@@ -1,3 +1,6 @@
+> [!WARNING]
+> Patched models may behave unexpectedly or unsafely. We cannot guarantee that a patch does only what its description claims, or that reviews and benchmarks reveal every effect. Repository inclusion, redistribution by us, and published results do not guarantee safety. Assess patches for your intended use, including possible unintended effects or potentially malicious changes introduced by third parties. See [DISCLAIMER.md](DISCLAIMER.md).
+
 # Weightspace Index
 
 **Find the change. Check the bytes. Read the evidence.**

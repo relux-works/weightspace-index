@@ -1,0 +1,193 @@
+{
+  "contract_version": 1,
+  "catalog_id": "template-catalog",
+  "document_kind": "TEMPLATE",
+  "notice": "TEMPLATE ONLY. Synthetic zero digests, zero sizes, names and paths; no bytes exist. Not an entry, not retrievable, not applicable; quality UNKNOWN.",
+  "registered_bundles": [],
+  "coverage": [
+    {
+      "request": "Template identity, route and quality",
+      "state": "UNKNOWN",
+      "reason": "Synthetic authoring example only.",
+      "owner": "template author"
+    }
+  ],
+  "corrections": [],
+  "entries": [
+    {
+      "id": "template-fix",
+      "kind": "TEMPLATE",
+      "publisher": "TEMPLATE",
+      "model": "TEMPLATE",
+      "profile_ref": "template-native",
+      "treatment_ref": "template-sparse",
+      "assessment_ref": "template-assessment",
+      "attribution": {
+        "authors": [
+          "TEMPLATE: actual authors required"
+        ],
+        "title": "TEMPLATE: original work title",
+        "sources": [
+          "TEMPLATE: article and full immutable source revisions required"
+        ],
+        "changes": "TEMPLATE: describe original work separately from record-keeping and packaging changes."
+      },
+      "licenses": [
+        {
+          "component": "TEMPLATE: identify base, patch, scripts and sidecars separately",
+          "terms": {
+            "state": "UNKNOWN",
+            "reason": "TEMPLATE: unresolved terms",
+            "owner": "rights reviewer"
+          },
+          "source": "TEMPLATE: pinned component license source",
+          "notices": "TEMPLATE: preserve applicable attribution/disclaimer notices",
+          "changes": "TEMPLATE: retain upstream modification history and identify our changes."
+        }
+      ],
+      "missing_evidence": [
+        {
+          "state": "UNKNOWN",
+          "reason": "All byte identities and sizes are synthetic; no patch has been qualified.",
+          "owner": "byte qualification owner"
+        },
+        {
+          "state": "UNKNOWN",
+          "reason": "No matched quality evidence.",
+          "owner": "evaluation owner"
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "template-native",
+      "files": [
+        {
+          "format": "opaque",
+          "size_bytes": 0,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "0000000000000000000000000000000000000000000000000000000000000000",
+            "status": "advertised",
+            "source": "TEMPLATE ONLY: synthetic sentinel, not a claimed payload digest."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "payloads/TEMPLATE/base.bin"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "TEMPLATE: replace with component-specific terms before admission.",
+            "owner": "entry contributor"
+          }
+        }
+      ],
+      "storage_precision": "TEMPLATE: declare actual tensor dtype mixture",
+      "compute_precision": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: unqualified",
+        "owner": "entry contributor"
+      },
+      "cache_precision": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: unqualified",
+        "owner": "entry contributor"
+      },
+      "configuration": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: missing identities",
+        "owner": "entry contributor"
+      },
+      "tokenizer_template": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: missing identities",
+        "owner": "entry contributor"
+      },
+      "quantization": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: declare native or exact recipe",
+        "owner": "entry contributor"
+      },
+      "runtime_build": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: no qualified runtime",
+        "owner": "entry contributor"
+      },
+      "hardware": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: no execution context",
+        "owner": "entry contributor"
+      }
+    }
+  ],
+  "treatments": [
+    {
+      "id": "template-sparse",
+      "kind": "sparse-exact",
+      "rationale": "exact-replacements",
+      "base_profile_ref": "template-native",
+      "route": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: no qualified applicator",
+        "owner": "entry contributor"
+      },
+      "payload": {
+        "format": "opaque",
+        "size_bytes": 0,
+        "digest": {
+          "algorithm": "sha256",
+          "value": "0000000000000000000000000000000000000000000000000000000000000000",
+          "status": "advertised",
+          "source": "TEMPLATE ONLY: synthetic sentinel, not a claimed payload digest."
+        },
+        "locators": [
+          {
+            "kind": "index-path",
+            "storage": "git",
+            "path": "payloads/TEMPLATE/replacements.bin"
+          }
+        ],
+        "license": {
+          "state": "UNKNOWN",
+          "reason": "TEMPLATE: replace with component-specific terms before admission.",
+          "owner": "entry contributor"
+        }
+      },
+      "targets": [
+        "TEMPLATE: actual tensor name and format-defined coordinates required"
+      ],
+      "replacement_semantics": "stored-bits",
+      "output_identity": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: no expected output",
+        "owner": "entry contributor"
+      }
+    }
+  ],
+  "runs": [],
+  "comparisons": [],
+  "assessments": [
+    {
+      "id": "template-assessment",
+      "profile_ref": "template-native",
+      "treatment_ref": "template-sparse",
+      "policy": {
+        "state": "UNKNOWN",
+        "reason": "No decision policy frozen.",
+        "owner": "assessment policy owner"
+      },
+      "intended_use": {
+        "state": "UNKNOWN",
+        "reason": "TEMPLATE: no intended-use claim",
+        "owner": "entry contributor"
+      },
+      "comparisons": [],
+      "quality": "UNKNOWN",
+      "reason": "No measured evidence; template only."
+    }
+  ]
+}

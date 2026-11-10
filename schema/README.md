@@ -1,0 +1,46 @@
+# Record contract, version 1
+
+`contract_version` is the application contract version. The schema's `$schema` names the JSON Schema dialect, Draft 2020-12; it does not version operational meanings. [catalog.schema.json](catalog.schema.json) is the structural definition. This document supplies the semantic obligations that structural validation alone cannot prove.
+
+This is a scaffold contract for discovery, exact-byte targets and evidence references. It is a new concrete design based on the [pinned logical roles](https://github.com/relux-works/model-patcher/blob/33ab004bd5a5ff31134289e26e67be062320f682/docs/catalog-and-evidence.md), not an upstream adopted schema. No reader or applicator is implemented, and no populated evidence or real entry is shipped.
+
+## Roles and authority
+
+| Role | Version 1 representation and meaning |
+|---|---|
+| Catalog | Root ID, entries, registered bundles, coverage and correction edges. Stable fix ID plus profile/treatment/assessment references; browsing labels are not byte identities. The shipped catalog is empty. |
+| Profile/artifact | Files with SHA-256, explicit hash status/source, size in bytes and retrieval alternatives; storage, compute/cache precision, config/tokenizer/template, quantization, runtime/build and hardware. Required but unknown context is explicit. |
+| Treatment | A tagged sparse, LoRA or whole-artifact recipe, bound to a base profile. The kind determines its rationale and fields. Order of LoRA members or whole-artifact inputs is significant. Expected output identity is a digest-bearing artifact or explicit UNKNOWN. |
+| Run | Profile/treatment references, COMPLETE/INCOMPLETE state, digest-bearing protocol, dataset, item/draw manifest and retained outcomes, coverage/failure accounting and the authoritative metric/value/unit/denominator or explicit UNKNOWN score. |
+| Comparison | Referenced baseline/candidate runs, estimand, selection/weights and reason. MATCHED records require a positive denominator plus digest-bearing matched outcomes/analysis and declared uncertainty. REFUSED/UNKNOWN records retain explicit gaps, reasons and available evidence. |
+| Assessment | Profile/treatment, intended use, policy, supporting comparison references, scoped quality decision and reason. UNKNOWN has an unresolved policy. SUPPORTED/REJECT/INCONCLUSIVE require a digest-bearing policy and nonempty comparison references; semantic acceptance still requires checking their contents. |
+
+Coverage declares missing, unsupported or refused requests without inventing measured records. Empty evidence arrays and the template's UNKNOWN assessment establish neither absence of regression nor success. In any future real run, protocol/dataset revision and all numerical/runtime conditions belong in the digest-bound files; the item/draw manifest and outcomes must preserve completions or lawful references, failures and coverage. Count completed work against expected coverage, retain infrastructure faults separately from model outcomes, and never drop failures to improve a denominator. A COMPLETE label cannot establish those facts on its own.
+
+A comparison's analysis must retain matched item/draw outcomes, gains and losses, population/selection, weights, estimator, uncertainty and comparability checks. Intentional cross-profile contrasts must name their exact arms; a four-arm gain contrast requires all four referenced arms in the retained analysis, rather than substituting a single cross-profile pair. The schema cannot prove those statistical conditions. Incomplete arms, mismatched protocols/scorers or unresolved identities refuse the intended comparison. A policy decision must actually satisfy predeclared intended-use margins and vetoes; references alone cannot establish support or justify rejection. Unassessed runs remain discoverable, and a later policy decision never rewrites observations.
+
+## Identity and references
+
+Record IDs are lowercase ASCII identifiers following the schema pattern. Within one record set, IDs must be unique across entries, profiles, treatments, runs, comparisons and assessments; a local reference must resolve to exactly the intended role. Cross-bundle references have `bundle_sha256` and an array `pointer`. A registered bundle's `inventory_pointer` is the empty JSON pointer, selecting its complete root record set rather than a positive subset. A bundle must be registered, its complete bytes digest-checked, and each record pointer resolved with bounds before interpretation. A bundle's own SHA-256 identifies record bytes; a payload SHA-256 identifies payload bytes. Neither is a fix release, protocol identity, signature or quality score.
+
+The caller pins the index snapshot. An `index-path` is relative to that snapshot, never a mutable working directory. An `hf` location uses a repository type, case-preserving namespace/name, full 40-hex revision and relative path. Syntax admission is not approval of a publisher or transport implementation. [Structure rules](../docs/structure.md) define the positive forms and deferred transports. Do not interpret citation text as a fetch instruction.
+
+Each artifact requires `size_bytes`, at least one locator, a complete SHA-256, `status` and `source`. An advertised digest requires `status: advertised`; leaving the status absent or supplying a bare hash string is invalid. `status: verified` additionally requires `verification.method: whole-file-sha256` and an immutable evidence reference. The evidence must actually establish complete-file hashing against an expected target; merely labelling it verified cannot prove it. Header, logical-tensor, Git-object and whole-file hashes are different domains and cannot substitute for one another. Descriptive `format` is not authorization to parse or apply a file.
+
+No unknown digest or placeholder may qualify a real artifact. If no payload digest/size is known, keep the missing fact in `missing_evidence` or coverage with a reason and owner; omit the operational artifact rather than fabricate an identity. Unknown facts never grant permission to fetch, apply or claim support. Multiple locators for an artifact must deliver identical bytes/size, regardless of archive/tensor semantic equivalence.
+
+## Templates and refusals
+
+[TEMPLATE.json](../examples/TEMPLATE.json) is schema-valid solely as `document_kind: TEMPLATE`, with `kind: TEMPLATE` entries. Its all-zero digests, zero sizes, names and paths are synthetic sentinels; no bytes or source claims exist. Consumers must exclude the entire template document from registration, browsing and application. Changing only its document kind fails schema validation. Contributor work starts by replacing every sentinel with evidence and obtaining review; relabelling an example does not qualify it.
+
+`catalog.json` has `document_kind: catalog` with no entries. Structural validity is not publication admission. Before a future nonempty catalog is admitted, reject template sentinels and unresolved/duplicate references, establish actual source and rights evidence, check required context and qualified route, and confirm exact candidate review. No implementation of those semantic gates is claimed in this scaffold.
+
+Required fields cannot be absent. `UNKNOWN` objects require `reason` and `owner`; explicit missing evidence is valid for discovery. An unsupported version/operational field must refuse interpretation instead of receiving defaults. All objects reject extra fields; only existing descriptive fields such as `notice` may carry non-operational explanation. Adding a restriction inside descriptive text cannot make it optional.
+
+Retain all registered evidence, negative/refused requests, corrections and unassessed records. A digest-unchecked/unavailable bundle makes completeness UNKNOWN. Correction edges must preserve originals and reasons; missing targets, cycles or unresolved divergent replacements refuse a unique current interpretation. Ordered recipes cannot be silently deduplicated or sorted. Config, tokenizer, quantization, route, runtime and output precision changes never inherit another profile's evidence.
+
+## Offline checks and their limits
+
+From the repository root, run `go test ./...` with Go 1.25 or later. The standard-library tests evaluate the schema against the shipped catalog/template, synthetic locator/kind positives and deliberately bad records. The test evaluator supports exactly the schema keywords used here, rejects additional keywords and never resolves a remote reference. It translates the schema's explicit strict-end regex assertion to Go's absolute end anchor; trailing newlines cannot pass identifier/path checks. It is a bounded test helper, not a general JSON Schema implementation or a catalog reader. A downstream consumer can use a conforming Draft 2020-12 validator as well, but still needs every semantic admission gate above.
+
+These tests prove selected structural acceptance/refusal controls, including missing digests, unmarked advertised hashes, unsafe locator syntax, kind/rationale separation and template promotion. They do not prove all JSON Schema conformance, filesystem containment, external availability, license rights, real byte identity, runtime support, safe application or quality. No network, model loading or payload operation occurs.

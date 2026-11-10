@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "catalog_id": "weightspace-index",
+  "document_kind": "catalog",
+  "notice": "SCAFFOLD ONLY: empty discovery catalog; no patch, payload, run, comparison or supported route.",
+  "registered_bundles": [],
+  "coverage": [
+    {
+      "request": "Real patch entries and exact-profile assessment evidence",
+      "state": "UNKNOWN",
+      "reason": "No entries or evidence bundles are registered in this scaffold.",
+      "owner": "future entry contributor"
+    }
+  ],
+  "corrections": [],
+  "entries": [],
+  "profiles": [],
+  "treatments": [],
+  "runs": [],
+  "comparisons": [],
+  "assessments": []
+}

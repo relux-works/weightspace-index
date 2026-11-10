@@ -1,22 +1,449 @@
 {
+  "document_kind": "catalog",
   "contract_version": 1,
   "catalog_id": "weightspace-index",
-  "document_kind": "catalog",
-  "notice": "SCAFFOLD ONLY: empty discovery catalog; no patch, payload, run, comparison or supported route.",
+  "notice": "One registered byte-qualified exact entry, quality UNKNOWN; no evaluation runs, comparisons or supported listing. Agreed wsi-sparse-exact v1 (safetensors selected-column) is the canonical lossless payload; tool-free runtime LoRA derivatives are separate derived treatments. Lossless payload is uncompressed for direct mmap/range access. Pin the index snapshot before resolving local files. Evidence profiles inventory byte/numerical records, not deployable models or evaluation runs.",
   "registered_bundles": [],
   "coverage": [
     {
-      "request": "Real patch entries and exact-profile assessment evidence",
+      "request": "Catalog completeness beyond the registered entry",
       "state": "UNKNOWN",
-      "reason": "No entries or evidence bundles are registered in this scaffold.",
-      "owner": "future entry contributor"
+      "reason": "One byte-qualified entry is registered; quality UNKNOWN. No evidence bundles, evaluation runs or comparisons are registered. Completeness beyond this entry is not established.",
+      "owner": "entry contributor"
+    },
+    {
+      "request": "Model quality",
+      "state": "UNKNOWN",
+      "reason": "No inference or evaluation; no study claims reproduced.",
+      "owner": "evaluation owner"
+    },
+    {
+      "request": "Dual-use acceptance policy",
+      "state": "UNKNOWN",
+      "reason": "Undecided policy must be resolved before any such entry can be supported.",
+      "owner": "index owner"
+    },
+    {
+      "request": "Runtime adapter application and GGUF/quantized survival",
+      "state": "UNSUPPORTED",
+      "reason": "Only the fixture-specific offline stored-bit Go application is qualified; no runtime adapter route admitted.",
+      "owner": "runtime integration owner"
     }
   ],
   "corrections": [],
-  "entries": [],
-  "profiles": [],
-  "treatments": [],
+  "profiles": [
+    {
+      "id": "qwen35-native-base",
+      "files": [
+        {
+          "format": "safetensors",
+          "size_bytes": 1746942600,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696",
+            "status": "verified",
+            "source": "Pinned publisher HF LFS SHA-256 and complete fresh-file measurement agree; the retained byte evidence distinguishes advertised identity from measurement.",
+            "verification": {
+              "method": "whole-file-sha256",
+              "evidence_ref": "p50c-byte-evidence"
+            }
+          },
+          "locators": [
+            {
+              "kind": "hf",
+              "repo_type": "model",
+              "repo_id": "Qwen/Qwen3.5-0.8B",
+              "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+              "path": "model.safetensors-00001-of-00001.safetensors"
+            }
+          ],
+          "license": "Apache-2.0; preserve applicable Qwen notices and separately applicable edit CC-BY-4.0 duties."
+        }
+      ],
+      "storage_precision": "452 BF16 tensors and 36 F32 tensors; 488 total",
+      "compute_precision": {
+        "state": "UNKNOWN",
+        "reason": "No model execution was performed; compute precision is unqualified.",
+        "owner": "entry contributor"
+      },
+      "cache_precision": {
+        "state": "UNKNOWN",
+        "reason": "No model KV-cache execution was performed.",
+        "owner": "entry contributor"
+      },
+      "configuration": {
+        "state": "UNKNOWN",
+        "reason": "Configuration artifact bytes were outside the checkpoint-only qualification.",
+        "owner": "entry contributor"
+      },
+      "tokenizer_template": {
+        "state": "UNKNOWN",
+        "reason": "Tokenizer/template artifacts are not qualified by tensor equality.",
+        "owner": "entry contributor"
+      },
+      "quantization": "Unquantized BF16/F32 checkpoint storage; no GGUF conversion or quantization route qualified.",
+      "runtime_build": {
+        "state": "UNKNOWN",
+        "reason": "No inference runtime is qualified.",
+        "owner": "entry contributor"
+      },
+      "hardware": {
+        "state": "UNKNOWN",
+        "reason": "No inference hardware profile is qualified.",
+        "owner": "entry contributor"
+      }
+    },
+    {
+      "id": "qwen35-p50c-reference",
+      "files": [
+        {
+          "format": "safetensors",
+          "size_bytes": 1746943032,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "fd1e42acdd118ac1b300d37500fd2885e75f5a09de3a33010d802bf7f737b553",
+            "status": "verified",
+            "source": "Pinned publisher HF LFS SHA-256 and complete fresh-file measurement agree; the retained byte evidence distinguishes advertised identity from measurement.",
+            "verification": {
+              "method": "whole-file-sha256",
+              "evidence_ref": "p50c-byte-evidence"
+            }
+          },
+          "locators": [
+            {
+              "kind": "hf",
+              "repo_type": "model",
+              "repo_id": "RikiyaT/Qwen3.5-0.8B-weight-space-programming",
+              "revision": "d1671a178705bcab7644806d23c535517f35723b",
+              "path": "model.safetensors-00001-of-00001.safetensors"
+            }
+          ],
+          "license": "Apache-2.0; preserve applicable Qwen notices and separately applicable edit CC-BY-4.0 duties."
+        }
+      ],
+      "storage_precision": "452 BF16 tensors and 36 F32 tensors; 488 total",
+      "compute_precision": {
+        "state": "UNKNOWN",
+        "reason": "No model execution was performed; compute precision is unqualified.",
+        "owner": "entry contributor"
+      },
+      "cache_precision": {
+        "state": "UNKNOWN",
+        "reason": "No model KV-cache execution was performed.",
+        "owner": "entry contributor"
+      },
+      "configuration": {
+        "state": "UNKNOWN",
+        "reason": "Configuration artifact bytes were outside the checkpoint-only qualification.",
+        "owner": "entry contributor"
+      },
+      "tokenizer_template": {
+        "state": "UNKNOWN",
+        "reason": "Tokenizer/template artifacts are not qualified by tensor equality.",
+        "owner": "entry contributor"
+      },
+      "quantization": "Unquantized BF16/F32 checkpoint storage; no GGUF conversion or quantization route qualified.",
+      "runtime_build": {
+        "state": "UNKNOWN",
+        "reason": "No inference runtime is qualified.",
+        "owner": "entry contributor"
+      },
+      "hardware": {
+        "state": "UNKNOWN",
+        "reason": "No inference hardware profile is qualified.",
+        "owner": "entry contributor"
+      }
+    },
+    {
+      "id": "p50c-byte-evidence",
+      "files": [
+        {
+          "format": "json",
+          "size_bytes": 4510,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "eeb091739483fee2ecf4afd8fd5685f3242e3492bd04da9d758d2c3a89bee032",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/evidence/byte-qualification.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        },
+        {
+          "format": "json",
+          "size_bytes": 200432,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "a858c10b7f48e216296ccf3a511fbc023776b77c2735783136d8d1bef005287a",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/evidence/round-trip.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        },
+        {
+          "format": "json",
+          "size_bytes": 200432,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "a858c10b7f48e216296ccf3a511fbc023776b77c2735783136d8d1bef005287a",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/evidence/payload-round-trip.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        },
+        {
+          "format": "json",
+          "size_bytes": 8338,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "cd4162636d7366799bf2039394df6ca101c4ef75ee993afddc3ec87563b3f447",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/data/spectrum.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        },
+        {
+          "format": "json",
+          "size_bytes": 27091,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "8ca84969d153005380d93a40d3fd2f1e2841b5d37636dd74a5b93243bc63360f",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/data/low-rank-errors.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        },
+        {
+          "format": "json",
+          "size_bytes": 2098,
+          "digest": {
+            "algorithm": "sha256",
+            "value": "102ddd01ee58cd734d4e50883e644b5924d8a2d5d0345959ccd567737463ec91",
+            "status": "advertised",
+            "source": "Complete-file SHA-256 measured for the retained byte/numerical evidence artifact; this is not model quality evidence."
+          },
+          "locators": [
+            {
+              "kind": "index-path",
+              "storage": "git",
+              "path": "models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/data/container-comparison.json"
+            }
+          ],
+          "license": {
+            "state": "UNKNOWN",
+            "reason": "License for new index evidence and documentation remains a repository-owner decision.",
+            "owner": "index owner"
+          }
+        }
+      ],
+      "storage_precision": "JSON/CSV immutable byte and numerical evidence; no model weights",
+      "compute_precision": {
+        "state": "UNKNOWN",
+        "reason": "Metadata evidence inventory only; no model execution context.",
+        "owner": "entry contributor"
+      },
+      "cache_precision": {
+        "state": "UNKNOWN",
+        "reason": "No model KV-cache execution was performed.",
+        "owner": "entry contributor"
+      },
+      "configuration": "Byte/numerical evidence inventory only; not a deployable model profile.",
+      "tokenizer_template": {
+        "state": "UNKNOWN",
+        "reason": "Tokenizer/template artifacts are not qualified by tensor equality.",
+        "owner": "entry contributor"
+      },
+      "quantization": "No model quantization; JSON/CSV evidence bytes.",
+      "runtime_build": {
+        "state": "UNKNOWN",
+        "reason": "No inference runtime is qualified.",
+        "owner": "entry contributor"
+      },
+      "hardware": {
+        "state": "UNKNOWN",
+        "reason": "No inference hardware profile is qualified.",
+        "owner": "entry contributor"
+      }
+    }
+  ],
+  "treatments": [
+    {
+      "id": "qwen35-p50c-sparse-v1",
+      "base_profile_ref": "qwen35-native-base",
+      "route": "Agreed wsi-sparse-exact v1, safetensors selected-column; offline BF16 stored-bit replacement on the exact base. Complete base/source/payload identities, target dtype/shape/pre/post hashes and all-tensor output comparison required. No runtime adapter route or efficacy qualification.",
+      "output_identity": {
+        "state": "UNKNOWN",
+        "reason": "All saved tensor bytes match the pinned reference, but the base-preserving serialized header differs. Generated output SHA-256 is retained in byte evidence; no admitted published locator exists for that generated whole file.",
+        "owner": "artifact publication owner"
+      },
+      "kind": "sparse-exact",
+      "rationale": "exact-replacements",
+      "payload": {
+        "format": "safetensors",
+        "size_bytes": 264800,
+        "digest": {
+          "algorithm": "sha256",
+          "value": "527139e3ec7870416c6d8e22026d884273cd9221444041114bea44edabd9fedc",
+          "status": "verified",
+          "source": "Whole-file SHA-256 measured on the unchanged release bytes; decoded against freshly reacquired original edit and checkpoint pair, then applied and compared across every stored tensor.",
+          "verification": {
+            "method": "whole-file-sha256",
+            "evidence_ref": "p50c-byte-evidence"
+          }
+        },
+        "locators": [
+          {
+            "kind": "index-path",
+            "storage": "git",
+            "path": "payloads/qwen35-p50c-exact/v1/qwen35-0.8b-p50c.safetensors"
+          }
+        ],
+        "license": "CC-BY-4.0 edit and lossless transcode plus applicable Apache-2.0 base-derived notices; see models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/ATTRIBUTION.md."
+      },
+      "targets": [
+        "model.language_model.layers.15.mlp.down_proj.weight",
+        "model.language_model.layers.19.mlp.down_proj.weight"
+      ],
+      "replacement_semantics": "stored-bits"
+    }
+  ],
   "runs": [],
   "comparisons": [],
-  "assessments": []
+  "assessments": [
+    {
+      "id": "qwen35-p50c-unknown",
+      "profile_ref": "qwen35-native-base",
+      "treatment_ref": "qwen35-p50c-sparse-v1",
+      "intended_use": "Discovery and byte-qualified exact replacement research only. Any behavioral use requires separate evaluation and explicit policy acceptance.",
+      "reason": "Exact bytes do not prove model quality. No evaluation, runtime interoperability or acceptance policy exists in this candidate.",
+      "policy": {
+        "state": "UNKNOWN",
+        "reason": "Dual-use and intended-use acceptance policy is undecided; entry must not be listed as supported.",
+        "owner": "index owner"
+      },
+      "comparisons": [],
+      "quality": "UNKNOWN"
+    }
+  ],
+  "entries": [
+    {
+      "id": "qwen35-p50c-exact",
+      "kind": "entry",
+      "publisher": "RikiyaT",
+      "model": "Qwen3.5-0.8B-weight-space-programming",
+      "profile_ref": "qwen35-native-base",
+      "treatment_ref": "qwen35-p50c-sparse-v1",
+      "assessment_ref": "qwen35-p50c-unknown",
+      "attribution": {
+        "authors": [
+          "Rikiya Takehi",
+          "Jayden Teoh",
+          "Alex Zhang",
+          "Omar Khattab"
+        ],
+        "title": "Sparks of Weight-Space Programming: LLMs can natively read & write neural network weights",
+        "sources": [
+          "https://rikiyat.github.io/blog/weight-space-programming/",
+          "https://github.com/RikiyaT/lm_understand-logs/tree/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/runs/p50c/edit",
+          "https://huggingface.co/Qwen/Qwen3.5-0.8B/tree/2fc06364715b967f1860aea9cf38778875588b17",
+          "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/tree/d1671a178705bcab7644806d23c535517f35723b"
+        ],
+        "changes": "Lossless selected-column safetensors transcode includes 884 base-identical addressed positions and complete base/source bindings; all 130,188 changed BF16 values and all final tensor bytes are preserved. Convention agreed as wsi-sparse-exact v1. Numerical analysis and catalog records are additions; study claims are not reproduced or inherited."
+      },
+      "licenses": [
+        {
+          "component": "Base Qwen weights and applicable base-derived contents",
+          "terms": "Apache-2.0",
+          "source": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/LICENSE",
+          "notices": "Copyright 2026 Alibaba Cloud; retain models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/Apache-2.0-Qwen.txt and models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/ATTRIBUTION.md. Pinned listings contained no NOTICE file.",
+          "changes": "Exact stored-bit replacements only; base header retained in generated application."
+        },
+        {
+          "component": "Original compact edit and lossless transcode",
+          "terms": "CC-BY-4.0",
+          "source": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/LICENSE",
+          "notices": "Retain models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/ATTRIBUTION.md and models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/SOURCE-LICENSE-lm_understand-logs.txt; credit authors, article and source; identify representation changes; no endorsement.",
+          "changes": "Flat sparse NPZ becomes complete selected-column U32/U16 safetensors; bindings and versioned semantics added; exact final tensor values unchanged."
+        },
+        {
+          "component": "Publisher scripts, not redistributed",
+          "terms": "MIT allocation in source LICENSE; no script implementation reused.",
+          "source": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/LICENSE",
+          "notices": "Scripts were read for format semantics; no publisher code executed or copied. New Go code is separate.",
+          "changes": "No MIT-licensed script implementation included."
+        }
+      ],
+      "missing_evidence": [
+        {
+          "state": "UNKNOWN",
+          "reason": "No quality evaluation or efficacy evidence for this exact treatment.",
+          "owner": "evaluation owner"
+        },
+        {
+          "state": "UNKNOWN",
+          "reason": "Dual-use and intended-use acceptance policy remains undecided; format agreement is not quality or support acceptance.",
+          "owner": "index owner"
+        },
+        {
+          "state": "UNKNOWN",
+          "reason": "Configuration/tokenizer/runtime/quantized profiles and published generated output artifact remain unqualified.",
+          "owner": "runtime integration owner"
+        }
+      ]
+    }
+  ]
 }

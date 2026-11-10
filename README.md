@@ -1,4 +1,15 @@
+> [!WARNING]
+> Patched models may behave unexpectedly or unsafely. We cannot guarantee that a patch does only what its description claims, or that reviews and benchmarks reveal every effect. Repository inclusion, redistribution by us, and published results do not guarantee safety. Assess patches for your intended use, including possible unintended effects or potentially malicious changes introduced by third parties. See [DISCLAIMER.md](DISCLAIMER.md).
+
 # Weightspace Index
+
+## Registered entry and current scope — 2026-11-10
+
+The catalog now registers **one byte-qualified exact entry, quality UNKNOWN**: the [Qwen3.5-0.8B p50c browse page](models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/README.md) links the exact base, unchanged release payload, evidence and component notices. It is not listed as supported. Read the [design decisions](docs/decisions.md), [wsi-sparse-exact v1 contract](docs/exact-sparse-v1.md), [current catalog](catalog.json), and [entry attribution](models/RikiyaT/Qwen3.5-0.8B-weight-space-programming/patches/qwen35-p50c-exact/notices/ATTRIBUTION.md). No applicator or LoRA derivative is released here; the dual-use acceptance policy remains open.
+
+The initial scaffold guide and its scaffold-only notices below describe the original empty snapshot. Their statements that no entry, payload or third-party material is present are historical; the current catalog and this entry's notices describe the added material. The scaffold's workflow examples remain unexecuted and do not qualify this entry's runtime behavior.
+
+## Initial scaffold guide
 
 **Find the change. Check the bytes. Read the evidence.**
 

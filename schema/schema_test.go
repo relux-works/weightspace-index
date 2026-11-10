@@ -234,16 +234,10 @@ func TestShippedDocuments(t *testing.T) {
 		})
 	}
 	catalog := readJSON(t, "../catalog.json")
-	entries := catalog["entries"].([]any)
-	if len(entries) != 1 || entries[0].(map[string]any)["id"] != "qwen35-p50c-exact" {
-		t.Fatal("catalog must contain the one registered exact entry")
-	}
-	if len(catalog["runs"].([]any)) != 0 || len(catalog["comparisons"].([]any)) != 0 {
-		t.Fatal("byte qualification must not introduce evaluation records")
-	}
-	assessments := catalog["assessments"].([]any)
-	if len(assessments) != 1 || assessments[0].(map[string]any)["quality"] != "UNKNOWN" {
-		t.Fatal("the registered entry's quality must remain UNKNOWN")
+	for _, role := range []string{"entries", "profiles", "treatments", "runs", "comparisons", "assessments", "registered_bundles", "corrections"} {
+		if got := len(catalog[role].([]any)); got != 0 {
+			t.Errorf("withdrawn catalog contains %d records in %s", got, role)
+		}
 	}
 }
 

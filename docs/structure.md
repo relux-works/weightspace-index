@@ -1,6 +1,6 @@
 # Repository structure and change rules
 
-**Status: target layout.** This snapshot is still the scaffold: no entry, payload or run is present, and the `models/` tree, generated indexes, tools and CI described below do not exist yet. [Migration from the scaffold layout](#migration-from-the-scaffold-layout) lists the changes that bring the repository to this shape.
+**Status: layout in place, no patches yet.** The schema, a synthetic example and its tests follow this document. The `models/` tree is empty, and the tools, CI and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
 
 ## Purpose and goals
 
@@ -55,16 +55,16 @@ Addresses are the identities. Records refer to each other by address; a pinned i
 
 | File | Contains |
 |---|---|
-| `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_type`, `repo_id`, full revision), and every file with path, SHA-256 and size. Every distinct file set is its own profile: another quantization, another publisher's file with the same quantization name, or a later upstream revision with changed weights. |
+| `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_id` and full revision of a Hugging Face model repository), and every file with path, SHA-256 and size. Every distinct file set is its own profile: another quantization, another publisher's file with the same quantization name, or a later upstream revision with changed weights. |
 | `patch.json` | Title, summary, kind (`replacement` or `lora`, see [Patch forms](#patch-forms)), `authors[]`, `submitter`, license, tags, and the status of each version (`active`, `deprecated`, `withdrawn`). |
-| `version.json` | One-line changelog, target base profile, and every file with locator, SHA-256, size and `role` (`source` or `derived`). A derived file also records `derived_from` (file digests) and the tool name and version that built it. |
+| `version.json` | One-line changelog, target base profile, and every file with its `name`, locators, SHA-256, size and `role` (`source` or `derived`). A derived file also records `derived_from` (file digests) and the tool name and version that built it. |
 | `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score, who performed it, and the outcome and resource files beside it. |
 | `comparisons/<id>.json` | The baseline and patched runs compared, estimand, matched outcomes, uncertainty, or the reason the comparison is refused. |
 | `assessments/<id>.json` | Intended use, decision policy, supporting comparisons, decision and reason. |
 | Patch `README.md` | The card. Prose for people, linking to machine facts instead of restating them. |
 | `notices/` | The patch's license and attribution, plus the obligations the base model's license passes on to derivatives. |
 
-Every JSON file, authored or generated, carries a `contract_version`.
+Every JSON file, authored or generated, carries a `contract_version`. [`schema/records.schema.json`](../schema/records.schema.json) defines each one; the file's path decides which definition applies.
 
 ## Patch forms
 
@@ -90,7 +90,7 @@ Every version has exactly one **source**: the files the author produced, in one 
 | `models/<ns>/<model>/README.md` | Table of every patch: kind, latest version, results per profile against that profile's baseline, regressions, assessment. Profiles without a run show "not measured". |
 | `by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
 | `by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not, and for each former name of a renamed repository: base address and profile IDs. |
-| `bases.json` | Every base address with its display name and the path of its `index.json`. |
+| `bases.json` | Every base address. Its `index.json` and `README.md` sit at `models/<address>/`. |
 
 Generated files are committed and never edited by hand. CI fails when they differ from a fresh build.
 
@@ -113,7 +113,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 
 | Locator | Fields | Download URL |
 |---|---|---|
-| In repository | `kind: index-path`, relative `path` inside the declaring version folder | `https://raw.githubusercontent.com/<org>/<repo>/<index-commit>/<path>` |
+| In repository | `kind: index-path`, `path` relative to the folder of the declaring file; under `files/` for a version | `https://raw.githubusercontent.com/<org>/<repo>/<index-commit>/<folder>/<path>` |
 | Hugging Face | `kind: hf`, `repo_type`, case-preserving `repo_id`, full 40-hex `revision`, relative `path` | `https://huggingface.co/<repo_id>/resolve/<revision>/<path>` |
 
 A file may have several locators for identical bytes; clients try Hugging Face first. Paths are ASCII segments of letters, digits, `_`, `-` and `.`, not starting with `.`; absolute paths, traversal, backslashes, URL encoding and arbitrary URLs are refused. Never execute locator strings, repository hooks or remote code from the index.
@@ -197,24 +197,27 @@ Negative, refused, inconclusive and unassessed results stay visible. A later dec
 
 ## Migration from the scaffold layout
 
-The scaffold described `models/<publisher>/<model>/patches/<fix-id>/` pages, a top-level `payloads/` tree and a single hand-edited `catalog.json` holding every record. Changes required:
+The scaffold described `models/<publisher>/<model>/patches/<fix-id>/` pages, a top-level `payloads/` tree and a single hand-edited `catalog.json` holding every record.
 
-1. **This document.** Done.
-2. **`schema/`.** Split the record contract into schemas for `base.json`, `patch.json`, `version.json`, `run.json`, comparisons, assessments and every generated file. Replace registered-bundle and JSON-pointer references with addresses for in-repository records; keep digest references for external evidence. Drop digest status and source fields. Update `schema/README.md`.
-3. **`examples/`.** Replace `TEMPLATE.json` with a template base folder and patch folder, still excluded from every generated file.
-4. **Tests.** Update the `payloads/...` locator fixtures and add tests for the new schemas and the rules above.
-5. **`tools/` (new):** intake tool that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; generator with a check mode, covering every generated file; builder for derived patch files; availability checker.
-6. **CI (new).** Checks on every pull request; the availability checker on a schedule.
-7. **`docs/patch-formats.md`.** Rewrite to the two patch forms; baked whole models are bases, not a patch kind.
-8. **`README.md`.** Browsing, client consumption and how to submit. Keep caveats in the README warning and `DISCLAIMER.md` rather than repeating them in every document.
-9. **`catalog.json`.** Remove; `bases.json` and the per-base indexes replace it.
-10. **Generated files.** Build them from the empty `models/` tree.
+Done:
+
+1. **This document.**
+2. **`schema/`.** One schema, `records.schema.json`, with a definition per file type; bundles, JSON pointers and digest status are gone.
+3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; generated files never read it.
+4. **Tests.** Schema controls, the layout rules a single file cannot express, hosted-file digests and the replacement file format, run against the example and broken copies of it.
+5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
+6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
+
+Remaining:
+
+7. **`tools/` (new, Rust):** intake tool that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; generator with a check mode, covering every generated file; builder for derived patch files; availability checker. The Go tests move into it.
+8. **CI (new).** Checks on every pull request, including that no merged file under `v<N>/` changed; the availability checker on a schedule.
+9. **Generated files.** Built by the generator once `models/` has a base.
 
 ## Open decisions
 
 - **Acceptance policy:** what the index refuses, for example refusal-removal patches, hidden behavior, or cards that misdescribe a patch.
 - **Gated and restricted bases:** `#old` values and replacement tensors are excerpts of the base weights; whether replacements are accepted for gated bases or bases whose license restricts redistribution, and whether patch files may be hosted in gated repositories.
-- **Tooling language:** Rust, shared with the client tool, or Go, matching the current schema tests.
 - **Run and profile IDs:** naming scheme for runs (for example benchmark, profile and date) and for profiles (for example publisher and quantization, such as `bartowski-q4-k-m`).
 - **Index protocols:** which benchmarks maintainers run by default within the budget.
 - **Patch ownership:** whether changes to an existing patch can be approved without a human, for example when they come from its original submitter or from a list of owners.

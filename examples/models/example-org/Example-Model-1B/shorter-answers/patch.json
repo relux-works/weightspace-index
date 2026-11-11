@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Shorter answers",
+  "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Example Author",
+      "url": "https://huggingface.co/example-author"
+    }
+  ],
+  "submitter": "example-user",
+  "license": "MIT",
+  "tags": [
+    "length"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "deprecated"
+    },
+    {
+      "version": 2,
+      "status": "active"
+    }
+  ]
+}

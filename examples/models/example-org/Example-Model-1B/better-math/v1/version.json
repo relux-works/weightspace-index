@@ -1,0 +1,41 @@
+{
+  "contract_version": 1,
+  "changelog": "First release.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "replacements.safetensors",
+      "role": "source",
+      "sha256": "0a8d4816198d77204b44b21b9dcbb801bfdde28a6cce40773353ba3bdd7437e7",
+      "size_bytes": 344,
+      "locators": [
+        {
+          "kind": "index-path",
+          "path": "files/replacements.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "better-math-lora.gguf",
+      "role": "derived",
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "size_bytes": 90000,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "example-org/weightspace-mirror",
+          "revision": "2222222222222222222222222222222222222222",
+          "path": "better-math/v1/better-math-lora.gguf"
+        }
+      ],
+      "derived_from": [
+        "0a8d4816198d77204b44b21b9dcbb801bfdde28a6cce40773353ba3bdd7437e7"
+      ],
+      "tool": {
+        "name": "weightspace-derive",
+        "version": "0.1.0"
+      }
+    }
+  ]
+}

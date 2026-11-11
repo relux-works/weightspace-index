@@ -26,14 +26,22 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 	return regexp.Compile(pattern)
 }
 
-func readJSON(t *testing.T, path string) map[string]any {
-	t.Helper()
+func readJSONFile(path string) (map[string]any, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	var v map[string]any
 	if err := json.Unmarshal(b, &v); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	return v, nil
+}
+
+func readJSON(t *testing.T, path string) map[string]any {
+	t.Helper()
+	v, err := readJSONFile(path)
+	if err != nil {
 		t.Fatal(err)
 	}
 	return v
@@ -51,10 +59,21 @@ func clone(v any) any {
 	return out
 }
 
+func loadSchema() (schemaCheck, error) {
+	root, err := readJSONFile("records.schema.json")
+	if err != nil {
+		return schemaCheck{}, err
+	}
+	if err := checkKeywords(root); err != nil {
+		return schemaCheck{}, err
+	}
+	return schemaCheck{root}, nil
+}
+
 func newCheck(t *testing.T) schemaCheck {
 	t.Helper()
-	c := schemaCheck{readJSON(t, "catalog.schema.json")}
-	if err := checkKeywords(c.root); err != nil {
+	c, err := loadSchema()
+	if err != nil {
 		t.Fatal(err)
 	}
 	return c
@@ -208,226 +227,192 @@ func (c schemaCheck) validate(s map[string]any, v any) error {
 	return nil
 }
 
-func (c schemaCheck) definition(t *testing.T, name string, v any, want bool) {
+// as validates v against one named definition.
+func (c schemaCheck) as(name string, v any) error {
+	if _, ok := c.root["$defs"].(map[string]any)[name]; !ok {
+		return fmt.Errorf("no definition %q", name)
+	}
+	return c.validate(map[string]any{"$ref": "#/$defs/" + name}, v)
+}
+
+func (c schemaCheck) expect(t *testing.T, name string, v any, want bool) {
 	t.Helper()
-	err := c.validate(map[string]any{"$ref": "#/$defs/" + name}, v)
+	err := c.as(name, v)
 	if (err == nil) != want {
 		t.Fatalf("%s: accepted=%v, want=%v: %v", name, err == nil, want, err)
 	}
 }
 
-func treatment(record map[string]any) map[string]any {
-	return record["treatments"].([]any)[0].(map[string]any)
-}
+const example = "../examples/models/example-org/Example-Model-1B/"
 
-func payload(record map[string]any) map[string]any {
-	return treatment(record)["payload"].(map[string]any)
-}
-
-func TestShippedDocuments(t *testing.T) {
+func TestShippedGeneratedFiles(t *testing.T) {
 	c := newCheck(t)
-	for _, file := range []string{"../catalog.json", "../examples/TEMPLATE.json"} {
-		t.Run(file, func(t *testing.T) {
-			if err := c.validate(c.root, readJSON(t, file)); err != nil {
-				t.Fatal(err)
-			}
-		})
-	}
-	if got := len(readJSON(t, "../catalog.json")["entries"].([]any)); got != 0 {
-		t.Fatalf("scaffold contains %d real entries", got)
-	}
+	c.expect(t, "bases", readJSON(t, "../bases.json"), true)
 }
 
 func TestBadRecordControls(t *testing.T) {
 	c := newCheck(t)
+	file := func(r map[string]any, i int) map[string]any { return r["files"].([]any)[i].(map[string]any) }
+	profile := func(r map[string]any) map[string]any { return r["profiles"].([]any)[0].(map[string]any) }
 	cases := []struct {
-		name string
-		edit func(map[string]any)
+		name, def, path string
+		edit            func(map[string]any)
 	}{
-		{"missing-payload-digest", func(r map[string]any) { delete(payload(r), "digest") }},
-		{"missing-base-digest", func(r map[string]any) {
-			p := r["profiles"].([]any)[0].(map[string]any)
-			delete(p["files"].([]any)[0].(map[string]any), "digest")
+		{"missing-digest", "version", "better-math/v1/version.json", func(r map[string]any) { delete(file(r, 0), "sha256") }},
+		{"word-for-digest", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["sha256"] = "advertised" }},
+		{"uppercase-digest", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["sha256"] = strings.Repeat("A", 64) }},
+		{"missing-size", "version", "better-math/v1/version.json", func(r map[string]any) { delete(file(r, 0), "size_bytes") }},
+		{"zero-size", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["size_bytes"] = float64(0) }},
+		{"fractional-size", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["size_bytes"] = 0.5 }},
+		{"no-locator", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["locators"] = []any{} }},
+		{"no-files", "version", "better-math/v1/version.json", func(r map[string]any) { r["files"] = []any{} }},
+		{"unknown-role", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["role"] = "submitted" }},
+		{"derived-without-inputs", "version", "better-math/v1/version.json", func(r map[string]any) { delete(file(r, 1), "derived_from") }},
+		{"derived-without-tool", "version", "better-math/v1/version.json", func(r map[string]any) { delete(file(r, 1), "tool") }},
+		{"source-with-inputs", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["derived_from"] = file(r, 1)["derived_from"] }},
+		{"file-name-with-path", "version", "better-math/v1/version.json", func(r map[string]any) { file(r, 0)["name"] = "files/replacements.safetensors" }},
+		{"hidden-operational-field", "version", "better-math/v1/version.json", func(r map[string]any) { r["ignore_mismatch"] = true }},
+		{"unsupported-contract", "version", "better-math/v1/version.json", func(r map[string]any) { r["contract_version"] = float64(2) }},
+		{"authored-targets", "version", "better-math/v1/version.json", func(r map[string]any) { r["targets"] = []any{"x"} }},
+		{"old-kind", "patch", "better-math/patch.json", func(r map[string]any) { r["kind"] = "sparse-exact" }},
+		{"whole-model-kind", "patch", "better-math/patch.json", func(r map[string]any) { r["kind"] = "whole" }},
+		{"no-authors", "patch", "better-math/patch.json", func(r map[string]any) { r["authors"] = []any{} }},
+		{"bad-submitter", "patch", "better-math/patch.json", func(r map[string]any) { r["submitter"] = "not a handle" }},
+		{"uppercase-tag", "patch", "better-math/patch.json", func(r map[string]any) { r["tags"] = []any{"Math"} }},
+		{"no-versions", "patch", "better-math/patch.json", func(r map[string]any) { r["versions"] = []any{} }},
+		{"latest-as-status", "patch", "better-math/patch.json", func(r map[string]any) {
+			r["versions"].([]any)[0].(map[string]any)["status"] = "latest"
 		}},
-		{"unmarked-advertised-hash", func(r map[string]any) { delete(payload(r)["digest"].(map[string]any), "status") }},
-		{"bare-hash-string", func(r map[string]any) { payload(r)["digest"] = strings.Repeat("a", 64) }},
-		{"verified-without-evidence", func(r map[string]any) { payload(r)["digest"].(map[string]any)["status"] = "verified" }},
-		{"bad-digest", func(r map[string]any) { payload(r)["digest"].(map[string]any)["value"] = "advertised" }},
-		{"missing-size", func(r map[string]any) { delete(payload(r), "size_bytes") }},
-		{"negative-size", func(r map[string]any) { payload(r)["size_bytes"] = float64(-1) }},
-		{"fractional-size", func(r map[string]any) { payload(r)["size_bytes"] = 0.5 }},
-		{"no-location", func(r map[string]any) { payload(r)["locators"] = []any{} }},
-		{"no-profiles", func(r map[string]any) { r["profiles"] = []any{} }},
-		{"no-treatments", func(r map[string]any) { r["treatments"] = []any{} }},
-		{"no-assessments", func(r map[string]any) { r["assessments"] = []any{} }},
-		{"template-promoted", func(r map[string]any) { r["document_kind"] = "catalog" }},
-		{"unsupported-version", func(r map[string]any) { r["contract_version"] = float64(2) }},
-		{"hidden-operational-field", func(r map[string]any) { treatment(r)["ignore_mismatch"] = true }},
-		{"lora-rationale-on-sparse", func(r map[string]any) { treatment(r)["rationale"] = "low-rank-factors" }},
-		{"lora-block-on-sparse", func(r map[string]any) { treatment(r)["members"] = []any{} }},
-		{"unjustified-support", func(r map[string]any) { r["assessments"].([]any)[0].(map[string]any)["quality"] = "SUPPORTED" }},
-		{"score-in-assessment", func(r map[string]any) { r["assessments"].([]any)[0].(map[string]any)["score"] = float64(1) }},
-		{"missing-unknown-owner", func(r map[string]any) { delete(treatment(r)["route"].(map[string]any), "owner") }},
-		{"undeclared-run", func(r map[string]any) { r["runs"] = []any{map[string]any{"score": float64(1)}} }},
-		{"undeclared-comparison", func(r map[string]any) { r["comparisons"] = []any{map[string]any{"gain": float64(1)}} }},
+		{"maintainers-field", "patch", "better-math/patch.json", func(r map[string]any) { r["maintainers"] = []any{"someone"} }},
+		{"no-profiles", "base", "base.json", func(r map[string]any) { r["profiles"] = []any{} }},
+		{"branch-revision", "base", "base.json", func(r map[string]any) {
+			profile(r)["source"].(map[string]any)["revision"] = "main"
+		}},
+		{"uppercase-profile-id", "base", "base.json", func(r map[string]any) { profile(r)["id"] = "BF16" }},
+		{"profile-without-files", "base", "base.json", func(r map[string]any) { profile(r)["files"] = []any{} }},
+		{"run-without-outcomes", "run", "runs/baseline-bf16/run.json", func(r map[string]any) { delete(r, "outcomes") }},
+		{"run-zero-denominator", "run", "runs/baseline-bf16/run.json", func(r map[string]any) {
+			r["score"].(map[string]any)["denominator"] = float64(0)
+		}},
+		{"run-unknown-performer", "run", "runs/baseline-bf16/run.json", func(r map[string]any) { r["performed_by"] = "someone" }},
+		{"run-unknown-score-without-owner", "run", "runs/baseline-bf16/run.json", func(r map[string]any) {
+			r["score"] = map[string]any{"state": "UNKNOWN", "reason": "not scored"}
+		}},
+		{"matched-without-denominator", "comparison", "better-math/v1/comparisons/bf16-accuracy.json", func(r map[string]any) { delete(r, "denominator") }},
+		{"matched-without-outcomes", "comparison", "better-math/v1/comparisons/bf16-accuracy.json", func(r map[string]any) { delete(r, "matched_outcomes") }},
+		{"score-in-comparison", "comparison", "better-math/v1/comparisons/bf16-accuracy.json", func(r map[string]any) { r["score"] = float64(1) }},
+		{"refused-without-reason", "comparison", "better-math/v1/comparisons/bf16-accuracy.json", func(r map[string]any) {
+			r["state"] = "REFUSED"
+			delete(r, "denominator")
+			delete(r, "matched_outcomes")
+			delete(r, "uncertainty")
+		}},
+		{"unknown-without-owner", "assessment", "better-math/v1/assessments/arithmetic-help.json", func(r map[string]any) { delete(r, "owner") }},
+		{"unjustified-support", "assessment", "better-math/v1/assessments/arithmetic-help.json", func(r map[string]any) { r["decision"] = "SUPPORTED" }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			r := readJSON(t, "../examples/TEMPLATE.json")
+			r := readJSON(t, example+tc.path)
+			c.expect(t, tc.def, r, true)
 			tc.edit(r)
-			if err := c.validate(c.root, r); err == nil {
-				t.Fatal("deliberately bad record accepted")
-			}
+			c.expect(t, tc.def, r, false)
 		})
 	}
 }
 
-func TestLocatorCompatibility(t *testing.T) {
+func TestDecidedAssessment(t *testing.T) {
 	c := newCheck(t)
-	local := map[string]any{"kind": "index-path", "storage": "git", "path": "payloads/example-v1/nested/adapter_model.safetensors"}
+	policy := readJSON(t, example+"better-math/v1/comparisons/bf16-accuracy.json")["matched_outcomes"]
+	a := map[string]any{
+		"contract_version": float64(1), "intended_use": "SYNTHETIC", "decision": "INCONCLUSIVE",
+		"policy": policy, "comparisons": []any{"bf16-accuracy"}, "reason": "SYNTHETIC control",
+	}
+	for _, d := range []string{"SUPPORTED", "REJECT", "INCONCLUSIVE"} {
+		a["decision"] = d
+		c.expect(t, "assessment", a, true)
+	}
+	a["comparisons"] = []any{}
+	c.expect(t, "assessment", a, false)
+	a["comparisons"] = []any{"bf16-accuracy"}
+	delete(a, "policy")
+	c.expect(t, "assessment", a, false)
+}
+
+func TestGeneratedShapes(t *testing.T) {
+	c := newCheck(t)
+	base := readJSON(t, example+"base.json")
+	version := readJSON(t, example+"better-math/v1/version.json")
+	f := clone(version["files"].([]any)[0]).(map[string]any)
+	f["format"] = "safetensors"
+	run := map[string]any{"id": "baseline-bf16", "profile": "bf16", "performed_by": "index",
+		"protocol": map[string]any{"name": "example-protocol", "sha256": strings.Repeat("d", 64)}, "state": "COMPLETE",
+		"score": map[string]any{"metric": "accuracy", "value": 0.5, "unit": "fraction", "denominator": float64(200)}}
+	index := map[string]any{
+		"contract_version": float64(1), "base": "example-org/Example-Model-1B", "profiles": base["profiles"],
+		"baseline_runs": []any{run},
+		"patches": []any{map[string]any{
+			"slug": "better-math", "title": "Better arithmetic", "summary": "SYNTHETIC", "kind": "replacement",
+			"authors": []any{map[string]any{"name": "Example Author"}}, "submitter": "example-user", "license": "Apache-2.0",
+			"tags": []any{}, "latest": float64(1),
+			"versions": []any{map[string]any{
+				"version": float64(1), "status": "active", "changelog": "First release.", "target_profile": "bf16",
+				"targets": []any{"model.layers.0.mlp.down_proj.weight"}, "files": []any{f}, "runs": []any{}, "assessments": []any{},
+			}},
+		}},
+	}
+	c.expect(t, "index", index, true)
+	bad := clone(index).(map[string]any)
+	delete(bad["patches"].([]any)[0].(map[string]any)["versions"].([]any)[0].(map[string]any), "targets")
+	c.expect(t, "index", bad, false)
+	bad = clone(index).(map[string]any)
+	bad["patches"].([]any)[0].(map[string]any)["versions"].([]any)[0].(map[string]any)["files"].([]any)[0].(map[string]any)["format"] = "pickle"
+	c.expect(t, "index", bad, false)
+
+	c.expect(t, "digestLookup", map[string]any{"contract_version": float64(1), "matches": []any{map[string]any{"base": "a/b", "profile": "bf16"}}}, true)
+	c.expect(t, "digestLookup", map[string]any{"contract_version": float64(1), "matches": []any{}}, false)
+	c.expect(t, "repoLookup", map[string]any{"contract_version": float64(1), "matches": []any{map[string]any{"base": "a/b", "profiles": []any{"q4"}}}}, true)
+	c.expect(t, "repoLookup", map[string]any{"contract_version": float64(1), "matches": []any{map[string]any{"base": "a/b", "profiles": []any{}}}}, false)
+	c.expect(t, "bases", map[string]any{"contract_version": float64(1), "bases": []any{"a/b/c"}}, false)
+}
+
+func TestLocatorControls(t *testing.T) {
+	c := newCheck(t)
+	local := map[string]any{"kind": "index-path", "path": "files/nested/adapter_model.safetensors"}
 	hf := map[string]any{"kind": "hf", "repo_type": "model", "repo_id": "Example-Publisher/Example.Model_1", "revision": strings.Repeat("a", 40), "path": "nested/model.part-00001.safetensors"}
-	c.definition(t, "locator", local, true)
-	for _, typ := range []string{"model", "dataset", "space"} {
+	c.expect(t, "locator", local, true)
+	for _, typ := range []string{"model", "dataset"} {
 		v := clone(hf).(map[string]any)
 		v["repo_type"] = typ
-		c.definition(t, "locator", v, true)
+		c.expect(t, "locator", v, true)
 	}
+	v := clone(hf).(map[string]any)
+	v["repo_type"] = "space"
+	c.expect(t, "locator", v, false)
 	for _, path := range []string{"../escape", "/absolute", "a/../escape", "a/./b", "a//b", "a\\b", "a/%2e%2e/b", "a/b?x", "a/b#x", "a/\x00b", ".hidden/file", "a/b/", "a/b\n", "a/b\r\n"} {
 		t.Run("path-"+path, func(t *testing.T) {
 			for _, source := range []map[string]any{local, hf} {
 				v := clone(source).(map[string]any)
 				v["path"] = path
-				c.definition(t, "locator", v, false)
+				c.expect(t, "locator", v, false)
 			}
 		})
 	}
 	for _, revision := range []string{"main", "v1", "abc1234", strings.Repeat("a", 39), strings.Repeat("g", 40), strings.Repeat("a", 40) + "\n"} {
 		v := clone(hf).(map[string]any)
 		v["revision"] = revision
-		c.definition(t, "locator", v, false)
+		c.expect(t, "locator", v, false)
 	}
 	for _, repo := range []string{"name-only", "namespace/name/extra", "../name", "https://example.invalid/model", "name/other?x"} {
 		v := clone(hf).(map[string]any)
 		v["repo_id"] = repo
-		c.definition(t, "locator", v, false)
+		c.expect(t, "locator", v, false)
 	}
-	v := clone(local).(map[string]any)
+	v = clone(local).(map[string]any)
 	v["storage"] = "git-lfs"
-	c.definition(t, "locator", v, false)
+	c.expect(t, "locator", v, false)
 	v = clone(hf).(map[string]any)
 	v["url"] = "https://example.invalid/payload"
-	c.definition(t, "locator", v, false)
-}
-
-func TestKindSeparation(t *testing.T) {
-	c := newCheck(t)
-	r := readJSON(t, "../examples/TEMPLATE.json")
-	sparse := treatment(r)
-	a := payload(r)
-	base := map[string]any{"id": "template-treatment", "base_profile_ref": "template-native", "route": sparse["route"], "output_identity": sparse["output_identity"]}
-	lora := clone(base).(map[string]any)
-	lora["kind"], lora["rationale"], lora["mode"], lora["conflict_policy"] = "lora", "low-rank-factors", "runtime-adapter", "TEMPLATE: qualify ordered targets"
-	lora["members"] = []any{map[string]any{"payload": a, "configuration": a, "scale": float64(1), "targets": []any{"TEMPLATE.target"}}}
-	whole := clone(base).(map[string]any)
-	whole["kind"], whole["rationale"], whole["files"], whole["provenance_manifest"], whole["ordered_inputs"] = "whole-artifact", "complete-output", []any{a}, a, []any{"template-native"}
-	for _, kind := range []map[string]any{sparse, lora, whole} {
-		c.definition(t, "treatment", kind, true)
-		for _, other := range []string{"exact-replacements", "low-rank-factors", "complete-output"} {
-			if other == kind["rationale"] {
-				continue
-			}
-			bad := clone(kind).(map[string]any)
-			bad["rationale"] = other
-			c.definition(t, "treatment", bad, false)
-		}
-	}
-	bad := clone(whole).(map[string]any)
-	delete(bad, "provenance_manifest")
-	c.definition(t, "treatment", bad, false)
-	bad = clone(lora).(map[string]any)
-	delete(bad["members"].([]any)[0].(map[string]any), "configuration")
-	c.definition(t, "treatment", bad, false)
-}
-
-func TestDigestEvidenceAndReferences(t *testing.T) {
-	c := newCheck(t)
-	d := map[string]any{"algorithm": "sha256", "value": strings.Repeat("a", 64), "status": "verified", "source": "SYNTHETIC control", "verification": map[string]any{"method": "whole-file-sha256", "evidence_ref": "template-evidence"}}
-	c.definition(t, "digest", d, true)
-	d["status"] = "advertised"
-	c.definition(t, "digest", d, false)
-	delete(d, "verification")
-	c.definition(t, "digest", d, true)
-	c.definition(t, "reference", map[string]any{"bundle_sha256": strings.Repeat("a", 64), "pointer": "/profiles/0"}, true)
-	c.definition(t, "reference", map[string]any{"bundle_sha256": "missing", "pointer": "/profiles/0"}, false)
-	c.definition(t, "reference", map[string]any{"bundle_sha256": strings.Repeat("a", 64), "pointer": "/profiles/../0"}, false)
-}
-
-func TestArtifactDigestRequiredInBothModes(t *testing.T) {
-	c := newCheck(t)
-	a := payload(readJSON(t, "../examples/TEMPLATE.json"))
-	hf := map[string]any{"kind": "hf", "repo_type": "model", "repo_id": "Example-Publisher/Example.Model_1", "revision": strings.Repeat("a", 40), "path": "nested/payload.npz"}
-	for _, locator := range []any{a["locators"].([]any)[0], hf} {
-		good := clone(a).(map[string]any)
-		good["locators"] = []any{locator}
-		c.definition(t, "artifact", good, true)
-		noDigest := clone(good).(map[string]any)
-		delete(noDigest, "digest")
-		c.definition(t, "artifact", noDigest, false)
-		unmarked := clone(good).(map[string]any)
-		delete(unmarked["digest"].(map[string]any), "status")
-		c.definition(t, "artifact", unmarked, false)
-	}
-}
-
-func TestEvidenceRoleControls(t *testing.T) {
-	c := newCheck(t)
-	r := readJSON(t, "../examples/TEMPLATE.json")
-	a := payload(r) // All identities and numeric values below are SYNTHETIC controls.
-	unknown := treatment(r)["route"]
-	run := map[string]any{
-		"id": "template-run", "profile_ref": "template-native", "treatment_ref": "template-sparse", "state": "INCOMPLETE",
-		"protocol": a, "dataset": a, "item_draw_manifest": a, "outcomes": a,
-		"coverage": map[string]any{"expected_item_draws": float64(2), "completed_item_draws": float64(1), "failure_policy": "TEMPLATE: retain incomplete work", "errors_and_truncations": "TEMPLATE: outcomes retain every attempt"},
-		"score":    unknown, "reason": "TEMPLATE ONLY: no observations exist",
-	}
-	c.definition(t, "run", run, true)
-	badRun := clone(run).(map[string]any)
-	delete(badRun, "outcomes")
-	c.definition(t, "run", badRun, false)
-	run["state"] = "COMPLETE"
-	run["coverage"].(map[string]any)["completed_item_draws"] = float64(2)
-	run["score"] = map[string]any{"metric": "SYNTHETIC", "value": float64(1), "unit": "SYNTHETIC", "denominator": float64(1)}
-	c.definition(t, "run", run, true)
-	badRun = clone(run).(map[string]any)
-	badRun["score"].(map[string]any)["denominator"] = float64(0)
-	c.definition(t, "run", badRun, false)
-	comparison := map[string]any{
-		"id": "template-comparison", "baseline_run_ref": "template-base-run", "candidate_run_ref": "template-run",
-		"estimand": "TEMPLATE: declared within-profile contrast", "selection_design": "TEMPLATE: frozen selection", "weights": unknown,
-		"reason": "TEMPLATE ONLY: no comparison exists", "state": "MATCHED", "denominator": float64(1), "matched_outcomes": a, "analysis": a, "uncertainty": unknown,
-	}
-	c.definition(t, "comparison", comparison, true)
-	badComparison := clone(comparison).(map[string]any)
-	delete(badComparison, "matched_outcomes")
-	c.definition(t, "comparison", badComparison, false)
-	badComparison = clone(comparison).(map[string]any)
-	badComparison["score"] = float64(1)
-	c.definition(t, "comparison", badComparison, false)
-	comparison["state"], comparison["denominator"], comparison["uncertainty"] = "REFUSED", unknown, unknown
-	c.definition(t, "comparison", comparison, true)
-	assessment := clone(r["assessments"].([]any)[0]).(map[string]any)
-	assessment["quality"], assessment["policy"], assessment["comparisons"] = "INCONCLUSIVE", a, []any{"template-comparison"}
-	c.definition(t, "assessment", assessment, true)
-	for _, decision := range []string{"SUPPORTED", "REJECT", "INCONCLUSIVE"} {
-		assessment["quality"] = decision
-		c.definition(t, "assessment", assessment, true)
-	}
-	assessment["comparisons"] = []any{}
-	c.definition(t, "assessment", assessment, false)
-	bundle := map[string]any{"artifact": a, "inventory_pointer": ""}
-	c.definition(t, "bundle", bundle, true)
-	bundle["inventory_pointer"] = "/positive-subset"
-	c.definition(t, "bundle", bundle, false)
+	c.expect(t, "locator", v, false)
 }
 
 func TestHelperControls(t *testing.T) {

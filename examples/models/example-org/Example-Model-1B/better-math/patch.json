@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "title": "Better arithmetic",
+  "summary": "SYNTHETIC EXAMPLE: two replaced weights.",
+  "kind": "replacement",
+  "authors": [
+    {
+      "name": "Example Author"
+    }
+  ],
+  "submitter": "example-user",
+  "license": "Apache-2.0",
+  "tags": [
+    "math"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

@@ -55,7 +55,7 @@ Addresses are the identities. Within this repository, records refer to each othe
 
 | File | Contains |
 |---|---|
-| `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_type`, `repo_id`, full revision), format, precision or quantization, every file with path, SHA-256 and size, and the context fields the record contract requires. Quantized or converted forms published in other repositories are further profiles here, with their own source repository. |
+| `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_type`, `repo_id`, full revision), format, precision or quantization, every file with path, SHA-256 and size, and the context fields the record contract requires. Quantized or converted forms are further profiles, with their own source repository. Every distinct file set is its own profile: two `Q4_K_M` files from different publishers are two profiles. |
 | `patch.json` | Title, summary, kind (`replacement` or `lora`, see [Patch forms](#patch-forms)), `authors[]`, `submitter`, license, tags, and the status of each version (`active`, `deprecated`, `withdrawn`). |
 | `version.json` | Version number, one-line changelog, target base profile, treatment details, `targets` (every tensor the patch changes), optional base fingerprint, and every file with locator, SHA-256 and size, `format` (`safetensors`, `gguf`, `json`) and `role` (`source` or `derived`). |
 | `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score, who performed it, and the outcome and resource files beside it. |
@@ -84,7 +84,7 @@ Every version has exactly one **source**: the files the author produced, in one 
 | File | Contains |
 |---|---|
 | `models/<ns>/<model>/index.json` | Everything a client needs for one base: its profiles, every patch with metadata, every version with files, targets and status, the latest version, and the results summary. |
-| `models/<ns>/<model>/README.md` | Table of every patch: kind, latest version, results against the shared baseline, regressions, assessment. |
+| `models/<ns>/<model>/README.md` | Table of every patch: kind, latest version, results per profile against that profile's baseline, regressions, assessment. Profiles without a run show "not measured". |
 | `by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
 | `by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not: base address and profile IDs. |
 | `bases.json` | Every base address with its display name, for manual selection. |
@@ -97,7 +97,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 ## Rules
 
 1. **Fixed depth.** No optional or variable path levels under `models/`.
-2. **Base folder choice.** A patch is filed under the model it was made against. A quantized or converted form of a model is a profile of that model, not a separate base folder. A fine-tune or merge is a model of its own and gets its own base folder.
+2. **Base folder choice.** A patch is filed under the model it was made against. Same weights in another encoding are a profile of that model, never a folder: GGUF quants, FP8 or AWQ made after training, converted formats, whoever publishes them. Different weights are a model of their own with their own base folder: fine-tunes, merges and quantization-aware trained (QAT) releases. A QAT folder is named after the unquantized QAT repository when one is published, otherwise after the quantized one.
 3. **Casing.** Namespace and model folders keep the source repository's exact spelling and case. Paths that differ only in case are rejected.
 4. **Names are for patches, versions are for updates.** A slug is lowercase ASCII and hyphen-separated, describes the effect, contains no author, model name or version, is unique within its base (first merged keeps it) and is never renamed. Improved bytes for the same patch are a new version under the same slug; a new slug is only for a genuinely different patch.
 5. **Versions are immutable.** Versions are numbered `v1`, `v2`, … with no gaps. Merged files under `v<N>/` are never modified or deleted; runs, comparisons and assessments may be added. The one exception is a legal takedown: the affected files are removed, the version is marked `withdrawn`, and `version.json` stays. The card, `notices/` and `patch.json` stay editable, including version statuses.
@@ -168,7 +168,7 @@ The original model is never modified. The client records the base profile, every
 
 1. **Every file is pinned** to a full 40-hex revision with size and SHA-256. The list covers every file needed to load or apply the patch; documentation and git metadata files are excluded.
 2. **Digest sources are explicit.** A SHA-256 reported by the Hugging Face API is recorded as `advertised`. Files for which the API reports only a git SHA-1 are downloaded and hashed. A digest is `verified` only with a retained whole-file hashing record; benchmarking a file produces one.
-3. **Model-card metadata prefills placement.** `base_model` and `base_model_relation` (`adapter`, `merge`, `quantized`, `finetune`) suggest the base folder and kind; a reviewer confirms them.
+3. **Model-card metadata prefills placement.** `base_model` and `base_model_relation` (`adapter`, `merge`, `quantized`, `finetune`) suggest the base folder and kind; a reviewer confirms them. `quantized` usually means a profile of the parent, except for QAT releases, which get their own base folder.
 4. **Private repositories are refused. Gated bases are identified, not retrieved:** a gated base is recorded by its revision and file digests, and obtaining it is left to the user.
 5. **Later upstream commits do not move a pin.** Changed upstream weights are a new version.
 
@@ -213,7 +213,7 @@ The scaffold described `models/<publisher>/<model>/patches/<fix-id>/` pages, a t
 ## Open decisions
 
 - **Tooling language:** Rust, shared with the client tool, or Go, matching the current schema tests.
-- **Run IDs:** naming scheme for runs, for example benchmark, profile and date.
+- **Run and profile IDs:** naming scheme for runs (for example benchmark, profile and date) and for profiles (for example publisher and quantization, such as `bartowski-q4-k-m`).
 - **Index protocols:** which benchmarks maintainers run by default within the budget.
 - **Gated patch hosting:** whether a patch file hosted in a gated Hugging Face repository is accepted.
 - **Patch ownership:** whether changes to an existing patch can be approved without a human, for example when they come from its original submitter or from a list of owners.

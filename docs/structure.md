@@ -1,6 +1,6 @@
 # Repository structure and change rules
 
-**Status: layout in place, no patches yet.** The schema, a synthetic example and its tests follow this document. The `models/` tree is empty, and the tools, CI and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
+**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty, and the tools, CI and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
 
 ## Purpose and goals
 
@@ -204,13 +204,13 @@ Done:
 1. **This document.**
 2. **`schema/`.** One schema, `records.schema.json`, with a definition per file type; bundles, JSON pointers and digest status are gone.
 3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; generated files never read it.
-4. **Tests.** Schema controls, the layout rules a single file cannot express, hosted-file digests and the replacement file format, run against the example and broken copies of it.
+4. **Checks, in the Rust crate under `tools/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
 5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
 6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
 
 Remaining:
 
-7. **`tools/` (new, Rust):** intake tool that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; generator with a check mode, covering every generated file; builder for derived patch files; availability checker. The Go tests move into it.
+7. **`tools/`, built on those checks:** intake tool that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; generator with a check mode, covering every generated file; builder for derived patch files; availability checker.
 8. **CI (new).** Checks on every pull request, including that no merged file under `v<N>/` changed; the availability checker on a schedule.
 9. **Generated files.** Built by the generator once `models/` has a base.
 

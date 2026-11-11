@@ -33,4 +33,4 @@ Downloading Hugging Face files, recomputing their digests, rebuilding derived fi
 
 ## Tests
 
-`go test ./...` from the repository root runs every check above against the [synthetic example](../examples/README.md), plus deliberately broken copies of it that must fail. The Go tests are interim: the tools will be written in Rust, and these checks move there. Until then the tests include a small schema evaluator that understands exactly the keywords this schema uses and rejects any other.
+The checks above live in the Rust crate under [`tools/`](../tools/), so CI and the intake tool apply the same rules. `cargo test` from the repository root runs them against the [synthetic example](../examples/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.

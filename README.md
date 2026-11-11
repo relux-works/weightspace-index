@@ -36,7 +36,7 @@ Open a pull request that adds a patch folder or a new version, following [struct
 
 - [Structure and rules](docs/structure.md): layout, records, hosting, review and the client's reading order.
 - [Record schema](schema/README.md): one JSON Schema for every authored and generated file.
-- `go test ./...` (Go 1.25+, standard library only, no network) checks the schema, the example tree and the layout rules.
+- [`tools/`](tools/): the index's Rust crate. `cargo test` (Rust 1.85+) checks the schema, the example tree and the layout rules; the checks never use the network.
 
 ## Licenses and attribution
 

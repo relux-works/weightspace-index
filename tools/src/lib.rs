@@ -4,5 +4,6 @@
 //!
 //! Nothing here touches the network or executes repository content.
 
+pub mod generate;
 pub mod layout;
 pub mod records;

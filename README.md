@@ -7,7 +7,7 @@
 
 An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
 
-**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet. CI runs the offline checks on every pull request; the generator, the intake tool and the client tool do not exist yet.
+**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet. CI runs the offline checks on every pull request and keeps the generated files in sync; the intake tool and the client tool do not exist yet.
 
 ## Browse
 
@@ -36,7 +36,7 @@ Open a pull request that adds a patch folder or a new version, following [struct
 
 - [Structure and rules](docs/structure.md): layout, records, hosting, review and the client's reading order.
 - [Record schema](schema/README.md): one JSON Schema for every authored and generated file.
-- [`tools/`](tools/): the index's Rust crate. `cargo test` (Rust 1.85+) checks the schema, the example tree and the layout rules; the checks never use the network.
+- [`tools/`](tools/): the index's Rust crate (Rust 1.85+). `cargo run -- check` runs every offline check and `cargo run -- generate` rebuilds the generated files; `cargo test` tests the checks and the generator. None of them use the network.
 
 ## Licenses and attribution
 

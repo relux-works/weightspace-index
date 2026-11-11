@@ -644,23 +644,23 @@ impl Layout<'_> {
     }
 }
 
-fn text<'v>(v: &'v Value, key: &str) -> &'v str {
+pub(crate) fn text<'v>(v: &'v Value, key: &str) -> &'v str {
     v.get(key).and_then(Value::as_str).unwrap_or("")
 }
 
-fn items<'v>(v: &'v Value, key: &str) -> &'v [Value] {
+pub(crate) fn items<'v>(v: &'v Value, key: &str) -> &'v [Value] {
     v.get(key)
         .and_then(Value::as_array)
         .map(Vec::as_slice)
         .unwrap_or(&[])
 }
 
-fn hex(bytes: &[u8]) -> String {
+pub(crate) fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
 /// Every regular file under `dir`, recursively; empty when `dir` is absent.
-fn walk_files(dir: &Path) -> Vec<PathBuf> {
+pub(crate) fn walk_files(dir: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
     let mut stack = vec![dir.to_path_buf()];
     while let Some(d) = stack.pop() {
@@ -676,7 +676,7 @@ fn walk_files(dir: &Path) -> Vec<PathBuf> {
     out
 }
 
-fn rel_parts(root: &Path, path: &Path) -> Vec<String> {
+pub(crate) fn rel_parts(root: &Path, path: &Path) -> Vec<String> {
     path.strip_prefix(root)
         .unwrap_or(path)
         .components()

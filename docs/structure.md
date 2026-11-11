@@ -1,6 +1,6 @@
 # Repository structure and change rules
 
-**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty; CI runs the offline checks, and the generator, intake tool, downloading checks and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
+**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty; CI runs the offline checks and keeps the generated files in sync, and the intake tool and downloading checks do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
 
 ## Purpose and goals
 
@@ -86,13 +86,15 @@ Every version has exactly one **source**: the files the author produced, in one 
 
 | File | Contains |
 |---|---|
-| `models/<ns>/<model>/index.json` | Everything a client needs for one base: its profiles, every patch with metadata, every version with its number, files and status, the tensors each version changes and each file's format (read from the files), the latest version, and the results summary. |
-| `models/<ns>/<model>/README.md` | Table of every patch: kind, latest version, results per profile against that profile's baseline, regressions, assessment. Profiles without a run show "not measured". |
+| `models/<ns>/<model>/index.json` | Everything a client needs for one base: its profiles and baseline runs, every patch with its metadata and latest version, and every version with its status, changelog, target profile, files, runs and assessment decisions. Each file gets a `format` from its extension, and an `index-path` locator is rewritten to be relative to this file. |
+| `models/<ns>/<model>/README.md` | The base's profiles, then a table of every patch: kind, latest version, summary. For each latest version, every comparison against its baseline run (metric, both scores, who measured it) or "not measured", and every assessment decision. |
 | `by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
 | `by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not, and for each former name of a renamed repository: base address and profile IDs. |
 | `bases.json` | Every base address. Its `index.json` and `README.md` sit at `models/<address>/`. |
 
-Generated files are committed and never edited by hand. CI fails when they differ from a fresh build.
+Generated files are committed and never edited by hand. `cargo run -- generate` rebuilds them for the repository and for `examples/`; `cargo run -- check` runs every offline check and fails when a generated file is missing, out of date or no longer generated. CI runs the check.
+
+The generator reads only authored files in the repository, never a patch file or the network, so every machine builds the same bytes and a Hugging Face outage cannot break a build. That is why `index.json` does not list the tensors a version changes: for a file hosted on Hugging Face it would need a download. Each file's `format` comes from its extension, and the downloading checks confirm it.
 
 The latest version of a patch is its highest-numbered `active` version. Deprecating or withdrawing a version moves "latest" back to the previous active one.
 
@@ -205,15 +207,15 @@ Done:
 
 1. **This document.**
 2. **`schema/`.** One schema, `records.schema.json`, with a definition per file type; bundles, JSON pointers and digest status are gone.
-3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; generated files never read it.
+3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; it is a tree of its own, with its own generated files, and the root's generated files never read it.
 4. **Checks, in the Rust crate under `tools/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
 5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
 6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
 7. **CI, first part.** `.github/workflows/checks.yml` runs formatting and every check above on each pull request and on `main`, and fails a pull request that modifies or deletes a file under a merged `v<N>/`.
+8. **Generator.** `weightspace generate` builds every generated file from the authored ones; `weightspace check` runs every offline check and fails when a generated file differs, and CI runs it.
 
 Remaining:
 
-8. **Generator,** with a check mode covering every generated file, run in CI. Needed before the first patch merges.
 9. **Downloading checks in CI:** patch files fetched and hashed, base digests compared with Hugging Face's records, derived files rebuilt.
 10. **Intake tool** that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; builder for derived patch files; availability checker on a schedule. Until the intake tool exists, maintainers file patches by hand, hashing every file themselves.
 11. **Repository settings (admins):** the `checks` workflow required before merging into `main`, and force pushes to `main` blocked.

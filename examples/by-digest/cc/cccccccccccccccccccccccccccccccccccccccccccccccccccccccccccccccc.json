@@ -1,0 +1,9 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "example-org/Example-Model-1B",
+      "profile": "example-quants-q4-k-m"
+    }
+  ]
+}

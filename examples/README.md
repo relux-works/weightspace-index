@@ -2,7 +2,7 @@
 
 **Nothing here is a real model, patch or result.** Every repository, digest, score and author is made up, except `replacements.safetensors`, which is a real 344-byte file so the tests can check a hosted file end to end.
 
-`models/` has the same shape as the repository's own `models/` tree (see [structure](../docs/structure.md#target-shape)). Generated files are built from the root `models/` only, so nothing in this folder ever appears in `bases.json`, `by-digest/`, `by-repo/` or a client listing.
+`models/` has the same shape as the repository's own `models/` tree (see [structure](../docs/structure.md#target-shape)). It is a tree of its own: `bases.json`, `by-digest/`, `by-repo/` and the base's `index.json` and `README.md` here are generated from this folder's `models/`, exactly as the root ones are from the root `models/`. The root's generated files never read this folder, so nothing here appears in a client listing.
 
 | Path under `models/example-org/Example-Model-1B/` | Shows |
 |---|---|

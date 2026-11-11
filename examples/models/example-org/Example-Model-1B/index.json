@@ -1,0 +1,247 @@
+{
+  "base": "example-org/Example-Model-1B",
+  "baseline_runs": [
+    {
+      "id": "baseline-bf16",
+      "performed_by": "index",
+      "profile": "bf16",
+      "protocol": {
+        "name": "example-protocol",
+        "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "score": {
+        "denominator": 200,
+        "metric": "accuracy",
+        "unit": "fraction",
+        "value": 0.5
+      },
+      "state": "COMPLETE"
+    }
+  ],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Example Author"
+        }
+      ],
+      "kind": "replacement",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "better-math",
+      "submitter": "example-user",
+      "summary": "SYNTHETIC EXAMPLE: two replaced weights.",
+      "tags": [
+        "math"
+      ],
+      "title": "Better arithmetic",
+      "versions": [
+        {
+          "assessments": [
+            {
+              "decision": "UNKNOWN",
+              "id": "arithmetic-help",
+              "intended_use": "Arithmetic help on the bf16 profile."
+            }
+          ],
+          "changelog": "First release.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "index-path",
+                  "path": "better-math/v1/files/replacements.safetensors"
+                }
+              ],
+              "name": "replacements.safetensors",
+              "role": "source",
+              "sha256": "0a8d4816198d77204b44b21b9dcbb801bfdde28a6cce40773353ba3bdd7437e7",
+              "size_bytes": 344
+            },
+            {
+              "derived_from": [
+                "0a8d4816198d77204b44b21b9dcbb801bfdde28a6cce40773353ba3bdd7437e7"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "better-math/v1/better-math-lora.gguf",
+                  "repo_id": "example-org/weightspace-mirror",
+                  "repo_type": "model",
+                  "revision": "2222222222222222222222222222222222222222"
+                }
+              ],
+              "name": "better-math-lora.gguf",
+              "role": "derived",
+              "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+              "size_bytes": 90000
+            }
+          ],
+          "runs": [
+            {
+              "id": "patched-bf16",
+              "performed_by": "index",
+              "profile": "bf16",
+              "protocol": {
+                "name": "example-protocol",
+                "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              },
+              "score": {
+                "denominator": 200,
+                "metric": "accuracy",
+                "unit": "fraction",
+                "value": 0.5
+              },
+              "state": "COMPLETE"
+            }
+          ],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Example Author",
+          "url": "https://huggingface.co/example-author"
+        }
+      ],
+      "kind": "lora",
+      "latest": 2,
+      "license": "MIT",
+      "slug": "shorter-answers",
+      "submitter": "example-user",
+      "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA.",
+      "tags": [
+        "length"
+      ],
+      "title": "Shorter answers",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "First release.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "example-author/shorter-answers-lora",
+                  "repo_type": "model",
+                  "revision": "5555555555555555555555555555555555555555"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+              "size_bytes": 16000000
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "example-author/shorter-answers-lora",
+                  "repo_type": "model",
+                  "revision": "5555555555555555555555555555555555555555"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+              "size_bytes": 800
+            }
+          ],
+          "runs": [],
+          "status": "deprecated",
+          "target_profile": "bf16",
+          "version": 1
+        },
+        {
+          "assessments": [],
+          "changelog": "Retrained with a larger dataset.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "example-author/shorter-answers-lora",
+                  "repo_type": "model",
+                  "revision": "7777777777777777777777777777777777777777"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "7777777777777777777777777777777777777777777777777777777777777777",
+              "size_bytes": 16000000
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "example-author/shorter-answers-lora",
+                  "repo_type": "model",
+                  "revision": "7777777777777777777777777777777777777777"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "8888888888888888888888888888888888888888888888888888888888888888",
+              "size_bytes": 800
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 2
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model.safetensors",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "size_bytes": 2000000000
+        },
+        {
+          "path": "config.json",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "size_bytes": 700
+        }
+      ],
+      "id": "bf16",
+      "source": {
+        "repo_id": "example-org/Example-Model-1B",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    },
+    {
+      "files": [
+        {
+          "path": "Example-Model-1B-Q4_K_M.gguf",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "size_bytes": 650000000
+        }
+      ],
+      "id": "example-quants-q4-k-m",
+      "source": {
+        "repo_id": "example-quants/Example-Model-1B-GGUF",
+        "revision": "cccccccccccccccccccccccccccccccccccccccc"
+      }
+    }
+  ]
+}

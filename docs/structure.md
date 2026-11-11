@@ -56,14 +56,28 @@ Addresses are the identities. Within this repository, records refer to each othe
 | File | Contains |
 |---|---|
 | `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_type`, `repo_id`, full revision), format, precision or quantization, every file with path, SHA-256 and size, and the context fields the record contract requires. Quantized or converted forms published in other repositories are further profiles here, with their own source repository. |
-| `patch.json` | Title, summary, kind (`sparse-exact`: stored values for selected weights; `lora`: a low-rank adapter; `whole`: complete replacement model files), `authors[]`, `submitter`, license, tags, and the status of each version (`active`, `deprecated`, `withdrawn`). |
-| `version.json` | Version number, one-line changelog, target base profile, treatment details, `targets` (every tensor the patch changes), optional base fingerprint, and every file with locator, SHA-256 and size, `format` (`safetensors`, `gguf`, `json`) and `role` (for example `adapter`, `adapter-config`, `replacements`, `model-file`). A version may carry the same patch in several formats, such as a GGUF adapter and a PEFT adapter. |
+| `patch.json` | Title, summary, kind (`replacement` or `lora`, see [Patch forms](#patch-forms)), `authors[]`, `submitter`, license, tags, and the status of each version (`active`, `deprecated`, `withdrawn`). |
+| `version.json` | Version number, one-line changelog, target base profile, treatment details, `targets` (every tensor the patch changes), optional base fingerprint, and every file with locator, SHA-256 and size, `format` (`safetensors`, `gguf`, `json`) and `role` (`source` or `derived`). |
 | `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score, who performed it, and the outcome and resource files beside it. |
 | `comparisons/<id>.json` | The baseline and patched runs compared, estimand, matched outcomes, uncertainty, or the reason the comparison is refused. |
 | `assessments/<id>.json` | Intended use, decision policy, supporting comparisons, decision and reason. |
 | Patch `README.md` | The card. Prose for people, linking to machine facts instead of restating them. |
 
 Every JSON file, authored or generated, carries a `contract_version`.
+
+## Patch forms
+
+Every version has exactly one **source**: the files the author produced, in one of two forms. Nothing else is accepted as a source.
+
+| Form | `kind` | Files | Applying it |
+|---|---|---|---|
+| Replacement | `replacement` | One or more `.safetensors` files keyed by the base's own tensor names, in the target profile's dtype. Each changed tensor is either the full new tensor under its own name, or sparse: `<name>#idx` (sorted, unique flat `int64` indices), `<name>#new` and `<name>#old` (values in the tensor's dtype). | Assignment. Bit-exact on the target profile, which is always unquantized. |
+| LoRA | `lora` | As published: PEFT (`adapter_model.safetensors` and `adapter_config.json`) or a GGUF LoRA. | Runtime adapter, or merged into a copy of the model. |
+
+- **A complete model is never a patch.** A fine-tune or merge publishing every tensor is a base of its own.
+- **Deltas are never stored.** When the local base is not the target profile, such as a quantized copy, the client computes `new − old` for sparse entries, adds it at higher precision and converts back; a full replacement tensor is converted directly. The result is labelled approximate.
+- **Derived files are optional conveniences** built by the index's own tool, never submitted: a LoRA built from a replacement (exact up to runtime rounding when the edits touch few rows or columns) and GGUF conversions of a PEFT LoRA. Each records its `derived_from` file digests and the tool name and version, and CI rebuilds it to confirm the digest.
+- **A new form is a change to this document**, not something a submission can introduce.
 
 ## Generated files
 
@@ -83,7 +97,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 ## Rules
 
 1. **Fixed depth.** No optional or variable path levels under `models/`.
-2. **Base folder choice.** A patch is filed under the model it was made against. A quantized or converted form of a model is a profile of that model, not a separate base folder. A fine-tune is a model of its own and gets its own base folder.
+2. **Base folder choice.** A patch is filed under the model it was made against. A quantized or converted form of a model is a profile of that model, not a separate base folder. A fine-tune or merge is a model of its own and gets its own base folder.
 3. **Casing.** Namespace and model folders keep the source repository's exact spelling and case. Paths that differ only in case are rejected.
 4. **Names are for patches, versions are for updates.** A slug is lowercase ASCII and hyphen-separated, describes the effect, contains no author, model name or version, is unique within its base (first merged keeps it) and is never renamed. Improved bytes for the same patch are a new version under the same slug; a new slug is only for a genuinely different patch.
 5. **Versions are immutable.** Versions are numbered `v1`, `v2`, … with no gaps. Merged files under `v<N>/` are never modified or deleted; runs, comparisons and assessments may be added. The one exception is a legal takedown: the affected files are removed, the version is marked `withdrawn`, and `version.json` stays. The card, `notices/` and `patch.json` stay editable, including version statuses.
@@ -101,7 +115,7 @@ Maintainers import patches they find; anyone else opens a pull request. Both use
 2. CI and the review agent check:
    - schema validity of every authored file;
    - SHA-256 and size of every file, and the 100 MB cap for uploads here;
-   - safe formats only;
+   - safe formats only, exactly one source form per version, and every derived file rebuilt to the same digest;
    - slug, casing, fixed depth and no symlinks;
    - no merged file under any `v<N>/` modified or deleted;
    - license and notices present;
@@ -132,12 +146,12 @@ The client tool lists models installed locally, lets the user pick one, then rea
 
 **4. Fetch `models/<ns>/<model>/index.json`** and show its patches, latest versions and results.
 
-**5. Download and check.** In-repository files come from the pinned raw URL; Hugging Face files from `https://huggingface.co/<repo_id>/resolve/<revision>/<path>`. Every file's size and SHA-256 must match before use. The client picks files by `format` and `role` for the chosen destination.
+**5. Download and check.** In-repository files come from the pinned raw URL; Hugging Face files from `https://huggingface.co/<repo_id>/resolve/<revision>/<path>`. Every file's size and SHA-256 must match before use. The client picks the source or a derived file by `format` for the chosen destination.
 
 **6. Apply.**
 
 - **Pull a LoRA:** install the adapter for the destination runtime.
-- **Bake one patch:** write a new copy of the model. A `sparse-exact` patch assigns stored values directly to the weights; it is exact only on its target profile's precision. Baking into another precision, such as a quantized GGUF, requantizes or keeps edited tensors at higher precision, and the client labels the result approximate before baking.
+- **Bake one patch:** write a new copy of the model. A `replacement` is assigned directly and is bit-exact on its target profile. On any other profile the client uses the approximate path from [Patch forms](#patch-forms) and says so before baking.
 - **Bake several LoRAs:** order matters. The client compares `targets` and warns when patches change the same tensors. A combination has no index results unless a run for that exact combination exists.
 
 The original model is never modified. The client records the base profile, every patch version applied, their order and the index commit SHA next to the baked copy. A `contract_version` the client does not support stops it instead of being guessed.
@@ -190,10 +204,11 @@ The scaffold described `models/<publisher>/<model>/patches/<fix-id>/` pages, a t
 2. **`schema/`.** Split the record contract into schemas for `base.json`, `patch.json`, `version.json`, `run.json`, comparisons, assessments and every generated file. Replace registered-bundle and JSON-pointer references with addresses for in-repository records; keep digest references for external evidence. Update `schema/README.md`.
 3. **`examples/`.** Replace `TEMPLATE.json` with a template base folder and patch folder, still excluded from every generated file.
 4. **Tests.** Update the `payloads/...` locator fixtures and add tests for the new schemas and the rules above.
-5. **`tools/` (new):** generator with a check mode, covering every generated file; review checks; Hugging Face intake tool that drafts a patch folder or version from a repository and revision, without credentials or running repository code; availability checker.
+5. **`tools/` (new):** generator with a check mode, covering every generated file; builder for derived patch files; review checks; Hugging Face intake tool that drafts a patch folder or version from a repository and revision, without credentials or running repository code; availability checker.
 6. **CI (new).** Checks on every pull request; the availability checker on a schedule.
-7. **`README.md`.** Browsing, client consumption and how to submit. Keep caveats in the README warning and `DISCLAIMER.md` rather than repeating them in every document.
-8. **Generated files.** Build them from the empty `models/` tree.
+7. **`docs/patch-formats.md`.** Rewrite to the two patch forms; baked whole models are bases, not a patch kind.
+8. **`README.md`.** Browsing, client consumption and how to submit. Keep caveats in the README warning and `DISCLAIMER.md` rather than repeating them in every document.
+9. **Generated files.** Build them from the empty `models/` tree.
 
 ## Open decisions
 

@@ -26,6 +26,11 @@ jobs:
       - name: Records and layout
         run: cargo test --locked
 
+      # Every offline check over the repository and examples/, and every
+      # generated file equal to a fresh build.
+      - name: Generated files in sync
+        run: cargo run --locked -- check
+
       # Rule 5: merged files under v<N>/ are never modified or deleted; runs,
       # comparisons and assessments may only be added. A legal takedown is
       # the one exception and is merged by an admin.

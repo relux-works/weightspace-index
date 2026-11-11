@@ -1,0 +1,6 @@
+{
+  "bases": [
+    "example-org/Example-Model-1B"
+  ],
+  "contract_version": 1
+}

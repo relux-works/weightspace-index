@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 publish = false
-description = "Checks for the Weightspace Index records and layout"
+description = "Checks and generator for the Weightspace Index"
+
+[[bin]]
+name = "weightspace"
+path = "src/main.rs"
 
 [dependencies]
 # No default features: the validator never fetches remote or file references.

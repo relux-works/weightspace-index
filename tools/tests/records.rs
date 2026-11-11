@@ -314,13 +314,13 @@ fn generated_shapes() {
             "tags": [], "latest": 1,
             "versions": [{
                 "version": 1, "status": "active", "changelog": "First release.", "target_profile": "bf16",
-                "targets": ["model.layers.0.mlp.down_proj.weight"], "files": [file], "runs": [], "assessments": [],
+                "files": [file], "runs": [], "assessments": [],
             }],
         }],
     });
     expect("index", &index, true);
     let mut bad = index.clone();
-    remove(&mut bad["patches"][0]["versions"][0], "targets");
+    remove(&mut bad["patches"][0]["versions"][0], "files");
     expect("index", &bad, false);
     let mut bad = index.clone();
     bad["patches"][0]["versions"][0]["files"][0]["format"] = json!("pickle");

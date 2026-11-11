@@ -21,6 +21,7 @@ fn example_tree() {
 fn repository_tree() {
     let records = records();
     let mut errors = check_lookups(records, &repo());
+    errors.extend(check_lookups(records, &repo().join("examples")));
     if repo().join("models").exists() {
         errors.extend(check_models(records, &repo().join("models")));
     }

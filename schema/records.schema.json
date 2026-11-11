@@ -384,12 +384,11 @@
                     "status": { "$ref": "#/$defs/versionStatus" },
                     "changelog": { "$ref": "#/$defs/text" },
                     "target_profile": { "$ref": "#/$defs/id" },
-                    "targets": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/text" } },
                     "files": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/indexFile" } },
                     "runs": { "type": "array", "items": { "$ref": "#/$defs/indexRun" } },
                     "assessments": { "type": "array", "items": { "$ref": "#/$defs/indexAssessment" } }
                   },
-                  "required": ["version", "status", "changelog", "target_profile", "targets", "files", "runs", "assessments"],
+                  "required": ["version", "status", "changelog", "target_profile", "files", "runs", "assessments"],
                   "additionalProperties": false
                 }
               }

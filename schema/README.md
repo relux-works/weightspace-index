@@ -31,6 +31,8 @@ What it cannot see is checked by the layout tests and, later, by CI:
 
 Downloading Hugging Face files, recomputing their digests, rebuilding derived files and protecting merged versions from change need the network or Git history; they belong to the intake tool and CI.
 
+Generated files are checked twice: each must satisfy its definition, and `weightspace check` fails when one differs from a fresh build.
+
 ## Tests
 
 The checks above live in the Rust crate under [`tools/`](../tools/), so CI and the intake tool apply the same rules. `cargo test` from the repository root runs them against the [synthetic example](../examples/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.

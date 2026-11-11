@@ -1,0 +1,41 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      # Pinned to the v7.0.1 commit.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Formatting
+        run: cargo fmt --check
+
+      # Schema, layout, cross-references, digests of files hosted here,
+      # no symlinks or case collisions, for examples/ and models/.
+      - name: Records and layout
+        run: cargo test --locked
+
+      # Rule 5: merged files under v<N>/ are never modified or deleted; runs,
+      # comparisons and assessments may only be added. A legal takedown is
+      # the one exception and is merged by an admin.
+      - name: Merged versions are unchanged
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-status --no-renames HEAD^1 HEAD -- models \
+            | awk -F'\t' '$1 != "A" && $2 ~ /^models\/[^\/]+\/[^\/]+\/[^\/]+\/v[0-9]+\//')
+          if [ -n "$changed" ]; then
+            echo "Files under a merged version folder were modified or deleted:"
+            echo "$changed"
+            exit 1
+          fi

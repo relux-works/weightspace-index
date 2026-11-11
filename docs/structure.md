@@ -1,6 +1,6 @@
 # Repository structure and change rules
 
-**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty, and the tools, CI and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
+**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty; CI runs the offline checks, and the generator, intake tool, downloading checks and most generated files do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
 
 ## Purpose and goals
 
@@ -118,7 +118,9 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 
 A file may have several locators for identical bytes; clients try Hugging Face first. Paths are ASCII segments of letters, digits, `_`, `-` and `.`, not starting with `.`; absolute paths, traversal, backslashes, URL encoding and arbitrary URLs are refused. Never execute locator strings, repository hooks or remote code from the index.
 
-**Every digest is our own.** The intake tool downloads every file, checks that it is valid safetensors, GGUF or JSON, reads its tensor names, and computes its SHA-256 and size. Nothing is copied from Hugging Face's API or from the submitter. CI repeats this for every file a pull request adds.
+**Every digest is our own.** The intake tool downloads every patch file, checks that it is valid safetensors, GGUF or JSON, reads its tensor names, and computes its SHA-256 and size. Nothing is copied from Hugging Face's API or from the submitter. CI repeats this for every patch file a pull request adds.
+
+Base model files can be hundreds of gigabytes, too large to download in CI. Whoever files a base profile hashes its files on their own machine. CI then compares each digest with the SHA-256 Hugging Face records for that file's large-file storage object, which needs no download, and downloads small files that are not stored that way. Two independent computations must agree.
 
 | Attack | What stops it |
 |---|---|
@@ -138,7 +140,7 @@ Maintainers import patches they find; anyone else opens a pull request. Both use
 1. Create the patch folder or a new `v<N>/`, usually with the intake tool, and complete the card and `notices/`.
 2. CI checks:
    - schema validity of every authored file;
-   - every file downloaded, its format, SHA-256 and size, and the 100 MB cap for uploads here;
+   - every patch file downloaded, its format, SHA-256 and size, and the 100 MB cap for uploads here; base file digests matched against Hugging Face's records;
    - exactly one source form per version, and every derived file rebuilt to the same digest;
    - slug, casing, fixed depth and no symlinks;
    - no merged file under any `v<N>/` modified or deleted;
@@ -207,12 +209,14 @@ Done:
 4. **Checks, in the Rust crate under `tools/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
 5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
 6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
+7. **CI, first part.** `.github/workflows/checks.yml` runs formatting and every check above on each pull request and on `main`, and fails a pull request that modifies or deletes a file under a merged `v<N>/`.
 
 Remaining:
 
-7. **`tools/`, built on those checks:** intake tool that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; generator with a check mode, covering every generated file; builder for derived patch files; availability checker.
-8. **CI (new).** Checks on every pull request, including that no merged file under `v<N>/` changed; the availability checker on a schedule.
-9. **Generated files.** Built by the generator once `models/` has a base.
+8. **Generator,** with a check mode covering every generated file, run in CI. Needed before the first patch merges.
+9. **Downloading checks in CI:** patch files fetched and hashed, base digests compared with Hugging Face's records, derived files rebuilt.
+10. **Intake tool** that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; builder for derived patch files; availability checker on a schedule. Until the intake tool exists, maintainers file patches by hand, hashing every file themselves.
+11. **Repository settings (admins):** the `checks` workflow required before merging into `main`, and force pushes to `main` blocked.
 
 ## Open decisions
 

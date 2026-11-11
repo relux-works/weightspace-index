@@ -7,7 +7,7 @@
 
 An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
 
-**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet, and the intake tool, the generator, the client tool and CI do not exist yet.
+**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet. CI runs the offline checks on every pull request; the generator, the intake tool and the client tool do not exist yet.
 
 ## Browse
 

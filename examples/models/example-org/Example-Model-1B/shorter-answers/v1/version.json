@@ -1,0 +1,37 @@
+{
+  "contract_version": 1,
+  "changelog": "First release.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "size_bytes": 16000000,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "example-author/shorter-answers-lora",
+          "revision": "5555555555555555555555555555555555555555",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "size_bytes": 800,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "example-author/shorter-answers-lora",
+          "revision": "5555555555555555555555555555555555555555",
+          "path": "adapter_config.json"
+        }
+      ]
+    }
+  ]
+}

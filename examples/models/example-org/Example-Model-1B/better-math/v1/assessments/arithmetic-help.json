@@ -1,0 +1,7 @@
+{
+  "contract_version": 1,
+  "intended_use": "Arithmetic help on the bf16 profile.",
+  "decision": "UNKNOWN",
+  "reason": "No decision policy is declared for this synthetic example.",
+  "owner": "index maintainers"
+}

@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "state": "MATCHED",
+  "baseline_run": "baseline-bf16",
+  "patched_run": "patched-bf16",
+  "estimand": "Paired accuracy difference on the same 200 items.",
+  "denominator": 200,
+  "matched_outcomes": {
+    "sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "size_bytes": 8192,
+    "locators": [
+      {
+        "kind": "hf",
+        "repo_type": "dataset",
+        "repo_id": "example-org/example-evidence",
+        "revision": "ffffffffffffffffffffffffffffffffffffffff",
+        "path": "matched.jsonl"
+      }
+    ]
+  },
+  "uncertainty": "95% paired bootstrap interval, 10000 resamples."
+}

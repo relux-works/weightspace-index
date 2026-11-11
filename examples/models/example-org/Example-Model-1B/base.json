@@ -1,0 +1,38 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "bf16",
+      "source": {
+        "repo_id": "example-org/Example-Model-1B",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "files": [
+        {
+          "path": "model.safetensors",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "size_bytes": 2000000000
+        },
+        {
+          "path": "config.json",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "size_bytes": 700
+        }
+      ]
+    },
+    {
+      "id": "example-quants-q4-k-m",
+      "source": {
+        "repo_id": "example-quants/Example-Model-1B-GGUF",
+        "revision": "cccccccccccccccccccccccccccccccccccccccc"
+      },
+      "files": [
+        {
+          "path": "Example-Model-1B-Q4_K_M.gguf",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "size_bytes": 650000000
+        }
+      ]
+    }
+  ]
+}

@@ -153,6 +153,13 @@ pub fn check_sources(kind: &str, sources: &[String]) -> Result<(), String> {
 /// Checks the replacement convention in a safetensors file: every tensor is
 /// either full or a complete sparse trio `<name>#idx`, `#new`, `#old`, with
 /// sorted unique `I64` indices and values matching them in shape.
+///
+/// This retained base hand parser is outside the checkpoint reader
+/// path: it validates hosted replacement (patch) files for the
+/// index `check` (and, in `ops`, the generated replacement temp
+/// file as a post-write gate). It is never a checkpoint parser —
+/// checkpoints and patch inputs to the operations are read only
+/// through the official `safetensors` reader in `checkpoint`.
 pub fn check_replacement_file(path: &Path) -> Result<(), String> {
     let bytes = fs::read(path).map_err(|e| e.to_string())?;
     let header_len = bytes

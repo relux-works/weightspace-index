@@ -1,33 +1,119 @@
+//! Thin binary: parse, dispatch, print, exit code.
+//!
 //! `weightspace check [repo]` runs every offline check and fails when a
 //! generated file is missing, out of date or stale.
-//! `weightspace generate [repo]` rewrites the generated files.
+//! `weightspace generate [repo]` rewrites the generated files. Both act
+//! on the repository root and on `examples/`, each a tree with its own
+//! `models/` and generated files, and keep their original success
+//! output.
 //!
-//! Both act on the repository root and on `examples/`, each a tree with
-//! its own `models/` and generated files.
+//! `weightspace replacement` and `weightspace apply` call the library
+//! operations in `weightspace_tools::ops` with a no-op progress sink.
+
+mod cli;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use std::sync::atomic::AtomicBool;
 
+use clap::Parser;
+use weightspace_tools::error::ToolError;
 use weightspace_tools::generate;
 use weightspace_tools::layout::{check_hygiene, check_lookups, check_models};
+use weightspace_tools::ops::{
+    ApplyReplacement, BuildReplacement, Cx, Progress, Report, apply_replacement, build_replacement,
+};
 use weightspace_tools::records::Records;
 
-const USAGE: &str = "usage: weightspace <check|generate> [repo]";
+use cli::{Cli, Command};
 
 fn main() -> ExitCode {
-    let args: Vec<String> = std::env::args().skip(1).collect();
-    let repo = PathBuf::from(args.get(1).map_or(".", String::as_str));
-    let result = match (args.first().map(String::as_str), args.len()) {
-        (Some("check"), 1 | 2) => check(&repo),
-        (Some("generate"), 1 | 2) => regenerate(&repo),
-        _ => Err(vec![USAGE.into()]),
-    };
+    match Cli::parse().command {
+        Command::Check { repo } => legacy(check(&repo_or_current(repo))),
+        Command::Generate { repo } => legacy(regenerate(&repo_or_current(repo))),
+        Command::Replacement {
+            base,
+            edited,
+            manifest,
+            out,
+        } => run_op(
+            "replacement written",
+            &out,
+            with_cx(|cx| {
+                build_replacement(
+                    &BuildReplacement {
+                        base,
+                        edited,
+                        manifest,
+                        out: out.clone(),
+                    },
+                    cx,
+                )
+            }),
+        ),
+        Command::Apply {
+            patch,
+            model,
+            out,
+            expect_tensor_sha256,
+        } => {
+            let result = cli::parse_expect(&expect_tensor_sha256).and_then(|expected| {
+                with_cx(|cx| {
+                    apply_replacement(
+                        &ApplyReplacement {
+                            patch,
+                            model,
+                            out: out.clone(),
+                            expect_tensor_sha256: expected,
+                        },
+                        cx,
+                    )
+                })
+            });
+            run_op("patched model written", &out, result)
+        }
+    }
+}
+
+fn repo_or_current(repo: Option<PathBuf>) -> PathBuf {
+    repo.unwrap_or_else(|| PathBuf::from("."))
+}
+
+fn legacy(result: Result<(), Vec<String>>) -> ExitCode {
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(problems) => {
             for p in &problems {
                 eprintln!("{p}");
             }
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// Runs one library operation with the CLI's no-op progress sink.
+fn with_cx(f: impl FnOnce(&mut Cx) -> Result<Report, ToolError>) -> Result<Report, ToolError> {
+    let cancelled = AtomicBool::new(false);
+    let mut sink = |_: Progress| {};
+    let mut cx = Cx::new(&cancelled, &mut sink);
+    f(&mut cx)
+}
+
+fn run_op(label: &str, out: &Path, result: Result<Report, ToolError>) -> ExitCode {
+    match result {
+        Ok(report) => {
+            println!(
+                "{label}: {} ({} tensors, {} entries, {} bytes, sha256 {})",
+                out.display(),
+                report.tensors_changed,
+                report.entries_changed,
+                report.out_bytes,
+                report.out_sha256
+            );
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("{e}");
             ExitCode::FAILURE
         }
     }

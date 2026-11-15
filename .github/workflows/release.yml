@@ -1,0 +1,133 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            archive: tar.gz
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            archive: zip
+          # Optional for v0.1.0; enable when owners want them:
+          # - target: aarch64-unknown-linux-musl
+          #   os: ubuntu-24.04-arm
+          #   archive: tar.gz
+          # - target: x86_64-apple-darwin
+          #   os: macos-latest
+          #   archive: tar.gz
+          # - target: aarch64-pc-windows-msvc
+          #   os: windows-11-arm
+          #   archive: zip
+    steps:
+      # Pinned to the v7.0.1 commit.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # Pinned to the v2.9.3 commit of Swatinem/rust-cache.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+
+      - name: Install target
+        shell: bash
+        run: rustup target add ${{ matrix.target }}
+
+      # musl targets are static by default; the MSVC CRT is made
+      # static with +crt-static so the .exe needs no redistributable.
+      - name: Build
+        shell: bash
+        env:
+          RUSTFLAGS: ${{ matrix.target == 'x86_64-pc-windows-msvc' && '-C target-feature=+crt-static' || '' }}
+        run: cargo build --locked --release --target ${{ matrix.target }} --bin weightspace
+
+      - name: Package
+        shell: bash
+        run: |
+          stage="weightspace-${{ github.ref_name }}-${{ matrix.target }}"
+          mkdir "$stage"
+          if [ "${{ matrix.archive }}" = zip ]; then
+            cp "target/${{ matrix.target }}/release/weightspace.exe" "$stage/"
+          else
+            cp "target/${{ matrix.target }}/release/weightspace" "$stage/"
+          fi
+          cp tools/LICENSE "$stage/"
+          if [ "${{ matrix.archive }}" = zip ]; then
+            7z a "$stage.zip" "$stage"
+            artifact="$stage.zip"
+          else
+            tar -czf "$stage.tar.gz" "$stage"
+            artifact="$stage.tar.gz"
+          fi
+          sha256sum "$artifact" > "$artifact.sha256" || shasum -a 256 "$artifact" > "$artifact.sha256"
+          echo "ARTIFACT=$artifact" >> "$GITHUB_ENV"
+
+      # Pinned to the v4.6.2 commit.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            ${{ env.ARTIFACT }}
+            ${{ env.ARTIFACT }}.sha256
+          if-no-files-found: error
+
+  release:
+    name: release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      # Pinned to the v7.0.1 commit.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # Pinned to the v4.3.0 commit.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Combined checksums
+        shell: bash
+        run: |
+          cd artifacts
+          cat ./*.sha256 > SHA256SUMS.tmp
+          sort SHA256SUMS.tmp > SHA256SUMS
+          rm SHA256SUMS.tmp ./*.sha256
+          ls -l
+          cat SHA256SUMS
+
+      # Pinned to the v4.2.2 commit.
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+        with:
+          subject-path: |
+            artifacts/*.tar.gz
+            artifacts/*.zip
+
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" artifacts/* \
+            --title "weightspace ${{ github.ref_name }}" \
+            --generate-notes \
+            --verify-tag

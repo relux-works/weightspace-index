@@ -2,8 +2,8 @@
 //! counting `GlobalAlloc` wrapping `System` tracks live heap, and
 //! the one test asserts that peak heap growth during
 //! `Checkpoint::open`, a sparse `build_replacement`, a sparse
-//! `apply_replacement`, and — now that M4 has landed — a
-//! full-form `build_replacement` over a 64 MiB synthetic
+//! `apply_replacement`, a full-form `build_replacement`, and a
+//! full-form `apply_replacement` over a 64 MiB synthetic
 //! checkpoint each stay under 8 MiB. Fixtures are built outside
 //! the measured windows (sparse files plus chunked writes), so
 //! fixture construction never allocates a whole tensor either.
@@ -151,17 +151,49 @@ fn heap_peak_bounded() {
     // The full-form path M4 zero-copies: views over the mapping,
     // streamed into the temp handle, gated streaming. Before M4
     // this leg held the tensor about three times in heap memory.
+    // The patch is kept for the full-form apply leg below; the
+    // expected base digest and the fresh model copy are likewise
+    // prepared outside that leg's measured window.
+    let full_patch = tmp.path().join("full.safetensors");
     reset_peak();
     build(&BuildReplacement {
-        base,
+        base: base.clone(),
         edited: edited_full,
         manifest: None,
-        out: tmp.path().join("full.safetensors"),
+        out: full_patch.clone(),
     })
     .unwrap();
     assert!(
         peak_delta() < LIMIT,
         "full-form build_replacement peak heap growth {} >= {LIMIT}",
         peak_delta()
+    );
+
+    let base_checkpoint = Checkpoint::open(&base).unwrap();
+    let big_meta = base_checkpoint.tensor("big").unwrap().clone();
+    let never = std::sync::atomic::AtomicBool::new(false);
+    let big_sha256 = base_checkpoint.tensor_hash(&big_meta, &never).unwrap();
+    drop(base_checkpoint);
+    let full_model = make_model_from(&base, &tmp.path().join("full-apply"));
+    let mut expect = BTreeMap::new();
+    expect.insert("big".to_string(), big_sha256);
+
+    // Fifth leg: full-form apply. The full-tensor write streams
+    // per chunk from the patch snapshot mapping (see
+    // `ops::apply`), so peak heap growth must stay bounded here
+    // exactly as on the sparse apply leg.
+    reset_peak();
+    apply(&ApplyReplacement {
+        patch: full_patch,
+        model: full_model,
+        out: tmp.path().join("patched-full"),
+        expect_tensor_sha256: expect,
+    })
+    .unwrap();
+    let full_apply_peak = peak_delta();
+    eprintln!("full-form apply_replacement peak heap growth: {full_apply_peak} bytes");
+    assert!(
+        full_apply_peak < LIMIT,
+        "full-form apply_replacement peak heap growth {full_apply_peak} >= {LIMIT}"
     );
 }

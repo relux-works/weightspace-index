@@ -566,3 +566,69 @@ fn truncating_original_after_open_is_harmless() {
         .unwrap();
     assert_eq!(bytes_after, bytes_before);
 }
+
+// Gap B: tensor_hash_with_progress reports per-chunk bytes (0 start,
+// intermediates, tensor total at the end), agrees with the plain
+// hash and an independent SHA-256, and a cancellation set from the
+// sink aborts the hash with nothing returned.
+#[test]
+fn tensor_hash_with_progress_reports_chunks_and_cancels() {
+    use std::sync::atomic::Ordering;
+    const LEN: usize = 1024 * 1024 + 12345;
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("model.safetensors");
+    fs::write(&path, serialize(&[("big", Dtype::U8, &[LEN])], false)).unwrap();
+    let before = file_hash(&path);
+
+    let checkpoint = Checkpoint::open(&path).unwrap();
+    let meta = checkpoint.tensor("big").unwrap().clone();
+    assert_eq!(meta.byte_len(), LEN as u64);
+
+    let cancelled = AtomicBool::new(false);
+    let mut records: Vec<(u64, u64)> = Vec::new();
+    let hashed = checkpoint
+        .tensor_hash_with_progress(&meta, &cancelled, &mut |done, total| {
+            records.push((done, total));
+        })
+        .unwrap();
+    assert_eq!(
+        hashed,
+        checkpoint.tensor_hash(&meta, &cancelled).unwrap(),
+        "progress form must agree with the plain hash"
+    );
+    let mut data = vec![0u8; LEN];
+    checkpoint.read_tensor_at(&meta, 0, &mut data).unwrap();
+    assert_eq!(hashed.as_str(), hex(&Sha256::digest(&data)));
+    assert_eq!(records.first(), Some(&(0, LEN as u64)), "{records:?}");
+    assert_eq!(
+        records.last(),
+        Some(&(LEN as u64, LEN as u64)),
+        "{records:?}"
+    );
+    assert!(
+        records
+            .iter()
+            .any(|&(done, total)| done > 0 && done < total),
+        "no intermediate tensor-hash progress: {records:?}"
+    );
+    assert!(
+        records.windows(2).all(|w| w[0].0 < w[1].0),
+        "tensor-hash ramp must be strictly increasing: {records:?}"
+    );
+    assert!(
+        records.iter().all(|&(_, total)| total == LEN as u64),
+        "every report must carry the tensor total: {records:?}"
+    );
+
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let err = checkpoint
+        .tensor_hash_with_progress(&meta, &flag, &mut |done, total| {
+            if done > 0 && done < total {
+                flag_ref.store(true, Ordering::Relaxed);
+            }
+        })
+        .expect_err("cancelled tensor hash must be refused");
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+    assert_eq!(file_hash(&path), before, "input mutated");
+}

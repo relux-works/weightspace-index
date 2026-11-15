@@ -82,10 +82,14 @@ impl Snapshot {
         Self::create_with_progress(input, temp_dir, cancelled, &mut |_, _| {})
     }
 
-    /// Like [`Self::create`], additionally reporting
-    /// `(bytes_copied, bytes_total)` after every copied chunk.
-    /// The X3 custody behaviour is unchanged; this is only an
-    /// observation hook on the copy loop consumption side.
+    /// Like [`Self::create`], additionally reporting byte progress
+    /// after every copied chunk and after every hashed chunk: first
+    /// a `(bytes_copied, bytes_total)` ramp over the copy, then a
+    /// second `(bytes_hashed, bytes_total)` ramp (restarting at 0)
+    /// over the digest of the mapped bytes. The X3 custody
+    /// behaviour is unchanged; this is only an observation hook.
+    /// Throttling, where wanted, is the consumer's job (see
+    /// `ops::Cx::emit_bytes`); the plain wrappers pass a no-op sink.
     pub(crate) fn create_with_progress(
         input: &Path,
         temp_dir: &Path,
@@ -157,7 +161,7 @@ impl Snapshot {
                 path: input.to_owned(),
             });
         }
-        let sha256 = sha256_chunked(&map, cancelled)?;
+        let sha256 = sha256_chunked(&map, cancelled, progress)?;
         Ok(Self { map, sha256 })
     }
 
@@ -207,12 +211,27 @@ fn copy_chunked(
 }
 
 /// SHA-256 over the mapped bytes, in bounded chunks, checking
-/// cancellation per chunk.
-fn sha256_chunked(bytes: &[u8], cancelled: &AtomicBool) -> Result<Sha256Hex, ToolError> {
+/// cancellation per chunk and reporting `(bytes_hashed, total)`
+/// per chunk. The ramp starts with an explicit `(0, total)` so a
+/// throttling consumer resets its per-phase byte baseline after
+/// the copy ramp that precedes this hash in the same phase. An
+/// empty input reports nothing, exactly like the copy loop.
+fn sha256_chunked(
+    bytes: &[u8],
+    cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
+) -> Result<Sha256Hex, ToolError> {
+    let total = bytes.len() as u64;
+    if total > 0 {
+        progress(0, total);
+    }
     let mut hasher = Sha256::new();
+    let mut done = 0u64;
     for chunk in bytes.chunks(CHUNK_BYTES) {
         check_cancelled(cancelled)?;
         hasher.update(chunk);
+        done += chunk.len() as u64;
+        progress(done, total);
     }
     Ok(Sha256Hex::from_digest(&hasher.finalize()))
 }

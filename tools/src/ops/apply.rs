@@ -98,7 +98,13 @@ fn verify_patch_against_base(
                         tensor: name.clone(),
                     }
                 })?;
-                let actual = base.tensor_hash(base_meta, cx.cancelled)?;
+                // Byte progress inside the (potentially long)
+                // wrong-base hash, under the Verify phase whose
+                // per-tensor counts this loop already reports.
+                let actual =
+                    base.tensor_hash_with_progress(base_meta, cx.cancelled, &mut |done, total| {
+                        cx.emit_bytes("apply", Phase::Verify, done, total);
+                    })?;
                 if actual != *expected {
                     return Err(ToolError::WrongBase {
                         tensor: name.clone(),

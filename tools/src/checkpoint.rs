@@ -118,9 +118,11 @@ impl Checkpoint {
         Self::open_in_with_progress(path, temp_dir, cancelled, &mut |_, _| {})
     }
 
-    /// Like [`Self::open_in`], additionally reporting
-    /// `(bytes_copied, bytes_total)` per chunk while the private
-    /// snapshot copy is made.
+    /// Like [`Self::open_in`], additionally reporting byte progress
+    /// per chunk while the private snapshot is made: a
+    /// `(bytes_copied, bytes_total)` ramp over the copy, then a
+    /// `(bytes_hashed, bytes_total)` ramp (restarting at 0) over
+    /// the digest of the mapped snapshot bytes.
     pub fn open_in_with_progress(
         path: &Path,
         temp_dir: &Path,
@@ -284,16 +286,42 @@ impl Checkpoint {
     }
 
     /// Streams one tensor's raw stored bytes through SHA-256 in
-    /// bounded chunks over the snapshot mapping.
+    /// bounded chunks over the snapshot mapping. This plain form
+    /// carries only a cancellation token, so it stays cancel-only;
+    /// callers holding a progress sink use
+    /// [`Self::tensor_hash_with_progress`].
     pub fn tensor_hash(
         &self,
         meta: &TensorMeta,
         cancelled: &AtomicBool,
     ) -> Result<Sha256Hex, ToolError> {
+        self.tensor_hash_with_progress(meta, cancelled, &mut |_, _| {})
+    }
+
+    /// Like [`Self::tensor_hash`], additionally reporting
+    /// `(bytes_hashed, tensor_bytes)` per chunk. The ramp starts
+    /// with an explicit `(0, tensor_bytes)` so a throttling
+    /// consumer resets its per-phase byte baseline between tensors
+    /// hashed in sequence under one phase. An empty tensor reports
+    /// nothing. Cancellation is still checked per chunk.
+    pub fn tensor_hash_with_progress(
+        &self,
+        meta: &TensorMeta,
+        cancelled: &AtomicBool,
+        progress: &mut (dyn FnMut(u64, u64) + '_),
+    ) -> Result<Sha256Hex, ToolError> {
+        let data = self.tensor_slice(meta)?;
+        let total = data.len() as u64;
+        if total > 0 {
+            progress(0, total);
+        }
         let mut hasher = Sha256::new();
-        for chunk in self.tensor_slice(meta)?.chunks(CHUNK_BYTES) {
+        let mut done = 0u64;
+        for chunk in data.chunks(CHUNK_BYTES) {
             check_cancelled(cancelled)?;
             hasher.update(chunk);
+            done += chunk.len() as u64;
+            progress(done, total);
         }
         Ok(Sha256Hex::from_digest(&hasher.finalize()))
     }

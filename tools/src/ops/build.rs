@@ -452,7 +452,7 @@ fn verify_manifest_hashes(
     manifest: &Manifest,
     base: &Checkpoint,
     edited: &Checkpoint,
-    cx: &Cx,
+    cx: &mut Cx,
 ) -> Result<(), ToolError> {
     let fail = |detail: String| ToolError::Manifest {
         path: manifest.path.clone(),
@@ -470,14 +470,21 @@ fn verify_manifest_hashes(
         if b.dtype != listed.dtype || e.dtype != listed.dtype {
             return Err(fail(format!("{name}: dtype differs from the manifest")));
         }
-        let base_hash = base.tensor_hash(b, cx.cancelled)?;
+        // Byte progress inside the (potentially long) manifest
+        // verification hashes, under the Verify phase.
+        let base_hash = base.tensor_hash_with_progress(b, cx.cancelled, &mut |done, total| {
+            cx.emit_bytes("replacement", Phase::Verify, done, total);
+        })?;
         if base_hash != listed.base_sha256 {
             return Err(fail(format!(
                 "{name}: base_sha256 mismatch (manifest {}, computed {base_hash})",
                 listed.base_sha256
             )));
         }
-        let edited_hash = edited.tensor_hash(e, cx.cancelled)?;
+        let edited_hash =
+            edited.tensor_hash_with_progress(e, cx.cancelled, &mut |done, total| {
+                cx.emit_bytes("replacement", Phase::Verify, done, total);
+            })?;
         if edited_hash != listed.edited_sha256 {
             return Err(fail(format!(
                 "{name}: edited_sha256 mismatch (manifest {}, computed {edited_hash})",

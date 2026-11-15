@@ -47,9 +47,10 @@ pub fn parse_patch_in(
     parse_patch_in_with_progress(path, temp_dir, cancelled, &mut |_, _| {})
 }
 
-/// Like [`parse_patch_in`], additionally reporting
-/// `(bytes_copied, bytes_total)` per chunk while the private
-/// snapshot copy is made.
+/// Like [`parse_patch_in`], additionally reporting byte progress
+/// per chunk while the private snapshot is made (copy ramp, then
+/// snapshot-hash ramp restarting at 0; see
+/// `Checkpoint::open_in_with_progress`).
 pub fn parse_patch_in_with_progress(
     path: &Path,
     temp_dir: &Path,

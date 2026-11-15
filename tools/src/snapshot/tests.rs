@@ -315,6 +315,96 @@ fn foreign_file_in_snapshot_dir_is_ignored_and_kept() {
     assert_eq!(fs::read(&source).unwrap(), vec![b'A'; 1024]);
 }
 
+// Gap B: the snapshot hash reports per-chunk byte progress through
+// the same sink as the copy: a copy ramp to the total, then a hash
+// ramp restarting at 0 with intermediates, ending at the total.
+#[test]
+fn snapshot_hash_reports_chunk_progress() {
+    let (_tmp, work, snap) = scratch();
+    let source = work.join("source.bin");
+    let bytes: Vec<u8> = (0..(1024 * 1024 + 12345u32))
+        .map(|i| (i % 251) as u8)
+        .collect();
+    fs::write(&source, &bytes).unwrap();
+    let total = bytes.len() as u64;
+
+    let cancelled = never_cancelled();
+    let mut records: Vec<(u64, u64)> = Vec::new();
+    let (_resolved, snapshot) =
+        Snapshot::create_with_progress(&source, &snap, &cancelled, &mut |done, tot| {
+            records.push((done, tot));
+        })
+        .unwrap();
+    assert_eq!(snapshot.sha256(), &expected_sha(&bytes));
+    assert!(
+        records.iter().all(|&(_, tot)| tot == total),
+        "every report must carry the file total: {records:?}"
+    );
+    let copy_end = records
+        .iter()
+        .position(|&(done, _)| done == total)
+        .expect("copy ramp must reach the total");
+    assert!(
+        records[..copy_end]
+            .iter()
+            .all(|&(done, _)| done > 0 && done < total),
+        "copy reports before completion are intermediates: {records:?}"
+    );
+    let hash = &records[copy_end + 1..];
+    assert_eq!(
+        hash.first(),
+        Some(&(0, total)),
+        "hash ramp must restart at 0: {records:?}"
+    );
+    assert_eq!(
+        hash.len() - 1,
+        (total as usize).div_ceil(CHUNK_BYTES),
+        "one hash report per chunk: {records:?}"
+    );
+    assert!(
+        hash.iter().any(|&(done, _)| done > 0 && done < total),
+        "hash ramp must report intermediates: {records:?}"
+    );
+    assert!(
+        hash.windows(2).all(|w| w[0].0 < w[1].0),
+        "hash ramp must be strictly increasing: {records:?}"
+    );
+    assert_eq!(hash.last(), Some(&(total, total)));
+}
+
+// Gap B: cancellation arriving at the start of the snapshot-hash
+// ramp aborts the hash, returns no snapshot, and leaves nothing.
+#[test]
+fn snapshot_hash_cancellation_leaves_nothing() {
+    let (_tmp, work, snap) = scratch();
+    let source = work.join("source.bin");
+    let bytes = vec![7u8; 512 * 1024];
+    fs::write(&source, &bytes).unwrap();
+    let before = fs::read(&source).unwrap();
+
+    let cancelled = never_cancelled();
+    let copy_complete = std::cell::Cell::new(false);
+    let flag = &cancelled;
+    let seen = &copy_complete;
+    let err = Snapshot::create_with_progress(&source, &snap, &cancelled, &mut |done, tot| {
+        if done == tot {
+            seen.set(true);
+        } else if done == 0 && seen.get() {
+            // The hash ramp's opening (0, total): cancel here so
+            // the failure must come from the hash loop itself.
+            flag.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
+    })
+    .expect_err("cancelled snapshot hash must be refused");
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+    assert_eq!(
+        dir_entries(&snap),
+        Vec::<PathBuf>::new(),
+        "cancelled snapshot hash must leave nothing"
+    );
+    assert_eq!(fs::read(&source).unwrap(), before, "source mutated");
+}
+
 // An empty input maps to an empty slice (memmap2 length-0), so no empty special case is needed; the official reader still refuses it.
 #[test]
 fn empty_input_maps_to_empty_slice() {

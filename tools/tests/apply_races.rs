@@ -545,3 +545,142 @@ fn progress_reports_chunk_bytes_inside_long_phases() {
         "sparse patch phase must end at bytes_done == bytes_total: {records:?}"
     );
 }
+
+/// A 3 MiB single tensor rewritten in every element, so the patch
+/// is full-form and apply must hash the whole base tensor during
+/// wrong-base verification. Returns (patch, model, edited bytes,
+/// expected digests).
+fn full_form_fixture(
+    dir: &std::path::Path,
+) -> (
+    std::path::PathBuf,
+    std::path::PathBuf,
+    Vec<u8>,
+    BTreeMap<String, weightspace_tools::files::Sha256Hex>,
+) {
+    use safetensors::Dtype;
+    const LEN: usize = 3 * 1024 * 1024;
+    let base_bytes = st_bytes(&[("big", Dtype::U8, &[LEN], vec![0u8; LEN])]);
+    let edited_bytes = st_bytes(&[("big", Dtype::U8, &[LEN], vec![0xabu8; LEN])]);
+    let base = dir.join("base.safetensors");
+    let edited = dir.join("edited.safetensors");
+    fs::write(&base, &base_bytes).unwrap();
+    fs::write(&edited, &edited_bytes).unwrap();
+    let patch_path = dir.join("patch.safetensors");
+    build(&BuildReplacement {
+        base,
+        edited,
+        manifest: None,
+        out: patch_path.clone(),
+    })
+    .unwrap();
+    let digests = expected_digests(&patch_path, &base_bytes);
+    assert!(
+        digests.contains_key("big"),
+        "fixture patch must be full-form: {digests:?}"
+    );
+    let model = make_model(dir, &base_bytes);
+    (patch_path, model, edited_bytes, digests)
+}
+
+#[test]
+fn progress_reports_snapshot_hash_and_verify_hash_bytes() {
+    // Gap B at the operation level: during one full-form apply the
+    // recording sink observes (a) a snapshot-hash byte ramp for the
+    // base file — a second Snapshot ramp restarting at 0 for the
+    // same file total, with intermediates after the restart (the
+    // copy alone produces only the caller's opening 0) — and
+    // (b) intermediate Verify byte progress from the wrong-base
+    // tensor hash, before any Copy report.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch_path, model, edited_bytes, digests) = full_form_fixture(tmp.path());
+    let weights = model.join("model.safetensors");
+    let base_len = fs::metadata(&weights).unwrap().len();
+
+    let seen = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+    let seen_sink = std::rc::Rc::clone(&seen);
+    let mut sink = move |progress: Progress| {
+        seen_sink
+            .borrow_mut()
+            .push((progress.phase, progress.bytes_done, progress.bytes_total));
+    };
+    let flag = AtomicBool::new(false);
+    let mut cx = Cx::new(&flag, &mut sink);
+    let out = tmp.path().join("patched");
+    apply_replacement(
+        &ApplyReplacement {
+            patch: patch_path,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: digests,
+        },
+        &mut cx,
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read(out.join("model.safetensors")).unwrap(),
+        edited_bytes,
+        "full-form apply output must equal the edited checkpoint"
+    );
+    let records = seen.borrow();
+    let snapshot_zeros: Vec<usize> = records
+        .iter()
+        .enumerate()
+        .filter(|(_, (p, done, total))| *p == Phase::Snapshot && *done == 0 && *total == base_len)
+        .map(|(i, _)| i)
+        .collect();
+    assert!(
+        snapshot_zeros.len() >= 2,
+        "snapshot hash must restart the Snapshot ramp for the base file: {records:?}"
+    );
+    assert!(
+        records[snapshot_zeros[1]..].iter().any(|(p, done, total)| {
+            *p == Phase::Snapshot && *total == base_len && *done > 0 && *done < *total
+        }),
+        "no intermediate snapshot-hash progress after the restart: {records:?}"
+    );
+    let first_copy = records
+        .iter()
+        .position(|(p, _, _)| *p == Phase::Copy)
+        .expect("apply must report Copy");
+    assert!(
+        records[..first_copy]
+            .iter()
+            .any(|(p, done, total)| *p == Phase::Verify && *done > 0 && *done < *total),
+        "no intermediate verify-hash progress before Copy: {records:?}"
+    );
+}
+
+#[test]
+fn cancellation_during_verify_hash_publishes_nothing() {
+    // Gap B: cancellation set from the first intermediate
+    // verify-hash report aborts inside the tensor hash; nothing
+    // is published and every input stays byte-unchanged.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch_path, model, _edited_bytes, digests) = full_form_fixture(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights, &patch_path]);
+    let out = tmp.path().join("patched");
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Verify
+            && progress.bytes_done > 0
+            && progress.bytes_done < progress.bytes_total
+        {
+            flag_ref.store(true, Ordering::Relaxed);
+        }
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let result = apply_replacement(
+        &ApplyReplacement {
+            patch: patch_path,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: digests,
+        },
+        &mut cx,
+    );
+    let err = assert_refusal(result, &out, &inputs);
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+}

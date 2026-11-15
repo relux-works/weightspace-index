@@ -21,11 +21,15 @@
 #![deny(unsafe_code)]
 
 pub mod checkpoint;
+pub(crate) mod digest;
 pub mod error;
 pub mod files;
 pub mod generate;
 pub mod layout;
+pub(crate) mod model_dir;
 pub mod ops;
+pub(crate) mod output;
 pub mod patch;
+pub(crate) mod publish;
 pub mod records;
 mod snapshot;

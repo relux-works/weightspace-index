@@ -115,7 +115,20 @@ impl Checkpoint {
         temp_dir: &Path,
         cancelled: &AtomicBool,
     ) -> Result<Self, ToolError> {
-        let (resolved, snapshot) = Snapshot::create(path, temp_dir, cancelled)?;
+        Self::open_in_with_progress(path, temp_dir, cancelled, &mut |_, _| {})
+    }
+
+    /// Like [`Self::open_in`], additionally reporting
+    /// `(bytes_copied, bytes_total)` per chunk while the private
+    /// snapshot copy is made.
+    pub fn open_in_with_progress(
+        path: &Path,
+        temp_dir: &Path,
+        cancelled: &AtomicBool,
+        progress: &mut (dyn FnMut(u64, u64) + '_),
+    ) -> Result<Self, ToolError> {
+        let (resolved, snapshot) =
+            Snapshot::create_with_progress(path, temp_dir, cancelled, progress)?;
         // The official reader requires the whole file as one
         // contiguous slice — exactly what the snapshot mapping is.
         // An empty snapshot yields an empty slice here and the
@@ -199,6 +212,14 @@ impl Checkpoint {
         self.snapshot.sha256()
     }
 
+    /// The whole snapshot mapping as one slice: exactly the bytes
+    /// parsed and hashed (`snapshot_sha256`). Crate-private so the
+    /// only whole-file consumer is `apply` writing its staged copy
+    /// from the verified snapshot; tensor reads stay ranged.
+    pub(crate) fn snapshot_bytes(&self) -> &[u8] {
+        self.snapshot.bytes()
+    }
+
     /// The official header descriptors this checkpoint was built
     /// from.
     pub fn official_metadata(&self) -> &Metadata {
@@ -216,6 +237,16 @@ impl Checkpoint {
     /// copied whole by the comparison paths. Fallible rather than
     /// indexing, so even a descriptor that did not come from this
     /// checkpoint is a refusal, never a panic.
+    /// The tensor's stored bytes as a zero-copy view into the
+    /// snapshot mapping: the accessor the full-form replacement
+    /// writer builds its `TensorView`s over, so a full tensor is
+    /// never materialized into a heap buffer. Crate-private like
+    /// [`Self::snapshot_bytes`]; ranged reads remain the public
+    /// consumption path.
+    pub(crate) fn tensor_bytes(&self, meta: &TensorMeta) -> Result<&[u8], ToolError> {
+        self.tensor_slice(meta)
+    }
+
     fn tensor_slice(&self, meta: &TensorMeta) -> Result<&[u8], ToolError> {
         let out_of_range = || ToolError::malformed(&self.path, "tensor offset out of range");
         let absolute = |offset: u64| {

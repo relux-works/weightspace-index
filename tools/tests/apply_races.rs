@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use common::*;
 use weightspace_tools::error::ToolError;
 use weightspace_tools::ops::{
-    ApplyReplacement, BuildReplacement, Cx, Progress, apply_replacement, build_replacement,
+    ApplyReplacement, BuildReplacement, Cx, Phase, Progress, apply_replacement, build_replacement,
 };
 
 #[test]
@@ -41,7 +41,7 @@ fn existing_output_and_no_change_and_cancellation() {
         &out,
         &inputs,
     );
-    assert!(matches!(err, ToolError::Refused { .. }), "{err}");
+    assert!(matches!(err, ToolError::NoChanges), "{err}");
 
     // Cancelled before starting.
     let out = tmp.path().join("patch3.safetensors");
@@ -85,13 +85,15 @@ fn existing_output_and_no_change_and_cancellation() {
     assert!(matches!(err, ToolError::OutputExists { .. }), "{err}");
 }
 #[test]
-fn apply_snapshot_hash_gate_refuses_base_changed_during_verify() {
-    // The apply snapshot-hash gate (F4): verification runs on the
-    // base snapshot; if the base file on disk no longer hashes to
-    // that snapshot when the copy is about to be made, apply
-    // refuses and publishes nothing. The base file is mutated
-    // from the first apply progress report, after verification
-    // has begun on the snapshot.
+fn apply_writes_weights_from_verified_snapshot() {
+    // M3: verification runs on the base snapshot and the staged
+    // weights are written from that same snapshot mapping, so
+    // mutating the original base file after its snapshot was taken
+    // (here: from the first Verify-phase progress report) cannot
+    // change the published output. Renames and inverts
+    // apply_snapshot_hash_gate_refuses_base_changed_during_verify:
+    // there is no original-file hash gate to refuse at any more,
+    // because the original is never re-read.
     let tmp = tempfile::tempdir().unwrap();
     let (base, edited, base_bytes, _) = write_pair(tmp.path());
     let patch_path = tmp.path().join("patch.safetensors");
@@ -119,8 +121,8 @@ fn apply_snapshot_hash_gate_refuses_base_changed_during_verify() {
     let weights = model.join("model.safetensors");
     let weights_for_sink = weights.clone();
     let mutated = std::cell::Cell::new(false);
-    let mut sink = move |_: Progress| {
-        if !mutated.get() {
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Verify && !mutated.get() {
             mutated.set(true);
             let mut bytes = fs::read(&weights_for_sink).unwrap();
             let last = bytes.len() - 1;
@@ -131,7 +133,7 @@ fn apply_snapshot_hash_gate_refuses_base_changed_during_verify() {
     let flag = AtomicBool::new(false);
     let mut cx = Cx::new(&flag, &mut sink);
     let out = tmp.path().join("patched-mutated");
-    let err = apply_replacement(
+    apply_replacement(
         &ApplyReplacement {
             patch: patch_path,
             model,
@@ -140,11 +142,12 @@ fn apply_snapshot_hash_gate_refuses_base_changed_during_verify() {
         },
         &mut cx,
     )
-    .err()
-    .expect("base changed after snapshot verification must refuse");
-    assert!(matches!(err, ToolError::Refused { .. }), "{err}");
-    assert!(err.to_string().contains("snapshot-verified"), "{err}");
-    assert!(!out.exists(), "refusal published {}", out.display());
+    .unwrap();
+    assert_eq!(
+        fs::read(out.join("model.safetensors")).unwrap(),
+        fs::read(out_ok.join("model.safetensors")).unwrap(),
+        "published weights must be the verified snapshot bytes, not the mutated original"
+    );
 }
 #[test]
 fn gapped_base_refused_through_apply() {
@@ -267,4 +270,278 @@ fn io_fault_mid_copy_publishes_nothing() {
         .filter(|name| name.contains(".weightspace-"))
         .collect();
     assert!(leftovers.is_empty(), "temp leftovers: {leftovers:?}");
+}
+
+#[test]
+fn progress_reports_phases_and_bytes() {
+    // M5: build and apply report their long phases (with byte
+    // counters on the byte-moving ones), not only per-tensor counts.
+    let tmp = tempfile::tempdir().unwrap();
+    let (base, edited, base_bytes, _) = write_pair(tmp.path());
+    let seen = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+    let seen_sink = std::rc::Rc::clone(&seen);
+    let mut sink = move |progress: Progress| {
+        seen_sink
+            .borrow_mut()
+            .push((progress.phase, progress.bytes_done, progress.bytes_total));
+    };
+    let flag = AtomicBool::new(false);
+    let mut cx = Cx::new(&flag, &mut sink);
+    let patch_path = tmp.path().join("patch.safetensors");
+    build_replacement(
+        &BuildReplacement {
+            base,
+            edited,
+            manifest: None,
+            out: patch_path.clone(),
+        },
+        &mut cx,
+    )
+    .unwrap();
+    let phases: Vec<Phase> = seen.borrow().iter().map(|(phase, _, _)| *phase).collect();
+    assert!(phases.contains(&Phase::Snapshot), "{phases:?}");
+    assert!(phases.contains(&Phase::Plan), "{phases:?}");
+    assert!(phases.contains(&Phase::Serialize), "{phases:?}");
+    drop(cx);
+
+    seen.borrow_mut().clear();
+    let seen_sink = std::rc::Rc::clone(&seen);
+    let mut sink = move |progress: Progress| {
+        seen_sink
+            .borrow_mut()
+            .push((progress.phase, progress.bytes_done, progress.bytes_total));
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let model = make_model(tmp.path(), &base_bytes);
+    let out = tmp.path().join("patched");
+    apply_replacement(
+        &ApplyReplacement {
+            patch: patch_path.clone(),
+            model,
+            out,
+            expect_tensor_sha256: expected_digests(&patch_path, &base_bytes),
+        },
+        &mut cx,
+    )
+    .unwrap();
+    let records = seen.borrow();
+    let phases: Vec<Phase> = records.iter().map(|(phase, _, _)| *phase).collect();
+    for expected in [Phase::Snapshot, Phase::Verify, Phase::Copy, Phase::Hash] {
+        assert!(
+            phases.contains(&expected),
+            "missing {expected:?} in {phases:?}"
+        );
+    }
+    assert!(
+        records
+            .iter()
+            .any(|(phase, done, total)| *phase == Phase::Copy && *total > 0 && *done == *total),
+        "copy phase must end at bytes_done == bytes_total: {records:?}"
+    );
+}
+
+#[test]
+fn cancellation_during_copy_phase_publishes_nothing() {
+    // M5: cancellation is observed inside the staged-copy phase,
+    // not only between tensors.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _base_bytes) = simple_patch(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights, &patch]);
+    let out = tmp.path().join("patched");
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Copy {
+            flag_ref.store(true, Ordering::Relaxed);
+        }
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let result = apply_replacement(
+        &ApplyReplacement {
+            patch,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: BTreeMap::new(),
+        },
+        &mut cx,
+    );
+    let err = assert_refusal(result, &out, &inputs);
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+}
+
+#[test]
+fn cancellation_during_patch_phase_publishes_nothing() {
+    // M5 remainder: cancellation is observed inside the sparse
+    // patch-write blocks (Phase::Patch), not only between tensors.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _base_bytes) = simple_patch(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights, &patch]);
+    let out = tmp.path().join("patched");
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Patch {
+            flag_ref.store(true, Ordering::Relaxed);
+        }
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let result = apply_replacement(
+        &ApplyReplacement {
+            patch,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: BTreeMap::new(),
+        },
+        &mut cx,
+    );
+    let err = assert_refusal(result, &out, &inputs);
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+}
+
+#[test]
+fn cancellation_during_hash_phase_publishes_nothing() {
+    // M5 remainder: cancellation is observed inside the final
+    // hash_file pass (Phase::Hash), chunk by chunk.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _base_bytes) = simple_patch(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights, &patch]);
+    let out = tmp.path().join("patched");
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Hash {
+            flag_ref.store(true, Ordering::Relaxed);
+        }
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let result = apply_replacement(
+        &ApplyReplacement {
+            patch,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: BTreeMap::new(),
+        },
+        &mut cx,
+    );
+    let err = assert_refusal(result, &out, &inputs);
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+}
+
+#[test]
+fn cancellation_during_snapshot_phase_publishes_nothing() {
+    // M5 remainder: cancellation set from the first chunk-granular
+    // snapshot-copy report aborts the snapshot copy itself.
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _base_bytes) = simple_patch(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights, &patch]);
+    let out = tmp.path().join("patched");
+    let flag = AtomicBool::new(false);
+    let flag_ref = &flag;
+    let mut sink = move |progress: Progress| {
+        if progress.phase == Phase::Snapshot && progress.bytes_done > 0 {
+            flag_ref.store(true, Ordering::Relaxed);
+        }
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let result = apply_replacement(
+        &ApplyReplacement {
+            patch,
+            model,
+            out: out.clone(),
+            expect_tensor_sha256: BTreeMap::new(),
+        },
+        &mut cx,
+    );
+    let err = assert_refusal(result, &out, &inputs);
+    assert!(matches!(err, ToolError::Cancelled), "{err}");
+}
+
+#[test]
+fn progress_reports_chunk_bytes_inside_long_phases() {
+    // M5 remainder: with a multi-MiB tensor, the snapshot copy,
+    // staged copy and final hash all report intermediate
+    // (0 < bytes_done < bytes_total) chunk progress, throttled,
+    // and the sparse patch phase ends at its byte total.
+    use safetensors::Dtype;
+    const LEN: usize = 3 * 1024 * 1024;
+    let tmp = tempfile::tempdir().unwrap();
+    let mut edited_data = vec![0u8; LEN];
+    edited_data[17] = 1;
+    edited_data[LEN - 3] = 2;
+    let base_bytes = st_bytes(&[("big", Dtype::U8, &[LEN], vec![0u8; LEN])]);
+    let edited_bytes = st_bytes(&[("big", Dtype::U8, &[LEN], edited_data)]);
+    let base = tmp.path().join("base.safetensors");
+    let edited = tmp.path().join("edited.safetensors");
+    fs::write(&base, &base_bytes).unwrap();
+    fs::write(&edited, &edited_bytes).unwrap();
+
+    let seen = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+    let seen_sink = std::rc::Rc::clone(&seen);
+    let mut sink = move |progress: Progress| {
+        seen_sink
+            .borrow_mut()
+            .push((progress.phase, progress.bytes_done, progress.bytes_total));
+    };
+    let flag = AtomicBool::new(false);
+    let mut cx = Cx::new(&flag, &mut sink);
+    let patch_path = tmp.path().join("patch.safetensors");
+    build_replacement(
+        &BuildReplacement {
+            base,
+            edited,
+            manifest: None,
+            out: patch_path.clone(),
+        },
+        &mut cx,
+    )
+    .unwrap();
+    drop(cx);
+    let intermediate = |phase: Phase, records: &[(Phase, u64, u64)]| {
+        records
+            .iter()
+            .any(|(p, done, total)| *p == phase && *done > 0 && *done < *total)
+    };
+    assert!(
+        intermediate(Phase::Snapshot, seen.borrow().as_slice()),
+        "no intermediate snapshot-copy progress: {:?}",
+        seen.borrow()
+    );
+
+    seen.borrow_mut().clear();
+    let seen_sink = std::rc::Rc::clone(&seen);
+    let mut sink = move |progress: Progress| {
+        seen_sink
+            .borrow_mut()
+            .push((progress.phase, progress.bytes_done, progress.bytes_total));
+    };
+    let mut cx = Cx::new(&flag, &mut sink);
+    let model = make_model(tmp.path(), &base_bytes);
+    let out = tmp.path().join("patched");
+    apply_replacement(
+        &ApplyReplacement {
+            patch: patch_path,
+            model,
+            out,
+            expect_tensor_sha256: BTreeMap::new(),
+        },
+        &mut cx,
+    )
+    .unwrap();
+    let records = seen.borrow();
+    for phase in [Phase::Snapshot, Phase::Copy, Phase::Hash] {
+        assert!(
+            intermediate(phase, records.as_slice()),
+            "no intermediate {phase:?} progress: {records:?}"
+        );
+    }
+    assert!(
+        records
+            .iter()
+            .any(|(p, done, total)| *p == Phase::Patch && *total > 0 && *done == *total),
+        "sparse patch phase must end at bytes_done == bytes_total: {records:?}"
+    );
 }

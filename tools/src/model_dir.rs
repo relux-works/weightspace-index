@@ -3,8 +3,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use crate::error::ToolError;
-use crate::files::{copy_range, open_input};
-use crate::ops::Cx;
+use crate::files::{copy_range_with_progress, open_input};
+use crate::ops::{Cx, Phase};
 
 /// Slice 1 supports exactly one weights file at the model root:
 /// `model.safetensors`. An index file or several safetensors files are
@@ -58,8 +58,9 @@ pub(crate) fn read_sorted_dir(dir: &Path) -> Result<Vec<fs::DirEntry>, ToolError
 pub(crate) fn copy_model_dir(
     src: &Path,
     dst: &Path,
-    cx: &Cx,
+    cx: &mut Cx,
     copied_dirs: &mut Vec<PathBuf>,
+    skip_target: Option<&Path>,
 ) -> Result<(), ToolError> {
     let mut stack: Vec<(PathBuf, PathBuf)> = vec![(src.to_path_buf(), dst.to_path_buf())];
     copied_dirs.push(dst.to_path_buf());
@@ -68,6 +69,11 @@ pub(crate) fn copy_model_dir(
             cx.check()?;
             let entry_path = entry.path();
             let target = to.join(entry.file_name());
+            if skip_target == Some(target.as_path()) {
+                // Staged separately from the verified snapshot
+                // mapping by the caller (see ops::apply::stage_copy).
+                continue;
+            }
             let meta =
                 fs::symlink_metadata(&entry_path).map_err(|e| ToolError::io(&entry_path, e))?;
             let kind = meta.file_type();
@@ -95,10 +101,7 @@ pub(crate) fn copy_model_dir(
                     File::open(&entry_path).map_err(|e| ToolError::io(&entry_path, e))?;
                 copy_one_file(&entry_path, &mut src_file, &target, cx)?;
             } else {
-                return Err(ToolError::refused(format!(
-                    "{}: special files are refused",
-                    entry_path.display()
-                )));
+                return Err(ToolError::NotRegularFile { path: entry_path });
             }
         }
     }
@@ -109,7 +112,7 @@ pub(crate) fn copy_one_file(
     src_path: &Path,
     src: &mut File,
     dst: &Path,
-    cx: &Cx,
+    cx: &mut Cx,
 ) -> Result<(), ToolError> {
     let len = src
         .metadata()
@@ -120,7 +123,18 @@ pub(crate) fn copy_one_file(
         .create_new(true)
         .open(dst)
         .map_err(|e| ToolError::io(dst, e))?;
-    copy_range(src, src_path, 0, len, &mut out, dst, cx.cancelled)?;
+    copy_range_with_progress(
+        src,
+        src_path,
+        0,
+        len,
+        &mut out,
+        dst,
+        cx.cancelled,
+        &mut |done, total| {
+            cx.emit_bytes("apply", Phase::Copy, done, total);
+        },
+    )?;
     out.flush().map_err(|e| ToolError::io(dst, e))?;
     out.sync_all().map_err(|e| ToolError::io(dst, e))
 }

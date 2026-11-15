@@ -72,16 +72,33 @@ impl Snapshot {
     /// be a single consistent byte sequence. `temp_dir` needs room
     /// for a private copy of the input (on Linux the default
     /// system temp directory is often tmpfs, i.e. RAM).
+    // Preserved no-sink wrapper; exercised by the snapshot unit tests.
+    #[allow(dead_code)]
     pub(crate) fn create(
         input: &Path,
         temp_dir: &Path,
         cancelled: &AtomicBool,
     ) -> Result<(PathBuf, Self), ToolError> {
+        Self::create_with_progress(input, temp_dir, cancelled, &mut |_, _| {})
+    }
+
+    /// Like [`Self::create`], additionally reporting
+    /// `(bytes_copied, bytes_total)` after every copied chunk.
+    /// The X3 custody behaviour is unchanged; this is only an
+    /// observation hook on the copy loop consumption side.
+    pub(crate) fn create_with_progress(
+        input: &Path,
+        temp_dir: &Path,
+        cancelled: &AtomicBool,
+        progress: &mut (dyn FnMut(u64, u64) + '_),
+    ) -> Result<(PathBuf, Self), ToolError> {
         // Open first, then inspect the handle (see `open_input`):
         // no check-then-open race.
         let (resolved, source) = open_input(input)?;
         let expected = len_of(&source, input)?;
-        let snapshot = Self::from_source(input, source, expected, temp_dir, cancelled)?;
+        let snapshot = Self::from_source_with_progress(
+            input, source, expected, temp_dir, cancelled, progress,
+        )?;
         Ok((resolved, snapshot))
     }
 
@@ -89,16 +106,44 @@ impl Snapshot {
     /// recorded length is `expected`. Split from [`Self::create`]
     /// so a test can pass a mismatched length directly instead of
     /// racing a concurrent writer.
+    // Test seam; exercised by the snapshot unit tests.
+    #[allow(dead_code)]
     fn from_source(
+        input: &Path,
+        source: File,
+        expected: u64,
+        temp_dir: &Path,
+        cancelled: &AtomicBool,
+    ) -> Result<Self, ToolError> {
+        Self::from_source_with_progress(
+            input,
+            source,
+            expected,
+            temp_dir,
+            cancelled,
+            &mut |_, _| {},
+        )
+    }
+
+    fn from_source_with_progress(
         input: &Path,
         mut source: File,
         expected: u64,
         temp_dir: &Path,
         cancelled: &AtomicBool,
+        progress: &mut (dyn FnMut(u64, u64) + '_),
     ) -> Result<Self, ToolError> {
         let mut private =
             private_file::create_in(temp_dir).map_err(|e| ToolError::io(temp_dir, e))?;
-        let copied = copy_chunked(&mut source, &mut private, input, temp_dir, cancelled)?;
+        let copied = copy_chunked(
+            &mut source,
+            &mut private,
+            input,
+            temp_dir,
+            expected,
+            cancelled,
+            progress,
+        )?;
         if copied != expected || len_of(&source, input)? != expected {
             return Err(ToolError::InputChanged {
                 path: input.to_owned(),
@@ -141,7 +186,9 @@ fn copy_chunked(
     private: &mut File,
     input: &Path,
     temp_dir: &Path,
+    expected: u64,
     cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
 ) -> Result<u64, ToolError> {
     let mut copied = 0u64;
     let mut buf = vec![0u8; CHUNK_BYTES];
@@ -155,6 +202,7 @@ fn copy_chunked(
             .write_all(&buf[..n])
             .map_err(|e| ToolError::io(temp_dir, e))?;
         copied += n as u64;
+        progress(copied, expected);
     }
 }
 

@@ -25,7 +25,7 @@ fn output_inside_model_refused() {
         &out,
         &inputs,
     );
-    assert!(matches!(err, ToolError::Refused { .. }), "{err}");
+    assert!(matches!(err, ToolError::OutputInsideInput { .. }), "{err}");
 }
 #[test]
 fn sharded_model_refused() {
@@ -262,5 +262,5 @@ fn output_inside_model_refused_any_case() {
         &model.join("patched-inside"),
         &inputs,
     );
-    assert!(matches!(err, ToolError::Refused { .. }), "{err}");
+    assert!(matches!(err, ToolError::OutputInsideInput { .. }), "{err}");
 }

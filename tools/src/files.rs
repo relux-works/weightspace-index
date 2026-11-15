@@ -32,7 +32,7 @@ use sha2::{Digest, Sha256};
 
 use crate::error::ToolError;
 
-pub use crate::digest::Sha256Hex;
+pub use crate::digest::{ParseDigestError, Sha256Hex};
 
 pub(crate) use crate::output::{OutputTarget, is_within};
 pub(crate) use crate::publish::{TempDir, TempFile, sync_dir};
@@ -147,10 +147,9 @@ pub(crate) fn check_input_dir(path: &Path) -> Result<(), ToolError> {
         });
     }
     if !meta.is_dir() {
-        return Err(ToolError::refused(format!(
-            "{}: not a directory",
-            path.display()
-        )));
+        return Err(ToolError::NotDirectory {
+            path: path.to_owned(),
+        });
     }
     Ok(())
 }
@@ -168,6 +167,8 @@ pub(crate) fn write_at(
 }
 
 /// Streams `len` bytes at `start` through SHA-256 in bounded chunks.
+// Preserved no-sink wrapper; current callers use the `_with_progress` form.
+#[allow(dead_code)]
 pub(crate) fn hash_range(
     file: &mut File,
     path: &Path,
@@ -175,10 +176,25 @@ pub(crate) fn hash_range(
     len: u64,
     cancelled: &AtomicBool,
 ) -> Result<Sha256Hex, ToolError> {
+    hash_range_with_progress(file, path, start, len, cancelled, &mut |_, _| {})
+}
+
+/// Like [`hash_range`], additionally reporting `(bytes_done, len)`
+/// after every hashed chunk. Cancellation is still checked per chunk.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn hash_range_with_progress(
+    file: &mut File,
+    path: &Path,
+    start: u64,
+    len: u64,
+    cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
+) -> Result<Sha256Hex, ToolError> {
     file.seek(SeekFrom::Start(start))
         .map_err(|e| ToolError::io(path, e))?;
     let mut hasher = Sha256::new();
     let mut left = len;
+    let mut done = 0u64;
     let mut buf = vec![0u8; CHUNK_BYTES];
     while left > 0 {
         check_cancelled(cancelled)?;
@@ -187,19 +203,35 @@ pub(crate) fn hash_range(
             .map_err(|e| ToolError::io(path, e))?;
         hasher.update(&buf[..n]);
         left -= n as u64;
+        done += n as u64;
+        progress(done, len);
     }
     Ok(Sha256Hex::from_digest(&hasher.finalize()))
 }
 
 /// SHA-256 of a whole resolved input file, streamed.
+// Preserved no-sink wrapper; current callers use the `_with_progress` form.
+#[allow(dead_code)]
 pub(crate) fn hash_file(path: &Path, cancelled: &AtomicBool) -> Result<Sha256Hex, ToolError> {
+    hash_file_with_progress(path, cancelled, &mut |_, _| {})
+}
+
+/// Like [`hash_file`], additionally reporting `(bytes_done, len)`
+/// after every hashed chunk.
+pub(crate) fn hash_file_with_progress(
+    path: &Path,
+    cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
+) -> Result<Sha256Hex, ToolError> {
     let (resolved, mut file) = open_input(path)?;
     let len = file.metadata().map_err(|e| ToolError::io(path, e))?.len();
-    hash_range(&mut file, &resolved, 0, len, cancelled)
+    hash_range_with_progress(&mut file, &resolved, 0, len, cancelled, progress)
 }
 
 /// Copies `len` bytes at `start` from `src` to `dst` at its current
 /// position, in bounded chunks.
+// Preserved no-sink wrapper; current callers use the `_with_progress` form.
+#[allow(dead_code)]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn copy_range(
     src: &mut File,
@@ -210,9 +242,35 @@ pub(crate) fn copy_range(
     dst_path: &Path,
     cancelled: &AtomicBool,
 ) -> Result<(), ToolError> {
+    copy_range_with_progress(
+        src,
+        src_path,
+        start,
+        len,
+        dst,
+        dst_path,
+        cancelled,
+        &mut |_, _| {},
+    )
+}
+
+/// Like [`copy_range`], additionally reporting `(bytes_done, len)`
+/// after every copied chunk. Cancellation is still checked per chunk.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn copy_range_with_progress(
+    src: &mut File,
+    src_path: &Path,
+    start: u64,
+    len: u64,
+    dst: &mut File,
+    dst_path: &Path,
+    cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
+) -> Result<(), ToolError> {
     src.seek(SeekFrom::Start(start))
         .map_err(|e| ToolError::io(src_path, e))?;
     let mut left = len;
+    let mut done = 0u64;
     let mut buf = vec![0u8; CHUNK_BYTES];
     while left > 0 {
         check_cancelled(cancelled)?;
@@ -222,6 +280,8 @@ pub(crate) fn copy_range(
         dst.write_all(&buf[..n])
             .map_err(|e| ToolError::io(dst_path, e))?;
         left -= n as u64;
+        done += n as u64;
+        progress(done, len);
     }
     Ok(())
 }

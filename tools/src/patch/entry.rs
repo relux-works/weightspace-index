@@ -12,8 +12,9 @@ pub enum EntryKind {
 }
 
 /// Splits an entry name into its tensor name and kind, mirroring
-/// `layout::check_replacement_file`: a `#` introduces exactly one of
-/// the `idx`/`new`/`old` suffixes; anything else is refused.
+/// `check_replacement_file` in this module's `file` submodule: a
+/// `#` introduces exactly one of the `idx`/`new`/`old` suffixes;
+/// anything else is refused.
 pub fn parse_entry_name<'a>(path: &Path, name: &'a str) -> Result<(&'a str, EntryKind), ToolError> {
     match name.split_once('#') {
         None => Ok((name, EntryKind::Full)),

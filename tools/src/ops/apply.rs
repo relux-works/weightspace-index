@@ -1,19 +1,37 @@
 use std::collections::BTreeSet;
 use std::fs::{self, OpenOptions};
 use std::io::{Seek, SeekFrom, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::checkpoint::{Checkpoint, TensorMeta};
 use crate::error::ToolError;
-use crate::files::{
-    OutputTarget, TempDir, check_input_dir, hash_file, is_within, sync_dir, write_at,
-};
-use crate::patch::{PatchTensor, for_each_index_block, parse_patch_in};
+use sha2::{Digest, Sha256};
 
-use super::{ApplyReplacement, Cx, Report};
+use crate::files::{
+    OutputTarget, Sha256Hex, TempDir, check_input_dir, hash_file_with_progress, is_within,
+    sync_dir, write_at,
+};
+use crate::patch::{PatchTensor, for_each_index_block, parse_patch_in_with_progress};
+
+use super::{ApplyReplacement, Cx, Phase, Report};
 use crate::model_dir::{copy_model_dir, single_weights_file};
 
 pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
+    let out = check_output(req)?;
+    let (base_file_relative, base_path) = locate_weights(req)?;
+    let (patch, base, entries_changed) = verify_patch_against_base(req, &base_path, cx)?;
+    let (temp, target_path, copied_dirs) = stage_copy(req, &out, &base, &base_file_relative, cx)?;
+    let out_bytes = write_changes(&patch, &base, &target_path, cx)?;
+    let out_sha256 = publish(temp, &out, &target_path, &copied_dirs, cx)?;
+    Ok(Report {
+        tensors_changed: patch.tensors.len() as u64,
+        entries_changed,
+        out_sha256,
+        out_bytes,
+    })
+}
+
+fn check_output(req: &ApplyReplacement) -> Result<OutputTarget, ToolError> {
     let out = OutputTarget::check(&req.out)?;
     check_input_dir(&req.model)?;
     // The output (and its sibling temp directory) must not live inside
@@ -22,23 +40,51 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
     // components ASCII-case-insensitively on every OS.
     let model_canonical = fs::canonicalize(&req.model).map_err(|e| ToolError::io(&req.model, e))?;
     if is_within(out.parent(), &model_canonical) {
-        return Err(ToolError::refused(format!(
-            "{}: output must not be inside the model directory {}",
-            req.out.display(),
-            req.model.display()
-        )));
+        return Err(ToolError::OutputInsideInput {
+            output: req.out.clone(),
+            model: req.model.clone(),
+        });
     }
+    Ok(out)
+}
+
+fn locate_weights(req: &ApplyReplacement) -> Result<(PathBuf, PathBuf), ToolError> {
     let base_file_relative = single_weights_file(&req.model)?;
     let base_path = req.model.join(&base_file_relative);
+    Ok((base_file_relative, base_path))
+}
 
-    let patch = parse_patch_in(&req.patch, cx.temp_dir(), cx.cancelled)?;
-    let base = Checkpoint::open_in(&base_path, cx.temp_dir(), cx.cancelled)?;
+fn verify_patch_against_base(
+    req: &ApplyReplacement,
+    base_path: &Path,
+    cx: &mut Cx,
+) -> Result<(crate::patch::PatchFile, Checkpoint, u64), ToolError> {
+    let patch_len = std::fs::metadata(&req.patch).map(|m| m.len()).unwrap_or(0);
+    cx.emit_bytes("apply", Phase::Snapshot, 0, patch_len);
+    let temp_dir = cx.temp_dir().to_path_buf();
+    let patch =
+        parse_patch_in_with_progress(&req.patch, &temp_dir, cx.cancelled, &mut |done, total| {
+            cx.emit_bytes("apply", Phase::Snapshot, done, total);
+        })?;
+    cx.emit_bytes("apply", Phase::Snapshot, patch_len, patch_len);
+    let base_len = std::fs::metadata(base_path).map(|m| m.len()).unwrap_or(0);
+    cx.emit_bytes("apply", Phase::Snapshot, 0, base_len);
+    let base = Checkpoint::open_in_with_progress(
+        base_path,
+        &temp_dir,
+        cx.cancelled,
+        &mut |done, total| {
+            cx.emit_bytes("apply", Phase::Snapshot, done, total);
+        },
+    )?;
+    cx.emit_bytes("apply", Phase::Snapshot, base_len, base_len);
     validate_patch_against_base(&patch, &base, req)?;
 
     // Wrong-base verification against the base snapshot bytes — the
     // exact bytes parsed — before anything is copied or published.
-    // The original file is hash-checked against that snapshot
-    // below, before the copy is made.
+    // The staged copy is later written from this same snapshot
+    // mapping (see `stage_copy`), so no re-read of the original
+    // file needs to be compared against it.
     let total = patch.tensors.len() as u64;
     let mut done = 0u64;
     let mut entries_changed = 0u64;
@@ -69,38 +115,82 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
             }
         }
         done += 1;
-        cx.emit("apply", Some(name.clone()), done, total);
+        cx.emit("apply", Phase::Verify, Some(name.clone()), done, total);
     }
+    Ok((patch, base, entries_changed))
+}
 
-    // Copy the whole model directory (byte-for-byte, symlink-resolved,
-    // materialized regular files) into a sibling temporary directory,
-    // patch the copy's weights in place by ranged writes, then publish
-    // by rename. Verification above ran on the base snapshot bytes;
-    // the original file must still be those exact bytes, and the copy
-    // is hash-checked against them before any ranged write.
-    let source_hash = hash_file(&base_path, cx.cancelled)?;
-    if source_hash != *base.snapshot_sha256() {
-        return Err(ToolError::refused(format!(
-            "{}: base file changed after it was snapshot-verified; nothing published",
-            base_path.display()
-        )));
-    }
+fn stage_copy(
+    req: &ApplyReplacement,
+    out: &OutputTarget,
+    base: &Checkpoint,
+    base_file_relative: &Path,
+    cx: &mut Cx,
+) -> Result<(TempDir, PathBuf, Vec<PathBuf>), ToolError> {
+    // Copy the model directory (byte-for-byte, symlink-resolved,
+    // materialized regular files) into a sibling temporary
+    // directory, except the weights file: the staged weights are
+    // written from the verified snapshot mapping below, hashing
+    // while writing. The original weights file is never re-read
+    // after verification, and no separate hash pass over either
+    // the original or the staged copy is needed: the bytes written
+    // are the snapshot bytes by construction, and the
+    // hash-while-writing comparison against `snapshot_sha256`
+    // catches any divergence between the two.
     let temp = TempDir::create_in(out.parent())?;
+    let target_path = temp.path().join(base_file_relative);
     let mut copied_dirs = Vec::new();
-    copy_model_dir(&req.model, temp.path(), cx, &mut copied_dirs)?;
-    let target_path = temp.path().join(&base_file_relative);
-    if hash_file(&target_path, cx.cancelled)? != source_hash {
-        return Err(ToolError::refused(format!(
-            "{}: copy differs from the base file; nothing published",
+    cx.emit_bytes("apply", Phase::Copy, 0, 0);
+    copy_model_dir(
+        &req.model,
+        temp.path(),
+        cx,
+        &mut copied_dirs,
+        Some(&target_path),
+    )?;
+
+    let snapshot = base.snapshot_bytes();
+    let total = snapshot.len() as u64;
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&target_path)
+        .map_err(|e| ToolError::io(&target_path, e))?;
+    let mut hasher = Sha256::new();
+    let mut done = 0u64;
+    cx.emit_bytes("apply", Phase::Copy, 0, total);
+    for chunk in snapshot.chunks(crate::files::CHUNK_BYTES) {
+        cx.check()?;
+        file.write_all(chunk)
+            .map_err(|e| ToolError::io(&target_path, e))?;
+        hasher.update(chunk);
+        done += chunk.len() as u64;
+        cx.emit_bytes("apply", Phase::Copy, done, total);
+    }
+    file.flush().map_err(|e| ToolError::io(&target_path, e))?;
+    file.sync_all()
+        .map_err(|e| ToolError::io(&target_path, e))?;
+    drop(file);
+    if Sha256Hex::from_digest(&hasher.finalize()) != *base.snapshot_sha256() {
+        return Err(ToolError::internal(format!(
+            "{}: staged copy hash differs from the verified snapshot; nothing published",
             target_path.display()
         )));
     }
+    Ok((temp, target_path, copied_dirs))
+}
 
+fn write_changes(
+    patch: &crate::patch::PatchFile,
+    base: &Checkpoint,
+    target_path: &Path,
+    cx: &mut Cx,
+) -> Result<u64, ToolError> {
     let mut target = OpenOptions::new()
         .read(true)
         .write(true)
-        .open(&target_path)
-        .map_err(|e| ToolError::io(&target_path, e))?;
+        .open(target_path)
+        .map_err(|e| ToolError::io(target_path, e))?;
     for (name, tensor) in &patch.tensors {
         cx.check()?;
         let base_meta = base.tensor(name)?;
@@ -112,7 +202,7 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
                 // at a time at the tensor's target offset.
                 target
                     .seek(SeekFrom::Start(target_start))
-                    .map_err(|e| ToolError::io(&target_path, e))?;
+                    .map_err(|e| ToolError::io(target_path, e))?;
                 let mut written = 0u64;
                 let mut buf = vec![0u8; crate::files::CHUNK_BYTES];
                 while written < meta.byte_len() {
@@ -126,15 +216,26 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
                         .read_tensor_at(meta, written, &mut buf[..n])?;
                     target
                         .write_all(&buf[..n])
-                        .map_err(|e| ToolError::io(&target_path, e))?;
+                        .map_err(|e| ToolError::io(target_path, e))?;
                     written += n as u64;
+                    cx.emit_bytes("apply", Phase::Patch, written, meta.byte_len());
                 }
             }
-            PatchTensor::Sparse { idx, new, .. } => {
+            PatchTensor::Sparse {
+                idx, new, count, ..
+            } => {
                 let elem = base_meta.elem_bytes();
                 let patch_ck = &patch.checkpoint;
                 let mut values: Vec<u8> = Vec::new();
+                let total_bytes = *count * elem;
+                cx.emit_bytes("apply", Phase::Patch, 0, total_bytes);
+                // Cancellation is checked per index block (bounded
+                // at `INDEX_BLOCK` entries) both by the stream and
+                // here, and byte progress is reported per block;
+                // the per-element writes inside one block are the
+                // bounded remainder.
                 for_each_index_block(patch_ck, name, idx, cx.cancelled, |block, ordinal| {
+                    cx.check()?;
                     check_index_block(name, block, base_meta, &base.path)?;
                     let block_bytes = block.len() as u64 * elem;
                     values.clear();
@@ -145,37 +246,54 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
                         let at = target_start + (index as u64) * elem;
                         write_at(
                             &mut target,
-                            &target_path,
+                            target_path,
                             at,
                             &values[i * elem_usize..(i + 1) * elem_usize],
                         )?;
                     }
+                    cx.emit_bytes(
+                        "apply",
+                        Phase::Patch,
+                        (ordinal + block.len() as u64) * elem,
+                        total_bytes,
+                    );
                     Ok(())
                 })?;
             }
         }
     }
-    target.flush().map_err(|e| ToolError::io(&target_path, e))?;
+    target.flush().map_err(|e| ToolError::io(target_path, e))?;
     target
         .sync_all()
-        .map_err(|e| ToolError::io(&target_path, e))?;
+        .map_err(|e| ToolError::io(target_path, e))?;
     let out_bytes = target
         .metadata()
-        .map_err(|e| ToolError::io(&target_path, e))?
+        .map_err(|e| ToolError::io(target_path, e))?
         .len();
     drop(target);
+    Ok(out_bytes)
+}
+
+fn publish(
+    temp: TempDir,
+    out: &OutputTarget,
+    target_path: &Path,
+    copied_dirs: &[PathBuf],
+    cx: &mut Cx,
+) -> Result<Sha256Hex, ToolError> {
     for dir in copied_dirs.iter().rev() {
         sync_dir(dir)?;
     }
-    let out_sha256 = hash_file(&target_path, cx.cancelled)?;
+    let len = std::fs::metadata(target_path).map(|m| m.len()).unwrap_or(0);
+    cx.emit_bytes("apply", Phase::Hash, 0, len);
+    let out_sha256 = hash_file_with_progress(target_path, cx.cancelled, &mut |done, total| {
+        cx.emit_bytes("apply", Phase::Hash, done, total);
+    })?;
+    cx.emit_bytes("apply", Phase::Hash, len, len);
     cx.check()?;
-    temp.publish(&out)?;
-    Ok(Report {
-        tensors_changed: patch.tensors.len() as u64,
-        entries_changed,
-        out_sha256,
-        out_bytes,
-    })
+    cx.emit_bytes("apply", Phase::Publish, 0, 0);
+    temp.publish(out)?;
+    Ok(out_sha256)
 }
 
 fn validate_patch_against_base(

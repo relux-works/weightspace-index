@@ -8,9 +8,10 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use regex::Regex;
-use serde_json::{Map, Value};
+use serde_json::Value;
 use sha2::{Digest, Sha256};
 
+use crate::patch::check_replacement_file;
 use crate::records::{Records, read_json};
 
 static SLUG: LazyLock<Regex> =
@@ -148,115 +149,6 @@ pub fn check_sources(kind: &str, sources: &[String]) -> Result<(), String> {
         other => return Err(format!("unknown kind {other}")),
     }
     Ok(())
-}
-
-/// Checks the replacement convention in a safetensors file: every tensor is
-/// either full or a complete sparse trio `<name>#idx`, `#new`, `#old`, with
-/// sorted unique `I64` indices and values matching them in shape.
-///
-/// This retained base hand parser is outside the checkpoint reader
-/// path: it validates hosted replacement (patch) files for the
-/// index `check` (and, in `ops`, the generated replacement temp
-/// file as a post-write gate). It is never a checkpoint parser —
-/// checkpoints and patch inputs to the operations are read only
-/// through the official `safetensors` reader in `checkpoint`.
-pub fn check_replacement_file(path: &Path) -> Result<(), String> {
-    let bytes = fs::read(path).map_err(|e| e.to_string())?;
-    let header_len = bytes
-        .get(..8)
-        .map(|b| u64::from_le_bytes(b.try_into().unwrap()))
-        .ok_or("not safetensors")?;
-    let header_end = usize::try_from(header_len)
-        .ok()
-        .and_then(|n| n.checked_add(8))
-        .filter(|&end| end <= bytes.len())
-        .ok_or("safetensors header out of range")?;
-    let header: Map<String, Value> = serde_json::from_slice(&bytes[8..header_end])
-        .map_err(|e| format!("safetensors header: {e}"))?;
-    let data = &bytes[header_end..];
-
-    let mut full = BTreeSet::new();
-    let mut sparse: BTreeMap<&str, BTreeMap<&str, Tensor>> = BTreeMap::new();
-    for (name, raw) in &header {
-        if name == "__metadata__" {
-            continue;
-        }
-        let t = Tensor::parse(raw).ok_or_else(|| format!("{name}: malformed tensor entry"))?;
-        if t.start > t.end || t.end > data.len() {
-            return Err(format!("{name}: data offsets out of range"));
-        }
-        match name.split_once('#') {
-            None => {
-                full.insert(name.as_str());
-            }
-            Some((base, suffix @ ("idx" | "new" | "old"))) => {
-                sparse.entry(base).or_default().insert(suffix, t);
-            }
-            Some((_, suffix)) => return Err(format!("{name}: unknown suffix #{suffix}")),
-        }
-    }
-    if full.is_empty() && sparse.is_empty() {
-        return Err("no tensors".into());
-    }
-    for (base, trio) in &sparse {
-        if full.contains(base) {
-            return Err(format!("{base}: both full and sparse"));
-        }
-        let (Some(idx), Some(new), Some(old)) = (trio.get("idx"), trio.get("new"), trio.get("old"))
-        else {
-            return Err(format!("{base}: sparse tensors need #idx, #new and #old"));
-        };
-        let count = match idx.shape.as_slice() {
-            [n] if *n >= 1 && idx.dtype == "I64" && idx.end - idx.start == 8 * *n as usize => *n,
-            _ => return Err(format!("{base}#idx: must be a non-empty 1-D I64 tensor")),
-        };
-        if new.dtype != old.dtype || new.shape != [count] || old.shape != [count] {
-            return Err(format!(
-                "{base}: #new and #old must match #idx in shape and each other in dtype"
-            ));
-        }
-        let mut previous = -1i64;
-        for chunk in data[idx.start..idx.end].chunks_exact(8) {
-            let index = i64::from_le_bytes(chunk.try_into().unwrap());
-            if index <= previous {
-                return Err(format!(
-                    "{base}#idx: indices must be sorted, unique and non-negative"
-                ));
-            }
-            previous = index;
-        }
-    }
-    Ok(())
-}
-
-struct Tensor {
-    dtype: String,
-    shape: Vec<u64>,
-    start: usize,
-    end: usize,
-}
-
-impl Tensor {
-    fn parse(v: &Value) -> Option<Self> {
-        let offsets = v.get("data_offsets")?.as_array()?;
-        let offset = |i: usize| {
-            offsets
-                .get(i)?
-                .as_u64()
-                .and_then(|n| usize::try_from(n).ok())
-        };
-        Some(Self {
-            dtype: v.get("dtype")?.as_str()?.to_owned(),
-            shape: v
-                .get("shape")?
-                .as_array()?
-                .iter()
-                .map(Value::as_u64)
-                .collect::<Option<_>>()?,
-            start: offset(0)?,
-            end: offset(1)?,
-        })
-    }
 }
 
 struct Entry {

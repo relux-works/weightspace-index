@@ -122,18 +122,18 @@ struct EntryTemplate {
 }
 
 fn entry_templates(tensors: &[ChangedTensor<'_>]) -> Result<Vec<EntryTemplate>, ToolError> {
-    let overflow = || ToolError::refused("stored byte comparison overflows");
+    let overflow = || ToolError::internal("stored byte comparison overflows");
     let mul = |a: u64, b: u64| a.checked_mul(b).ok_or_else(overflow);
     let mut templates = Vec::with_capacity(tensors.len() * 4);
     for (owner, tensor) in tensors.iter().enumerate() {
         if tensor.dtype.bitsize() % 8 != 0 {
-            return Err(ToolError::refused(format!(
+            return Err(ToolError::internal(format!(
                 "{}: dtype {:?} elements are not whole bytes",
                 tensor.name, tensor.dtype
             )));
         }
         if tensor.changed == 0 || tensor.changed > tensor.numel {
-            return Err(ToolError::refused(format!(
+            return Err(ToolError::internal(format!(
                 "{}: {} changed elements out of {}",
                 tensor.name, tensor.changed, tensor.numel
             )));
@@ -196,7 +196,7 @@ fn serialized_len(
     templates: &[EntryTemplate],
     choices: &[Representation],
 ) -> Result<u64, ToolError> {
-    let overflow = || ToolError::refused("stored byte comparison overflows");
+    let overflow = || ToolError::internal("stored byte comparison overflows");
     let add = |a: u64, b: u64| a.checked_add(b).ok_or_else(overflow);
     // The "__metadata__":{"format":"pt"} entry always written first.
     let mut header_len = metadata_entry_len();

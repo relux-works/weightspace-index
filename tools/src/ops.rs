@@ -26,13 +26,35 @@ mod build;
 pub use apply::apply_replacement;
 pub use build::build_replacement;
 
-/// Progress reported between tensors; frontends adapt it as they like.
+/// The long-running phase a [`Progress`] report belongs to. Byte
+/// counters are per-phase: `bytes_done` restarts when the phase
+/// changes.
+#[non_exhaustive]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Phase {
+    Snapshot,
+    Verify,
+    Copy,
+    Patch,
+    Hash,
+    Plan,
+    Serialize,
+    Publish,
+}
+
+/// Progress reported between tensors and at chunk granularity inside
+/// the long byte-moving phases; frontends adapt it as they like.
+/// Byte fields are 0/0 on per-tensor reports that carry no byte
+/// counter.
 #[non_exhaustive]
 pub struct Progress {
     pub operation: &'static str,
+    pub phase: Phase,
     pub tensor: Option<String>,
     pub tensors_done: u64,
     pub tensors_total: u64,
+    pub bytes_done: u64,
+    pub bytes_total: u64,
 }
 
 /// Cooperation context: a cancellation token checked between tensors
@@ -42,6 +64,8 @@ pub struct Cx<'a> {
     pub(crate) cancelled: &'a AtomicBool,
     progress: &'a mut (dyn FnMut(Progress) + 'a),
     temp_dir: PathBuf,
+    last_phase: Option<Phase>,
+    last_bytes_done: u64,
 }
 
 impl<'a> Cx<'a> {
@@ -64,6 +88,8 @@ impl<'a> Cx<'a> {
             cancelled,
             progress,
             temp_dir,
+            last_phase: None,
+            last_bytes_done: 0,
         }
     }
 
@@ -76,12 +102,54 @@ impl<'a> Cx<'a> {
         check_cancelled(self.cancelled)
     }
 
-    fn emit(&mut self, operation: &'static str, tensor: Option<String>, done: u64, total: u64) {
+    fn emit(
+        &mut self,
+        operation: &'static str,
+        phase: Phase,
+        tensor: Option<String>,
+        done: u64,
+        total: u64,
+    ) {
+        self.last_phase = Some(phase);
         (self.progress)(Progress {
             operation,
+            phase,
             tensor,
             tensors_done: done,
             tensors_total: total,
+            bytes_done: 0,
+            bytes_total: 0,
+        });
+    }
+
+    /// Chunk-granular byte progress, throttled: at most one report
+    /// per MiB per phase, plus the phase's first and final reports.
+    pub(crate) fn emit_bytes(
+        &mut self,
+        operation: &'static str,
+        phase: Phase,
+        bytes_done: u64,
+        bytes_total: u64,
+    ) {
+        const THROTTLE_BYTES: u64 = 1024 * 1024;
+        let phase_changed = self.last_phase != Some(phase);
+        let due = phase_changed
+            || bytes_done == 0
+            || bytes_done >= bytes_total
+            || bytes_done.saturating_sub(self.last_bytes_done) >= THROTTLE_BYTES;
+        if !due {
+            return;
+        }
+        self.last_phase = Some(phase);
+        self.last_bytes_done = bytes_done;
+        (self.progress)(Progress {
+            operation,
+            phase,
+            tensor: None,
+            tensors_done: 0,
+            tensors_total: 0,
+            bytes_done,
+            bytes_total,
         });
     }
 }

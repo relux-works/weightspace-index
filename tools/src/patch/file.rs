@@ -8,6 +8,7 @@ use crate::checkpoint::{Checkpoint, TensorMeta};
 use crate::error::ToolError;
 
 use super::entry::{EntryKind, parse_entry_name};
+use super::index::for_each_index_block;
 
 /// One patched tensor in a parsed replacement file.
 #[derive(Clone, Debug)]
@@ -43,9 +44,21 @@ pub fn parse_patch_in(
     temp_dir: &Path,
     cancelled: &AtomicBool,
 ) -> Result<PatchFile, ToolError> {
+    parse_patch_in_with_progress(path, temp_dir, cancelled, &mut |_, _| {})
+}
+
+/// Like [`parse_patch_in`], additionally reporting
+/// `(bytes_copied, bytes_total)` per chunk while the private
+/// snapshot copy is made.
+pub fn parse_patch_in_with_progress(
+    path: &Path,
+    temp_dir: &Path,
+    cancelled: &AtomicBool,
+    progress: &mut (dyn FnMut(u64, u64) + '_),
+) -> Result<PatchFile, ToolError> {
     // Patch files take the same snapshot-backed official reader
     // path as checkpoints; there is no separate patch parser.
-    let checkpoint = Checkpoint::open_in(path, temp_dir, cancelled)?;
+    let checkpoint = Checkpoint::open_in_with_progress(path, temp_dir, cancelled, progress)?;
     let malformed = |detail: String| ToolError::malformed(path, detail);
     let mut full: BTreeMap<String, TensorMeta> = BTreeMap::new();
     let mut sparse: BTreeMap<String, [Option<TensorMeta>; 3]> = BTreeMap::new();
@@ -115,6 +128,57 @@ pub fn parse_patch_in(
 /// [`TensorMeta`]. File-derived descriptors always pass: the
 /// official reader enforces `start <= end` and `Checkpoint::open`
 /// refuses sub-byte dtypes.
+/// Streaming replacement-file gate: the file must parse through
+/// the official reader ([`Checkpoint::open_in`] over its private
+/// snapshot, via [`parse_patch_in`]) with the sparse-trio
+/// structure that parsing cross-validates, and every `#idx`
+/// stream must be non-negative and strictly increasing
+/// ([`for_each_index_block`] validates while streaming in bounded
+/// blocks). No whole-file buffer is materialized on this path:
+/// the snapshot copy and every index read are chunk-bounded.
+/// This is the post-write gate for generated replacements and
+/// the hosted-file check behind [`check_replacement_file`];
+/// it replaces the former hand parser in `layout`, whose rules
+/// (full-vs-sparse exclusivity, complete `#idx`/`#new`/`#old`
+/// trios, non-empty 1-D `I64` `#idx`, matching `#new`/`#old`
+/// shape and dtype, sorted unique non-negative indices, no
+/// tensors refused, unknown `#` suffix refused) are the rules
+/// [`parse_patch_in`] and [`for_each_index_block`] already
+/// enforce, reached here without interpreting header bytes by
+/// hand. The official reader is additionally stricter where it
+/// always was for operation inputs (for example contiguous
+/// coverage of the data region and shape/byte-length agreement).
+pub(crate) fn validate_replacement_streaming(
+    path: &Path,
+    temp_dir: &Path,
+    cancelled: &AtomicBool,
+) -> Result<(), ToolError> {
+    let patch = parse_patch_in(path, temp_dir, cancelled)?;
+    for (base, tensor) in &patch.tensors {
+        if let PatchTensor::Sparse { idx, .. } = tensor {
+            for_each_index_block(&patch.checkpoint, base, idx, cancelled, |_, _| Ok(()))?;
+        }
+    }
+    Ok(())
+}
+
+/// Checks the replacement convention in a safetensors file:
+/// every tensor is either full or a complete sparse trio
+/// `<name>#idx`, `#new`, `#old`, with sorted unique `I64`
+/// indices and values matching them in shape.
+///
+/// Relocated here from `layout` (recommendation section 7.3
+/// item 7) and reimplemented over the streaming gate above, so
+/// the core no longer depends on the legacy module for it; the
+/// string error shape is kept for the legacy layout caller.
+/// The private snapshot copy is made in the system temporary
+/// directory, as with [`Checkpoint::open`].
+pub fn check_replacement_file(path: &Path) -> Result<(), String> {
+    let cancelled = AtomicBool::new(false);
+    validate_replacement_streaming(path, &std::env::temp_dir(), &cancelled)
+        .map_err(|e| e.to_string())
+}
+
 pub(super) fn check_meta(path: &Path, tensor: &str, meta: &TensorMeta) -> Result<(), ToolError> {
     if meta.offsets_inverted() {
         return Err(ToolError::malformed(

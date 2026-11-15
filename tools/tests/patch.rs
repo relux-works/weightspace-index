@@ -836,22 +836,29 @@ fn symlink_rules() {
     .unwrap();
     assert!(matches!(err, ToolError::SymlinkRefused { .. }), "{err}");
 
-    // Output under a symlinked component refused.
+    // Output under an already-existing symlinked ancestor resolves
+    // to the canonical parent (the system-symlinked TMPDIR shape:
+    // macOS `/var`, `/tmp`): the build succeeds and the output lands
+    // in the real directory, written via the canonical path.
     let real_dir = tmp.path().join("real");
     fs::create_dir(&real_dir).unwrap();
     let dir_link = tmp.path().join("dir-link");
     symlink(&real_dir, &dir_link).unwrap();
     let out = dir_link.join("patch.safetensors");
-    let err = build(&BuildReplacement {
+    build(&BuildReplacement {
         base,
         edited,
         manifest: None,
         out,
     })
-    .err()
     .unwrap();
-    assert!(matches!(err, ToolError::SymlinkRefused { .. }), "{err}");
-    assert!(!real_dir.join("patch.safetensors").exists());
+    assert!(real_dir.join("patch.safetensors").exists());
+    assert!(
+        !fs::symlink_metadata(real_dir.join("patch.safetensors"))
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
 }
 
 #[test]

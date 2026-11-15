@@ -178,10 +178,10 @@ impl Checkpoint {
     }
 
     /// SHA-256 of the snapshot bytes — the bytes parsed and read
-    /// through this checkpoint, in the private snapshot file
-    /// bound to its open file handles at mapping time (see
-    /// `snapshot` for that custody and its same-UID
-    /// pre-opened-writer scope limit).
+    /// through this checkpoint, in the private sealed snapshot
+    /// file mapped from its already-open descriptor (see
+    /// `snapshot` for that custody and its same-UID descriptor
+    /// scope limit).
     pub fn snapshot_sha256(&self) -> &Sha256Hex {
         self.snapshot.sha256()
     }

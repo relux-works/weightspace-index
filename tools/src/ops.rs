@@ -119,7 +119,7 @@ fn shape_usize(path: &Path, name: &str, shape: &[u64]) -> Result<Vec<usize>, Too
 }
 
 pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
-    check_output_path(&req.out)?;
+    let out = check_output_path(&req.out)?;
     let base = Checkpoint::open(&req.base)?;
     let edited = Checkpoint::open(&req.edited)?;
     check_same_tensor_set(&base, &edited)?;
@@ -298,7 +298,7 @@ pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, 
     let out_sha256 = Sha256Hex::from_digest(&Sha256::digest(&bytes));
     let out_bytes = bytes.len() as u64;
 
-    let mut temp = TempFile::create_in(&parent_dir(&req.out))?;
+    let mut temp = TempFile::create_in(&parent_dir(&out))?;
     temp.file_mut()
         .write_all(&bytes)
         .map_err(|e| ToolError::io(temp.path(), e))?;
@@ -311,7 +311,7 @@ pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, 
         ))
     })?;
     cx.check()?;
-    temp.publish(&req.out)?;
+    temp.publish(&out)?;
     Ok(Report {
         tensors_changed: changed_names.len() as u64,
         entries_changed,
@@ -417,12 +417,12 @@ fn verify_manifest_hashes(
 }
 
 pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
-    check_output_path(&req.out)?;
+    let out = check_output_path(&req.out)?;
     check_input_dir(&req.model)?;
     // The output (and its sibling temp directory) must not live inside
     // the model being copied, or the copy would try to copy itself.
     let model_canonical = fs::canonicalize(&req.model).map_err(|e| ToolError::io(&req.model, e))?;
-    let out_parent = parent_dir(&req.out);
+    let out_parent = parent_dir(&out);
     let out_parent_canonical =
         fs::canonicalize(&out_parent).map_err(|e| ToolError::io(&out_parent, e))?;
     if out_parent_canonical.starts_with(&model_canonical) {
@@ -489,7 +489,7 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
             base_path.display()
         )));
     }
-    let temp = TempDir::create_in(&parent_dir(&req.out))?;
+    let temp = TempDir::create_in(&parent_dir(&out))?;
     let mut copied_dirs = Vec::new();
     copy_model_dir(&req.model, temp.path(), cx, &mut copied_dirs)?;
     let target_path = temp.path().join(&base_file_relative);
@@ -573,7 +573,7 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
     }
     let out_sha256 = hash_file(&target_path, cx.cancelled)?;
     cx.check()?;
-    temp.publish(&req.out)?;
+    temp.publish(&out)?;
     Ok(Report {
         tensors_changed: patch.tensors.len() as u64,
         entries_changed,

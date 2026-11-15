@@ -2,11 +2,14 @@ mod common;
 
 use std::collections::BTreeMap;
 use std::fs;
+#[cfg(unix)]
 use std::path::{Path, PathBuf};
 
 use common::*;
 use weightspace_tools::error::ToolError;
-use weightspace_tools::ops::{ApplyReplacement, BuildReplacement};
+use weightspace_tools::ops::ApplyReplacement;
+#[cfg(unix)]
+use weightspace_tools::ops::BuildReplacement;
 
 #[test]
 fn output_inside_model_refused() {

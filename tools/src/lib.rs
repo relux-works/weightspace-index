@@ -6,9 +6,10 @@
 //! builds and applies safetensors replacement files over synthetic or
 //! real checkpoints with typed refusals and outputs that refuse
 //! existing destinations: single files publish by atomic no-clobber
-//! hard link, while model directories publish by local
-//! check-then-rename, which is not atomic no-clobber against a
-//! concurrent writer in the destination directory (see `files`).
+//! hard link, while model directories publish by claim-then-rename
+//! on Unix and by local check-then-rename on Windows, the latter
+//! not atomic no-clobber against a concurrent writer in the
+//! destination directory (see `files`).
 //! Checkpoints are read through the official `safetensors` reader
 //! over a private mapped snapshot of each input (see `checkpoint`
 //! and `snapshot`).

@@ -223,3 +223,48 @@ fn apply_cancellation_after_start_publishes_nothing() {
         .collect();
     assert!(leftovers.is_empty(), "temp leftovers: {leftovers:?}");
 }
+
+// P4: an I/O fault mid-copy (unreadable model sibling) publishes nothing and leaves no temp entries.
+#[cfg(unix)]
+#[test]
+fn io_fault_mid_copy_publishes_nothing() {
+    use std::os::unix::fs::PermissionsExt;
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _) = simple_patch(tmp.path());
+    // Positive control first: the readable model applies cleanly.
+    let out_ok = tmp.path().join("patched-ok");
+    apply(&ApplyReplacement {
+        patch: patch.clone(),
+        model: model.clone(),
+        out: out_ok.clone(),
+        expect_tensor_sha256: BTreeMap::new(),
+    })
+    .unwrap();
+    assert!(out_ok.join("model.safetensors").exists());
+    // chmod 000 faults are meaningless as root (CAP_DAC_OVERRIDE):
+    // panic rather than silently skip (consultation 8.2).
+    let note = model.join("assets/note.txt");
+    fs::set_permissions(&note, fs::Permissions::from_mode(0o000)).unwrap();
+    if fs::File::open(&note).is_ok() {
+        fs::set_permissions(&note, fs::Permissions::from_mode(0o644)).unwrap();
+        panic!("chmod-000 file is readable (running as root?); P4 cannot run here");
+    }
+    let out = tmp.path().join("patched-fault");
+    let err = apply(&ApplyReplacement {
+        patch,
+        model,
+        out: out.clone(),
+        expect_tensor_sha256: BTreeMap::new(),
+    })
+    .err()
+    .unwrap();
+    fs::set_permissions(&note, fs::Permissions::from_mode(0o644)).unwrap();
+    assert!(matches!(err, ToolError::Io { .. }), "{err}");
+    assert!(!out.exists());
+    let leftovers: Vec<String> = fs::read_dir(tmp.path())
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .filter(|name| name.contains(".weightspace-"))
+        .collect();
+    assert!(leftovers.is_empty(), "temp leftovers: {leftovers:?}");
+}

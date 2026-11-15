@@ -7,7 +7,7 @@ use sha2::{Digest, Sha256};
 
 use crate::checkpoint::{Checkpoint, TensorMeta};
 use crate::error::ToolError;
-use crate::files::{Sha256Hex, TempFile, check_output_path, parent_dir};
+use crate::files::{OutputTarget, Sha256Hex, TempFile};
 use crate::patch::{
     ChangedTensor, Manifest, Representation, choose_representations, diff_tensor, read_manifest,
 };
@@ -31,7 +31,7 @@ fn shape_usize(path: &Path, name: &str, shape: &[u64]) -> Result<Vec<usize>, Too
 }
 
 pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
-    let out = check_output_path(&req.out)?;
+    let out = OutputTarget::check(&req.out)?;
     let base = Checkpoint::open(&req.base)?;
     let edited = Checkpoint::open(&req.edited)?;
     check_same_tensor_set(&base, &edited)?;
@@ -210,7 +210,7 @@ pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, 
     let out_sha256 = Sha256Hex::from_digest(&Sha256::digest(&bytes));
     let out_bytes = bytes.len() as u64;
 
-    let mut temp = TempFile::create_in(&parent_dir(&out))?;
+    let mut temp = TempFile::create_in(out.parent())?;
     temp.file_mut()
         .write_all(&bytes)
         .map_err(|e| ToolError::io(temp.path(), e))?;

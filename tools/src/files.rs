@@ -1,7 +1,8 @@
 //! File custody: read-only inputs, streaming hashes, and publication
 //! that refuses existing destinations (files by atomic no-clobber
-//! hard link; directories by check-then-rename — see
-//! `TempDir::publish` for the concurrent-writer limit).
+//! hard link; directories by claim-then-rename on Unix and
+//! check-then-rename on Windows — see `crate::publish::publish_dir`
+//! for the concurrent-writer residual).
 //!
 //! Custody rules (keeper amendments): a read-only input symlink is
 //! allowed only as the resolved regular file reached by canonicalization
@@ -10,19 +11,17 @@
 //! refused, under any spelling of that component (trailing `/`, `/.`,
 //! nested forms — see [`check_input_dir`]), while symlinked ancestors
 //! above the input directory are followed by the operating system as
-//! part of reaching it and are not themselves refused. Outputs:
-//! symlinks in the already-existing ancestor chain above the output
-//! (for example macOS `/tmp`, `/var`, or a `$TMPDIR` under
-//! `/var/folders`) are resolved by canonicalizing the nearest
-//! existing ancestor, and the canonical location is the real parent
+//! part of reaching it and are not themselves refused. Outputs are
+//! checked once into an `OutputTarget` (see `crate::output`): the
+//! output parent as spelled must already be a real directory, never
+//! a symlink; links above the parent (for example macOS `/tmp`,
+//! `/var`, or a `$TMPDIR` under `/var/folders`) are resolved by one
+//! canonicalization, and the canonical parent plus name is what
 //! every later write uses; the final output component must not
-//! already exist in any form and is never written through; parent
-//! components below the canonicalized ancestor that do not yet exist
-//! are created one by one as real directories, refusing a planted
-//! symlink in that tail (see [`check_output_path`]). Check-then-create
-//! races against a same-UID actor who can write in the parent remain
-//! outside the guarantee; no atomicity is claimed for the path
-//! resolution itself.
+//! already exist in any form and is never written through.
+//! Check-then-act races against a same-UID actor who can write in
+//! the parent remain outside the guarantee; no atomicity is claimed
+//! for the path resolution itself.
 
 use std::fs::{self, File};
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -35,8 +34,8 @@ use crate::error::ToolError;
 
 pub use crate::digest::Sha256Hex;
 
-pub(crate) use crate::output::{check_output_path, parent_dir};
-pub(crate) use crate::publish::{TempDir, TempFile, fsync_dir};
+pub(crate) use crate::output::{OutputTarget, is_within};
+pub(crate) use crate::publish::{TempDir, TempFile, sync_dir};
 /// Bounded chunk size for every streaming read, copy, compare and hash.
 pub(crate) const CHUNK_BYTES: usize = 64 * 1024;
 
@@ -76,6 +75,12 @@ pub(crate) fn open_input(path: &Path) -> Result<(PathBuf, File), ToolError> {
 /// the final component is checked: symlinked ancestors above the
 /// model directory are followed while reaching it, as they are for
 /// file inputs, and are not refused.
+///
+/// On Windows this also refuses junctioned model directories: std
+/// reports every name-surrogate reparse point (symlinks and
+/// junctions) as a symlink. Non-surrogate reparse points, such as
+/// OneDrive cloud placeholders, are treated as regular files and
+/// are hydrated on read.
 pub(crate) fn check_input_dir(path: &Path) -> Result<(), ToolError> {
     let stripped: PathBuf = path.components().collect();
     let meta = fs::symlink_metadata(&stripped).map_err(|e| ToolError::io(path, e))?;

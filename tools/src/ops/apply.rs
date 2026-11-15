@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::checkpoint::{Checkpoint, TensorMeta};
 use crate::error::ToolError;
 use crate::files::{
-    TempDir, check_input_dir, check_output_path, fsync_dir, hash_file, parent_dir, write_at,
+    OutputTarget, TempDir, check_input_dir, hash_file, is_within, sync_dir, write_at,
 };
 use crate::patch::{PatchTensor, for_each_index_block, parse_patch};
 
@@ -14,15 +14,14 @@ use super::{ApplyReplacement, Cx, Report};
 use crate::model_dir::{copy_model_dir, single_weights_file};
 
 pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
-    let out = check_output_path(&req.out)?;
+    let out = OutputTarget::check(&req.out)?;
     check_input_dir(&req.model)?;
     // The output (and its sibling temp directory) must not live inside
     // the model being copied, or the copy would try to copy itself.
+    // `out.parent()` is already canonical; containment compares
+    // components ASCII-case-insensitively on every OS.
     let model_canonical = fs::canonicalize(&req.model).map_err(|e| ToolError::io(&req.model, e))?;
-    let out_parent = parent_dir(&out);
-    let out_parent_canonical =
-        fs::canonicalize(&out_parent).map_err(|e| ToolError::io(&out_parent, e))?;
-    if out_parent_canonical.starts_with(&model_canonical) {
+    if is_within(out.parent(), &model_canonical) {
         return Err(ToolError::refused(format!(
             "{}: output must not be inside the model directory {}",
             req.out.display(),
@@ -86,7 +85,7 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
             base_path.display()
         )));
     }
-    let temp = TempDir::create_in(&parent_dir(&out))?;
+    let temp = TempDir::create_in(out.parent())?;
     let mut copied_dirs = Vec::new();
     copy_model_dir(&req.model, temp.path(), cx, &mut copied_dirs)?;
     let target_path = temp.path().join(&base_file_relative);
@@ -166,7 +165,7 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
         .len();
     drop(target);
     for dir in copied_dirs.iter().rev() {
-        fsync_dir(dir)?;
+        sync_dir(dir)?;
     }
     let out_sha256 = hash_file(&target_path, cx.cancelled)?;
     cx.check()?;

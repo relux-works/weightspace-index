@@ -52,6 +52,13 @@ pub enum ToolError {
     /// The output path already exists; outputs are never clobbered.
     #[error("output already exists: {path}")]
     OutputExists { path: PathBuf },
+    /// The output path has no usable final name, or the name is one
+    /// the platform reserves (see `output::OutputTarget::check`).
+    #[error("invalid output name: {path}")]
+    InvalidOutputName { path: PathBuf },
+    /// The output path's parent exists but is not a directory.
+    #[error("{path}: output parent is not a directory")]
+    OutputParentNotDir { path: PathBuf },
     /// A symlink where the custody rules refuse one.
     #[error("symlink refused at {path}: {detail}")]
     SymlinkRefused { path: PathBuf, detail: String },

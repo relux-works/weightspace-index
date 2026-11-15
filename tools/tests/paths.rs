@@ -118,30 +118,28 @@ fn symlink_rules() {
     .unwrap();
     assert!(matches!(err, ToolError::SymlinkRefused { .. }), "{err}");
 
-    // Output under an already-existing symlinked ancestor resolves
-    // to the canonical parent (the system-symlinked TMPDIR shape:
-    // macOS `/var`, `/tmp`): the build succeeds and the output lands
-    // in the real directory, written via the canonical path.
+    // SUPERSEDED (X2, consultation 3.3): leaf1b accepted an existing
+    // dir-link as the output parent and resolved through it. The
+    // OutputTarget contract refuses a symlinked output parent as
+    // spelled; only links above the parent are resolved (see
+    // `symlinked_ancestor_accepted`). Nothing is written through it.
     let real_dir = tmp.path().join("real");
     fs::create_dir(&real_dir).unwrap();
     let dir_link = tmp.path().join("dir-link");
     symlink(&real_dir, &dir_link).unwrap();
     let out = dir_link.join("patch.safetensors");
-    build(&BuildReplacement {
+    let err = build(&BuildReplacement {
         base,
         edited,
         manifest: None,
         out,
     })
+    .err()
     .unwrap();
-    assert!(real_dir.join("patch.safetensors").exists());
-    assert!(
-        !fs::symlink_metadata(real_dir.join("patch.safetensors"))
-            .unwrap()
-            .file_type()
-            .is_symlink()
-    );
+    assert!(matches!(err, ToolError::SymlinkRefused { .. }), "{err}");
+    assert!(!real_dir.join("patch.safetensors").exists());
 }
+// X5: a symlinked input directory is refused under every spelling of its final component.
 #[cfg(unix)]
 #[test]
 fn symlinked_model_dir_spellings_refused() {
@@ -199,4 +197,70 @@ fn symlinked_model_dir_spellings_refused() {
         .unwrap();
         assert!(out.join("model.safetensors").exists());
     }
+}
+
+// X1: output below a symlinked ancestor (var -> private/var shape) is accepted and lands in the real parent.
+#[cfg(unix)]
+#[test]
+fn symlinked_ancestor_accepted() {
+    use std::os::unix::fs::symlink;
+    let tmp = tempfile::tempdir().unwrap();
+    let (base, edited, _, _) = write_pair(tmp.path());
+    let real_parent = tmp.path().join("private").join("var").join("parent");
+    fs::create_dir_all(&real_parent).unwrap();
+    symlink(
+        tmp.path().join("private").join("var"),
+        tmp.path().join("var"),
+    )
+    .unwrap();
+    let out = tmp
+        .path()
+        .join("var")
+        .join("parent")
+        .join("patch.safetensors");
+    build(&BuildReplacement {
+        base,
+        edited,
+        manifest: None,
+        out,
+    })
+    .unwrap();
+    let landed = real_parent.join("patch.safetensors");
+    assert!(landed.exists());
+    assert!(
+        !fs::symlink_metadata(&landed)
+            .unwrap()
+            .file_type()
+            .is_symlink()
+    );
+}
+
+// X6: output inside the model reached through a symlink-alias ancestor is refused.
+#[cfg(unix)]
+#[test]
+fn output_inside_model_refused_any_case() {
+    use std::os::unix::fs::symlink;
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _) = simple_patch(tmp.path());
+    let weights = model.join("model.safetensors");
+    let inputs = snapshot(&[&weights]);
+    // The alias is an ancestor above the output parent (the model
+    // dir itself), so the output check passes and containment —
+    // canonical parent against canonical model — must refuse it.
+    let alias = tmp.path().join("alias");
+    symlink(tmp.path(), &alias).unwrap();
+    let out = alias
+        .join(model.file_name().unwrap())
+        .join("patched-inside");
+    let err = assert_refusal(
+        apply(&ApplyReplacement {
+            patch,
+            model: model.clone(),
+            out: out.clone(),
+            expect_tensor_sha256: BTreeMap::new(),
+        }),
+        &model.join("patched-inside"),
+        &inputs,
+    );
+    assert!(matches!(err, ToolError::Refused { .. }), "{err}");
 }

@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::path::Path;
+use std::sync::atomic::AtomicBool;
 
 use safetensors::Dtype;
 
@@ -31,9 +32,20 @@ pub struct PatchFile {
 }
 
 pub fn parse_patch(path: &Path) -> Result<PatchFile, ToolError> {
+    let cancelled = AtomicBool::new(false);
+    parse_patch_in(path, &std::env::temp_dir(), &cancelled)
+}
+
+/// Like [`parse_patch`], with the snapshot directory and
+/// cancellation token of the calling operation.
+pub fn parse_patch_in(
+    path: &Path,
+    temp_dir: &Path,
+    cancelled: &AtomicBool,
+) -> Result<PatchFile, ToolError> {
     // Patch files take the same snapshot-backed official reader
     // path as checkpoints; there is no separate patch parser.
-    let checkpoint = Checkpoint::open(path)?;
+    let checkpoint = Checkpoint::open_in(path, temp_dir, cancelled)?;
     let malformed = |detail: String| ToolError::malformed(path, detail);
     let mut full: BTreeMap<String, TensorMeta> = BTreeMap::new();
     let mut sparse: BTreeMap<String, [Option<TensorMeta>; 3]> = BTreeMap::new();

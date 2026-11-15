@@ -16,8 +16,8 @@
 //!
 //! Nothing here touches the network or executes repository content.
 // `forbid` gave way to `deny` for exactly one allow: the
-// snapshot mapping call in `snapshot::map_readonly`, whose SAFETY
-// argument rests on private sealed snapshot custody. Everything
+// snapshot mapping call in `snapshot::seal`, whose SAFETY
+// argument rests on private snapshot custody. Everything
 // else in the crate is unsafe-free.
 #![deny(unsafe_code)]
 

@@ -44,6 +44,13 @@ pub enum Command {
         manifest: Option<PathBuf>,
         #[arg(long)]
         out: PathBuf,
+        /// Directory for the private snapshots of the inputs
+        /// (default: the system temporary directory). It needs
+        /// free space for a copy of each input checkpoint held at
+        /// once; on Linux the default is often tmpfs (RAM), so
+        /// pass a disk directory for large checkpoints.
+        #[arg(long = "temp-dir")]
+        temp_dir: Option<PathBuf>,
     },
     /// Bake a replacement file into a new copy of a model directory
     /// holding a single root model.safetensors. The original is never
@@ -60,6 +67,13 @@ pub enum Command {
         /// file does not record the bytes it replaces.
         #[arg(long = "expect-tensor-sha256")]
         expect_tensor_sha256: Vec<String>,
+        /// Directory for the private snapshots of the inputs
+        /// (default: the system temporary directory). It needs
+        /// free space for a copy of each input checkpoint held at
+        /// once; on Linux the default is often tmpfs (RAM), so
+        /// pass a disk directory for large checkpoints.
+        #[arg(long = "temp-dir")]
+        temp_dir: Option<PathBuf>,
     },
 }
 

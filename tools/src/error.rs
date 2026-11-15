@@ -46,6 +46,14 @@ pub enum ToolError {
          (--expect-tensor-sha256 {tensor}=HEX); the patch file does not record one"
     )]
     MissingExpectedDigest { tensor: String },
+    /// An input file changed size while its private snapshot was
+    /// being copied, so the snapshot would not be one consistent
+    /// byte sequence.
+    #[error("{path}: input changed while it was being snapshotted")]
+    InputChanged { path: PathBuf },
+    /// An input path does not resolve to a regular file.
+    #[error("{path}: input is not a regular file")]
+    NotRegularFile { path: PathBuf },
     /// The authors' manifest is malformed or does not match the checkpoints.
     #[error("manifest {path}: {detail}")]
     Manifest { path: PathBuf, detail: String },

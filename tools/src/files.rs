@@ -47,20 +47,76 @@ pub(crate) fn check_cancelled(cancelled: &AtomicBool) -> Result<(), ToolError> {
     }
 }
 
-/// Opens an input file read-only. A symlink input is canonicalized and
-/// the resolved path must be a regular file; the caller verifies the
-/// resolved bytes (hashes, `#old` values) before trusting them.
+/// Opens an input file read-only. A symlink input is canonicalized
+/// and the resolved file is opened first, then inspected through
+/// the opened handle: there is no check-then-open race between a
+/// metadata check and the open. The caller verifies the resolved
+/// bytes (hashes, `#old` values) before trusting them.
 pub(crate) fn open_input(path: &Path) -> Result<(PathBuf, File), ToolError> {
     let resolved = fs::canonicalize(path).map_err(|e| ToolError::io(path, e))?;
-    let meta = fs::metadata(&resolved).map_err(|e| ToolError::io(path, e))?;
+    let file = open_input_file(&resolved).map_err(|e| ToolError::io(path, e))?;
+    let meta = file.metadata().map_err(|e| ToolError::io(path, e))?;
     if !meta.is_file() {
-        return Err(ToolError::refused(format!(
-            "{}: input is not a regular file",
-            path.display()
-        )));
+        return Err(ToolError::NotRegularFile {
+            path: path.to_owned(),
+        });
     }
-    let file = File::open(&resolved).map_err(|e| ToolError::io(path, e))?;
     Ok((resolved, file))
+}
+
+/// Opens the resolved input. On Unix the open is non-blocking so a
+/// FIFO (or other special file) is inspected and refused through
+/// the handle instead of blocking in `open`; `O_NONBLOCK` has no
+/// effect on reads from a regular file. The flag value is the
+/// platform's own `O_NONBLOCK`, spelled here because std exposes
+/// `custom_flags` but not the constant; other Unixes fall back to a
+/// plain open, where a FIFO can still block (the residual the
+/// cross-platform consultation records).
+#[cfg(any(target_os = "linux", target_os = "android"))]
+fn open_input_file(resolved: &Path) -> std::io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+    const O_NONBLOCK: i32 = 0o4000;
+    fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NONBLOCK)
+        .open(resolved)
+}
+
+#[cfg(any(
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "dragonfly"
+))]
+fn open_input_file(resolved: &Path) -> std::io::Result<File> {
+    use std::os::unix::fs::OpenOptionsExt;
+    const O_NONBLOCK: i32 = 0x0004;
+    fs::OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NONBLOCK)
+        .open(resolved)
+}
+
+#[cfg(not(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "ios",
+    target_os = "tvos",
+    target_os = "watchos",
+    target_os = "visionos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd",
+    target_os = "dragonfly"
+)))]
+fn open_input_file(resolved: &Path) -> std::io::Result<File> {
+    File::open(resolved)
 }
 
 /// An input directory must be a real directory, never a symlink.

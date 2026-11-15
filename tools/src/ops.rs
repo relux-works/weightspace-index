@@ -14,7 +14,7 @@
 //! complete output visible (see `files::TempDir::publish`).
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 
 use crate::error::ToolError;
@@ -41,14 +41,35 @@ pub struct Progress {
 pub struct Cx<'a> {
     pub(crate) cancelled: &'a AtomicBool,
     progress: &'a mut (dyn FnMut(Progress) + 'a),
+    temp_dir: PathBuf,
 }
 
 impl<'a> Cx<'a> {
+    /// A context whose private input snapshots are made in the
+    /// system temporary directory (`std::env::temp_dir()`).
     pub fn new(cancelled: &'a AtomicBool, progress: &'a mut (dyn FnMut(Progress) + 'a)) -> Self {
+        Self::new_with_temp_dir(cancelled, progress, std::env::temp_dir())
+    }
+
+    /// Like [`Self::new`], but private input snapshots are made in
+    /// `temp_dir`, which needs room for a copy of each input a
+    /// operation holds at once (on Linux the system default is
+    /// often tmpfs, i.e. RAM).
+    pub fn new_with_temp_dir(
+        cancelled: &'a AtomicBool,
+        progress: &'a mut (dyn FnMut(Progress) + 'a),
+        temp_dir: PathBuf,
+    ) -> Self {
         Self {
             cancelled,
             progress,
+            temp_dir,
         }
+    }
+
+    /// The directory private input snapshots are made in.
+    pub(crate) fn temp_dir(&self) -> &Path {
+        &self.temp_dir
     }
 
     pub(crate) fn check(&self) -> Result<(), ToolError> {

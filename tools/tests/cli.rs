@@ -127,6 +127,53 @@ fn replacement_and_apply_via_cli() {
     }
 }
 
+// --temp-dir: snapshots are made in the given directory, which is empty again afterwards (Unix unnamed form).
+#[test]
+fn replacement_with_temp_dir_flag() {
+    let tmp = tempfile::tempdir().unwrap();
+    let snap = tmp.path().join("snap");
+    fs::create_dir(&snap).unwrap();
+    let base_bytes = st_bytes(&[1, 2, 3], &[1]);
+    let edited_bytes = st_bytes(&[1, 9, 3], &[1]);
+    let base = tmp.path().join("base.safetensors");
+    let edited = tmp.path().join("edited.safetensors");
+    fs::write(&base, &base_bytes).unwrap();
+    fs::write(&edited, &edited_bytes).unwrap();
+
+    let patch = tmp.path().join("patch.safetensors");
+    let out = run(&[
+        "replacement",
+        "--base",
+        base.to_str().unwrap(),
+        "--edited",
+        edited.to_str().unwrap(),
+        "--out",
+        patch.to_str().unwrap(),
+        "--temp-dir",
+        snap.to_str().unwrap(),
+    ]);
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(patch.exists());
+    assert_eq!(
+        fs::read_dir(&snap).unwrap().count(),
+        0,
+        "no snapshot may remain in --temp-dir"
+    );
+    // Inputs unchanged.
+    assert_eq!(fs::read(&base).unwrap(), base_bytes);
+    assert_eq!(fs::read(&edited).unwrap(), edited_bytes);
+
+    // Help documents the snapshot-space requirement.
+    let help = run(&["replacement", "--help"]);
+    assert!(help.status.success());
+    assert!(stdout(&help).contains("--temp-dir"), "{}", stdout(&help));
+    assert!(
+        stdout(&help).contains("free space for a copy"),
+        "{}",
+        stdout(&help)
+    );
+}
+
 #[test]
 fn cli_errors() {
     let tmp = tempfile::tempdir().unwrap();

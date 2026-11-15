@@ -8,7 +8,7 @@ use crate::error::ToolError;
 use crate::files::{
     OutputTarget, TempDir, check_input_dir, hash_file, is_within, sync_dir, write_at,
 };
-use crate::patch::{PatchTensor, for_each_index_block, parse_patch};
+use crate::patch::{PatchTensor, for_each_index_block, parse_patch_in};
 
 use super::{ApplyReplacement, Cx, Report};
 use crate::model_dir::{copy_model_dir, single_weights_file};
@@ -31,8 +31,8 @@ pub fn apply_replacement(req: &ApplyReplacement, cx: &mut Cx) -> Result<Report, 
     let base_file_relative = single_weights_file(&req.model)?;
     let base_path = req.model.join(&base_file_relative);
 
-    let patch = parse_patch(&req.patch)?;
-    let base = Checkpoint::open(&base_path)?;
+    let patch = parse_patch_in(&req.patch, cx.temp_dir(), cx.cancelled)?;
+    let base = Checkpoint::open_in(&base_path, cx.temp_dir(), cx.cancelled)?;
     validate_patch_against_base(&patch, &base, req)?;
 
     // Wrong-base verification against the base snapshot bytes — the

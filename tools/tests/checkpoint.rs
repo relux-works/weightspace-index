@@ -497,3 +497,72 @@ fn foreign_descriptors_refused_not_panicking() {
         .expect_err("sub-byte idx meta must refuse");
     assert!(matches!(err, ToolError::UnsupportedDtype { .. }), "{err}");
 }
+
+// M1: after Checkpoint::open, replacing the original with a different valid file of equal size does not change any tensor read.
+#[test]
+fn parse_sees_snapshot_not_original() {
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("model.safetensors");
+    let original = serialize(&[("w", Dtype::BF16, &[4]), ("x", Dtype::F32, &[2])], false);
+    fs::write(&path, &original).unwrap();
+
+    let checkpoint = Checkpoint::open(&path).unwrap();
+    let cancelled = AtomicBool::new(false);
+    let w_meta = checkpoint.tensor("w").unwrap().clone();
+    let x_meta = checkpoint.tensor("x").unwrap().clone();
+    let w_hash = checkpoint.tensor_hash(&w_meta, &cancelled).unwrap();
+    let x_hash = checkpoint.tensor_hash(&x_meta, &cancelled).unwrap();
+    let snapshot_sha = checkpoint.snapshot_sha256().clone();
+
+    // A different valid file of exactly the same size (same header
+    // shape, every stored byte different) takes the original's
+    // place; a reader mapping the original in place would now
+    // parse and read these bytes instead.
+    let mut replacement = original.clone();
+    let data_start = checkpoint.data_start() as usize;
+    for byte in &mut replacement[data_start..] {
+        *byte = byte.wrapping_add(1);
+    }
+    assert_eq!(replacement.len(), original.len());
+    assert_ne!(replacement, original);
+    // The replacement is itself official-valid.
+    SafeTensors::read_metadata(&replacement).unwrap();
+    fs::write(&path, &replacement).unwrap();
+
+    assert_eq!(checkpoint.tensor_hash(&w_meta, &cancelled).unwrap(), w_hash);
+    assert_eq!(checkpoint.tensor_hash(&x_meta, &cancelled).unwrap(), x_hash);
+    assert_eq!(checkpoint.snapshot_sha256(), &snapshot_sha);
+}
+
+// M3: truncating the original to 0 after open succeeds and all reads return the old bytes.
+#[test]
+fn truncating_original_after_open_is_harmless() {
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("model.safetensors");
+    let original = serialize(&[("w", Dtype::BF16, &[4])], false);
+    fs::write(&path, &original).unwrap();
+
+    let checkpoint = Checkpoint::open(&path).unwrap();
+    let cancelled = AtomicBool::new(false);
+    let w_meta = checkpoint.tensor("w").unwrap().clone();
+    let hash_before = checkpoint.tensor_hash(&w_meta, &cancelled).unwrap();
+    let mut bytes_before = vec![0u8; 8];
+    checkpoint
+        .read_tensor_at(&w_meta, 0, &mut bytes_before)
+        .unwrap();
+
+    // Succeeds (on Windows truncating a mapped file would fail,
+    // so success there also proves the original is not mapped)
+    // and the opened checkpoint does not notice.
+    fs::File::create(&path).unwrap().set_len(0).unwrap();
+    assert_eq!(fs::metadata(&path).unwrap().len(), 0);
+    assert_eq!(
+        checkpoint.tensor_hash(&w_meta, &cancelled).unwrap(),
+        hash_before
+    );
+    let mut bytes_after = vec![0u8; 8];
+    checkpoint
+        .read_tensor_at(&w_meta, 0, &mut bytes_after)
+        .unwrap();
+    assert_eq!(bytes_after, bytes_before);
+}

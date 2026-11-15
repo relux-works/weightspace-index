@@ -36,10 +36,11 @@ fn main() -> ExitCode {
             edited,
             manifest,
             out,
+            temp_dir,
         } => run_op(
             "replacement written",
             &out,
-            with_cx(|cx| {
+            with_cx(temp_dir, |cx| {
                 build_replacement(
                     &BuildReplacement {
                         base,
@@ -56,9 +57,10 @@ fn main() -> ExitCode {
             model,
             out,
             expect_tensor_sha256,
+            temp_dir,
         } => {
             let result = cli::parse_expect(&expect_tensor_sha256).and_then(|expected| {
-                with_cx(|cx| {
+                with_cx(temp_dir, |cx| {
                     apply_replacement(
                         &ApplyReplacement {
                             patch,
@@ -92,10 +94,18 @@ fn legacy(result: Result<(), Vec<String>>) -> ExitCode {
 }
 
 /// Runs one library operation with the CLI's no-op progress sink.
-fn with_cx(f: impl FnOnce(&mut Cx) -> Result<Report, ToolError>) -> Result<Report, ToolError> {
+/// Private input snapshots are made in `temp_dir` when given, else
+/// in the system temporary directory.
+fn with_cx(
+    temp_dir: Option<PathBuf>,
+    f: impl FnOnce(&mut Cx) -> Result<Report, ToolError>,
+) -> Result<Report, ToolError> {
     let cancelled = AtomicBool::new(false);
     let mut sink = |_: Progress| {};
-    let mut cx = Cx::new(&cancelled, &mut sink);
+    let mut cx = match temp_dir {
+        Some(dir) => Cx::new_with_temp_dir(&cancelled, &mut sink, dir),
+        None => Cx::new(&cancelled, &mut sink),
+    };
     f(&mut cx)
 }
 

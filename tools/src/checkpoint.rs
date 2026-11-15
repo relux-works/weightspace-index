@@ -1,8 +1,9 @@
 //! Snapshot-backed official safetensors reader.
 //!
 //! [`Checkpoint::open`] first takes a private snapshot of the
-//! resolved input file (see `snapshot`): bounded streaming copy,
-//! SHA-256 while copying, synced, then memory-mapped read-only. The
+//! resolved input file (see `snapshot`): bounded streaming copy
+//! into a private file, memory-mapped read-only, with the SHA-256
+//! computed over the mapped bytes. The
 //! official [`SafeTensors::read_metadata`] parses that mapping and
 //! its [`Metadata`]/`TensorInfo` descriptors and [`Dtype`] values
 //! are the source of truth; no header byte is interpreted by hand.
@@ -99,8 +100,22 @@ impl Checkpoint {
     /// Snapshots and opens a safetensors file (checkpoint or patch
     /// file; both take this same official reader path), refusing
     /// everything the official reader refuses plus sub-byte dtypes.
+    /// The private snapshot copy is made in the system temporary
+    /// directory; see [`Self::open_in`] to choose it.
     pub fn open(path: &Path) -> Result<Self, ToolError> {
-        let (resolved, snapshot) = Snapshot::create(path)?;
+        let cancelled = AtomicBool::new(false);
+        Self::open_in(path, &std::env::temp_dir(), &cancelled)
+    }
+
+    /// Like [`Self::open`], but the private snapshot copy is made
+    /// in `temp_dir` (which needs room for a copy of the input) and
+    /// the copy and hash stop early when `cancelled` is set.
+    pub fn open_in(
+        path: &Path,
+        temp_dir: &Path,
+        cancelled: &AtomicBool,
+    ) -> Result<Self, ToolError> {
+        let (resolved, snapshot) = Snapshot::create(path, temp_dir, cancelled)?;
         // The official reader requires the whole file as one
         // contiguous slice — exactly what the snapshot mapping is.
         // An empty snapshot yields an empty slice here and the
@@ -177,11 +192,9 @@ impl Checkpoint {
         &self.resolved
     }
 
-    /// SHA-256 of the snapshot bytes — the bytes parsed and read
-    /// through this checkpoint, in the private sealed snapshot
-    /// file mapped from its already-open descriptor (see
-    /// `snapshot` for that custody and its same-UID descriptor
-    /// scope limit).
+    /// SHA-256 of the snapshot bytes — the mapped bytes parsed
+    /// and read through this checkpoint (see `snapshot` for their
+    /// custody and trust boundary).
     pub fn snapshot_sha256(&self) -> &Sha256Hex {
         self.snapshot.sha256()
     }

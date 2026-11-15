@@ -32,8 +32,8 @@ fn shape_usize(path: &Path, name: &str, shape: &[u64]) -> Result<Vec<usize>, Too
 
 pub fn build_replacement(req: &BuildReplacement, cx: &mut Cx) -> Result<Report, ToolError> {
     let out = OutputTarget::check(&req.out)?;
-    let base = Checkpoint::open(&req.base)?;
-    let edited = Checkpoint::open(&req.edited)?;
+    let base = Checkpoint::open_in(&req.base, cx.temp_dir(), cx.cancelled)?;
+    let edited = Checkpoint::open_in(&req.edited, cx.temp_dir(), cx.cancelled)?;
     check_same_tensor_set(&base, &edited)?;
 
     let manifest = req.manifest.as_deref().map(read_manifest).transpose()?;

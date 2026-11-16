@@ -3,6 +3,7 @@ apply_cancellation_after_start_publishes_nothing
 apply_writes_weights_from_verified_snapshot
 bad_record_controls
 bad_sparse_indices_refused
+base_identity_refusals
 cancellation_during_copy_phase_publishes_nothing
 cancellation_during_hash_phase_publishes_nothing
 cancellation_during_patch_phase_publishes_nothing
@@ -13,8 +14,18 @@ catalog_covers_all_bases_and_patch_statuses
 check_success_output_preserved
 checkpoint_mismatches_refused
 cli_errors
+cli_explicit_options
 corrupted_replacement_refused_by_streaming_gate
 decided_assessment
+deficient_and_signed_zero_report
+derive_lora::tests::bake_and_factor_controls
+derive_lora::tests::exact_difference_controls
+derive_lora::tests::known_tall_spectra_and_signs
+derive_lora::tests::lossy_storage_metric_control
+derive_lora::tests::modular_rank_controls
+derive_lora::tests::repeated_and_zero_spectra
+derive_lora::tests::selector_exactness
+derive_lora::tests::wide_spectrum
 determinism
 drift_is_reported_and_repaired
 duplicate_header_fields_bom_and_invalid_utf8_refused
@@ -24,6 +35,7 @@ error::tests::parse_digest_has_own_error_type
 error::tests::refusal_variants_are_distinct_and_stable
 example_tree
 existing_output_and_no_change_and_cancellation
+existing_output_is_untouched
 foreign_descriptors_refused_not_panicking
 full_expected_digest_gate
 full_form_streaming_writer_byte_identical_to_official_serializer
@@ -46,6 +58,7 @@ malformed_refused_through_official_reader
 manifest_gate
 models_catalog_controls
 models_catalog_layout_controls
+nonfinite_refusals
 official_acceptances_pinned
 official_descriptor_parity
 output::tests::is_within_is_componentwise_case_insensitive
@@ -69,9 +82,11 @@ progress_reports_snapshot_hash_and_verify_hash_bytes
 publish::tests::publish_dir_never_replaces_foreign_dir
 publish::tests::publish_dir_onto_foreign_file_refused
 publish::tests::publish_file_no_clobber
+rank_refusals
 readme_cells_stay_in_their_cell
 readme_reports_refused_and_unmeasured_versions
 replacement_and_apply_via_cli
+replacement_to_lora_end_to_end
 replacement_with_temp_dir_flag
 repository_tree
 representation_choice_matches_official_serializer_sizes
@@ -99,5 +114,6 @@ symlink_rules
 symlinked_ancestor_accepted
 symlinked_model_dir_spellings_refused
 tensor_hash_with_progress_reports_chunks_and_cancels
+truncated_svd_reports_loss
 truncating_original_after_open_is_harmless
 wrong_sparse_old_refused

@@ -177,7 +177,9 @@ pub fn derive_lora(req: &DeriveLora, cx: &mut Cx) -> Result<Report, ToolError> {
         .collect::<Result<Vec<_>, _>>()?;
     safetensors::tensor::serialize_to_file(views, None, &adapter)
         .map_err(|e| invalid(e.to_string()))?;
-    fs::File::open(&adapter)
+    OpenOptions::new()
+        .write(true)
+        .open(&adapter)
         .and_then(|f| f.sync_all())
         .map_err(|e| ToolError::io(&adapter, e))?;
     let report_path = temp.path().join("lora-report.json");

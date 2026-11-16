@@ -1,0 +1,19 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial maintainer canonical replacement representation of the two pinned published checkpoints.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "replacements.safetensors",
+      "role": "source",
+      "sha256": "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9",
+      "size_bytes": 1563032,
+      "locators": [
+        {
+          "kind": "index-path",
+          "path": "files/replacements.safetensors"
+        }
+      ]
+    }
+  ]
+}

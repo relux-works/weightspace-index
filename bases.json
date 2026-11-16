@@ -1,4 +1,6 @@
 {
-  "bases": [],
+  "bases": [
+    "Qwen/Qwen3.5-0.8B"
+  ],
   "contract_version": 1
 }

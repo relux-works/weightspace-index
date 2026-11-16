@@ -1,0 +1,9 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "Qwen/Qwen3.5-0.8B",
+      "profile": "bf16"
+    }
+  ]
+}

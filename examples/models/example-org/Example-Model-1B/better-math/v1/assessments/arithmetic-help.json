@@ -2,6 +2,6 @@
   "contract_version": 1,
   "intended_use": "Arithmetic help on the bf16 profile.",
   "decision": "UNKNOWN",
-  "reason": "No decision policy is declared for this synthetic example.",
+  "reason": "An assessment of arithmetic help on the bf16 profile was attempted using the bf16-accuracy comparison, but could not be settled because no decision policy is declared for this synthetic example.",
   "owner": "index maintainers"
 }

@@ -8,7 +8,7 @@
 |---|---|
 | `base.json` | Two profiles: the unquantized `bf16` upload and a GGUF quant from another publisher |
 | `runs/baseline-bf16/` | A baseline run, measured once and reused by every patch |
-| `better-math/` | A `replacement` patch: one sparse tensor hosted in this repository, plus a derived GGUF LoRA on Hugging Face, a run, a comparison and an UNKNOWN assessment |
+| `better-math/` | A `replacement` patch: one sparse tensor hosted in this repository, plus a derived GGUF LoRA on Hugging Face, a run, a comparison and an attempted-but-not-established UNKNOWN assessment |
 | `shorter-answers/` | A `lora` patch on Hugging Face with two versions, the first deprecated |
 
-To start a real patch, copy the folder shape, not the values: every digest must come from the intake tool.
+To start a real patch, copy the folder shape, not the values: every digest must come from the intake tool. Real patch slugs follow the [author-prefixed sourced-naming rule](../docs/structure.md#rules); the synthetic names here are not naming sources for real submissions.

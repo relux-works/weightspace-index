@@ -2,6 +2,11 @@
 
 Every patch version has one **source**, in one of two forms. A new form is a change to [structure.md](structure.md#patch-forms), never something a submission introduces.
 
+A source file may be a maintainer-produced canonical representation
+of an author-published edit, under the lineage and validation rules
+in [structure.md](structure.md#patch-forms). It is the version's
+source for derived files; it is never itself listed as `derived`.
+
 | | Replacement | LoRA |
 |---|---|---|
 | `kind` | `replacement` | `lora` |

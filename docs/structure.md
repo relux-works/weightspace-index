@@ -68,7 +68,29 @@ Every JSON file, authored or generated, carries a `contract_version`. [`schema/r
 
 ## Patch forms
 
-Every version has exactly one **source**: the files the author produced, in one of two forms. Nothing else is accepted as a source.
+Every version has exactly one **source**, in one of two forms: files
+the author produced, or a maintainer-produced **canonical
+representation** of an author-published edit. Nothing else is accepted
+as a source. A canonical representation is admitted only when all of
+the following hold:
+
+1. The author-published artifacts it encodes are pinned in the patch
+   card and notices by repository, revision, path, size and SHA-256.
+2. The representation changes container and layout only: coordinate
+   encoding, dtype-preserving bit reinterpretation, and values copied
+   from the pinned base (such as sparse `#old`). It adds, drops and
+   alters no changed coordinate or value. Building it by diffing two
+   pinned author-published checkpoints is the normal route.
+3. Submission evidence proves this before merge: the decoded
+   coordinate/value set equals the author edit's, every `#old` value
+   equals the pinned base at its coordinate, and applying the
+   representation to the pinned base reproduces the author's
+   published result tensors. An independent reviewer re-checks the
+   proof against the pinned inputs, not against the submitter's copy.
+4. The card records the tool identity used to build it and describes
+   the file as a maintainer representation, never as an
+   author-published file. Authorship, credit, license obligations and
+   change-marking of the original edit are unchanged.
 
 | Form | `kind` | Files | Applying it |
 |---|---|---|---|
@@ -103,7 +125,19 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 1. **Fixed depth.** No optional or variable path levels under `models/`.
 2. **Base folder choice.** A patch is filed under the model it was made against, which must have a Hugging Face repository. Same weights in another encoding are a profile of that model, never a folder: GGUF quants, FP8 or AWQ made after training, converted formats, whoever publishes them. A later revision of the same repository is another profile too. Different weights in another repository are a model of their own with their own base folder: fine-tunes, merges and quantization-aware trained (QAT) releases. A QAT folder is named after the unquantized QAT repository when one is published, otherwise after the quantized one.
 3. **Casing and renames.** Namespace and model folders keep the source repository's exact spelling and case at the time of filing. Paths that differ only in case are rejected. A repository renamed later keeps its folder; `by-repo/` maps the new name.
-4. **Names are for patches, versions are for updates.** A slug is lowercase ASCII and hyphen-separated, describes the effect, contains no author, model name or version, is unique within its base (first merged keeps it) and is never renamed. Improved bytes for the same patch are a new version under the same slug; a new slug is only for a genuinely different patch.
+4. **Names are for patches, versions are for updates.** A slug is
+   `<author>-<name>`: the author's namespace, lowercased, then the
+   patch's name sourced ONLY from the author's own published words —
+   by priority (a) the edit's own name, (b) the author's
+   tag/headline effect phrase slugified word-for-word, (c) the
+   author's stated-goal phrase. The card records the exact quote and
+   link the name was derived from. Maintainers never invent a name
+   for someone else's patch and never ask for one; a patch with no
+   usable published name or effect phrase is not listed until it has
+   one. The slug is lowercase ASCII, single-hyphen-separated, unique
+   within its base, and never renamed. Improved bytes for the same
+   patch are a new version under the same slug; a new slug is only
+   for a genuinely different patch.
 5. **Versions are immutable.** Versions are numbered `v1`, `v2`, … with no gaps. Merged files under `v<N>/` are never modified or deleted; runs, comparisons and assessments may be added. The one exception is a legal takedown: the affected files are removed, the version is marked `withdrawn`, and `version.json` stays. The card, `notices/` and `patch.json` stay editable, including version statuses.
 6. **Existing patches change under human review.** A new version, a status change or a card edit for an existing patch is always reviewed by a human maintainer. Authors and submitter are recorded separately and may differ.
 7. **Hosting is the submitter's choice.** A patch file may be hosted in this repository (under `files/`) or on Hugging Face. Files uploaded to this repository must each be under 100 MB, GitHub's per-file limit; the cap does not apply to Hugging Face-hosted files. Git LFS is not used.
@@ -188,9 +222,17 @@ The client records the base profile, every patch version applied and the index c
 
 ## Evidence states
 
+A patch or version with no runs, comparisons or assessments has no
+evidence state: that absence IS the state, shown as "no benchmarks
+submitted". No record is filed to represent it. `UNKNOWN` below is
+reserved for evidence that was submitted but not established — a
+score inside an attempted run, or an assessment that was attempted
+and could not be settled — always with its reason and owner. It is
+never filed as a placeholder for missing evidence.
+
 | State | Meaning |
 |---|---|
-| `UNKNOWN` | Not measured or not established; give the reason and owner. Stays visible. |
+| `UNKNOWN` | Attempted but not established; give the reason and owner. Stays visible. |
 | `UNSUPPORTED` | Outside a declared capability (version, route, profile, transport); refused with a reason. |
 | `REFUSED` | A requested comparison cannot meet its prerequisites; the request and reason are kept. |
 | `INCONCLUSIVE` | Evidence cannot settle the decision. |

@@ -194,6 +194,7 @@ pub fn derive_lora(req: &DeriveLora, cx: &mut Cx) -> Result<Report, ToolError> {
     file.write_all(&report_bytes)
         .and_then(|()| file.sync_all())
         .map_err(|e| ToolError::io(&report_path, e))?;
+    drop(file);
     let out_sha256 = hash_file(&adapter, cx.cancelled)?;
     let out_bytes = fs::metadata(&adapter)
         .map_err(|e| ToolError::io(&adapter, e))?

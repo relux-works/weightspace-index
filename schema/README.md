@@ -35,4 +35,4 @@ Generated files are checked twice: each must satisfy its definition, and `weight
 
 ## Tests
 
-The checks above live in the Rust crate under [`tools/`](../tools/), so CI and the intake tool apply the same rules. `cargo test` from the repository root runs them against the [synthetic example](../examples/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.
+The checks above live in the Rust crate under [`tool/`](../tool/), so CI and the intake tool apply the same rules. `cargo test` from the repository root runs them against the [synthetic example](../examples/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.

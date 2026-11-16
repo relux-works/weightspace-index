@@ -55,13 +55,13 @@ jobs:
         run: cargo test --locked
 
       # No required test may silently vanish: every name in the
-      # per-OS list under tools/tests/required/ must be compiled
+      # per-OS list under tool/tests/required/ must be compiled
       # into a test binary on this OS.
       - name: Required tests present
         shell: bash
         run: |
           cargo test --locked -- --list --format terse 2>/dev/null | sed 's/: test$//' | sort > listed.txt
-          sort "tools/tests/required/${{ matrix.required }}.txt" > required.txt
+          sort "tool/tests/required/${{ matrix.required }}.txt" > required.txt
           missing=$(comm -23 required.txt listed.txt)
           if [ -n "$missing" ]; then
             echo "required tests not compiled on this OS:"

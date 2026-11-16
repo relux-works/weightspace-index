@@ -65,7 +65,7 @@ jobs:
           else
             cp "target/${{ matrix.target }}/release/weightspace" "$stage/"
           fi
-          cp tools/LICENSE "$stage/"
+          cp tool/LICENSE "$stage/"
           if [ "${{ matrix.archive }}" = zip ]; then
             7z a "$stage.zip" "$stage"
             artifact="$stage.zip"

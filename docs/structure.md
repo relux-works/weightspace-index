@@ -19,7 +19,7 @@ The index collects open-source weight patches, identifies each one exactly, and 
 bases.json                            GENERATED list of base addresses
 by-digest/<aa>/<sha256>.json          GENERATED known base file digest -> base and profile
 by-repo/<namespace>/<repo>.json       GENERATED known repository -> base
-schema/  tools/  docs/  NOTICE.md  DISCLAIMER.md
+schema/  tool/  docs/  NOTICE.md  DISCLAIMER.md
 models/
   <hf-namespace>/                     base model namespace, exact casing
     <hf-model>/                       base model repository name, exact casing
@@ -208,7 +208,7 @@ Done:
 1. **This document.**
 2. **`schema/`.** One schema, `records.schema.json`, with a definition per file type; bundles, JSON pointers and digest status are gone.
 3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; it is a tree of its own, with its own generated files, and the root's generated files never read it.
-4. **Checks, in the Rust crate under `tools/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
+4. **Checks, in the Rust crate under `tool/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
 5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
 6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
 7. **CI, first part.** `.github/workflows/checks.yml` runs formatting and every check above on each pull request and on `main`, and fails a pull request that modifies or deletes a file under a merged `v<N>/`.

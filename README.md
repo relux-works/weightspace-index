@@ -7,7 +7,7 @@
 
 An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
 
-**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet. CI runs the offline checks on every pull request and keeps the generated files in sync; the intake tool and the client tool do not exist yet.
+**Status: empty.** The layout, record schema, a synthetic example and its tests are in place. No patch has been filed yet. CI runs the offline checks on every pull request and keeps the generated files in sync. The `weightspace` command-line tool ([user guide](tool/README.md)) builds and applies replacement patches and runs those checks, all offline.
 
 ## Browse
 
@@ -20,13 +20,13 @@ A patch is one of two forms ([details](docs/patch-formats.md)):
 
 See [`examples/`](examples/README.md) for a complete synthetic base with one patch of each form.
 
-## Use a patch without a tool
+## Use a patch
 
 1. Pin the index: note the commit you read.
 2. Open the version's `version.json`. Download each file from a listed locator: a Hugging Face file at its pinned revision, or a file in this repository at your pinned commit.
 3. Check every file's size and SHA-256 against `version.json` (`shasum -a 256 <file>`, `wc -c < <file>`). Stop on any mismatch.
 4. Check that your model files match the target profile's digests in `base.json`.
-5. Apply it with your runtime: [workflows](docs/workflows.md).
+5. Apply it: for a replacement patch, `weightspace apply` bakes it into a copy of the model ([tool guide](tool/README.md)); for a LoRA, use your runtime ([workflows](docs/workflows.md)).
 
 ## Submit a patch
 
@@ -36,7 +36,7 @@ Open a pull request that adds a patch folder or a new version, following [struct
 
 - [Structure and rules](docs/structure.md): layout, records, hosting, review and the client's reading order.
 - [Record schema](schema/README.md): one JSON Schema for every authored and generated file.
-- [`tools/`](tools/): the index's Rust crate (Rust 1.85+). `cargo run -- check` runs every offline check and `cargo run -- generate` rebuilds the generated files; `cargo test` tests the checks and the generator. None of them use the network.
+- [`weightspace` tool guide](tool/README.md): install and use the `weightspace` binary from the index's Rust crate (Rust 1.85+) — build and apply replacement patches, run every offline check with `weightspace check`, and rebuild the generated files with `weightspace generate`. `cargo test` tests the checks and the generator. None of them use the network.
 
 ## Licenses and attribution
 

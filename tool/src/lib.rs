@@ -22,6 +22,7 @@
 #![deny(unsafe_code)]
 
 pub mod checkpoint;
+pub mod derive_lora;
 pub(crate) mod digest;
 pub mod error;
 pub mod files;

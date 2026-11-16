@@ -52,6 +52,40 @@ fn main() -> ExitCode {
                 )
             }),
         ),
+        Command::DeriveLora {
+            model,
+            patch,
+            rank,
+            factor_dtype,
+            method,
+            out,
+            expect_tensor_sha256,
+            temp_dir,
+        } => {
+            // Clap admits F32 only; the library also has no alternate storage path.
+            debug_assert_eq!(factor_dtype, "f32");
+            let result = cli::parse_expect(&expect_tensor_sha256).and_then(|expected| {
+                with_cx(temp_dir, |cx| {
+                    weightspace_tools::derive_lora::derive_lora(
+                        &weightspace_tools::derive_lora::DeriveLora {
+                            model,
+                            patch,
+                            rank,
+                            out: out.clone(),
+                            expect_tensor_sha256: expected,
+                            method: if method == "svd" {
+                                weightspace_tools::derive_lora::Method::Svd
+                            } else {
+                                weightspace_tools::derive_lora::Method::Selector
+                            },
+                        },
+                        cx,
+                    )
+                })
+            });
+            println!("{}", weightspace_tools::derive_lora::DISCLAIMER);
+            run_op("derived experimental LoRA written", &out, result)
+        }
         Command::Apply {
             patch,
             model,

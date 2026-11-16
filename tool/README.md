@@ -1,6 +1,6 @@
 # weightspace
 
-`weightspace` is the command-line tool for the [Weightspace Index](../README.md). It builds and applies **exact replacement patches** for open models, and it runs the index's offline checks and generator. This page is the user guide for the tool; the index itself — what is filed, where, and under what rules — is described in the [root README](../README.md) and [repository structure](../docs/structure.md).
+`weightspace` is the command-line tool for the [Weightspace Index](../README.md). It builds and applies **exact replacement patches** for open models, derives experimental LoRA factors, and runs the index's offline checks and generator. This page is the user guide for the tool; the index itself — what is filed, where, and under what rules — is described in the [root README](../README.md) and [repository structure](../docs/structure.md).
 
 > [!WARNING]
 > A patched model may behave unexpectedly or unsafely. This tool checks bytes and tensor identities; it cannot tell you whether a patch does what its description claims. Inclusion in the index, a successful `weightspace` run, and published benchmark results do not prove that a third-party patch is safe or effective. Read the patch's card and evidence, and assess it for your intended use. See [DISCLAIMER.md](../DISCLAIMER.md).
@@ -9,10 +9,11 @@
 
 A model checkpoint is a large file of named tensors (arrays of numbers). A **replacement patch** says: "for this exact base model, replace the values of these tensors with these new values." Applying it is plain assignment — the new values are copied bit-for-bit into a copy of the model — so the result is exact, with no rounding. For each changed tensor the tool picks whichever storage — in full, or sparsely as the changed positions plus the old and new values at those positions — makes the serialized patch file smaller, storing in full when the sizes tie, so a tensor changed in only a few places can still be stored in full. See [patch formats](../docs/patch-formats.md) for the file-level details.
 
-`weightspace` has four commands:
+`weightspace` has five commands:
 
 - `weightspace replacement` — compare a base checkpoint with an edited checkpoint and write one replacement patch file (`.safetensors`) holding only what changed. This is for patch authors.
 - `weightspace apply` — bake one replacement patch file into a **new copy** of a model directory. The original model is never modified. This is for people who have downloaded a patch and a matching base model and want a patched copy to run.
+- `weightspace derive-lora` — derive experimental LoRA factors from an exact replacement and matching base. Study claims NEVER transfer to this derived form; it needs its own evaluation. PEFT/llama.cpp/vLLM runtime loading is UNQUALIFIED.
 - `weightspace check [repo]` — run every offline check over an index repository checkout. This is for contributors and CI.
 - `weightspace generate [repo]` — rebuild the index's generated files in a checkout. This is for contributors.
 
@@ -21,7 +22,7 @@ Everything runs **offline**. The tool never uses the network, never downloads mo
 ## What it does not do
 
 - It does **not** train or fine-tune models, run inference, or run benchmarks. Run the patched copy with your usual runtime; [workflows](../docs/workflows.md) shows where common runtimes fit.
-- It does **not** combine patches. A baked copy takes at most one replacement. LoRA adapters are applied by your runtime, as published — `weightspace` handles replacement patches only.
+- It does **not** combine patches. A baked copy takes at most one replacement. The experimental derived LoRA factors require separate evaluation and runtime qualification; study claims NEVER transfer to them. PEFT/llama.cpp/vLLM runtime loading is UNQUALIFIED.
 - It does **not** prove patch quality, safety, or effectiveness, and a clean run is not an endorsement (see the warning above).
 - It does **not** quantize, dequantize, or convert weights, and it does not read pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`). Checkpoints and patch files must be single-file [safetensors](https://github.com/huggingface/safetensors); sharded or indexed layouts are refused (see [Inputs in detail](#inputs-in-detail)).
 
@@ -99,6 +100,45 @@ weightspace apply \
 
 If one is missing, the refusal names the tensor that needs one. Where those digests should come from — and why computing them from the model in front of you defeats the check — is covered under [Inputs in detail](#inputs-in-detail).
 
+### Derive experimental LoRA factors
+
+**LoRA is a derived form for experimentation/combination; study claims NEVER transfer to it. It is a separate treatment needing its own evaluation. PEFT/llama.cpp/vLLM runtime loading is UNQUALIFIED.** The adapter is not asserted to be ready to load in any runtime.
+
+```sh
+weightspace derive-lora \
+  --model ./my-model \
+  --patch ./replacements.safetensors \
+  --rank 2 --factor-dtype f32 --method svd \
+  --expect-tensor-sha256 linear.weight=<64-hex-digit-base-tensor-sha256> \
+  --temp-dir ./scratch --out ./derived-lora
+```
+
+Create `./scratch` first. Supply a trusted expected base digest for **each full-form** patch tensor, exactly as for `apply`; omit the flag for sparse tensors, whose saved old bytes are verified. The model uses the same single root `model.safetensors` profile as `apply`. Every patched tensor must be a nonempty 2-D BF16 matrix. Other tensors are not derived. Nonfinite base/patched values are refused. No inputs are downloaded, and no inference or benchmark is run.
+
+All four choices are explicit: `--rank` (positive), `--factor-dtype f32` (the only supported factor dtype), `--method svd|selector`, and `--out` (a **new** directory, refused if it already exists, even empty). The output parent must exist and be outside the input model. Input snapshots use `--temp-dir` or the system temporary directory. Successful output contains `adapter.safetensors` and `lora-report.json`; neither contains input paths or timestamps.
+
+For each patch tensor, the tool reuses apply's snapshot reader and base verification, reconstructs its exact replacement values, expands BF16 exactly to F64, then subtracts in F64. An error-free residual check refuses a dyadic difference that F64 cannot represent exactly. A full stored-bit comparison scans every column; active column indices are sorted ascending, including columns changed only in their signed-zero bit pattern. Omitted columns have zero delta.
+
+`svd` computes the thin SVD of the active-column matrix in F64 with a std-only cyclic one-sided Jacobi implementation. Wide matrices are transposed for the solve. Pairs run in fixed order; a sweep converges when every column cross product is at most `8 * f64::EPSILON * norm(p) * norm(q)`. Failure to converge in 256 sweeps is a refusal. Singular values are sorted descending, ties by original Jacobi column. Each U column's largest-magnitude element is positive, ties by lowest row. The top `rank` components produce balanced `B=U*sqrt(S)` and `A=sqrt(S)*Vᵀ`, with A zero-expanded to the original width, then each factor is separately cast to F32. Rank must not exceed `min(rows,k)` for SVD, where `k` is the number of active columns.
+
+`selector` requires `rank=k` and builds `B=exact_delta[:,active_columns]`, with one-hot A rows selecting the original columns, before the F32 cast. Its real-algebra product is exact; storage and bake fidelity are measured rather than assumed. Rank exceeding k is always refused. All-zero numerical deltas can still have active signed-zero columns; relative error is `null` when the exact delta norm is zero.
+
+Names are mapped **exactly** by appending literal `.lora_A` and `.lora_B` to the complete original UTF-8 tensor name. A is row-major `[rank,width]`, B is row-major `[rows,rank]`; no name rewriting, prefix stripping, transpose or target-module inference occurs. This suffix mapping is injective across tensor/factor pairs. The effective scale is **1**, recorded in the report; no runtime config is emitted. A runtime using alpha/r would need alpha=rank and user scale 1, plus separately qualified mapping and kernels.
+
+The report includes used and all computed active singular values, structural zero count, active indices and k, Jacobi sweeps, exact-rank evidence, factor names/shapes and raw factor byte counts. Independent of SVD, exact BF16 differences scaled by `2^133` are eliminated modulo `1,000,000,007` and `1,000,000,009`. Each modular rank is a lower bound; equality to `min(rows,k)` proves exact rank. A smaller lower bound does **not** prove deficiency; `proven_exact_rank` is then `null`.
+
+Errors are measured from the **stored F32 factors** widened to F64. Multiplication and accumulation proceed in increasing rank order in F64. The frozen bake adds that reconstructed delta to the exact BF16 base in F64, casts to F32, then rounds to BF16 round-to-nearest-ties-even. This is a fixed arithmetic experiment, not a runtime-kernel simulation. Nonfinite stored factors or overflow in the bake are refused.
+
+- `delta_frobenius_error`: Frobenius norm of reconstructed delta minus exact delta; `relative_delta_error` divides this by `exact_delta_frobenius_norm` (null for zero denominator).
+- `bf16_mismatch_count`: stored-bit mismatches against the exact patched tensor after the frozen bake.
+- `max_ulp`, `mean_ulp_all_elements`, `mean_ulp_active_columns`: distances between monotone BF16 encodings (`!bits` for negative values, `bits | 0x8000` otherwise). Signed zero patterns remain distinct; active-column means include every row of each active column.
+- `baked_frobenius_error`: Frobenius norm of baked BF16 values minus exact patched BF16 values, expanded to F64.
+- `raw_factor_bytes`: A, B and combined bytes, excluding safetensors headers and the report.
+
+Identical immutable inputs/options in the same numerical environment produce byte-identical outputs. No timestamps or randomized decomposition are used. Cross-platform/library/compiler bit identity, runtime-kernel fidelity and efficacy are unqualified; the sign convention does not uniquely identify all degenerate singular subspaces. Preserve exact generated bytes and evaluate the derived treatment separately. Study claims NEVER transfer to LoRA.
+
+This analysis materializes one patched tensor and its active matrix in RAM, plus factors for all output tensors. Unlike streaming replacement/apply, it needs memory proportional to the analyzed matrices (`O(rows*width + rows*k + k²)` per tensor, plus stored factors); snapshots additionally need disk space. No derived index record or runtime config is written.
+
 ### Check or regenerate an index checkout (contributors)
 
 From a repository checkout, with no argument both commands act on the current directory (and its `docs/example/` tree):
@@ -174,7 +214,7 @@ That isolation costs temporary space:
 - `replacement` holds snapshots of base and edited at once: allow roughly `size(base) + size(edited)` free in the snapshot directory, plus space for the patch file at `--out`.
 - `apply` holds snapshots of the patch and of `model.safetensors`: allow roughly `size(patch) + size(model.safetensors)` free in the snapshot directory, plus space for a full copy of the model directory next to `--out` while it is staged.
 
-Snapshots go in `--temp-dir` when given, else the system temporary directory. On Linux that default is often tmpfs, which is RAM: for large checkpoints, pass a directory on disk, for example `--temp-dir ./scratch` (create it first). Apart from snapshots on tmpfs, the tool streams tensor bytes in bounded chunks and memory-maps its snapshots rather than loading a whole checkpoint into memory, so a large checkpoint does not need a checkpoint's worth of free RAM.
+Snapshots go in `--temp-dir` when given, else the system temporary directory. On Linux that default is often tmpfs, which is RAM: for large checkpoints, pass a directory on disk, for example `--temp-dir ./scratch` (create it first). For replacement/apply, apart from snapshots on tmpfs, the tool streams tensor bytes in bounded chunks and memory-maps its snapshots rather than loading a whole checkpoint into memory, so a large checkpoint does not need a checkpoint's worth of free RAM.
 
 Outputs are **no-clobber**:
 

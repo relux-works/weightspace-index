@@ -54,7 +54,7 @@ fn locate_weights(req: &ApplyReplacement) -> Result<(PathBuf, PathBuf), ToolErro
     Ok((base_file_relative, base_path))
 }
 
-fn verify_patch_against_base(
+pub(crate) fn verify_patch_against_base(
     req: &ApplyReplacement,
     base_path: &Path,
     cx: &mut Cx,

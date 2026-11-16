@@ -24,6 +24,7 @@ mod apply;
 mod build;
 
 pub use apply::apply_replacement;
+pub(crate) use apply::verify_patch_against_base;
 pub use build::build_replacement;
 
 /// The long-running phase a [`Progress`] report belongs to. Byte

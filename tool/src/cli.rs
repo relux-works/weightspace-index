@@ -53,6 +53,28 @@ pub enum Command {
         #[arg(long = "temp-dir")]
         temp_dir: Option<PathBuf>,
     },
+    /// Derive experimental LoRA factors. Study claims NEVER transfer to LoRA;
+    /// it needs its own evaluation. PEFT/llama.cpp/vLLM loading is UNQUALIFIED.
+    DeriveLora {
+        #[arg(long)]
+        model: PathBuf,
+        #[arg(long)]
+        patch: PathBuf,
+        #[arg(long)]
+        rank: usize,
+        /// Stored factor dtype (F32 only in this version).
+        #[arg(long, value_parser = ["f32"])]
+        factor_dtype: String,
+        #[arg(long, value_parser = ["svd", "selector"])]
+        method: String,
+        #[arg(long)]
+        out: PathBuf,
+        /// Mandatory expected base digest for every full-form patch tensor.
+        #[arg(long = "expect-tensor-sha256")]
+        expect_tensor_sha256: Vec<String>,
+        #[arg(long = "temp-dir")]
+        temp_dir: Option<PathBuf>,
+    },
     /// Bake a replacement file into a new copy of a model directory
     /// holding a single root model.safetensors. The original is never
     /// modified.

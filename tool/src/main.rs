@@ -3,7 +3,7 @@
 //! `weightspace check [repo]` runs every offline check and fails when a
 //! generated file is missing, out of date or stale.
 //! `weightspace generate [repo]` rewrites the generated files. Both act
-//! on the repository root and on `examples/`, each a tree with its own
+//! on the repository root and on `docs/example/`, each a tree with its own
 //! `models/` and generated files, and keep their original success
 //! output.
 //!
@@ -130,7 +130,7 @@ fn run_op(label: &str, out: &Path, result: Result<Report, ToolError>) -> ExitCod
 }
 
 fn trees(repo: &Path) -> [PathBuf; 2] {
-    [repo.to_path_buf(), repo.join("examples")]
+    [repo.to_path_buf(), repo.join("docs/example")]
 }
 
 /// Model checks for a tree; a tree with no `models/` has nothing to check.
@@ -162,7 +162,7 @@ fn check(repo: &Path) -> Result<(), Vec<String>> {
         println!("checks passed");
         Ok(())
     } else {
-        problems.push("run `cargo run -- generate` if only generated files are reported".into());
+        problems.push("from tool/, run `cargo run --locked -- generate ..` if only generated files are reported".into());
         Err(problems)
     }
 }

@@ -11,9 +11,9 @@
 | `comparison` | `.../v<N>/comparisons/<id>.json` | maintainers |
 | `assessment` | `.../v<N>/assessments/<id>.json` | maintainers |
 | `index` | `models/<ns>/<model>/index.json` | generator |
-| `bases` | `bases.json` | generator |
-| `digestLookup` | `by-digest/<aa>/<sha256>.json` | generator |
-| `repoLookup` | `by-repo/<namespace>/<repo>.json` | generator |
+| `modelsIndex` | `models/index.json` | generator |
+| `digestLookup` | `lookup/by-digest/<aa>/<sha256>.json` | generator |
+| `repoLookup` | `lookup/by-repo/<namespace>/<repo>.json` | generator |
 
 The path decides the definition; a JSON file anywhere else under `models/` is an error. [structure.md](../docs/structure.md) explains what each field means.
 
@@ -35,4 +35,6 @@ Generated files are checked twice: each must satisfy its definition, and `weight
 
 ## Tests
 
-The checks above live in the Rust crate under [`tool/`](../tool/), so CI and the intake tool apply the same rules. `cargo test` from the repository root runs them against the [synthetic example](../examples/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.
+The checks above live in the Rust crate under [`tool/`](../tool/), so CI and the intake tool apply the same rules. `cargo test --locked` from `tool/` runs them against the [synthetic example](../docs/example/README.md) and against deliberately broken copies of it that must fail. Validation uses the `jsonschema` crate with remote and file references disabled. JSON Schema ignores unknown keywords, so a test also limits the schema to the keywords it actually uses, which catches a misspelt rule.
+
+The path mapping also applies below `docs/example/`. Generated `models/README.md` and per-model tables are Markdown: regeneration checks their exact bytes, with links relative to each table, while JSON Schema covers the JSON records.

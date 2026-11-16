@@ -1,6 +1,6 @@
 # Repository structure and change rules
 
-**Status: layout in place, no patches yet.** The schema, a synthetic example and the Rust checks follow this document. The `models/` tree is empty; CI runs the offline checks and keeps the generated files in sync, and the intake tool and downloading checks do not exist yet; [Migration](#migration-from-the-scaffold-layout) lists what remains.
+**Status:** the index contains a first replacement patch. The schema, generator and offline checks cover both the real collection and the synthetic examples. Downloading checks and automated intake remain planned.
 
 ## Purpose and goals
 
@@ -16,11 +16,23 @@ The index collects open-source weight patches, identifies each one exactly, and 
 ## Target shape
 
 ```text
-bases.json                            GENERATED list of base addresses
-by-digest/<aa>/<sha256>.json          GENERATED known base file digest -> base and profile
-by-repo/<namespace>/<repo>.json       GENERATED known repository -> base
-schema/  tool/  docs/  NOTICE.md  DISCLAIMER.md
+.github/                             workflows and PULL_REQUEST_TEMPLATE.md
+CONTRIBUTING.md  DISCLAIMER.md  NOTICE.md  README.md
+docs/                                authored documentation
+  example/                           synthetic base showing a filled-in patch folder
+    README.md                        authored explanation
+    models/                          authored records and GENERATED catalogs/tables
+    lookup/                          GENERATED client lookups for the example
+schema/                              authored JSON record definitions
+tool/                                standalone Rust crate
+  Cargo.toml  Cargo.lock             crate manifest and pinned dependencies
+  src/  tests/  README.md  LICENSE
+lookup/                              GENERATED, for client discovery
+  by-digest/<aa>/<sha256>.json        known base weight digest -> base and profile
+  by-repo/<namespace>/<repo>.json     known repository -> base and profiles
 models/
+  README.md                          GENERATED table of every base with patch counts
+  index.json                         GENERATED list of all base addresses
   <hf-namespace>/                     base model namespace, exact casing
     <hf-model>/                       base model repository name, exact casing
       README.md                       GENERATED results table for this base
@@ -110,11 +122,12 @@ the following hold:
 |---|---|
 | `models/<ns>/<model>/index.json` | Everything a client needs for one base: its profiles and baseline runs, every patch with its metadata and latest version, and every version with its status, changelog, target profile, files, runs and assessment decisions. Each file gets a `format` from its extension, and an `index-path` locator is rewritten to be relative to this file. |
 | `models/<ns>/<model>/README.md` | The base's profiles, then a table of every patch: kind, latest version, summary. For each latest version, every comparison against its baseline run (metric, both scores, who measured it) or "not measured", and every assessment decision. |
-| `by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
-| `by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not, and for each former name of a renamed repository: base address and profile IDs. |
-| `bases.json` | Every base address. Its `index.json` and `README.md` sit at `models/<address>/`. |
+| `lookup/by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
+| `lookup/by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not, and for each former name of a renamed repository: base address and profile IDs. |
+| `models/index.json` | `{ "contract_version": 1, "bases": ["<namespace>/<model>"] }`, with every base address sorted. Each base has its own `index.json` and `README.md` at `models/<address>/`. |
+| `models/README.md` | Every base, linked relative to `models/`, and its count of patch names (including names with only deprecated or withdrawn versions). |
 
-Generated files are committed and never edited by hand. `cargo run -- generate` rebuilds them for the repository and for `examples/`; `cargo run -- check` runs every offline check and fails when a generated file is missing, out of date or no longer generated. CI runs the check.
+Generated files are committed and never edited by hand. The same generator produces all these paths under `docs/example/` as a separate collection; it never mixes example bases into the main catalog. Markdown tables are verified byte-for-byte by generation; JSON files are also validated against the schema. From `tool/`, `cargo run --locked -- generate ..` rebuilds them for the repository and for `docs/example/`; `cargo run --locked -- check ..` runs every offline check and fails when a generated file is missing, out of date or no longer generated. CI runs the check.
 
 The generator reads only authored files in the repository, never a patch file or the network, so every machine builds the same bytes and a Hugging Face outage cannot break a build. That is why `index.json` does not list the tensors a version changes: for a file hosted on Hugging Face it would need a download. Each file's `format` comes from its extension, and the downloading checks confirm it.
 
@@ -124,7 +137,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 
 1. **Fixed depth.** No optional or variable path levels under `models/`.
 2. **Base folder choice.** A patch is filed under the model it was made against, which must have a Hugging Face repository. Same weights in another encoding are a profile of that model, never a folder: GGUF quants, FP8 or AWQ made after training, converted formats, whoever publishes them. A later revision of the same repository is another profile too. Different weights in another repository are a model of their own with their own base folder: fine-tunes, merges and quantization-aware trained (QAT) releases. A QAT folder is named after the unquantized QAT repository when one is published, otherwise after the quantized one.
-3. **Casing and renames.** Namespace and model folders keep the source repository's exact spelling and case at the time of filing. Paths that differ only in case are rejected. A repository renamed later keeps its folder; `by-repo/` maps the new name.
+3. **Casing and renames.** Namespace and model folders keep the source repository's exact spelling and case at the time of filing. Paths that differ only in case are rejected. A repository renamed later keeps its folder; `lookup/by-repo/` maps the new name.
 4. **Names are for patches, versions are for updates.** A slug is
    `<author>-<name>`: the author's namespace, lowercased, then the
    patch's name sourced ONLY from the author's own published words —
@@ -203,10 +216,10 @@ The client tool lists models installed locally, lets the user pick one, then rea
 
 **3. Find the base**, stopping at the first hit; a 404 means no match at that step:
 
-1. `by-digest/<aa>/<sha256>.json` for an exact profile match;
-2. `by-repo/<namespace>/<repo>.json` from the cache path or LM Studio path;
+1. `lookup/by-digest/<aa>/<sha256>.json` for an exact profile match;
+2. `lookup/by-repo/<namespace>/<repo>.json` from the cache path or LM Studio path;
 3. the GGUF `general.base_model.0.repo_url` key, then step 2;
-4. manual selection from `bases.json`, shown as unverified.
+4. manual selection from `models/index.json`, shown as unverified.
 
 **4. Fetch `models/<ns>/<model>/index.json`** and show its patches, latest versions and results for the user's profile.
 
@@ -241,26 +254,11 @@ never filed as a placeholder for missing evidence.
 
 Negative, refused, inconclusive and unassessed results stay visible. A later decision adds a new assessment; it never rewrites a run. Results for one profile or version never fill in for another. Evidence hosted outside this repository, such as a Hugging Face dataset, is referenced by locator plus SHA-256.
 
-## Migration from the scaffold layout
+## Implementation status
 
-The scaffold described `models/<publisher>/<model>/patches/<fix-id>/` pages, a top-level `payloads/` tree and a single hand-edited `catalog.json` holding every record.
+The offline checks validate records, layout, references, hosted-file digests and replacement format. CI runs formatting, clippy, tests and generated-output checks, and rejects edits or deletions under a merged version folder. The standalone `tool/` crate builds and applies replacements.
 
-Done:
-
-1. **This document.**
-2. **`schema/`.** One schema, `records.schema.json`, with a definition per file type; bundles, JSON pointers and digest status are gone.
-3. **`examples/`.** A synthetic base with a replacement patch and a LoRA patch replaces `TEMPLATE.json`; it is a tree of its own, with its own generated files, and the root's generated files never read it.
-4. **Checks, in the Rust crate under `tool/`.** Schema validation, the layout rules a single file cannot express, hosted-file digests and the replacement file format, tested against the example and broken copies of it.
-5. **Docs.** `README.md`, `docs/patch-formats.md`, `docs/workflows.md`, `schema/README.md`.
-6. **`catalog.json`.** Removed; `bases.json` (empty) and the per-base indexes replace it.
-7. **CI, first part.** `.github/workflows/checks.yml` runs formatting and every check above on each pull request and on `main`, and fails a pull request that modifies or deletes a file under a merged `v<N>/`.
-8. **Generator.** `weightspace generate` builds every generated file from the authored ones; `weightspace check` runs every offline check and fails when a generated file differs, and CI runs it.
-
-Remaining:
-
-9. **Downloading checks in CI:** patch files fetched and hashed, base digests compared with Hugging Face's records, derived files rebuilt.
-10. **Intake tool** that downloads, checks and hashes every file and drafts a patch folder or version, without credentials or running repository code; builder for derived patch files; availability checker on a schedule. Until the intake tool exists, maintainers file patches by hand, hashing every file themselves.
-11. **Repository settings (admins):** the `checks` workflow required before merging into `main`, and force pushes to `main` blocked.
+Downloading checks (remote digests and rebuilding derived files), automated intake and scheduled availability checks remain planned. Until then, maintainers file patches by hand and record sources, licenses, sizes and hashes themselves.
 
 ## Open decisions
 

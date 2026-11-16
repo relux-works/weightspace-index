@@ -37,7 +37,7 @@ pub fn records() -> &'static Records {
 }
 
 pub fn example_models() -> PathBuf {
-    repo().join("examples/models")
+    repo().join("docs/example/models")
 }
 
 /// The synthetic example base, relative to a models/ root.

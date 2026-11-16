@@ -27,7 +27,8 @@ pub enum Command {
         /// Repository root (default: current directory).
         repo: Option<PathBuf>,
     },
-    /// Rewrite the generated files.
+    /// Rewrite lookup/, models/index.json, models/README.md and per-model
+    /// indexes/tables in the repository and docs/example/.
     Generate {
         /// Repository root (default: current directory).
         repo: Option<PathBuf>,

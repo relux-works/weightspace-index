@@ -20,6 +20,9 @@ jobs:
           - { os: ubuntu-latest, lane: linux-symlinked-tmp, required: linux }
           - { os: macos-latest, lane: macos, required: macos }
           - { os: windows-latest, lane: windows, required: windows }
+    defaults:
+      run:
+        working-directory: tool
     steps:
       # Pinned to the v7.0.1 commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -29,6 +32,8 @@ jobs:
 
       # Pinned to the v2.9.3 commit of Swatinem/rust-cache.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+        with:
+          workspaces: tool
 
       # The macOS-shape proxy: TMPDIR spelled through a symlink
       # ($RUNNER_TEMP/tmp -> private/tmp), as macOS spells its
@@ -50,7 +55,7 @@ jobs:
         run: cargo clippy --locked --all-targets -- -D warnings
 
       # Schema, layout, cross-references, digests of files hosted here,
-      # no symlinks or case collisions, for examples/ and models/.
+      # no symlinks or case collisions, for docs/example/ and models/.
       - name: Records and layout
         run: cargo test --locked
 
@@ -61,7 +66,7 @@ jobs:
         shell: bash
         run: |
           cargo test --locked -- --list --format terse 2>/dev/null | sed 's/: test$//' | sort > listed.txt
-          sort "tool/tests/required/${{ matrix.required }}.txt" > required.txt
+          sort "tests/required/${{ matrix.required }}.txt" > required.txt
           missing=$(comm -23 required.txt listed.txt)
           if [ -n "$missing" ]; then
             echo "required tests not compiled on this OS:"
@@ -69,16 +74,17 @@ jobs:
             exit 1
           fi
 
-      # Every offline check over the repository and examples/, and every
+      # Every offline check over the repository and docs/example/, and every
       # generated file equal to a fresh build.
       - name: Generated files in sync
         if: matrix.lane == 'linux'
-        run: cargo run --locked -- check
+        run: cargo run --locked -- check ..
 
       # Rule 5: merged files under v<N>/ are never modified or deleted; runs,
       # comparisons and assessments may only be added. A legal takedown is
       # the one exception and is merged by an admin.
       - name: Merged versions are unchanged
+        working-directory: .
         if: github.event_name == 'pull_request' && matrix.lane == 'linux'
         run: |
           changed=$(git diff --name-status --no-renames HEAD^1 HEAD -- models \

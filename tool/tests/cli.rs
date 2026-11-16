@@ -281,3 +281,41 @@ fn cli_errors() {
     );
     assert!(!destination.exists());
 }
+
+// The CLI detects root/example catalog drift, repairs both at docs/example, and preserves authored records.
+#[test]
+fn generate_and_check_new_layout_via_cli() {
+    let tmp = tempfile::tempdir().unwrap();
+    for dir in ["schema", "models", "lookup", "docs/example"] {
+        common::copy_dir(&common::repo().join(dir), &tmp.path().join(dir));
+    }
+    let base = tmp.path().join("models/Qwen/Qwen3.5-0.8B/base.json");
+    let authored = fs::read(&base).unwrap();
+    let root = tmp.path().to_str().unwrap();
+    let checked = run(&["check", root]);
+    assert!(checked.status.success(), "{}", stderr(&checked));
+    fs::write(
+        tmp.path().join("models/index.json"),
+        r#"{"contract_version":1,"bases":[]}"#,
+    )
+    .unwrap();
+    let refused = run(&["check", root]);
+    assert!(!refused.status.success());
+    assert!(stderr(&refused).contains("models/index.json: out of date"));
+    let generated = run(&["generate", root]);
+    assert!(generated.status.success(), "{}", stderr(&generated));
+    assert!(stdout(&generated).contains("6 generated files"));
+    assert!(stdout(&generated).contains("8 generated files"));
+    assert!(stdout(&generated).contains("docs/example"));
+    let example_index = tmp.path().join("docs/example/models/index.json");
+    fs::write(&example_index, r#"{"contract_version":1,"bases":[]}"#).unwrap();
+    let refused = run(&["check", root]);
+    assert!(!refused.status.success());
+    assert!(stderr(&refused).contains("docs/example: models/index.json: out of date"));
+    let generated = run(&["generate", root]);
+    assert!(generated.status.success(), "{}", stderr(&generated));
+    assert_eq!(fs::read_dir(tmp.path()).unwrap().count(), 4);
+    let checked = run(&["check", root]);
+    assert!(checked.status.success(), "{}", stderr(&checked));
+    assert_eq!(fs::read(base).unwrap(), authored);
+}

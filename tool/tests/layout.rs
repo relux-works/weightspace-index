@@ -21,7 +21,7 @@ fn example_tree() {
 fn repository_tree() {
     let records = records();
     let mut errors = check_lookups(records, &repo());
-    errors.extend(check_lookups(records, &repo().join("examples")));
+    errors.extend(check_lookups(records, &repo().join("docs/example")));
     if repo().join("models").exists() {
         errors.extend(check_models(records, &repo().join("models")));
     }
@@ -271,6 +271,7 @@ fn hygiene_controls() {
     assert_eq!(check_hygiene(tmp.path()).len(), 1);
 }
 
+// Correct lookup paths and records pass; wrong shard, depth or record shape is rejected.
 #[test]
 fn lookup_controls() {
     let records = records();
@@ -278,16 +279,16 @@ fn lookup_controls() {
     let good = r#"{"contract_version": 1, "matches": [{"base": "a/b", "profile": "bf16"}]}"#;
     let repo = r#"{"contract_version": 1, "matches": [{"base": "a/b", "profiles": ["bf16"]}]}"#;
     let cases = [
-        (format!("by-digest/ab/{sum}.json"), good, true),
-        (format!("by-digest/cd/{sum}.json"), good, false),
-        (format!("by-digest/{sum}.json"), good, false),
+        (format!("lookup/by-digest/ab/{sum}.json"), good, true),
+        (format!("lookup/by-digest/cd/{sum}.json"), good, false),
+        (format!("lookup/by-digest/{sum}.json"), good, false),
         (
-            format!("by-digest/ab/{sum}.json"),
+            format!("lookup/by-digest/ab/{sum}.json"),
             r#"{"contract_version": 1, "matches": []}"#,
             false,
         ),
-        ("by-repo/a/b.json".to_owned(), repo, true),
-        ("by-repo/a.json".to_owned(), repo, false),
+        ("lookup/by-repo/a/b.json".to_owned(), repo, true),
+        ("lookup/by-repo/a.json".to_owned(), repo, false),
     ];
     for (path, body, ok) in cases {
         let tmp = tempfile::tempdir().unwrap();
@@ -297,4 +298,30 @@ fn lookup_controls() {
         let errors = check_lookups(records, tmp.path());
         assert_eq!(errors.is_empty(), ok, "{path}: {errors:#?}");
     }
+}
+
+// Generated catalog files are allowed at models/; malformed catalogs and stray files are rejected.
+#[test]
+fn models_catalog_layout_controls() {
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path().join("models");
+    copy_dir(&example_models(), &root);
+    assert!(check_models(records(), &root).is_empty());
+    fs::write(
+        root.join("index.json"),
+        r#"{"contract_version":1,"bases":["bad/address/extra"]}"#,
+    )
+    .unwrap();
+    let errors = check_models(records(), &root);
+    assert_eq!(errors.len(), 1, "{errors:?}");
+    assert!(errors[0].contains("index.json"));
+    fs::write(
+        root.join("index.json"),
+        r#"{"contract_version":1,"bases":[]}"#,
+    )
+    .unwrap();
+    fs::write(root.join("stray.txt"), "unexpected").unwrap();
+    let errors = check_models(records(), &root);
+    assert_eq!(errors.len(), 1, "{errors:?}");
+    assert!(errors[0].contains("only namespace folders"));
 }

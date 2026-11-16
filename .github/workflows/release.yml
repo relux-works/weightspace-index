@@ -42,6 +42,8 @@ jobs:
 
       # Pinned to the v2.9.3 commit of Swatinem/rust-cache.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+        with:
+          workspaces: tool
 
       - name: Install target
         shell: bash
@@ -50,6 +52,7 @@ jobs:
       # musl targets are static by default; the MSVC CRT is made
       # static with +crt-static so the .exe needs no redistributable.
       - name: Build
+        working-directory: tool
         shell: bash
         env:
           RUSTFLAGS: ${{ matrix.target == 'x86_64-pc-windows-msvc' && '-C target-feature=+crt-static' || '' }}
@@ -61,9 +64,9 @@ jobs:
           stage="weightspace-${{ github.ref_name }}-${{ matrix.target }}"
           mkdir "$stage"
           if [ "${{ matrix.archive }}" = zip ]; then
-            cp "target/${{ matrix.target }}/release/weightspace.exe" "$stage/"
+            cp "tool/target/${{ matrix.target }}/release/weightspace.exe" "$stage/"
           else
-            cp "target/${{ matrix.target }}/release/weightspace" "$stage/"
+            cp "tool/target/${{ matrix.target }}/release/weightspace" "$stage/"
           fi
           cp tool/LICENSE "$stage/"
           if [ "${{ matrix.archive }}" = zip ]; then

@@ -60,9 +60,14 @@ fn schema_uses_only_known_keywords() {
     walk(&read(&repo().join("schema/records.schema.json")), "#");
 }
 
+// The shipped root catalog validates under its dedicated generated-record definition.
 #[test]
 fn shipped_generated_files() {
-    expect("bases", &read(&repo().join("bases.json")), true);
+    expect(
+        "modelsIndex",
+        &read(&repo().join("models/index.json")),
+        true,
+    );
 }
 
 #[test]
@@ -347,7 +352,7 @@ fn generated_shapes() {
         false,
     );
     expect(
-        "bases",
+        "modelsIndex",
         &json!({"contract_version": 1, "bases": ["a/b/c"]}),
         false,
     );
@@ -417,4 +422,24 @@ fn locator_controls() {
     let mut v = hf.clone();
     v["url"] = json!("https://example.invalid/payload");
     expect("locator", &v, false);
+}
+
+// A catalog accepts base addresses only, with the declared version and no extra fields.
+#[test]
+fn models_catalog_controls() {
+    let valid = json!({"contract_version": 1, "bases": ["a/b"]});
+    expect("modelsIndex", &valid, true);
+    expect(
+        "modelsIndex",
+        &json!({"contract_version": 1, "bases": []}),
+        true,
+    );
+    for bad in [
+        json!({"bases": ["a/b"]}),
+        json!({"contract_version": 2, "bases": ["a/b"]}),
+        json!({"contract_version": 1, "bases": ["a/b/c"]}),
+        json!({"contract_version": 1, "bases": ["a/b"], "extra": 1}),
+    ] {
+        expect("modelsIndex", &bad, false);
+    }
 }

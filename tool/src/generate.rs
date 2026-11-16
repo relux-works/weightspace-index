@@ -3,9 +3,9 @@
 //! output is the same on every machine and never depends on a remote source.
 //!
 //! Generated paths, relative to the tree:
-//! - `bases.json`
-//! - `by-digest/<aa>/<sha256>.json` for each weight file of a profile
-//! - `by-repo/<namespace>/<repo>.json` for each repository holding a profile
+//! - `models/index.json` and `models/README.md`
+//! - `lookup/by-digest/<aa>/<sha256>.json` for each weight file of a profile
+//! - `lookup/by-repo/<namespace>/<repo>.json` for each repository holding a profile
 //! - `models/<namespace>/<model>/index.json` and `README.md`
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -26,6 +26,11 @@ pub fn build(tree: &Path) -> Result<Output, String> {
     let models = tree.join("models");
     let mut out = Output::new();
     let mut bases = Vec::new();
+    let mut readme = String::from(
+        "# Models\n\nGENERATED from authored model records. Do not edit by hand.\n\n\
+         Patch counts include all patch names, regardless of version status.\n\n\
+         | Base | Patches |\n|---|---:|\n",
+    );
     let mut digests: BTreeMap<String, BTreeSet<(String, String)>> = BTreeMap::new();
     let mut repos: BTreeMap<String, BTreeMap<String, BTreeSet<String>>> = BTreeMap::new();
 
@@ -60,21 +65,26 @@ pub fn build(tree: &Path) -> Result<Output, String> {
                 format!("models/{address}/README.md"),
                 base.readme().into_bytes(),
             );
+            readme.push_str(&format!(
+                "| [{address}]({address}/README.md) | {} |\n",
+                base.patches.len()
+            ));
             bases.push(address);
         }
     }
 
     out.insert(
-        "bases.json".into(),
+        "models/index.json".into(),
         pretty(&json!({"contract_version": 1, "bases": bases})),
     );
+    out.insert("models/README.md".into(), readme.into_bytes());
     for (sum, matches) in digests {
         let matches: Vec<Value> = matches
             .iter()
             .map(|(b, p)| json!({"base": b, "profile": p}))
             .collect();
         out.insert(
-            format!("by-digest/{}/{sum}.json", &sum[..2]),
+            format!("lookup/by-digest/{}/{sum}.json", &sum[..2]),
             pretty(&json!({"contract_version": 1, "matches": matches})),
         );
     }
@@ -84,7 +94,7 @@ pub fn build(tree: &Path) -> Result<Output, String> {
             .map(|(b, p)| json!({"base": b, "profiles": p}))
             .collect();
         out.insert(
-            format!("by-repo/{repo}.json"),
+            format!("lookup/by-repo/{repo}.json"),
             pretty(&json!({"contract_version": 1, "matches": matches})),
         );
     }
@@ -117,9 +127,7 @@ pub fn write(tree: &Path, output: &Output) -> Result<(), String> {
             fs::remove_file(tree.join(&rel)).map_err(|e| format!("{rel}: {e}"))?;
         }
     }
-    for dir in ["by-digest", "by-repo"] {
-        remove_empty_dirs(&tree.join(dir));
-    }
+    remove_empty_dirs(&tree.join("lookup"));
     for (rel, bytes) in output {
         let path = tree.join(rel);
         if fs::read(&path).is_ok_and(|disk| disk == *bytes) {
@@ -133,13 +141,15 @@ pub fn write(tree: &Path, output: &Output) -> Result<(), String> {
 
 /// Files at generated paths that exist in the tree now.
 fn existing(tree: &Path) -> Vec<String> {
-    let mut found: Vec<String> = ["by-digest", "by-repo"]
-        .iter()
-        .flat_map(|dir| walk_files(&tree.join(dir)))
+    let mut found: Vec<String> = walk_files(&tree.join("lookup"))
+        .into_iter()
         .map(|p| rel_parts(tree, &p).join("/"))
         .collect();
-    if tree.join("bases.json").is_file() {
-        found.push("bases.json".into());
+    for name in ["index.json", "README.md"] {
+        let rel = format!("models/{name}");
+        if tree.join(&rel).is_file() {
+            found.push(rel);
+        }
     }
     let models = tree.join("models");
     for ns in subdirs(&models).unwrap_or_default() {

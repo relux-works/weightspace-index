@@ -34,6 +34,16 @@ pub fn check_models(records: &Records, root: &Path) -> Vec<String> {
     };
     for ns in l.read_dir(root) {
         if !ns.is_dir {
+            match ns.name.as_str() {
+                "index.json" => {
+                    l.record(&ns.path, "modelsIndex");
+                    continue;
+                }
+                "README.md" => continue,
+                _ => {}
+            }
+        }
+        if !ns.is_dir {
             l.fail(format!(
                 "{}: only namespace folders belong here",
                 ns.path.display()
@@ -54,13 +64,13 @@ pub fn check_models(records: &Records, root: &Path) -> Vec<String> {
     l.errors
 }
 
-/// Checks the generated `by-digest/` and `by-repo/` trees under `root`, when present.
+/// Checks the generated `lookup/by-digest/` and `lookup/by-repo/` trees under `root`, when present.
 pub fn check_lookups(records: &Records, root: &Path) -> Vec<String> {
     let mut l = Layout {
         records,
         errors: Vec::new(),
     };
-    let digests = root.join("by-digest");
+    let digests = root.join("lookup/by-digest");
     for path in walk_files(&digests) {
         let parts = rel_parts(&digests, &path);
         let sum = parts
@@ -69,19 +79,19 @@ pub fn check_lookups(records: &Records, root: &Path) -> Vec<String> {
             .unwrap_or("");
         if parts.len() != 2 || !SHA256.is_match(sum) || parts[0] != sum[..2] {
             l.fail(format!(
-                "{}: expected by-digest/<aa>/<sha256>.json",
+                "{}: expected lookup/by-digest/<aa>/<sha256>.json",
                 path.display()
             ));
             continue;
         }
         l.record(&path, "digestLookup");
     }
-    let repos = root.join("by-repo");
+    let repos = root.join("lookup/by-repo");
     for path in walk_files(&repos) {
         let parts = rel_parts(&repos, &path);
         if parts.len() != 2 || !parts[1].ends_with(".json") {
             l.fail(format!(
-                "{}: expected by-repo/<namespace>/<repo>.json",
+                "{}: expected lookup/by-repo/<namespace>/<repo>.json",
                 path.display()
             ));
             continue;

@@ -41,13 +41,14 @@ Each archive will contain a single top-level directory, `weightspace-<tag>-<targ
 
 ### From source
 
-You need Rust **1.85 or newer** on Linux, macOS, or Windows. From the repository root:
+You need Rust **1.85 or newer** on Linux, macOS, or Windows. From `tool/` in the repository:
 
 ```sh
+cd tool
 cargo build --locked --release --bin weightspace
 ```
 
-`--locked` builds exactly the dependency versions recorded in `Cargo.lock`. The binary is written to `target/release/weightspace` (`target\release\weightspace.exe` on Windows); run it from there or copy it to a directory on your `PATH`. Confirm it runs:
+`--locked` builds exactly the dependency versions recorded in `tool/Cargo.lock`. The binary is written to `tool/target/release/weightspace` (`tool\target\release\weightspace.exe` on Windows), relative to the repository root; run it from there or copy it to a directory on your `PATH`. Confirm it runs:
 
 ```sh
 weightspace --help
@@ -100,7 +101,7 @@ If one is missing, the refusal names the tensor that needs one. Where those dige
 
 ### Check or regenerate an index checkout (contributors)
 
-From a repository checkout, with no argument both commands act on the current directory (and its `examples/` tree):
+From a repository checkout, with no argument both commands act on the current directory (and its `docs/example/` tree):
 
 ```sh
 weightspace check            # every offline check; prints "checks passed"
@@ -201,17 +202,19 @@ Malformed or mismatched input is a **typed refusal**, never a crash or a best-ef
 | `symlink refused`, `output parent`, `invalid output name` | Path breaks the custody rules | Use real directories and a fresh name |
 | An OS error naming `--temp-dir` or `--out` | Usually out of space | Free space; move `--temp-dir` to disk |
 
-For `check`, failures list each problem; if only generated files are reported, run `cargo run -- generate` (the failure output ends with that hint). Any other problem is in an authored record — see the [record schema](../schema/README.md) and [repository structure](../docs/structure.md).
+For `check`, failures list each problem; if only generated files are reported, from `tool/`, run `cargo run --locked -- generate ..` (the failure output ends with that hint). Any other problem is in an authored record — see the [record schema](../schema/README.md) and [repository structure](../docs/structure.md).
+
+Generated outputs are `lookup/{by-digest,by-repo}/`, `models/index.json`, `models/README.md` and each base's `index.json`/`README.md`, both at the repository root and under `docs/example/`. All are generated, including the example equivalents. Patch cards and source records remain authored.
 
 ## Development checks
 
-From the repository root (in CI, `cargo fmt --check` and `cargo run --locked -- check` run on the Linux lane only; clippy and the tests run on every lane — Linux, macOS, and Windows):
+From `tool/` (in CI, `cargo fmt --check` and `cargo run --locked -- check ..` run on the Linux lane only; clippy and the tests run on every lane — Linux, macOS, and Windows):
 
 ```sh
 cargo fmt --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
-cargo run --locked -- check
+cargo run --locked -- check ..
 ```
 
 ## Further reading
@@ -221,7 +224,7 @@ cargo run --locked -- check
 - [Repository structure](../docs/structure.md) — layout, records, hosting, review, and the rules `check` enforces.
 - [Workflows](../docs/workflows.md) — running a patched copy or a LoRA with common runtimes.
 - [Record schema](../schema/README.md) — the JSON contract for every index file.
-- [Synthetic example](../examples/README.md) — a complete made-up base with one patch of each form.
+- [Synthetic example](../docs/example/README.md) — a complete made-up base with one patch of each form.
 
 ## License
 

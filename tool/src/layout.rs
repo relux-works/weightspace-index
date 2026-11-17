@@ -2,6 +2,8 @@
 //! folders, which records refer to which, and whether files hosted in the
 //! repository match their recorded digests.
 
+mod dual;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -443,6 +445,12 @@ impl Layout<'_> {
                         }
                     }
                 }
+            }
+        }
+
+        if !withdrawn {
+            if let Err(e) = dual::check(dir, kind, files) {
+                self.fail(e);
             }
         }
 

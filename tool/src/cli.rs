@@ -56,16 +56,23 @@ pub enum Command {
     /// Derive experimental LoRA factors. Study claims NEVER transfer to LoRA;
     /// it needs its own evaluation. PEFT/llama.cpp/vLLM loading is UNQUALIFIED.
     DeriveLora {
+        #[arg(
+            long,
+            required_unless_present = "tensor_shapes",
+            conflicts_with = "tensor_shapes"
+        )]
+        model: Option<PathBuf>,
+        /// Offline sparse derivation: JSON name -> [rows,width], selector-exact only.
         #[arg(long)]
-        model: PathBuf,
+        tensor_shapes: Option<PathBuf>,
         #[arg(long)]
         patch: PathBuf,
         #[arg(long)]
-        rank: usize,
+        rank: Option<usize>,
         /// Stored factor dtype (F32 only in this version).
         #[arg(long, value_parser = ["f32"])]
         factor_dtype: String,
-        #[arg(long, value_parser = ["svd", "selector"])]
+        #[arg(long, value_parser = ["svd", "selector", "selector-exact"])]
         method: String,
         #[arg(long)]
         out: PathBuf,

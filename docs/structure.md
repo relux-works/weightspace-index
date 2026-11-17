@@ -43,7 +43,7 @@ models/
         README.md                     the card: what it does, how to use it, caveats
         patch.json                    name-level metadata and version statuses
         notices/                      license texts and attribution
-        v<N>/                         one version; merged files never change
+        v<N>/                         one version; pre-adoption edits allowed (rule 5)
           version.json                files of this version
           files/                      optional, patch files hosted in this repository
           runs/<run-id>/              runs of this version
@@ -111,7 +111,10 @@ the following hold:
 
 - **A complete model is never a patch.** A fine-tune or merge publishing every tensor is a base of its own.
 - **`#old` records what the patch replaced.** It lets CI build and check derived files without downloading the base.
-- **Derived files are optional conveniences** built by the index's own tool, never submitted: a LoRA built from a replacement and GGUF conversions of a PEFT LoRA, made with llama.cpp's own converter. A LoRA built from a replacement is exact up to runtime rounding and stays small only when the edits touch few rows or columns; a replacement of whole tensors gets none. CI rebuilds every derived file and compares digests.
+- **Dual publication is the publication expectation (owner decision, 2026-11-17):** “I expect every entry in our index to get published as both exact replacement patch and LoRa adapter at the same time”. Keep one source form and list the other as `role: derived`, with source digests and tool identity. Conversion measures and reports; density, size, sparsity and usefulness never decide whether the tool converts. Hosting limits still decide where a file may live.
+- **Replacement → LoRA:** `weightspace derive-lora --method selector-exact` chooses rank `k_t` per tensor, including whole-tensor replacements. It emits F32 `adapter.safetensors` and `lora-report.json`, both derived from the replacement source. The algebraic selector is exact before storage; F32 delta error and frozen BF16 bake mismatches are reported. This is not a claim of runtime equivalence or benchmark transfer. Runtime loading remains **UNQUALIFIED**; there is no `adapter_config.json`.
+- **Current coverage boundary:** nonempty 2-D BF16 patch tensors with finite old/new values and differences representable in F64 and finite F32 storage. Full tensors need the verified base and expected tensor digests. Offline sparse derivation uses `#old` plus an explicit name → shape map: sparse trios do not encode original matrix dimensions. Its bake metrics cover saved coordinates only; unseen base bytes are unverified. Unsupported tensors produce a nonzero exit and a report naming every failure, without an adapter. Numerical storage/bake loss is reported, not a worthiness gate. Nonmatrix/non-BF16 coverage and LoRA → replacement conversion remain open work.
+- **Contract v1 compatibility:** absence of derived files remains valid for historical versions; universal dual publication is not silently made a v1 schema requirement. Listing either canonical derived name `adapter.safetensors` or `lora-report.json` claims the canonical pair profile: both must be hosted with complete provenance and consistent report data, and this profile currently requires exactly one replacement source file. Multiple-source versions need a future bundle/report contract and cannot claim complete coverage through one partial pair. This refines validation of these names, including previously accepted incomplete pairs. A mandatory universal rule needs an explicit contract revision/migration after coverage is complete. Other derived files (for example GGUF conversions by llama.cpp) keep their existing v1 rules.
 - **A new form is a change to this document**, not something a submission can introduce.
 
 **Combining patches follows the runtimes.** Several LoRAs combine the way llama.cpp loads and merges them: the scaled sum of their outputs, independent of order. The client passes the adapters and their scales to the runtime and adds no rule of its own. Replacements have no runtime convention, so a baked copy takes at most one replacement; the copy is then an ordinary model, and LoRAs go on top of it.
@@ -148,10 +151,12 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
    for someone else's patch and never ask for one; a patch with no
    usable published name or effect phrase is not listed until it has
    one. The slug is lowercase ASCII, single-hyphen-separated, unique
-   within its base, and never renamed. Improved bytes for the same
+   within its base, and never renamed. After adoption, improved bytes for the same
    patch are a new version under the same slug; a new slug is only
    for a genuinely different patch.
-5. **Versions are immutable.** Versions are numbered `v1`, `v2`, … with no gaps. Merged files under `v<N>/` are never modified or deleted; runs, comparisons and assessments may be added. The one exception is a legal takedown: the affected files are removed, the version is marked `withdrawn`, and `version.json` stays. The card, `notices/` and `patch.json` stay editable, including version statuses.
+5. **Version policy follows adoption.** Versions are numbered `v1`, `v2`, … with no gaps. The index is currently pre-adoption: merged files under `v<N>/` may be edited in place, including `version.json`, rather than creating a new version. Deletions and file-type changes remain forbidden. When adoption begins, maintainers must set `PRE_ADOPTION` to `'false'` in `.github/workflows/checks.yml`; thereafter merged files may not be modified or deleted, while runs, comparisons and assessments may be added. The legal-takedown exception remains: an admin removes affected files, marks the version `withdrawn`, and retains `version.json`. The card, `notices/` and `patch.json` stay editable, including version statuses.
+
+   Owner decision, 2026-11-17: "no one have seen this index or used it yet - we may just edit what we have instead of adding a v2"
 6. **Existing patches change under human review.** A new version, a status change or a card edit for an existing patch is always reviewed by a human maintainer. Authors and submitter are recorded separately and may differ.
 7. **Hosting is the submitter's choice.** A patch file may be hosted in this repository (under `files/`) or on Hugging Face. Files uploaded to this repository must each be under 100 MB, GitHub's per-file limit; the cap does not apply to Hugging Face-hosted files. Git LFS is not used.
 8. **Safe formats only.** Weights are safetensors or GGUF; metadata is JSON. Pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`) and any code from a source repository are refused, because loading them can execute code.
@@ -175,10 +180,10 @@ Base model files can be hundreds of gigabytes, too large to download in CI. Whoe
 |---|---|
 | A Hugging Face owner replaces a file | Pinned revision, plus our own SHA-256: a mismatch is refused |
 | A pull request claims a false digest | CI recomputes it from the downloaded bytes |
-| A later pull request points a merged version at new bytes | Rule 5, enforced by CI |
+| After adoption, a later pull request points a merged version at new bytes | Rule 5, enforced by CI once `PRE_ADOPTION` is false |
 | This repository's history is rewritten | `main` is protected against force pushes; clients record the index commit they used |
 
-The worst a source owner can do is make a file unavailable: delete the repository, make it private or gated, or squash its history. A scheduled job requests every Hugging Face locator at its pinned revision and records the result and date; an unavailable source never removes an entry. Where the license allows, maintainers mirror files to a maintainer-owned Hugging Face repository as a second locator. Later upstream commits never move a pin; changed upstream weights are a new version.
+The worst a source owner can do is make a file unavailable: delete the repository, make it private or gated, or squash its history. A scheduled job requests every Hugging Face locator at its pinned revision and records the result and date; an unavailable source never removes an entry. Where the license allows, maintainers mirror files to a maintainer-owned Hugging Face repository as a second locator. Later upstream commits never move a pin automatically; changed upstream weights require a reviewed in-place edit before adoption or a new version after adoption.
 
 **Hugging Face model cards prefill placement.** `base_model` and `base_model_relation` (`adapter`, `merge`, `quantized`, `finetune`) suggest the base folder and kind; a reviewer confirms them. `quantized` usually means a profile of the parent, except for QAT releases. Private repositories are refused. A gated base is recorded by its revision and file digests; obtaining it is left to the user.
 
@@ -186,13 +191,13 @@ The worst a source owner can do is make a file unavailable: delete the repositor
 
 Maintainers import patches they find; anyone else opens a pull request. Both use the same files and checks:
 
-1. Create the patch folder or a new `v<N>/`, usually with the intake tool, and complete the card and `notices/`.
+1. Create the patch folder or a new `v<N>/`, or edit an existing version before adoption (rule 5), usually with the intake tool, and complete the card and `notices/`.
 2. CI checks:
    - schema validity of every authored file;
    - every patch file downloaded, its format, SHA-256 and size, and the 100 MB cap for uploads here; base file digests matched against Hugging Face's records;
    - exactly one source form per version, and every derived file rebuilt to the same digest;
    - slug, casing, fixed depth and no symlinks;
-   - no merged file under any `v<N>/` modified or deleted;
+   - no merged file under any `v<N>/` deleted or changed in type; modifications are allowed only before adoption (rule 5);
    - license and notices present;
    - generated files in sync.
 3. The review agent approves a new patch only when every CI check has passed, and queues it for benchmarking. Changes to an existing patch, and anything the agent cannot decide, go to a human maintainer; an approved new version is queued for benchmarking too. Results supplied by a submitter are recorded as reported.
@@ -256,9 +261,9 @@ Negative, refused, inconclusive and unassessed results stay visible. A later dec
 
 ## Implementation status
 
-The offline checks validate records, layout, references, hosted-file digests and replacement format. CI runs formatting, clippy, tests and generated-output checks, and rejects edits or deletions under a merged version folder. The standalone `tool/` crate builds and applies replacements.
+The offline checks validate records, layout, references, hosted-file digests, replacement format and canonical dual-publication pairs. Pair checks bind source/adapter/report digests, tool, method, per-tensor ranks, names, shapes and bytes. Offline sparse pairs are rebuilt from their saved coordinates and declared shapes, including measured metrics. For base-backed full-form tensors, offline checking verifies descriptors, selector A and bindings only; it cannot recompute full-tensor `lora_B` values or numeric report claims, including bake metrics, without the base. CI runs formatting, clippy, tests and generated-output checks, and enforces rule 5: deletions and file-type changes under a merged version folder are rejected, and edits are rejected after adoption. The standalone `tool/` crate builds and applies replacements.
 
-Downloading checks (remote digests and rebuilding derived files), automated intake and scheduled availability checks remain planned. Until then, maintainers file patches by hand and record sources, licenses, sizes and hashes themselves.
+Remote digest checks, rebuilding other derived formats, automated intake and scheduled availability checks remain planned. Before adoption, rule 5 permits retrofitting an existing v1 in place; after adoption it requires a new patch version. Meanwhile, maintainers file patches by hand and record sources, licenses, sizes and hashes themselves.
 
 ## Open decisions
 

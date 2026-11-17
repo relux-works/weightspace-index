@@ -26,13 +26,13 @@ A changed tensor is stored one of two ways:
   - `<name>#new`: the new values, in the tensor's dtype, one per index;
   - `<name>#old`: the values they replace, same shape and dtype.
 
-A tensor is either full or sparse, never both. Values are stored, never differences: assigning a value is exact, while adding a difference in a low-precision dtype can round. `#old` lets CI check derived files without downloading the base, and lets a user confirm their copy matches before writing.
+A tensor is either full or sparse, never both. Values are stored, never differences: assigning a value is exact, while adding a difference in a low-precision dtype can round. `#old`, together with explicitly supplied original matrix shapes, lets offline checks rebuild derived sparse selectors without downloading the base, and lets a user confirm their copy matches before writing.
 
 ## Derived files
 
-The index may build convenience files from a source and list them as `role: derived`, with `derived_from` and the tool that built them. CI rebuilds each one and compares digests; submitters never provide them.
+The publication expectation is to provide replacement and LoRA forms together, keeping one source form and listing the other as `role: derived`, with `derived_from` source digests and tool name/version. Historical contract-v1 records without dual files remain readable. See [coverage and contract boundaries](structure.md#patch-forms).
 
-- A **LoRA built from a replacement**, so the patch works on quants and in adapter-only runtimes. It reproduces the replacement up to runtime rounding and stays small only when the edits touch few rows or columns; a replacement of whole tensors gets none.
+- A **LoRA derived from a replacement**: per-tensor `selector-exact` handles sparse and whole BF16 matrices without a size or sparsity gate. It emits `adapter.safetensors` plus `lora-report.json`. Exactness is the algebraic construction before F32 storage; the report measures delta loss and a frozen BF16 bake. Saved `#old` values plus declared matrix shapes permit offline sparse rebuilding, with metrics limited to saved coordinates. Runtime loading, including use with quants, remains **UNQUALIFIED**; no runtime config is emitted. Study claims never transfer to this treatment.
 - A **GGUF conversion of a PEFT LoRA**, made with llama.cpp's own converter.
 
 ## What is not a patch

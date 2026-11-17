@@ -41,3 +41,17 @@ The slug `rikiyat-thinking-loops` uses the author's namespace `RikiyaT`, lowerca
 The base and edited checkpoint are published under Apache-2.0. The original compact edit's data are published under CC BY 4.0. Both layers travel with this representation: [attribution and change marking](notices/ATTRIBUTION.md), [Apache-2.0](notices/Apache-2.0.txt), and [CC BY 4.0](notices/CC-BY-4.0.txt).
 
 **no benchmarks submitted**. No inference was run for this entry. It contains no run, comparison or assessment records and makes no behavioral efficacy claim.
+
+## Derived LoRA publication
+
+Version 1 also lists `adapter.safetensors` and `lora-report.json` as derived files from the unchanged replacement source. Weightspace tools 0.2.0 built the per-tensor `selector-exact` adapter offline from saved #old/#new values and the [1024, 3584] matrix shapes recorded above; no base weights were downloaded for this derivation. To reproduce, write a JSON object mapping both complete tensor names (layers 15 and 19) to `[1024, 3584]`, then run:
+
+```sh
+weightspace derive-lora --patch v1/files/replacements.safetensors \
+  --tensor-shapes tensor-shapes.json --method selector-exact \
+  --factor-dtype f32 --out derived-lora
+```
+
+Each tensor uses rank 64. The adapter is 2,359,816 bytes (2,359,296 raw F32 factor bytes), compared with 1,563,032 bytes for the exact replacement; conversion is not conditional on compression. The report records zero frozen-BF16 bake mismatches on 65,260 and 64,928 saved coordinates respectively. F32 delta Frobenius errors are approximately 2.33e-10 and 8.73e-11; algebraic selector exactness does not mean exact stored delta. Unseen base values were not verified. See the report's precise values, verification scopes, digests and frozen arithmetic rule.
+
+Names append literal `.lora_A` / `.lora_B`, with scale 1; no adapter_config is supplied. **PEFT/llama.cpp/vLLM loading is UNQUALIFIED.** No inference or benchmark was run for this derived treatment, and the source study's claims do not transfer to it.

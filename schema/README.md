@@ -1,6 +1,6 @@
 # Record schema, contract version 1
 
-[records.schema.json](records.schema.json) is one JSON Schema (Draft 2020-12) with a definition for every JSON file in the index. Every file carries `"contract_version": 1`; a reader that meets another version stops instead of guessing.
+[records.schema.json](records.schema.json) is one JSON Schema (Draft 2020-12) with a definition for every index record. Every record carries `"contract_version": 1`; a reader that meets another version stops instead of guessing.
 
 | Definition | File | Written by |
 |---|---|---|
@@ -15,7 +15,7 @@
 | `digestLookup` | `lookup/by-digest/<aa>/<sha256>.json` | generator |
 | `repoLookup` | `lookup/by-repo/<namespace>/<repo>.json` | generator |
 
-The path decides the definition; a JSON file anywhere else under `models/` is an error. [structure.md](../docs/structure.md) explains what each field means.
+The path decides the record definition; a JSON record anywhere else under `models/` is an error. Listed payloads under a version’s `files/` (including adapter configs and derivation reports) use their own formats, not the index record contract. [structure.md](../docs/structure.md) explains what each field means.
 
 ## What the schema settles, and what it cannot
 
@@ -29,7 +29,11 @@ What it cannot see is checked by the layout tests and, later, by CI:
 - an `index-path` locator is relative to the folder of the file that declares it, stays under `files/` for a version, points at a file with the recorded size and SHA-256, and every hosted file is listed;
 - a replacement file is valid safetensors with full tensors or complete `#idx`/`#new`/`#old` trios and sorted unique indices.
 
-Downloading Hugging Face files, recomputing their digests, rebuilding derived files and protecting merged versions from change need the network or Git history; they belong to the intake tool and CI.
+The canonical derived `adapter.safetensors` / `lora-report.json` pair is checked offline: either name requires both, hosted under this version, with the same source digest and tool identity. The current canonical profile requires exactly one replacement source file; it refuses a partial claim over a multi-source version. Reports must be complete selector-exact format 2, F32, scale 1, and match all source tensors, factor names/shapes, per-tensor ranks, bytes and digests. For sparse-old reports the checker rebuilds factors and measured tensor evidence from #old/#new and the report's declared shapes. A base-backed full-tensor report needs the base to independently recheck its numerical claims; offline checking verifies its descriptors and bindings only.
+
+The 2026-11-17 publication expectation is both forms for every entry; historical v1 records without derived files remain valid. Conversion currently covers nonempty 2-D BF16 matrices within the numeric boundary in [structure](../docs/structure.md#patch-forms). LoRA-source reverse conversion and unsupported tensor classes are unresolved, not silently skipped. No required fields or contract version are changed here; canonical-pair validation is a refinement and may reject previously accepted incomplete pairs. A universal mandatory rule requires an explicit future contract/migration decision.
+
+Downloading Hugging Face files, recomputing remote digests, rebuilding other derived formats and enforcing the adoption-dependent version policy need the network or Git history; they belong to intake and CI.
 
 Generated files are checked twice: each must satisfy its definition, and `weightspace check` fails when one differs from a fresh build.
 

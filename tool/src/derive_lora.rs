@@ -1,6 +1,8 @@
 //! Derived experimental LoRA factors. Study claims NEVER transfer to LoRA.
 //! Runtime loading in PEFT/llama.cpp/vLLM is UNQUALIFIED.
+mod exact;
 mod math;
+pub use exact::{DeriveExactLora, check_exact_publication, derive_exact_lora};
 
 use std::collections::BTreeMap;
 use std::fs::{self, OpenOptions};

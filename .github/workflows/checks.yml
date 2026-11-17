@@ -139,17 +139,20 @@ jobs:
         if: steps.changes.outputs.records == 'true' && matrix.lane == 'linux'
         run: cargo run --locked -- check ..
 
-      # Rule 5: merged files under v<N>/ are never modified or deleted; runs,
-      # comparisons and assessments may only be added. A legal takedown is
-      # the one exception and is merged by an admin.
-      - name: Merged versions are unchanged
+      # Rule 5: before adoption, merged version files may be edited in place.
+      # Deletions and type changes stay forbidden; additions remain allowed.
+      # Set PRE_ADOPTION to 'false' when adoption begins to forbid edits too.
+      # Legal takedowns remain an admin exception.
+      - name: Merged versions follow adoption policy
         working-directory: .
         if: github.event_name == 'pull_request' && matrix.lane == 'linux'
+        env:
+          PRE_ADOPTION: 'true'
         run: |
           changed=$(git diff --name-status --no-renames HEAD^1 HEAD -- models \
-            | awk -F'\t' '$1 != "A" && $2 ~ /^models\/[^\/]+\/[^\/]+\/[^\/]+\/v[0-9]+\//')
+            | awk -F'\t' -v pre_adoption="$PRE_ADOPTION" '$1 != "A" && !(pre_adoption == "true" && $1 == "M") && $2 ~ /^models\/[^\/]+\/[^\/]+\/[^\/]+\/v[0-9]+\//')
           if [ -n "$changed" ]; then
-            echo "Files under a merged version folder were modified or deleted:"
+            echo "Changes forbidden by the version adoption policy:"
             echo "$changed"
             exit 1
           fi

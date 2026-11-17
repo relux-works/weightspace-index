@@ -38,6 +38,7 @@ Open a pull request that adds a patch folder or a new version, following [CONTRI
 
 - [Structure and rules](docs/structure.md): layout, records, hosting, review and the client's reading order.
 - [Record schema](schema/README.md): one JSON Schema for every authored and generated file.
+- [Qwen3.5-0.8B on M1 Pro](docs/benchmarks/qwen3.5-0.8b-m1-pro.md): MLX-LM speed and memory from 512 to 131k tokens, with a recipe to rerun it on your own Mac.
 - [`weightspace` tool guide](tool/README.md): install and use the `weightspace` binary from the index's Rust crate (Rust 1.85+) — build and apply replacement patches, run every offline check with `weightspace check`, and rebuild the generated files with `weightspace generate`. `cargo test --locked` from `tool/` tests the checks and the generator. None of them use the network.
 
 ## Tools

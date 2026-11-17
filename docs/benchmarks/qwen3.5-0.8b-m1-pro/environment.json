@@ -1,0 +1,88 @@
+{
+  "date": "2026-11-17",
+  "machine": {
+    "model": "MacBookPro18,3",
+    "chip": "Apple M1 Pro",
+    "cpu_cores": 8,
+    "performance_cores": 6,
+    "efficiency_cores": 2,
+    "gpu_cores": 14,
+    "memory_bytes": 34359738368
+  },
+  "os": {
+    "name": "macOS",
+    "version": "27.2.1",
+    "build": "26B131"
+  },
+  "python": "3.12.5",
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-metal": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.23.0"
+  },
+  "device": "Device(gpu, 0)",
+  "metal_available": true,
+  "device_info": {
+    "device_name": "Apple M1 Pro",
+    "max_recommended_working_set_size": 26800603136,
+    "memory_size": 34359738368,
+    "architecture": "applegpu_g13s",
+    "max_buffer_length": 20100448256,
+    "resource_limit": 499000
+  },
+  "power": "AC power",
+  "thermal_status_before": "no thermal or performance warnings",
+  "protocol": {
+    "contexts": [
+      512,
+      2048,
+      8192,
+      16384,
+      32768,
+      65536,
+      131072
+    ],
+    "generated_tokens": 256,
+    "batch_size": 1,
+    "warmup_trials_per_context": 1,
+    "measured_trials_per_context": 3,
+    "prefill_step_size": 2048,
+    "delay_before_measured_trial_seconds": 3,
+    "prompt_seed": 0,
+    "greedy": true,
+    "ignore_eos": true,
+    "prompt_cache_reused": false,
+    "weight_quantization": null,
+    "kv_quantization": null,
+    "input": "synthetic token ids",
+    "fresh_process_per_context": true
+  },
+  "smoke_test": {
+    "prompt": "What is 2 + 2? Answer with only the number.",
+    "enable_thinking": false,
+    "response": "4",
+    "generation_tokens": 2,
+    "finish_reason": "stop"
+  },
+  "limitations": [
+    "Normal desktop applications remained open.",
+    "Sequential ascending contexts; no randomized ordering.",
+    "Text path only; vision and MTP excluded by MLX-LM.",
+    "No comparison against another engine or quantization.",
+    "Process footprint sampled only for 131072; top reports whole GiB above 10 GiB."
+  ],
+  "process_memory_sampling": {
+    "contexts": [
+      131072
+    ],
+    "interval_seconds": 2,
+    "sources": {
+      "rss_kb": "ps -o rss=",
+      "phys_footprint": "top -l 1 -pid <pid> -stats mem"
+    },
+    "started_after_warmup_began": true,
+    "file": "context-131072.footprint.tsv",
+    "effective_interval_seconds": 3.6
+  }
+}

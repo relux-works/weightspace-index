@@ -1,4 +1,5 @@
-{schema:2,task:$task,model_label:$label,endpoint:$url,shard_id:$shard,served_model:$model,protocol_id:$protocol,
+{schema:2,task:$task,model_label:$label,endpoint:$url,shard_id:$shard,served_model:$model,protocol_id:(if $task == "card-math" then "qwen35-0.8b-card-replication-32k-v1"
+   else "lm_eval-0.4.13-qwen35-text-thinking-32k-math500-mmlupro-tiers-v2" end),
  dataset:(if $task|startswith("mmlu_pro") then $pins[0].mmlu_pro_biology else $pins[0].minerva_math500 end | {path,name,split,revision}),
  sample_units:$units[0],selection_sha256:$selection,count:($units[0]|length),engine:"vllm",engine_version_expected:"0.33.0",plugin_expected:"vllm-metal==0.33.0",
  lineage:$lin[0],performed_by:"index",trust_level:"submitted",lm_eval_version:"0.4.13",sampling:$backend[0].generation_kwargs,

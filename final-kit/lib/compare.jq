@@ -6,6 +6,7 @@ def identity: {task,dataset,protocol_id,config,engine,lm_eval_version,sampling,s
     engine_version_observed:.lineage.engine_version_observed,plugin_version_observed:.lineage.plugin_version_observed,
     machine_layout_evidence:.lineage.machine_layout_evidence};
 def key: [.task,.index];
+def selection: map([.task,.index,.global_index,.stratum]) | sort;
 def side($rows):
   $rows[0].manifest as $m |
   demand(all($rows[]; .manifest.task==$spec[0].task and .manifest.dataset.path==$spec[0].dataset and .manifest.dataset.revision==$spec[0].revision);"selection identity mismatch") |
@@ -18,15 +19,17 @@ def side($rows):
     (if $i.task=="minerva_math500" then {exact_match:$r.exact_match,math_verify:$r.math_verify} else {exact_match:$r.exact_match} end) as $scores |
     demand(all($scores[]; .==0 or .==1);"invalid upstream scores") |
     $i+{scores:$scores}] as $items |
-  demand(($items|map(key)|sort)==($expected[0]|map(key)|sort);"missing/unexpected/duplicate paired units") |
-  demand(all($rows[]; (.items|map(key)|sort)==(.manifest.sample_units|map(key)|sort) and (.native|length)==(.items|length));"manifest/native coverage mismatch") |
+  demand(($items|selection)==($expected[0]|selection);"missing/unexpected/duplicate paired units") |
+  demand(all($rows[]; (.items|selection)==(.manifest.sample_units|selection) and (.native|length)==(.items|length));"manifest/native coverage mismatch") |
   {manifest:$m,items:($items|sort_by(key)),shards:($rows|length)};
 side($a) as $x | side($b) as $y |
 demand($x.manifest.model_label!=$y.manifest.model_label;"distinct arm labels required") |
 demand(($x.manifest|identity)==($y.manifest|identity);"protocol/config mismatch between sides") |
 demand(if $aa then $x.manifest.lineage==$y.manifest.lineage and $x.manifest.served_model==$y.manifest.served_model and $x.manifest.request_seed!=$y.manifest.request_seed else $x.manifest.request_seed==$y.manifest.request_seed end;"paired seed/A-A lineage mismatch") |
 demand(($x.items|map([.task,.index,.prompt_sha256,.doc_sha256]))==($y.items|map([.task,.index,.prompt_sha256,.doc_sha256]));"paired prompt/doc mismatch") |
-[$x.items[] as $i | $y.items[] | select(key==($i|key)) | {task:.task,index:.index,global_index:.global_index,stratum:.stratum,a:$i.scores,b:.scores}] as $pairs |
+# Both sides have just been sorted and checked for identical item identities.
+[range($x.items|length) as $i | $x.items[$i] |
+  {task,index,global_index,stratum,a:.scores,b:$y.items[$i].scores}] as $pairs |
 {task:$spec[0].task,protocol_id:$x.manifest.protocol_id,status:"DESCRIPTIVE frozen selection; deployment unqualified; authoritative re-scoring pending",output_cap:32768,aa_control:$aa,
  expected:($pairs|length),models:[$x.manifest.model_label,$y.manifest.model_label],shards:[$x.shards,$y.shards],
  metrics:[$pairs[0].a|keys[] as $metric |

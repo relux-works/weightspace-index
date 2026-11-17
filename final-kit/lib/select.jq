@@ -3,7 +3,7 @@ def fail($m): error($m);
 ($pins[0]) as $p | ($spec[0]) as $s | ($strata[0]) as $st |
 (if $task=="card-math" then "minerva_math500" elif $task|startswith("mmlu_pro_") then "mmlu_pro" else $task end) as $parent |
 (if $parent=="mmlu_pro" then $p.mmlu_pro_biology else $p.minerva_math500 end) as $pin |
-if $s.task != $task or $s.dataset != $pin.path or $s.revision != $pin.revision then fail("selection identity mismatch") else . end |
+if ($spec|length) != 1 or ($s.indices|type) != "array" or $s.task != $task or $s.dataset != $pin.path or $s.revision != $pin.revision then fail("selection identity mismatch") else . end |
 $s.indices as $all |
 if ($all|length)==0 or ($all|unique|length)!=($all|length) or (all($all[];type=="number" and floor==. and .>=0)|not) then fail("invalid/duplicate indices") else . end |
 (if $parent=="mmlu_pro" then

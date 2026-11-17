@@ -1,38 +1,76 @@
 #!/usr/bin/env bash
-# Adapted from kit2-delta's bundle validation; JSON plumbing uses jq, never Python.
-set -euo pipefail
-hash_file() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | cut -d ' ' -f 1; else shasum -a 256 "$1" | cut -d ' ' -f 1; fi; }
-refuse() { echo "REFUSED: $*" >&2; exit 65; }
+# Shared by the Bash entry points. Callers set -euo pipefail, kit_dir and umask.
+refuse() {
+    printf 'REFUSED: %s\n' "$*" >&2
+    exit 65
+}
+
+# Create one directory beneath an already checked parent. Concurrent mkdir is OK.
+ensure_directory() {
+    [[ ! -L $1 ]] && mkdir -p -- "$1" && [[ -d $1 && ! -L $1 ]] ||
+        refuse "expected a directory: $1"
+}
+
+hash_file() {
+    local result
+    if command -v sha256sum >/dev/null 2>&1; then
+        result=$(sha256sum < "$1") || return 1
+    else
+        result=$(shasum -a 256 < "$1") || return 1
+    fi
+    printf '%s\n' "${result%% *}"
+}
+
 scan_file() {
-  # Never print a matched value. These are detector patterns, not credentials.
-  if LC_ALL=C grep -Eq '(sk-|hf_|ghp_|ghs_|github_pat_)[A-Za-z0-9_-]{16,}|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----' "$1"; then return 1; fi
-  case "$1" in *.json|*.jsonl)
-    jq -e -s 'all(.. | objects | to_entries[];
-       ((.key|ascii_downcase|gsub("-";"_"))|test("(^|_)(api_key|apikey|access_token|auth_token|refresh_token|authorization|password|passwd|secret|private_key|client_secret|token|secret_key|api_token|bearer_token|session_token|hf_token|github_token|credentials|credential|privatekey|clientsecret)$")|not)
-       or (.value==null or .value=="" or .value==false or .value==[] or .value=={}))' "$1" >/dev/null 2>&1 || return 1;;
-  esac
+    local pattern='(sk-|hf_|ghp_|ghs_|github_pat_)[A-Za-z0-9_-]{16,}|-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----'
+    [[ -f $1 && ! -L $1 ]] || return 1
+    # grep exits 1 for no match. A read error must also refuse export.
+    if LC_ALL=C grep -aEq -- "$pattern" "$1"; then
+        return 1
+    elif [[ $? != 1 ]]; then
+        return 1
+    fi
+    case $1 in
+        *.json|*.jsonl) jq -ne -f "$kit_dir/lib/privacy.jq" "$1" >/dev/null 2>&1 ;;
+    esac
 }
-scan_tree() {
-  local b=$1 p
-  [ -z "$(find "$b" -type l -print -quit)" ] || return 1
-  while IFS= read -r p; do scan_file "$p" || return 1; done < <(find "$b" -type f | LC_ALL=C sort)
+
+# Print sorted relative file names. Reject entries the line-based seal cannot encode.
+list_files() (
+    [[ -d $1 && ! -L $1 ]] && cd -- "$1" || exit 1
+    find . ! -type d -print0 |
+        while IFS= read -r -d '' path; do
+            [[ -f $path && ! -L $path && $path != *[[:cntrl:]]* && $path != *\\* ]] || exit 1
+            printf '%s\n' "${path#./}"
+        done | LC_ALL=C sort
+)
+
+# Derive checksums from the on-disk inventory. Never open paths read from a seal.
+checksums() {
+    local root=$1 kind=$2 path digest
+    list_files "$root" | while IFS= read -r path; do
+        if [[ $kind == tiers ]]; then
+            [[ $path == *.json ]] || continue
+        else
+            [[ $path != SHA256SUMS ]] || continue
+            scan_file "$root/$path" || return 1
+        fi
+        digest=$(hash_file "$root/$path") || return 1
+        printf '%s  %s\n' "$digest" "$path" || return 1
+    done
 }
-seal_tree() {
-  local b=$1 p
-  scan_tree "$b" || return 1
-  [ ! -e "$b/SHA256SUMS" ] || return 1
-  while IFS= read -r p; do printf '%s  %s\n' "$(hash_file "$p")" "${p#"$b/"}"; done < <(find "$b" -type f ! -name SHA256SUMS | LC_ALL=C sort) > "$b/SHA256SUMS"
-}
+
 verify_tree() {
-  local b=$1 line digest name actual=0 sealed=0
-  [ -f "$b/SHA256SUMS" ] && scan_tree "$b" || return 1
-  while IFS= read -r line; do
-    digest=${line%%  *}; name=${line#*  }
-    [[ "$digest" =~ ^[a-f0-9]{64}$ ]] || return 1
-    case "$name" in ''|/*|../*|*/../*|*/..|*\\*|SHA256SUMS) return 1;; esac
-    [ -f "$b/$name" ] && [ "$(hash_file "$b/$name")" = "$digest" ] || return 1
-    sealed=$((sealed+1))
-  done < "$b/SHA256SUMS"
-  actual=$(find "$b" -type f ! -name SHA256SUMS | wc -l | tr -d ' ')
-  [ "$actual" -eq "$sealed" ] && [ "$(cut -c 67- "$b/SHA256SUMS" | sort -u | wc -l | tr -d ' ')" -eq "$sealed" ]
+    local root=$1 kind=${2:-bundle}
+    [[ -f $root/SHA256SUMS && ! -L $root/SHA256SUMS ]] || return 1
+    checksums "$root" "$kind" | LC_ALL=C sort > "$scratch/actual" || return 1
+    LC_ALL=C sort "$root/SHA256SUMS" > "$scratch/sealed" || return 1
+    [[ -s $scratch/actual ]] && cmp -s "$scratch/actual" "$scratch/sealed"
+}
+
+seal_tree() {
+    # Publish only after the entire scan and checksum pass. ln refuses an existing file.
+    checksums "$1" bundle > "$scratch/checksums" || return 1
+    [[ ! -e $1/SHA256SUMS && ! -L $1/SHA256SUMS ]] &&
+        ln "$scratch/checksums" "$1/SHA256SUMS"
 }

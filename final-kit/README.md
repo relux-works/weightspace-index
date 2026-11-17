@@ -1,6 +1,6 @@
 # Final Mac pilot kit — 2026-11-17
 
-Run MATH-500 first and generative MMLU-Pro second, using two vLLM-metal BF16 servers and the frozen **197/R1** screen. Every score must state **32768 output-token cap**. SUITE measurements and author-reported references are separate records (PROTOCOLS.md, REPORTED.md). Mac/vLLM execution is **UNVERIFIED**. PowerShell syntax/execution is **NOT RUN / UNVERIFIED**.
+Run MATH-500 first and generative MMLU-Pro second, using two vLLM-metal BF16 servers and the frozen **197/R1** screen. Every score must state **32768 output-token cap**. SUITE measurements and author-reported references are separate records (PROTOCOLS.md, REPORTED.md). Mac/vLLM execution is **UNVERIFIED**. The PowerShell runner has passed offline tests on macOS. Windows execution still needs qualification.
 
 **Author-protocol decision:** RIKIYAT-REPRODUCTION.md extracts the pinned p50c recipe. All source metrics are **not-comparable** with the current task/backend machinery; no automatic author-reproduction lane is enabled. The old 12-item card smoke and manual card worksheet are retired from the Mac pilot and are not acceptance gates or targets. Continue the independent suite steps below. Author-reported values and website JSON templates are in REPORTED.md.
 
@@ -124,7 +124,9 @@ bash compare-bundles.sh INDEX_JSON A_LABEL_ROOT B_LABEL_ROOT [--aa]
 
 TASK: minerva_math500, mmlu_pro, 14 pinned mmlu_pro_CATEGORY children. `card-math` remains a retired internal diagnostic fixture, not an owner pilot step. An explicit selection JSON supplies task/dataset/revision/indices. For parent MMLU these are global IDs; child files use category-local IDs. `--tier` accepts available frozen parent n-lists only. No implicit raw-prefix range, arbitrary task or IFEval substitution. Empty/out-of-range/duplicate selections are refused. DRAW_SEED defaults 1234, PROFILE_FILE and MODEL_ID are required; PILOT_PYTHON defaults .venv/bin/python. Exits: 0 complete/skip; 64 CLI misuse; nonzero validation/inference/interruption failures. All outcomes remain deployment-unqualified.
 
-PowerShell 7 candidate has the same positional contract (`pwsh -File shard-run.ps1 ...`), JSON libraries, schema and bundle paths; it uses Get-FileHash and forward-slash seal/source paths. It is **UNVERIFIED, syntax not executed**; do not treat it as day-1 Windows support. Its interruption/finalization semantics need target execution before use.
+PowerShell 7 accepts the same positional arguments with `pwsh -File shard-run.ps1 ...`. Both runners use the same jq rules for selection, item identity, privacy checks and resume. A retry checks the original selection bytes, operational source hashes, model, seed and lineage. Use a fresh shard ID after changing the request or updating the kit. Keep separate comparison roots for runs from different revisions.
+
+A successful evaluator exit requires exactly one native row for every requested item. On evaluator failure, the manifest records the evaluator’s exit code. The runner publishes `SHA256SUMS` after checking the complete file inventory. The offline tests exercise both runners on macOS. Windows cancellation and directory permissions still require testing on Windows. [Verification](VERIFY.md)
 
 Bundles: `bundles/<task>/<label>/<shard>/` contains manifest.json, units.json, samples.json, model-args.json, generation.json, source-hashes.json, lm-eval.pid, run.log, native upstream results/samples, native-rows.jsonl, relative native-file inventory, items.jsonl and SHA256SUMS. Null finish/token/cap fields mean manual evidence is owed. Trust starts submitted; a valid seal is integrity evidence only. No code mutates upstream task/scorer or overwrites a bundle.
 
@@ -137,7 +139,7 @@ Bundles: `bundles/<task>/<label>/<shard>/` contains manifest.json, units.json, s
 | shasum / sha256sum | `shasum -a 256 -c MANIFEST.sha256`; runner uses available SHA256 command | Manifest verification / SHA256SUMS |
 | curl | Projected localhost `/v1/models` check above | receipts/models-A.json, models-B.json |
 | memory_pressure / vm_stat / sysctl | Snapshot commands above | receipts/ memory/swap evidence |
-| PowerShell 7 (optional, UNVERIFIED) | `pwsh -File shard-run.ps1 ...`; Get-FileHash | Same bundle layout |
+| PowerShell 7 (optional) | `pwsh -File shard-run.ps1 ...`; Get-FileHash | Same bundle layout |
 | tar | `tar -czf pilot-results.tar.gz bundles receipts` after manual export scan | Transfer archive; exclude failed/unsealed exports |
 
 The rebuilt clean kit archive and detached SHA256 receipt are one required transfer unit. See VERIFY.md for the exact Linux scope and the self-reference limitation of embedding an archive's own hash.

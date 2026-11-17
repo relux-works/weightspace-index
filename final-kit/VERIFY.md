@@ -1,6 +1,18 @@
-# Verification of rebuilt kit — 2026-11-17
+# Script verification
 
-This candidate implements only the accepted review fixes. **Mac/vLLM/Metal/2x12, real-model scores and PowerShell syntax/execution remain UNVERIFIED.** No independent acceptance of these edited bytes is claimed. New internal bundles/seals were generated; no old seal describes edited bytes.
+Run the offline regression suite from the repository root on macOS or Linux. It copies the kit to a temporary directory and supplies a local evaluator fixture. Bash and jq are required. Put PowerShell 7 on PATH or set `PWSH` to its executable to include the PowerShell cases.
+
+```bash
+python3 -B -m unittest discover -s tests/final_kit -v
+```
+
+The tests exercise the installer, explicit and frozen-tier selections, retries, concurrent requests, child failure, Bash cancellation, exact row coverage, export refusals and paired comparison. They also check that PowerShell can resume a Bash bundle. These checks ran on Apple Silicon with Bash 3.2 and PowerShell 7.7. Windows execution and real vLLM/Metal deployment still require target testing.
+
+# Historical verification of the 2026-11-17 assembly
+
+The following record and the files under `evidence/` describe the earlier packaged scripts.
+
+That candidate implemented the accepted review fixes. **Mac/vLLM/Metal/2x12, real-model scores and PowerShell execution were unverified in that assembly.** No independent acceptance of these edited bytes is claimed. New internal bundles/seals were generated; no old seal describes edited bytes.
 
 ## Preserved baseline
 
@@ -43,6 +55,6 @@ Send **`final-kit.tar.gz` + `final-kit.tar.gz.sha256` together**. Verify the det
 
 ## Packaging verification scope
 
-Current packaging checks cover fresh-extraction MANIFEST.sha256 and inventory size readback, every JSON/JSONL parse, tiers/SHA256SUMS, bash -n for all four Bash files, exact extraction/tree equality, operational-byte equality against the preserved fix2 archive, export scan and preserved-baseline hash readbacks. The fix2 archive and detached receipt are retained read-only under ../review-baseline/fix2/; archive SHA256: `a50b9c644e3834d7137f80a9aba73e5e10c8280b29a18a7ed3642120775974b0`.
+The fix3 packaging checks covered fresh-extraction MANIFEST.sha256 and inventory size readback, every JSON/JSONL parse, tiers/SHA256SUMS, bash -n for all four Bash files, exact extraction/tree equality, operational-byte equality against the preserved fix2 archive, export scan and preserved-baseline hash readbacks. The fix2 archive and detached receipt are retained read-only under ../review-baseline/fix2/; archive SHA256: `a50b9c644e3834d7137f80a9aba73e5e10c8280b29a18a7ed3642120775974b0`.
 
-The internal execution results above are retained evidence. The full stub control set is not rerun; operational files remain byte-for-byte equal to fix2. MANIFEST.sha256, INVENTORY.tsv and the detached archive receipt are recomputed for the current bytes; unchanged source/tier seals retain their original meaning. Current packaging results and archive size/SHA256 are recorded in ../FIX3-REPORT.md. Fresh independent re-review is pending; no landing or delivery is claimed.
+The internal execution results above are retained evidence. The full stub control set is not rerun; operational files remain byte-for-byte equal to fix2. MANIFEST.sha256, INVENTORY.tsv and the detached archive receipt are recomputed for the fix3 bytes; unchanged source/tier seals retain their original meaning. The fix3 packaging results and archive size/SHA256 are recorded in ../FIX3-REPORT.md. Fresh independent re-review is pending; no landing or delivery is claimed.

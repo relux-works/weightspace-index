@@ -41,6 +41,8 @@ Open a pull request that adds a patch folder or a new version, following [CONTRI
 - [Qwen3.5-0.8B on M1 Pro](docs/benchmarks/qwen3.5-0.8b-m1-pro.md): MLX-LM speed and memory from 512 to 131k tokens, with a recipe to rerun it on your own Mac.
 - [`weightspace` tool guide](tool/README.md): install and use the `weightspace` binary from the index's Rust crate (Rust 1.85+) — build and apply replacement patches, run every offline check with `weightspace check`, and rebuild the generated files with `weightspace generate`. `cargo test --locked` from `tool/` tests the checks and the generator. None of them use the network.
 
+The pilot kit includes the shard runners and the bundle comparator. Its verification guide describes how to run the offline script tests. [Pilot kit](final-kit/README.md) · [Script tests](final-kit/VERIFY.md)
+
 ## Tools
 
 The standalone Rust crate lives in `tool/`, including its manifest and lockfile. With Rust 1.85+ and Cargo, run from the repository root:

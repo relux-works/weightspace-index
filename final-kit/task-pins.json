@@ -1,0 +1,196 @@
+{
+  "minerva_math500": {
+    "path": "HuggingFaceH4/MATH-500",
+    "name": "default",
+    "split": "test",
+    "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+    "population": 500,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match",
+      "math_verify"
+    ]
+  },
+  "mmlu_pro_biology": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 717,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "biology",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_business": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 789,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "business",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_chemistry": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 1132,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "chemistry",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_computer_science": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 410,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "computer science",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_economics": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 844,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "economics",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_engineering": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 969,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "engineering",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_health": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 818,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "health",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_history": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 381,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "history",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_law": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 1101,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "law",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_math": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 1351,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "math",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_other": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 924,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "other",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_philosophy": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 499,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "philosophy",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_physics": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 1299,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "physics",
+    "index_space": "category-filtered order, not global test row"
+  },
+  "mmlu_pro_psychology": {
+    "path": "TIGER-Lab/MMLU-Pro",
+    "name": null,
+    "split": "test",
+    "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+    "population": 798,
+    "task_version": 3.1,
+    "metrics": [
+      "exact_match"
+    ],
+    "category": "psychology",
+    "index_space": "category-filtered order, not global test row"
+  }
+}

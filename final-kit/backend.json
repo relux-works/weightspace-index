@@ -1,0 +1,33 @@
+{
+  "backend": "local-chat-completions",
+  "model_args": {
+    "model": "REPLACE_WITH_EXACT_SERVED_MODEL_ID",
+    "base_url": "http://127.0.0.1:8000/v1/chat/completions",
+    "tokenizer_backend": null,
+    "tokenized_requests": false,
+    "num_concurrent": 12,
+    "max_gen_toks": 32768,
+    "seed": 1234,
+    "timeout": 14400,
+    "max_retries": 1
+  },
+  "generation_kwargs": {
+    "do_sample": true,
+    "max_gen_toks": 32768,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repetition_penalty": 1.0,
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    }
+  },
+  "apply_chat_template": true,
+  "engine": "vllm",
+  "server_version_expected_owner_reported": "0.33.0",
+  "plugin_expected_owner_reported": "vllm-metal==0.33.0",
+  "qualified": false,
+  "batch_size": 1
+}

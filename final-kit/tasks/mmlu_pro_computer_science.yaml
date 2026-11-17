@@ -1,0 +1,6 @@
+# Select the installed upstream child; preserve prompt, five shots, filter and stop.
+group: day1_mmlu_pro_computer_science
+task:
+  - mmlu_pro_computer_science
+dataset_kwargs:
+  revision: b189ec765aa7ed75c8acfea42df31fdae71f97be

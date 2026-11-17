@@ -1,0 +1,806 @@
+[
+  {
+    "case": "wrapper-mmlu_pro.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_biology.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_business.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_chemistry.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_computer_science.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_economics.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_engineering.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_health.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_history.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_law.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_math.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_other.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_philosophy.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_physics.yaml",
+    "pass": true
+  },
+  {
+    "case": "wrapper-mmlu_pro_psychology.yaml",
+    "pass": true
+  },
+  {
+    "case": "math-wrapper",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n100.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n127.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n150.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n197.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n250.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n50.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n500.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n51.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/n541.json",
+    "pass": true
+  },
+  {
+    "case": "tier-ifeval/order.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n100.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n127.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n150.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n197.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n250.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n50.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n500.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/n54.json",
+    "pass": true
+  },
+  {
+    "case": "tier-minerva_math500/order.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n100.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n1000.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n12032.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n126.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n150.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n197.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n250.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n50.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n500.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_biology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_business.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_chemistry.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_computer_science.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_economics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_engineering.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_health.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_history.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_law.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_math.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_other.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_philosophy.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_physics.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785/mmlu_pro_psychology.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/n785.json",
+    "pass": true
+  },
+  {
+    "case": "tier-mmlu_pro/order.json",
+    "pass": true
+  },
+  {
+    "case": "tier-strata.json",
+    "pass": true
+  },
+  {
+    "case": "tier-summary.json",
+    "pass": true
+  },
+  {
+    "case": "bash-syntax-compare-bundles.sh",
+    "pass": true
+  },
+  {
+    "case": "bash-syntax-shard-run.sh",
+    "pass": true
+  },
+  {
+    "case": "bash-syntax-setup/install.sh",
+    "pass": true
+  },
+  {
+    "case": "bash-syntax-lib/common.sh",
+    "pass": true
+  },
+  {
+    "case": "no-delivered-python",
+    "pass": true
+  },
+  {
+    "case": "minerva_math500-plan",
+    "pass": true
+  },
+  {
+    "case": "minerva_math500-A101-B96",
+    "pass": true
+  },
+  {
+    "case": "mmlu_pro-plan",
+    "pass": true
+  },
+  {
+    "case": "mmlu_pro-A101-B96",
+    "pass": true
+  },
+  {
+    "case": "mmlu-197-mapping",
+    "pass": true
+  },
+  {
+    "case": "selection-valid",
+    "pass": true
+  },
+  {
+    "case": "selection-duplicate",
+    "pass": true
+  },
+  {
+    "case": "selection-out-of-range",
+    "pass": true
+  }
+]

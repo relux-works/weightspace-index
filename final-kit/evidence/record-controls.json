@@ -1,0 +1,24 @@
+{
+  "claim": "Six reported records validate; wrong discriminant/status/ID/duplicate-link controls fail their intended schema constraints; measured template has no publishable score.",
+  "positive_records": 6,
+  "negative_controls": [
+    {
+      "case": "wrong-type",
+      "intended_schema_rejection": true
+    },
+    {
+      "case": "invalid-status",
+      "intended_schema_rejection": true
+    },
+    {
+      "case": "no-id",
+      "intended_schema_rejection": true
+    },
+    {
+      "case": "duplicate-run",
+      "intended_schema_rejection": true
+    }
+  ],
+  "measured_template_unpublished": true,
+  "validator": "system Python3 jsonschema 4.19.2"
+}

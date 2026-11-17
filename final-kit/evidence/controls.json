@@ -1,0 +1,91 @@
+[
+  {
+    "case": "rerun-skip",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "case": "protocol-mismatch",
+    "exit": 5,
+    "pass": true
+  },
+  {
+    "case": "config-mismatch",
+    "exit": 5,
+    "pass": true
+  },
+  {
+    "case": "corrupt-seal",
+    "exit": 65,
+    "pass": true
+  },
+  {
+    "case": "duplicate-unit",
+    "exit": 5,
+    "pass": true
+  },
+  {
+    "case": "missing-unit",
+    "exit": 65,
+    "pass": true
+  },
+  {
+    "case": "secret-field",
+    "exit": 1,
+    "pass": true
+  },
+  {
+    "case": "prefixed-secret-field",
+    "exit": 1,
+    "pass": true
+  },
+  {
+    "case": "token-shape",
+    "exit": 1,
+    "pass": true
+  },
+  {
+    "case": "scan-positive",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "case": "invalid-indices",
+    "exit": 5,
+    "pass": true
+  },
+  {
+    "case": "fallback-refused",
+    "exit": 65,
+    "pass": true
+  },
+  {
+    "case": "kill-after-request",
+    "exit": 65,
+    "state": "failed",
+    "pass": true
+  },
+  {
+    "case": "completed-peer-preserved",
+    "pass": true
+  },
+  {
+    "case": "failed-path-refuses-reuse",
+    "exit": 65,
+    "pass": true
+  },
+  {
+    "case": "fresh-attempt-recovers",
+    "exit": 0,
+    "pass": true
+  },
+  {
+    "case": "export-refuses-token-response",
+    "exit": 65,
+    "pass": true
+  },
+  {
+    "case": "refused-export-unsealed",
+    "pass": true
+  }
+]

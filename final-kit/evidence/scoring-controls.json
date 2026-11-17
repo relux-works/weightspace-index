@@ -1,0 +1,68 @@
+[
+  {
+    "input": "\\boxed{2}",
+    "scores": {
+      "exact_match": 0,
+      "math_verify": 1
+    }
+  },
+  {
+    "input": "2",
+    "scores": {
+      "exact_match": 0,
+      "math_verify": 1
+    }
+  },
+  {
+    "input": "\\boxed{3}",
+    "scores": {
+      "exact_match": 0,
+      "math_verify": 0
+    }
+  },
+  {
+    "input": "Final Answer: The final answer is $2$. I hope it is correct.",
+    "scores": {
+      "exact_match": 1,
+      "math_verify": 1
+    }
+  },
+  {
+    "finish_reason": "stop",
+    "parsed": [
+      "\\boxed{2}"
+    ],
+    "metadata_lost": true
+  },
+  {
+    "finish_reason": "length",
+    "parsed": [
+      "\\boxed{2}"
+    ],
+    "metadata_lost": true
+  },
+  {
+    "response": "the answer is (A)",
+    "gold": "A",
+    "extracted": "A",
+    "pass": true
+  },
+  {
+    "response": "the answer is (B)",
+    "gold": "A",
+    "extracted": "B",
+    "pass": true
+  },
+  {
+    "response": "A",
+    "gold": "A",
+    "extracted": "[invalid]",
+    "pass": true
+  },
+  {
+    "response": "the answer is (A)",
+    "gold": "B",
+    "extracted": "A",
+    "pass": true
+  }
+]

@@ -1,0 +1,707 @@
+{
+  "retrieved_date": "2026-11-17",
+  "logs_revision": "4d09ba6d6a7e891dd8063974dfe81b3d78e3494f",
+  "hf_card": {
+    "repo": "RikiyaT/Qwen3.5-0.8B-weight-space-programming",
+    "revision": "d1671a178705bcab7644806d23c535517f35723b",
+    "url": "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/README.md"
+  },
+  "blog": {
+    "revision": "9e62ad5d1aa5508ee7ff9cdf5440031f1524d46e",
+    "path": "blog/weight-space-programming/index.html"
+  },
+  "sources": [
+    {
+      "locator": "Qwen--Qwen3.5-0.8B.md",
+      "sha256": "87a163af54f32fa608a0f8d3ac67945c53dd2b4a7c96740b3d7fdc28e8458864",
+      "url": null
+    },
+    {
+      "locator": "Qwen--Qwen3.5-0.8B.pin.json",
+      "sha256": "afc44811ad42cbeee95338f8609fd4db2c3e8d84f1875bfa757eb2779eec4725",
+      "url": null
+    },
+    {
+      "locator": "README.md",
+      "sha256": "b1c51eeb9b9e2935ff227fdc7796c2a67bd3a55014cf99291224f9cc7b93d342",
+      "url": null
+    },
+    {
+      "locator": "RikiyaT-card.md",
+      "sha256": "cc464ae319a6907a944e5d8920388cba8989d9fe83ea9c9d5eae4ee65c4dd5a3",
+      "url": null
+    },
+    {
+      "locator": "RikiyaT-card.pin.json",
+      "sha256": "341c30b295f1a7bb6dea6ddfe602a3a652a755d666ac2afd082ef6b6e15f69eb",
+      "url": null
+    },
+    {
+      "locator": "blog.html",
+      "sha256": "fe5338d4a29b73e4f61c0ea42a90e17c1a356190a2d721b9e59c061a441f1313",
+      "url": null
+    },
+    {
+      "locator": "blog.pin.json",
+      "sha256": "65a65928eff2c26a02226b42e1a1781b38202b2856c9951547ac8e9febd6c53d",
+      "url": null
+    },
+    {
+      "locator": "exp8_math/README.md",
+      "sha256": "473e386ade21ff52240103003b6b125e4362d9fa11010916c1b770ddb0edcbbd",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/README.md"
+    },
+    {
+      "locator": "exp8_math/base_model/Qwen3.5-0.8B-text/chat_template.jinja",
+      "sha256": "273d8e0e683b885071fb17e08d71e5f2a5ddfb5309756181681de4f5a1822d80",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/base_model/Qwen3.5-0.8B-text/chat_template.jinja"
+    },
+    {
+      "locator": "exp8_math/code/apply_edit.py",
+      "sha256": "d2b627a6cf344f309cca4bcab4ff6ccc6ad1c8f29cabda78d11f99c19d1b1c5d",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/apply_edit.py"
+    },
+    {
+      "locator": "exp8_math/code/build_ckpt.py",
+      "sha256": "da0759bd0a150392b7aaa330f9d242429f47b49c0f900d0d890c91832c9217db",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/build_ckpt.py"
+    },
+    {
+      "locator": "exp8_math/code/evaluate.py",
+      "sha256": "c93f477c02b3ae0d6b37abe3afad8bb7353e273322ff963eec7ff2270012035d",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/evaluate.py"
+    },
+    {
+      "locator": "exp8_math/code/make_edit_diff.py",
+      "sha256": "2bf84b497e308e07be94d969d6763cd8396de44cb0aaf5213a6b1075999287a1",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/make_edit_diff.py"
+    },
+    {
+      "locator": "exp8_math/code/mathqa.py",
+      "sha256": "f0d576a1adc625dede7bff749b3bf8c9a5a8f6bae43d51e2d0ee36d694e89843",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/mathqa.py"
+    },
+    {
+      "locator": "exp8_math/code/merge.py",
+      "sha256": "2ecd0420c929f721f547b8f189cf0a24343d960ed3b0e9b2892d9c7c8cede021",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/merge.py"
+    },
+    {
+      "locator": "exp8_math/code/practice35.py",
+      "sha256": "6e19a615fd04d20af7641900c32198010a716939b91f926c7fe2c1cc781f99db",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/practice35.py"
+    },
+    {
+      "locator": "exp8_math/code/profiles.py",
+      "sha256": "ba4be365e44c3e165b9c3982af9dbcd8ec94f7fd0430e5fd9de1d57f249a4ae4",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/profiles.py"
+    },
+    {
+      "locator": "exp8_math/code/st_numpy.py",
+      "sha256": "3c4e532fb8edf374e1a4636aa806a04d062f824943eaf4bca0d3af5b0e7dca40",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/code/st_numpy.py"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/merged.json",
+      "sha256": "c93d3db30a612ef0da396014fdfbe011efbcf2cd417e2e6125664d7effdd0471",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/eval/p50c/merged.json"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/merged.json",
+      "sha256": "5c31370485b9f197f592745e935eeaee6b09dc127daa5b2a8be1ebbcbc210221",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/eval/unedited/merged.json"
+    },
+    {
+      "locator": "exp8_math/gemma_followup/runs/g05b/edit/manifest.json",
+      "sha256": "f5003b6ac11a906140a4e1bb17c7f569215500824610345437e3fb5a1f16979e",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/gemma_followup/runs/g05b/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/gemma_followup/runs/g10b/edit/manifest.json",
+      "sha256": "30aacedc5e847d7be48fefcb0eadcc4e3b29ce22766ac685a75bcbdd9e52ec8d",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/gemma_followup/runs/g10b/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/gemma_followup/runs/g25b/edit/manifest.json",
+      "sha256": "23e8bb15bdceb9fda8771f8eaf731cfddee0d4fee9d7b9d698d5d670d8fc254a",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/gemma_followup/runs/g25b/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/gemma_followup/runs/g50b/edit/manifest.json",
+      "sha256": "265edc6885ea22ef873ed2a64a010fcfe4101771bf43e88c7e27726a45dd523d",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/gemma_followup/runs/g50b/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/runs/p10c/edit/manifest.json",
+      "sha256": "2bb4a93a93e3dc6d9673835a50f46d773a04faa66f312ba25cd7ae765acd4b99",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/runs/p10c/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/runs/p25c/edit/manifest.json",
+      "sha256": "04cb002659910548f42f6f046165817d8a23312b07ae495a831a322c51156986",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/runs/p25c/edit/manifest.json"
+    },
+    {
+      "locator": "exp8_math/runs/p50c/edit/manifest.json",
+      "sha256": "83185c1db46e3dafb34af645f8c5ce033c09cc99d4512b9e1b8e3aba9d269225",
+      "url": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/exp8_math/runs/p50c/edit/manifest.json"
+    }
+  ],
+  "hf_base_card": {
+    "repo": "Qwen/Qwen3.5-0.8B",
+    "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+    "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md"
+  },
+  "hf_rerun_scores": [
+    {
+      "url": "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/eval/scores_edited_math500.json",
+      "sha256": "17c14674b4e6b06f622c0bfbffb243b17f196fda31a57cd6579f23a50fdfdc0c",
+      "summary": {
+        "acc": 0.51,
+        "cut_share": 0.316,
+        "mean_tokens": 21703.7475,
+        "n_problems": 500,
+        "samples": 4,
+        "seconds": 3059,
+        "gen_tokens": 43407495,
+        "tok_per_s": 14190.9,
+        "sampling": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "top_k": 20,
+          "presence_penalty": 1.5,
+          "max_tokens": 32768,
+          "seed": 0
+        },
+        "thinking": true,
+        "ckpt": "edited"
+      },
+      "record_type": "author-reported",
+      "verification_status": "not-comparable"
+    },
+    {
+      "url": "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/eval/scores_base_math500.json",
+      "sha256": "205171ff45a3ceb859b1c580c5a90ddf98987dc697080a1214a61f9ad22ee2cf",
+      "summary": {
+        "acc": 0.05,
+        "cut_share": 0.95,
+        "mean_tokens": 31689.95,
+        "n_problems": 25,
+        "samples": 4,
+        "seconds": 288,
+        "gen_tokens": 3168995,
+        "tok_per_s": 11016.7,
+        "sampling": {
+          "temperature": 0.6,
+          "top_p": 0.95,
+          "top_k": 20,
+          "presence_penalty": 1.5,
+          "max_tokens": 32768,
+          "seed": 0
+        },
+        "thinking": true,
+        "ckpt": "base"
+      },
+      "record_type": "author-reported",
+      "verification_status": "not-comparable"
+    }
+  ],
+  "per_problem_sources": [
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime24_s0of3/aime24_per_problem.json",
+      "sha256": "544c225186001feec1e6cea025dc1ef73a9a86b7013d46e7329672dffa408b7f"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime24_s1of3/aime24_per_problem.json",
+      "sha256": "9c3403596e37bef2bac406c8fa7651478e3b5e32697765d06cca356059fb1c07"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime24_s2of3/aime24_per_problem.json",
+      "sha256": "b2360780165275aca720d1ff16bb09f067d090d00accc99c405b8afad7b33eba"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime25_s0of3/aime25_per_problem.json",
+      "sha256": "92777a27a48a79c8d8965efb7fae70ee4ac9b9a4f765178fda264a0ec1d9ea8b"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime25_s1of3/aime25_per_problem.json",
+      "sha256": "3b1ad49f7f01f2140f75b3ff8e27cfbf8cd4ba7fc5b3bd3f60c6c92a431bd883"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/aime25_s2of3/aime25_per_problem.json",
+      "sha256": "945cf4d4564a8a8540d2f327566e19267dda9f99a466085c9c4b9ced4a4dd848"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/amc23_s0of4/amc23_per_problem.json",
+      "sha256": "2d8fc60e7fb64c05b9194d108a19e7dc28d1d8cf501d6a4500f853619c6bbebc"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/amc23_s1of4/amc23_per_problem.json",
+      "sha256": "5cd08904a03013a0a2b27c952329e6d1522a3573ad2d613ad958fc9589bae8fd"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/amc23_s2of4/amc23_per_problem.json",
+      "sha256": "9cb21defd440d3f10df0dda0d0e604ec8f52be9f3892211ee55fb45e45011e97"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/amc23_s3of4/amc23_per_problem.json",
+      "sha256": "c14658ed1548b0c20c8399783966d8f15fc483071e9bf996e1f7a07fcbfdb6af"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gpqa_s0of4/gpqa_per_problem.json",
+      "sha256": "382f0a20e9d557cbfbce3ffe11f4518624bbfd15f61ea02c81828febb44f58d4"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gpqa_s1of4/gpqa_per_problem.json",
+      "sha256": "3be7b1f1a370206394a0e8102698716a481333b79fa7b06b3fe47a0317e837dd"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gpqa_s2of4/gpqa_per_problem.json",
+      "sha256": "9019ae12d8d383d085a7973a49ecca7b5a99cd4c73bf90eb3e0f1483fd96c326"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gpqa_s3of4/gpqa_per_problem.json",
+      "sha256": "468b3eed9907e754766be79a5c1c18af6e4b682b7c82237f3366a4fbf1d4234f"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s0of10/gsm8k_per_problem.json",
+      "sha256": "b16a61ecbfd1db755dd94f1e255e7a1d65fd72e0699c3dd178cd6a8d8b54ed21"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s1of10/gsm8k_per_problem.json",
+      "sha256": "8e0b195f06363d72a4c6c0e090744ba4b01780ebc6fc8ce8f937160e3abd05f4"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s2of10/gsm8k_per_problem.json",
+      "sha256": "72406da05509c237df85891c0a37c57b3a6c4b116fb456674802668577e757a7"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s3of10/gsm8k_per_problem.json",
+      "sha256": "cccd7f921833290eab6b98e042c11ba2e606361d57f713c6f1b9758261f5d980"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s4of10/gsm8k_per_problem.json",
+      "sha256": "b68bbe5095c8eef141cccaaa7be6922283ab420d2b2599215d21657e6f8a4b5b"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s5of10/gsm8k_per_problem.json",
+      "sha256": "90dc282ca6c3d2b5b9c85073898efbb1eb3be8bcf21df0ac69958b5609ab041e"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s6of10/gsm8k_per_problem.json",
+      "sha256": "6870f211839fa4fc5b1e682b0204f40f2fa60ce806249d7b7449f10669358b75"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s7of10/gsm8k_per_problem.json",
+      "sha256": "acccdcb83e87cef96537a9c1db9874f77f920da7af60250ff754b0b03c3e2805"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s8of10/gsm8k_per_problem.json",
+      "sha256": "fe19b90c1c9619d027a4e3449c07cb99550f21ab7669dd1c454907faea34037c"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/gsm8k_s9of10/gsm8k_per_problem.json",
+      "sha256": "554d686243271578c65de722038f7a14c36e93788830a6330d75f63486823db3"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/ifeval_s0of5/ifeval_per_problem.json",
+      "sha256": "dafab0760982434a7c5d07c0904c9780c65c5a3a6ed3dc92b2f98cb1ef882a6a"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/ifeval_s1of5/ifeval_per_problem.json",
+      "sha256": "653d8f5e36fb96b0b0554e6ac0759638130ef1539d0cd557a96aae3fb1be4267"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/ifeval_s2of5/ifeval_per_problem.json",
+      "sha256": "0844faa1fe96378f7121caf994f35b23cc0e7a40343edecfa7f2eb9245ef2c7f"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/ifeval_s3of5/ifeval_per_problem.json",
+      "sha256": "4106a49ae089f3b5fcdc5617a3106d72efd86ed10217c27600580e4270b8de4f"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/ifeval_s4of5/ifeval_per_problem.json",
+      "sha256": "870622c8add2a0d75453497471e40c66185fe90aba060cbee9a8fd7ecafa978c"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s0of10/math500_per_problem.json",
+      "sha256": "2ecff86bb5063961b71cf81ac8a60114037730c4591d48dab039101f9b7e3448"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s1of10/math500_per_problem.json",
+      "sha256": "44c94ca607ba2ff0abadc9087fd91d93c51aeb5bb3f3eb09262cad2f86c8f809"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s2of10/math500_per_problem.json",
+      "sha256": "903204fcd00635575127fc8bedfec168e6260ece87440e1e0b24531f3d5d7516"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s3of10/math500_per_problem.json",
+      "sha256": "5fb978d056da4a53225c850d05febc985e5f66d323aa27e8df0c9c38847ed9cc"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s4of10/math500_per_problem.json",
+      "sha256": "6f49dd85f2bf303d1c4fb295c7cd6123db45b2b9df30ab1ab50473318d9e98de"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s5of10/math500_per_problem.json",
+      "sha256": "ca9b1c574324345f92589e5b27bfd600a85167945958dad98927402788338c4f"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s6of10/math500_per_problem.json",
+      "sha256": "c8dc94d86524b6f1881f992215594c2787a8620a6e2f38f50d3cc4421c382fba"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s7of10/math500_per_problem.json",
+      "sha256": "a9cf93bbc03075682f76e6fa088f572b3884089f302f78fc009a3e4bb6561e94"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s8of10/math500_per_problem.json",
+      "sha256": "77144d5d95883711c427a7130a7f833aa2ec032ce687cfaabc831da9db22e12b"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/math500_s9of10/math500_per_problem.json",
+      "sha256": "7ac9526620ea5dfa967baa6d2a9d75ad34b3855b0b8ea627299c947634f8acb3"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s0of6/minerva_per_problem.json",
+      "sha256": "db3f7ef2c55b9780b97fced906a545a68f3ac62bf623c67ebb740cd1b9b2891c"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s1of6/minerva_per_problem.json",
+      "sha256": "97a365a04e72729f1e307feec0317cbeeb7c7957d1fdd6b47f14cdb61e974614"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s2of6/minerva_per_problem.json",
+      "sha256": "04ed8ac95f916a444ac5f5553f8950391dae44cdac186caad41081100b8a0910"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s3of6/minerva_per_problem.json",
+      "sha256": "1eefdaff823ccb1fa85b7f3afff4c8450ae629b21c5869bb695bd661138ecc9a"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s4of6/minerva_per_problem.json",
+      "sha256": "532cc7861bc779c09615d471f46748aa536b22d0f124cdf5c69d1b10c9daddf5"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/minerva_s5of6/minerva_per_problem.json",
+      "sha256": "6f31fe63a792da24aaf4f24041e0f882b90cc3089bac51c9d8f6d45f5826c88e"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/mmlupro1k_s0of5/mmlupro1k_per_problem.json",
+      "sha256": "e5ad49d0cdd11e874d25a69f4fe87cc3438a404d75b54d29c200004f94f3ed46"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/mmlupro1k_s1of5/mmlupro1k_per_problem.json",
+      "sha256": "b26a18c0e67ba032fef862b41ff7765d0ff612a64c8cad31c1dca3d642ad5cd9"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/mmlupro1k_s2of5/mmlupro1k_per_problem.json",
+      "sha256": "0cc782c7280a2aa1d9aab1bcdfcd55df6ff450f88f736411f7ab042a18f59467"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/mmlupro1k_s3of5/mmlupro1k_per_problem.json",
+      "sha256": "15801c1199c1ab6d2b703e28de997e8b3d48c183ff6fa1f0d7fc3051d370d6c7"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/mmlupro1k_s4of5/mmlupro1k_per_problem.json",
+      "sha256": "99a8bae6199a1d4291a57089d0b70f8fa5ca40065fa06698ecbd9afb6cf9070d"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s0of12/olympiad_per_problem.json",
+      "sha256": "6dbbda3b38e4a54aa8055257391667ede47aded1d5b3f7c2fee1e15e4f713531"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s10of12/olympiad_per_problem.json",
+      "sha256": "0e9be64164a888a15ee2f26aa915b79bcb9ee1785081990fca01da382949e5d4"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s11of12/olympiad_per_problem.json",
+      "sha256": "7b69a92915651d0b2fa8c7d1fd476f4672ff4724e16208eacba053937083b264"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s1of12/olympiad_per_problem.json",
+      "sha256": "1754473170687471aae393d3a825490d519683afcc14bd5d204619e362db884a"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s2of12/olympiad_per_problem.json",
+      "sha256": "e1e04ec88ec55aebe3fa6242a7c94ad72345d40d2c80e9f9097a641c4a517437"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s3of12/olympiad_per_problem.json",
+      "sha256": "7ea1ee2d9de3211908ecac182bb1cbb534f127da69ad0c9723f29646c773a4a5"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s4of12/olympiad_per_problem.json",
+      "sha256": "175dbe80974939946e4290a7a418b3c6f6e415eb1b25e9c0ba603c8cc33ef7bf"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s5of12/olympiad_per_problem.json",
+      "sha256": "22a01afc67ec463b5c1a5d39fc8c350fa412fdab04e28cb3e0ef8dcaa8a21db4"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s6of12/olympiad_per_problem.json",
+      "sha256": "c96018f9ad62b084423369376f545945743c59e3a4fd3cecad5f9ca16f3539cc"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s7of12/olympiad_per_problem.json",
+      "sha256": "4e124b8aa4d68a02d6727bf44a91ac197f038759aca0f8eb24dc0622733cb113"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s8of12/olympiad_per_problem.json",
+      "sha256": "4409f522b991ea74c313094c82979319cea23da20fef2fc7875b567062c01fe0"
+    },
+    {
+      "locator": "exp8_math/eval/p50c/parts/olympiad_s9of12/olympiad_per_problem.json",
+      "sha256": "8c06d4bcfdd7dbd32220a88e8c0a62698e2334e9d26485db9651f5a4422f6569"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime24_s0of3/aime24_per_problem.json",
+      "sha256": "83b141d5c9f5bed4653fdf99738968216b22aa71efa59b9d5b2b9b630a75a338"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime24_s1of3/aime24_per_problem.json",
+      "sha256": "0ff12bc458eaacaa8dd605a18afdebe63b2582ef97b2a40a7213e0bb752a2e55"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime24_s2of3/aime24_per_problem.json",
+      "sha256": "885f00750c7a4be249c5a926365bd8b1681f6493caa9808bf235ee81871cb3b9"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime25_s0of3/aime25_per_problem.json",
+      "sha256": "6586f04ae2d4649c946968923b43d7c5a60399e5f8ef3d2695f68835ce3823da"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime25_s1of3/aime25_per_problem.json",
+      "sha256": "67cfa22f1d5a9b17c967dc9f20cad0323fb2c51dbf50da138fdabbec6496e669"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/aime25_s2of3/aime25_per_problem.json",
+      "sha256": "fa91c4b19fe8a56bb264304aa4f39b3f9fc22ab9ceed6071c1105e7d3dec2706"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/amc23_s0of4/amc23_per_problem.json",
+      "sha256": "1f65718de143a83dd88fed59932a0c30868d296f2db41f3cb91eb63eac95b488"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/amc23_s1of4/amc23_per_problem.json",
+      "sha256": "4b84c11006e9a164a622eb062fcf143673b522e5db3c6f3181dc01cd066cf354"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/amc23_s2of4/amc23_per_problem.json",
+      "sha256": "86d0ae0be4bdb4862df7cbf08a0bffed2aa097a479bcae21b7dbe9241336b2c0"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/amc23_s3of4/amc23_per_problem.json",
+      "sha256": "29e9d979c97342770db09e1fc27869bc1b5d18dbfe6dda62b596d35b644483e2"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gpqa_s0of4/gpqa_per_problem.json",
+      "sha256": "72a9e08d08347141ff6452dc6dcc3bc9946bd029a960498f83878b6d0bf50d19"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gpqa_s1of4/gpqa_per_problem.json",
+      "sha256": "87d64fd2582c7cc3359920945fee57fa68ef7565419977ecf1577980c29d5a63"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gpqa_s2of4/gpqa_per_problem.json",
+      "sha256": "059f4f5c4395ce67eb1a8de170a95875268e32f192efd28922cd37afec516827"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gpqa_s3of4/gpqa_per_problem.json",
+      "sha256": "9f064c251d3e16ac2cf7fc09a574a9fc9f1d6ff683d2ab32a26ed472c6ffd99f"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s0of10/gsm8k_per_problem.json",
+      "sha256": "4b1b7052677701e3ee35f0cd50207c47604508b1317e4790fe7f1167de618766"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s1of10/gsm8k_per_problem.json",
+      "sha256": "4824664e2577471ac13a44854982de5cac76c942b3a9224ee3cfe3932f69ea8b"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s2of10/gsm8k_per_problem.json",
+      "sha256": "aada29bc18cf87a33bfe7a948e6bccfcad79b896be418f58ef8bdb5ba0b3d2a8"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s3of10/gsm8k_per_problem.json",
+      "sha256": "0db9fbc10f32da570304911fbaf474396e3ab935f40648a88dd7ea79fd23791a"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s4of10/gsm8k_per_problem.json",
+      "sha256": "3bdce7f4d320517540ad51d53ea7df38013e06e051253a46e06e697ccdd2a08a"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s5of10/gsm8k_per_problem.json",
+      "sha256": "80e5e0c9a4920d89a916a49a474ac5dbfe8b96c9dc46237e4979abd7a8ae7f2e"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s6of10/gsm8k_per_problem.json",
+      "sha256": "b91635c4240497e35ad09926178c924e0ee44c338304b8ee5f61b60ac74180a7"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s7of10/gsm8k_per_problem.json",
+      "sha256": "ef7337f2dcf83bc14307e86bead075fee9766d0e66b625d6e827438157bdee60"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s8of10/gsm8k_per_problem.json",
+      "sha256": "57eb618812faceb7350b8afe85532b76ed5e4e024148a53ce483c7ebaf8bf620"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/gsm8k_s9of10/gsm8k_per_problem.json",
+      "sha256": "79f077428d4186c946bb807bcaa7ff9a5596f5ea614800bb1cfa0e9b70bcf749"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/ifeval_s0of5/ifeval_per_problem.json",
+      "sha256": "3b005eb7d5f3e1691dd09e3c41b00c3bac24f7080f9942b4385cd76dbdeecfe4"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/ifeval_s1of5/ifeval_per_problem.json",
+      "sha256": "5603d423d8497a729a107eebd27f1936dc024d6c4ce4b07f75fccde6bda01df4"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/ifeval_s2of5/ifeval_per_problem.json",
+      "sha256": "d9a84e9ea7a42df8d9a10f681e9375868318391afa7504db2259956716777d9c"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/ifeval_s3of5/ifeval_per_problem.json",
+      "sha256": "2d1f21fbe90bbc35384fad1da18e995fae9ac5475224b0629de60e3c4414e2fa"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/ifeval_s4of5/ifeval_per_problem.json",
+      "sha256": "3f54684da0f6d3845af866fccde7d5062ff2cf6d8838df42dd46551b4382f5d5"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s0of10/math500_per_problem.json",
+      "sha256": "53ddd18fda1e48f80d42616d1a6c02d7484e834661eea3c188bc3886aa03b01b"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s1of10/math500_per_problem.json",
+      "sha256": "10aabaae73cee417c767b194864b9737c2c7ee3bcd65d2075948c84a6a9cb8f5"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s2of10/math500_per_problem.json",
+      "sha256": "6fdfe6d5240cd82a66461beba64ebf6b23d6c771b7df022577ac24325e832780"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s3of10/math500_per_problem.json",
+      "sha256": "12442ca82647b23c8928ff4b0216b8df0df81924c2e979405628932a1d7e2495"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s4of10/math500_per_problem.json",
+      "sha256": "3969f7462b6c8ddef9957c11ceb92c8e94872cd9a54571b71b2cf35ed2a49aae"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s5of10/math500_per_problem.json",
+      "sha256": "6ceff65c9ee6b2be89cc6081bba3cd00202236116078c4ce8436f2dd96b7a310"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s6of10/math500_per_problem.json",
+      "sha256": "c85ec81f42a5d1fdf87d85304eaa91967b707526f65a79796d96f05aeb362fc3"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s7of10/math500_per_problem.json",
+      "sha256": "e3d678c982b57c1734cb56fbcd571fc54bb55d83ac6e36717997749cf27bd937"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s8of10/math500_per_problem.json",
+      "sha256": "3da289ba7e16a74b305aa5887f90a2ef0778f6d169984ca81e0e49efa5fe27e8"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/math500_s9of10/math500_per_problem.json",
+      "sha256": "ac7fd6c5fd9f7743368ad6086632b4ff3e01c0da371464450c7f760e28b5589a"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s0of6/minerva_per_problem.json",
+      "sha256": "179a164d67689b94b0818eb3b8c9c67904d775b4296e12fbf5756774e6c7e267"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s1of6/minerva_per_problem.json",
+      "sha256": "500b6172cd2c732fd91dd199ca949d3799f75bb2e8ba7bd4c67f64453cbd7b53"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s2of6/minerva_per_problem.json",
+      "sha256": "c90e770924c4c15c3b5c72b305bfe201e295364b22f22679b1dc406d5ae38438"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s3of6/minerva_per_problem.json",
+      "sha256": "81dc619e5ac07444feb91838af330767cc0fe5c1027728863f342f08c1869df2"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s4of6/minerva_per_problem.json",
+      "sha256": "0657dbadcd2bd86a1b0b1b977b743eede8519a14a0d42a68bdecebc1bb58a377"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/minerva_s5of6/minerva_per_problem.json",
+      "sha256": "c0eb539b576bfff677f9977d29bfd6b0115002e003af06da519c9b3964f34754"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/mmlupro1k_s0of5/mmlupro1k_per_problem.json",
+      "sha256": "41be7ecde8f58721db7064073418b7d9e76d8c536fe5c2a87d6867cbc577f048"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/mmlupro1k_s1of5/mmlupro1k_per_problem.json",
+      "sha256": "4c3ec8b29c584500969a31e07e9be57282b9407849a306c4a8769c69922d7405"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/mmlupro1k_s2of5/mmlupro1k_per_problem.json",
+      "sha256": "17c115f6ed20de9bedb92d9fbc3e0dbb530b5ecb17736310f239786b4e087a52"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/mmlupro1k_s3of5/mmlupro1k_per_problem.json",
+      "sha256": "cb73e4608e897229b38307ea86cb2762d76dce6b4bac502a0aa85e246c080ce1"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/mmlupro1k_s4of5/mmlupro1k_per_problem.json",
+      "sha256": "1f8da65088094262ccbc97d77c479ca9ea9c4275002bd15187ef9db8399e2bca"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s0of12/olympiad_per_problem.json",
+      "sha256": "b5b2390035025c4bee196981f7aca6878328d6fc4b9da663a7cb27019fe7f2bd"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s10of12/olympiad_per_problem.json",
+      "sha256": "6b8909865c450b0fb4b9a379de5050c6548009c749a59ca679ead3fc5ed982e7"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s11of12/olympiad_per_problem.json",
+      "sha256": "6e3a31d9419cc8355a91196abfaa959ed0a8d2fe30dd54b8b55ef56f2891f4c9"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s1of12/olympiad_per_problem.json",
+      "sha256": "650136c30675f4c334073eff79762be03e594e895854c53398daf07b4f16bc42"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s2of12/olympiad_per_problem.json",
+      "sha256": "314d403de7a7c43e99abdefa736047b4e17f9e1ba244e7dcaf07b3bb895aa9f6"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s3of12/olympiad_per_problem.json",
+      "sha256": "40d8fcca0a86a0165749ee3b45cda0aa956ced57964ca4bbb36c597bbed9aac4"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s4of12/olympiad_per_problem.json",
+      "sha256": "ecbb37fbd2818b63e611270e5bb373a4fcc8b8e77b4086847873b3f20b29f251"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s5of12/olympiad_per_problem.json",
+      "sha256": "73376d38c2cbc2a6f43d485543511c461d33c494220ff4840c4653ae1f16ef5d"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s6of12/olympiad_per_problem.json",
+      "sha256": "1862b3800b3450c63a302c867d5767ecc0018670c07f3c6e8f1b6ff17502b74e"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s7of12/olympiad_per_problem.json",
+      "sha256": "9184978c628d6d9fc28a7a2d330aa71d5ff75ddb43044059562a4eb883a8451c"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s8of12/olympiad_per_problem.json",
+      "sha256": "861af4419eed7fbbe3d499331373e71b2a6e183c159b2fc1847214aac91b0a2e"
+    },
+    {
+      "locator": "exp8_math/eval/unedited/parts/olympiad_s9of12/olympiad_per_problem.json",
+      "sha256": "a7c3b25bcad3731db60b6698fe2f6a7e36b49171e1d51c498a09322078e21a44"
+    }
+  ]
+}

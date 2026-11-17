@@ -1,0 +1,13 @@
+{
+  "reference_config": "qwen35-0.8b-vllm-metal-bf16-2x12-v1",
+  "base_weights_digest": "REQUIRED: sha256 of a sorted weight-file SHA256 manifest",
+  "patch_digest": "none — base",
+  "tokenizer_digest": "REQUIRED: sha256 of sorted tokenizer-file SHA256 manifest",
+  "template_digest": "REQUIRED: sha256 of actual chat template bytes",
+  "quantization": "bf16",
+  "conversion_tool_versions": "REQUIRED: exact versions or none — original BF16",
+  "patch_quantization_order": "not applicable — base",
+  "engine_version_observed": "REQUIRED: actual vLLM version",
+  "plugin_version_observed": "REQUIRED: actual vllm-metal version",
+  "machine_layout_evidence": "REQUIRED: local evidence locator + sha256"
+}

@@ -1,0 +1,7 @@
+.venv/
+.cache/
+.tmp/
+bundles/
+receipts/
+manifest-check.log
+*-version.txt

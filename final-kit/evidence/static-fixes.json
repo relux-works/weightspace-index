@@ -1,0 +1,169 @@
+{
+  "claim": "Only PowerShell operational bytes changed from reviewed baseline; current tested copies match final operational files. PS self-hash and start/stream guards checked statically; no PS execution claim. Loaded task source locators are relative.",
+  "powershell_execution": "UNVERIFIED",
+  "files": [
+    {
+      "path": "backend.json",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "7b56bbe66eb943a53b9688273f3ce4e9980a1df3dfda95ffa979fec93c900bc5"
+    },
+    {
+      "path": "compare-bundles.sh",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "e46fddcad549edde5c5debaff1a26cd909107518bc91dd52f62abf5c63e3c51c"
+    },
+    {
+      "path": "lib/common.sh",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "20b8ba5d498d546134f5862a22122cd0fc4893e0848879087fb2e602227e247a"
+    },
+    {
+      "path": "lib/compare.jq",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "11e126c62bba9aa056ab65e842c1261b3755e6f92357ff6d148b715d50467328"
+    },
+    {
+      "path": "lib/manifest.jq",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "c0144e0ecfb808b43368db20f0d06bc6d9c54b07426450b1af42079f5a89760e"
+    },
+    {
+      "path": "lib/select.jq",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "ead3f3e18365188a7a020f9e575230bbf2e14fc6540037914de81f62597381c2"
+    },
+    {
+      "path": "setup/install.sh",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "844a6f203b085fd75056aca8d9e19d75d44a5139e4a944793b00b7271711dba6"
+    },
+    {
+      "path": "shard-run.ps1",
+      "unchanged_from_reviewed_baseline": false,
+      "matches_current_internal_test_copy": true,
+      "sha256": "e584c798f1ae6d3fffe399fe86b78fb72fc84554e54540e16d23fe50d3732719"
+    },
+    {
+      "path": "shard-run.sh",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "c7fc5ec7faaf4d1a5f610c0e50e992c0c42b09e173e00f0d96aa4fd766b417ca"
+    },
+    {
+      "path": "task-pins.json",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "e07a0c9471f29e3bb59388f96c21ed806108b22e17643cb632cb8a50c6d2639a"
+    },
+    {
+      "path": "tasks/card_math.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "ece320d04782643322a4621d0e2d673bec06fc30be992c9e4d3b668ecfdfd9ec"
+    },
+    {
+      "path": "tasks/minerva_math500.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "cd559011e2f682a61d48ae62077206153aa81c81e8869d651ab22b0575d32a60"
+    },
+    {
+      "path": "tasks/mmlu_pro.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "41d81bb7fca3238752b2009585b2089ac9c439e70954dd88a5a12369d227b867"
+    },
+    {
+      "path": "tasks/mmlu_pro_biology.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "1d4e7af1ea5c9a7d243e4cb5383e71bc510a2504d5bd18dd586342ea00571a89"
+    },
+    {
+      "path": "tasks/mmlu_pro_business.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "7c8dc5344a8fb73f948205bcb82d06ba66b8c1950c72044bbc2f180cd95430c4"
+    },
+    {
+      "path": "tasks/mmlu_pro_chemistry.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "bbf7fe7ff5abd0650bafedcb4bc2467dcca73620575b92a3912df34b1a3bfb85"
+    },
+    {
+      "path": "tasks/mmlu_pro_computer_science.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "7825569bcc63796602a5fd543bb08c4c0559375dc9622f3db9ff75837635be9a"
+    },
+    {
+      "path": "tasks/mmlu_pro_economics.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "6d5901913fdae0645f0d4f389ea4eca9a11b5975d787c9f74b6bac3a0cd89302"
+    },
+    {
+      "path": "tasks/mmlu_pro_engineering.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "0ba37a88bb773e4a0347159dca9e29b741cce4a47e4bebba53b1ca80aad7e47f"
+    },
+    {
+      "path": "tasks/mmlu_pro_health.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "4debf9b87fd64b824e9561402d8c982cadb6c6a04a80af5dd5801b1d4bae775b"
+    },
+    {
+      "path": "tasks/mmlu_pro_history.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "61b984feb887ec2597c86f3d283b1a59554ac2496893da6c231f98848ee6f7f4"
+    },
+    {
+      "path": "tasks/mmlu_pro_law.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "cc40171984cd7709d57186850a3891afe3f1b3301961d54a8559ddd4d334140a"
+    },
+    {
+      "path": "tasks/mmlu_pro_math.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "78eec90a439c7da54d776216df9b543554b9fef1c9533a79f30a7d9f7d17da42"
+    },
+    {
+      "path": "tasks/mmlu_pro_other.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "2872c9bfcbd171c8632db881d4481536a2b13ab5c82f743311dad68383b86398"
+    },
+    {
+      "path": "tasks/mmlu_pro_philosophy.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "a7dbcb3dc9a0f1558df4a265d0d451f3b567dc39e20c6f74352774e90aa8b57a"
+    },
+    {
+      "path": "tasks/mmlu_pro_physics.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "264b9a8f82914accb8e657842af1433f3b85edce950ea48fe031d47e4be2c7c4"
+    },
+    {
+      "path": "tasks/mmlu_pro_psychology.yaml",
+      "unchanged_from_reviewed_baseline": true,
+      "matches_current_internal_test_copy": true,
+      "sha256": "c893513d43d3e1f8054e092d8cafa8f27224c8eb9e6c9275ea03db1d0954d0bb"
+    }
+  ],
+  "loaded_task_locators_relative": true
+}

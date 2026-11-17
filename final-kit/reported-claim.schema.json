@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reported-claim.schema.json",
+  "title": "Author-reported claim record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "record_type",
+    "claim_id",
+    "model_id",
+    "patch_id",
+    "claimed_identity",
+    "source",
+    "benchmark",
+    "metric",
+    "reported_protocol",
+    "recorded_by",
+    "protocol_id",
+    "verification_status",
+    "verification_run_ids",
+    "verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "record_type": {
+      "const": "author-reported"
+    },
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "patch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "url",
+        "revision",
+        "retrieved_date"
+      ]
+    },
+    "metric": {
+      "type": "object",
+      "required": [
+        "name",
+        "value",
+        "unit"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "verification_status": {
+      "enum": [
+        "unverified",
+        "reproduced",
+        "not-reproduced",
+        "not-comparable"
+      ]
+    },
+    "verification_run_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "tolerance",
+        "uncertainty",
+        "reason",
+        "evidence_refs"
+      ]
+    }
+  }
+}

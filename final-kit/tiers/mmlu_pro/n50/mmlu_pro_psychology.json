@@ -1,0 +1,16 @@
+{
+  "dataset": "TIGER-Lab/MMLU-Pro",
+  "full_weight": 0.06632313829787234,
+  "global_indices": [
+    2279,
+    2153,
+    2302
+  ],
+  "indices": [
+    389,
+    263,
+    412
+  ],
+  "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "task": "mmlu_pro_psychology"
+}

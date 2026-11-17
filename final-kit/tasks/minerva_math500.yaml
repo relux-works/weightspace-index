@@ -1,0 +1,7 @@
+# Select the installed upstream task unchanged, and freeze dataset bytes.
+# Group-level task overrides are the supported 0.4.13 inheritance route.
+group: day1_minerva_math500
+task:
+  - minerva_math500
+dataset_kwargs:
+  revision: 6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be

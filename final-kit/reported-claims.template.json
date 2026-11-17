@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "record_type": "author-reported",
+  "collection_id": "qwen35-0.8b-card-language-v1",
+  "records": [
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-mmlupro-non-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / non-thinking"
+      },
+      "benchmark": {
+        "id": "MMLU-Pro",
+        "variant": "card non-thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 29.7,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "non-thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    },
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-mmlupro-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / thinking"
+      },
+      "benchmark": {
+        "id": "MMLU-Pro",
+        "variant": "card thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 42.3,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    },
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-ifeval-non-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / non-thinking"
+      },
+      "benchmark": {
+        "id": "IFEval",
+        "variant": "card non-thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 52.1,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "non-thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    },
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-ifeval-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / thinking"
+      },
+      "benchmark": {
+        "id": "IFEval",
+        "variant": "card thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 44.0,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    },
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-ifbench-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / thinking"
+      },
+      "benchmark": {
+        "id": "IFBench",
+        "variant": "card thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 21.0,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    },
+    {
+      "schema_version": 1,
+      "record_type": "author-reported",
+      "claim_id": "qwen35-0.8b-card-gpqa-thinking-v1",
+      "model_id": "qwen35-0.8b",
+      "patch_id": "none",
+      "claimed_identity": {
+        "model": "Qwen/Qwen3.5-0.8B",
+        "patch": "none",
+        "weight_revision": "2fc06364715b967f1860aea9cf38778875588b17"
+      },
+      "source": {
+        "url": "https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/README.md",
+        "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+        "retrieved_date": "2026-11-17",
+        "publication_date": "unspecified",
+        "section": "Language / thinking"
+      },
+      "benchmark": {
+        "id": "GPQA",
+        "variant": "card thinking; split and exact metric subtype unspecified"
+      },
+      "metric": {
+        "name": "author table score; exact subtype unspecified",
+        "value": 11.9,
+        "unit": "percent",
+        "higher_is_better": true
+      },
+      "reported_protocol": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "presence_penalty": 1.5,
+        "max_output_tokens": "unspecified for individual table rows; general recommendations differ",
+        "seed": "unspecified",
+        "repetitions": "unspecified",
+        "prompt_template": "unspecified",
+        "extraction": "unspecified",
+        "mode": "thinking",
+        "settings_source": "Language experimental-settings note; not inferred per-row recipe"
+      },
+      "recorded_by": "index",
+      "protocol_id": "qwen35-0.8b-card-language-reported-v1",
+      "verification_status": "unverified",
+      "verification_run_ids": [],
+      "verification": {
+        "tolerance": null,
+        "uncertainty": null,
+        "reason": "No comparable measured run supplied; no tolerance predeclared.",
+        "evidence_refs": [
+          "REPORTED.md",
+          "RIKIYAT-REPRODUCTION.md"
+        ]
+      },
+      "pilot_comparability": "not-comparable",
+      "pilot_comparability_reason": "Suite differs or task absent; author-reproduction lane disabled.",
+      "display_series": "author-reported"
+    }
+  ]
+}

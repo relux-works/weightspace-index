@@ -1,0 +1,523 @@
+{
+  "ifeval": {
+    "N": 541,
+    "full_instruction_marginals": {
+      "change_case:capital_word_frequency": 25,
+      "change_case:english_capital": 25,
+      "change_case:english_lowercase": 39,
+      "combination:repeat_prompt": 41,
+      "combination:two_responses": 24,
+      "detectable_content:number_placeholders": 27,
+      "detectable_content:postscript": 26,
+      "detectable_format:constrained_response": 10,
+      "detectable_format:json_format": 17,
+      "detectable_format:multiple_sections": 14,
+      "detectable_format:number_bullet_lists": 31,
+      "detectable_format:number_highlighted_sections": 48,
+      "detectable_format:title": 37,
+      "keywords:existence": 39,
+      "keywords:forbidden_words": 49,
+      "keywords:frequency": 42,
+      "keywords:letter_frequency": 33,
+      "language:response_language": 31,
+      "length_constraints:nth_paragraph_first_word": 12,
+      "length_constraints:number_paragraphs": 27,
+      "length_constraints:number_sentences": 52,
+      "length_constraints:number_words": 52,
+      "punctuation:no_comma": 66,
+      "startend:end_checker": 26,
+      "startend:quotation": 41
+    },
+    "strata": 25,
+    "targets": {
+      "r1-10pp": {
+        "R": 1,
+        "n": 197,
+        "required_n_eff": 196.22406399999997,
+        "target_pp": 10.0
+      },
+      "r1-5pp": {
+        "R": 1,
+        "n": null,
+        "required_n_eff": 784.8962559999999,
+        "target_pp": 5.0
+      },
+      "r8-5pp": {
+        "R": 8,
+        "n": 127,
+        "required_n_eff": 125.58340095999998,
+        "target_pp": 5.0
+      },
+      "r8-8pp": {
+        "R": 8,
+        "n": 51,
+        "required_n_eff": 49.056016,
+        "target_pp": 8.0
+      }
+    },
+    "tiers": [
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 2,
+          "change_case:english_capital": 2,
+          "change_case:english_lowercase": 5,
+          "combination:repeat_prompt": 3,
+          "combination:two_responses": 2,
+          "detectable_content:number_placeholders": 2,
+          "detectable_content:postscript": 2,
+          "detectable_format:constrained_response": 1,
+          "detectable_format:json_format": 2,
+          "detectable_format:multiple_sections": 1,
+          "detectable_format:number_bullet_lists": 2,
+          "detectable_format:number_highlighted_sections": 4,
+          "detectable_format:title": 2,
+          "keywords:existence": 5,
+          "keywords:forbidden_words": 5,
+          "keywords:frequency": 3,
+          "keywords:letter_frequency": 4,
+          "language:response_language": 3,
+          "length_constraints:nth_paragraph_first_word": 1,
+          "length_constraints:number_paragraphs": 2,
+          "length_constraints:number_sentences": 6,
+          "length_constraints:number_words": 3,
+          "punctuation:no_comma": 4,
+          "startend:end_checker": 3,
+          "startend:quotation": 4
+        },
+        "n": 50,
+        "n_eff": 48.98290145323701,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 2,
+          "change_case:english_capital": 2,
+          "change_case:english_lowercase": 5,
+          "combination:repeat_prompt": 3,
+          "combination:two_responses": 2,
+          "detectable_content:number_placeholders": 2,
+          "detectable_content:postscript": 2,
+          "detectable_format:constrained_response": 1,
+          "detectable_format:json_format": 2,
+          "detectable_format:multiple_sections": 1,
+          "detectable_format:number_bullet_lists": 2,
+          "detectable_format:number_highlighted_sections": 4,
+          "detectable_format:title": 3,
+          "keywords:existence": 5,
+          "keywords:forbidden_words": 5,
+          "keywords:frequency": 3,
+          "keywords:letter_frequency": 4,
+          "language:response_language": 3,
+          "length_constraints:nth_paragraph_first_word": 1,
+          "length_constraints:number_paragraphs": 2,
+          "length_constraints:number_sentences": 7,
+          "length_constraints:number_words": 3,
+          "punctuation:no_comma": 5,
+          "startend:end_checker": 3,
+          "startend:quotation": 4
+        },
+        "n": 51,
+        "n_eff": 49.92426439232409,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 5,
+          "change_case:english_capital": 5,
+          "change_case:english_lowercase": 9,
+          "combination:repeat_prompt": 7,
+          "combination:two_responses": 4,
+          "detectable_content:number_placeholders": 6,
+          "detectable_content:postscript": 4,
+          "detectable_format:constrained_response": 2,
+          "detectable_format:json_format": 3,
+          "detectable_format:multiple_sections": 3,
+          "detectable_format:number_bullet_lists": 4,
+          "detectable_format:number_highlighted_sections": 9,
+          "detectable_format:title": 7,
+          "keywords:existence": 8,
+          "keywords:forbidden_words": 11,
+          "keywords:frequency": 6,
+          "keywords:letter_frequency": 6,
+          "language:response_language": 6,
+          "length_constraints:nth_paragraph_first_word": 2,
+          "length_constraints:number_paragraphs": 6,
+          "length_constraints:number_sentences": 8,
+          "length_constraints:number_words": 7,
+          "punctuation:no_comma": 8,
+          "startend:end_checker": 6,
+          "startend:quotation": 8
+        },
+        "n": 100,
+        "n_eff": 99.44030759299422,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 7,
+          "change_case:english_capital": 6,
+          "change_case:english_lowercase": 11,
+          "combination:repeat_prompt": 11,
+          "combination:two_responses": 6,
+          "detectable_content:number_placeholders": 7,
+          "detectable_content:postscript": 5,
+          "detectable_format:constrained_response": 2,
+          "detectable_format:json_format": 4,
+          "detectable_format:multiple_sections": 3,
+          "detectable_format:number_bullet_lists": 6,
+          "detectable_format:number_highlighted_sections": 10,
+          "detectable_format:title": 9,
+          "keywords:existence": 10,
+          "keywords:forbidden_words": 15,
+          "keywords:frequency": 8,
+          "keywords:letter_frequency": 8,
+          "language:response_language": 7,
+          "length_constraints:nth_paragraph_first_word": 3,
+          "length_constraints:number_paragraphs": 7,
+          "length_constraints:number_sentences": 11,
+          "length_constraints:number_words": 10,
+          "punctuation:no_comma": 13,
+          "startend:end_checker": 7,
+          "startend:quotation": 11
+        },
+        "n": 127,
+        "n_eff": 126.52854060819658,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 8,
+          "change_case:english_capital": 7,
+          "change_case:english_lowercase": 12,
+          "combination:repeat_prompt": 12,
+          "combination:two_responses": 6,
+          "detectable_content:number_placeholders": 8,
+          "detectable_content:postscript": 6,
+          "detectable_format:constrained_response": 3,
+          "detectable_format:json_format": 5,
+          "detectable_format:multiple_sections": 4,
+          "detectable_format:number_bullet_lists": 7,
+          "detectable_format:number_highlighted_sections": 12,
+          "detectable_format:title": 10,
+          "keywords:existence": 11,
+          "keywords:forbidden_words": 16,
+          "keywords:frequency": 9,
+          "keywords:letter_frequency": 9,
+          "language:response_language": 9,
+          "length_constraints:nth_paragraph_first_word": 3,
+          "length_constraints:number_paragraphs": 9,
+          "length_constraints:number_sentences": 13,
+          "length_constraints:number_words": 12,
+          "punctuation:no_comma": 15,
+          "startend:end_checker": 8,
+          "startend:quotation": 12
+        },
+        "n": 150,
+        "n_eff": 149.5630192356867,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 9,
+          "change_case:english_capital": 9,
+          "change_case:english_lowercase": 16,
+          "combination:repeat_prompt": 16,
+          "combination:two_responses": 8,
+          "detectable_content:number_placeholders": 10,
+          "detectable_content:postscript": 8,
+          "detectable_format:constrained_response": 4,
+          "detectable_format:json_format": 6,
+          "detectable_format:multiple_sections": 5,
+          "detectable_format:number_bullet_lists": 10,
+          "detectable_format:number_highlighted_sections": 17,
+          "detectable_format:title": 16,
+          "keywords:existence": 17,
+          "keywords:forbidden_words": 20,
+          "keywords:frequency": 13,
+          "keywords:letter_frequency": 14,
+          "language:response_language": 11,
+          "length_constraints:nth_paragraph_first_word": 4,
+          "length_constraints:number_paragraphs": 12,
+          "length_constraints:number_sentences": 18,
+          "length_constraints:number_words": 17,
+          "punctuation:no_comma": 19,
+          "startend:end_checker": 10,
+          "startend:quotation": 17
+        },
+        "n": 197,
+        "n_eff": 196.72397653788317,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 11,
+          "change_case:english_capital": 11,
+          "change_case:english_lowercase": 19,
+          "combination:repeat_prompt": 18,
+          "combination:two_responses": 12,
+          "detectable_content:number_placeholders": 14,
+          "detectable_content:postscript": 11,
+          "detectable_format:constrained_response": 5,
+          "detectable_format:json_format": 8,
+          "detectable_format:multiple_sections": 6,
+          "detectable_format:number_bullet_lists": 14,
+          "detectable_format:number_highlighted_sections": 20,
+          "detectable_format:title": 18,
+          "keywords:existence": 19,
+          "keywords:forbidden_words": 24,
+          "keywords:frequency": 17,
+          "keywords:letter_frequency": 17,
+          "language:response_language": 14,
+          "length_constraints:nth_paragraph_first_word": 6,
+          "length_constraints:number_paragraphs": 14,
+          "length_constraints:number_sentences": 23,
+          "length_constraints:number_words": 22,
+          "punctuation:no_comma": 26,
+          "startend:end_checker": 13,
+          "startend:quotation": 19
+        },
+        "n": 250,
+        "n_eff": 249.67401371858014,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 23,
+          "change_case:english_capital": 22,
+          "change_case:english_lowercase": 37,
+          "combination:repeat_prompt": 39,
+          "combination:two_responses": 22,
+          "detectable_content:number_placeholders": 25,
+          "detectable_content:postscript": 23,
+          "detectable_format:constrained_response": 9,
+          "detectable_format:json_format": 16,
+          "detectable_format:multiple_sections": 13,
+          "detectable_format:number_bullet_lists": 28,
+          "detectable_format:number_highlighted_sections": 46,
+          "detectable_format:title": 35,
+          "keywords:existence": 34,
+          "keywords:forbidden_words": 46,
+          "keywords:frequency": 40,
+          "keywords:letter_frequency": 31,
+          "language:response_language": 28,
+          "length_constraints:nth_paragraph_first_word": 11,
+          "length_constraints:number_paragraphs": 25,
+          "length_constraints:number_sentences": 50,
+          "length_constraints:number_words": 47,
+          "punctuation:no_comma": 56,
+          "startend:end_checker": 24,
+          "startend:quotation": 36
+        },
+        "n": 500,
+        "n_eff": 499.91637853884953,
+        "strata_covered": 25
+      },
+      {
+        "instruction_marginals": {
+          "change_case:capital_word_frequency": 25,
+          "change_case:english_capital": 25,
+          "change_case:english_lowercase": 39,
+          "combination:repeat_prompt": 41,
+          "combination:two_responses": 24,
+          "detectable_content:number_placeholders": 27,
+          "detectable_content:postscript": 26,
+          "detectable_format:constrained_response": 10,
+          "detectable_format:json_format": 17,
+          "detectable_format:multiple_sections": 14,
+          "detectable_format:number_bullet_lists": 31,
+          "detectable_format:number_highlighted_sections": 48,
+          "detectable_format:title": 37,
+          "keywords:existence": 39,
+          "keywords:forbidden_words": 49,
+          "keywords:frequency": 42,
+          "keywords:letter_frequency": 33,
+          "language:response_language": 31,
+          "length_constraints:nth_paragraph_first_word": 12,
+          "length_constraints:number_paragraphs": 27,
+          "length_constraints:number_sentences": 52,
+          "length_constraints:number_words": 52,
+          "punctuation:no_comma": 66,
+          "startend:end_checker": 26,
+          "startend:quotation": 41
+        },
+        "n": 541,
+        "n_eff": 541.0,
+        "strata_covered": 25
+      }
+    ]
+  },
+  "minerva_math500": {
+    "N": 500,
+    "full_instruction_marginals": {},
+    "strata": 35,
+    "targets": {
+      "r1-10pp": {
+        "R": 1,
+        "n": 197,
+        "required_n_eff": 196.22406399999997,
+        "target_pp": 10.0
+      },
+      "r1-5pp": {
+        "R": 1,
+        "n": null,
+        "required_n_eff": 784.8962559999999,
+        "target_pp": 5.0
+      },
+      "r8-5pp": {
+        "R": 8,
+        "n": 127,
+        "required_n_eff": 125.58340095999998,
+        "target_pp": 5.0
+      },
+      "r8-8pp": {
+        "R": 8,
+        "n": 54,
+        "required_n_eff": 49.056016,
+        "target_pp": 8.0
+      }
+    },
+    "tiers": [
+      {
+        "instruction_marginals": null,
+        "n": 50,
+        "n_eff": 45.64959371861591,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 54,
+        "n_eff": 50.16722408026756,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 100,
+        "n_eff": 97.68768595548791,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 127,
+        "n_eff": 125.7341979056275,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 150,
+        "n_eff": 148.72634237113056,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 197,
+        "n_eff": 196.43823186882915,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 250,
+        "n_eff": 249.20431722566047,
+        "strata_covered": 35
+      },
+      {
+        "instruction_marginals": null,
+        "n": 500,
+        "n_eff": 500.0,
+        "strata_covered": 35
+      }
+    ]
+  },
+  "mmlu_pro": {
+    "N": 12032,
+    "full_instruction_marginals": {},
+    "strata": 14,
+    "targets": {
+      "r1-10pp": {
+        "R": 1,
+        "n": 197,
+        "required_n_eff": 196.22406399999997,
+        "target_pp": 10.0
+      },
+      "r1-5pp": {
+        "R": 1,
+        "n": 785,
+        "required_n_eff": 784.8962559999999,
+        "target_pp": 5.0
+      },
+      "r8-5pp": {
+        "R": 8,
+        "n": 126,
+        "required_n_eff": 125.58340095999998,
+        "target_pp": 5.0
+      },
+      "r8-8pp": {
+        "R": 8,
+        "n": 50,
+        "required_n_eff": 49.056016,
+        "target_pp": 8.0
+      }
+    },
+    "tiers": [
+      {
+        "instruction_marginals": null,
+        "n": 50,
+        "n_eff": 49.55560194336722,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 100,
+        "n_eff": 99.83408911236418,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 126,
+        "n_eff": 125.83754083154523,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 150,
+        "n_eff": 149.91372832640783,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 197,
+        "n_eff": 196.93666518861926,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 250,
+        "n_eff": 249.91162483992645,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 500,
+        "n_eff": 499.98347264142535,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 785,
+        "n_eff": 784.9789272532702,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 1000,
+        "n_eff": 999.9766426534208,
+        "strata_covered": 14
+      },
+      {
+        "instruction_marginals": null,
+        "n": 12032,
+        "n_eff": 12032.0,
+        "strata_covered": 14
+      }
+    ]
+  }
+}

@@ -1,0 +1,1012 @@
+{
+  "record_type": "author-reported",
+  "source_revision": "4d09ba6d6a7e891dd8063974dfe81b3d78e3494f",
+  "source_url_prefix": "https://github.com/RikiyaT/lm_understand-logs/blob/4d09ba6d6a7e891dd8063974dfe81b3d78e3494f/",
+  "note": "Arithmetic readback of published source counts only; no inference was reproduced.",
+  "arms": {
+    "unedited": {
+      "math500": {
+        "acc": 0.079,
+        "cut_share": 0.93,
+        "mean_tokens": 30868.4345,
+        "problems": 500,
+        "complete": true,
+        "acc_lenient": null,
+        "ok": 158,
+        "total": 2000,
+        "cut": 1860,
+        "tokens_sum": 61736869,
+        "n_problems": 500,
+        "samples_per_problem": 4,
+        "ok_lenient": null,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s0of10/scores.json",
+            "sha256": "ce5dd263ef7436727341ff92cf60aa5567b55742fc3b4ecb820303d82af1cc41",
+            "shard": "0/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s1of10/scores.json",
+            "sha256": "4e21ee307576ccbc669e534d740ab15dd3fa3ccf6da7441827b85bff87914bed",
+            "shard": "1/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s2of10/scores.json",
+            "sha256": "dcd29ca4d7fe4d10f960a91b10e2f7a2676c40f5dcbd3f7f364f0e9a7edb0e0b",
+            "shard": "2/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s3of10/scores.json",
+            "sha256": "c8fdc797411d68bdc56b9b9f98cacca4ab0ecd861d0040e87e96a6413733a5f2",
+            "shard": "3/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s4of10/scores.json",
+            "sha256": "596c759bc030f85a35b7d06ae58ac7ca5705170b52415deb308cadb8cc9a9b74",
+            "shard": "4/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s5of10/scores.json",
+            "sha256": "1e3b4f117a2b46e7e9f83601d362e9c17ce6a8f5b5f1bc5cb0f9831ab4fa9944",
+            "shard": "5/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s6of10/scores.json",
+            "sha256": "ee54cc13bc5bf62a1579d82a51a7c5eb914502dd9f5c6935beeeb328ef360561",
+            "shard": "6/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s7of10/scores.json",
+            "sha256": "89a6423f112680288a037d58c9b1042064cb4a2af4ace03261e4397b7d528e26",
+            "shard": "7/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s8of10/scores.json",
+            "sha256": "1998e370714b5fd8bca130071ece6563a0c06ed08daef3c9bfe9556f9a27334c",
+            "shard": "8/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/math500_s9of10/scores.json",
+            "sha256": "2fda84abecbb441d444342c110688f0feb05b53da62e6cec634b9b0272d47c3d",
+            "shard": "9/10"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "gsm8k": {
+        "acc": 0.13836239575435935,
+        "cut_share": 0.8749052312357847,
+        "mean_tokens": 29288.653904473085,
+        "problems": 1319,
+        "complete": true,
+        "acc_lenient": null,
+        "ok": 365,
+        "total": 2638,
+        "cut": 2308,
+        "tokens_sum": 77263469,
+        "n_problems": 1319,
+        "samples_per_problem": 2,
+        "ok_lenient": null,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s0of10/scores.json",
+            "sha256": "38566c9d03abad1d270cd72ebc15b768ee3629056973430b5f66584722608864",
+            "shard": "0/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s1of10/scores.json",
+            "sha256": "35c44e7a4ff1a6df6b7fffce197daf2f0d62f4e5532d362bb100e70f310a5d35",
+            "shard": "1/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s2of10/scores.json",
+            "sha256": "ae480ff5a0a960d42e5eee5ecd3527e5ba0b01a1c8fe05155d9d05a603280c1a",
+            "shard": "2/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s3of10/scores.json",
+            "sha256": "b3c54c9d3bf038a509d4ac0ad0ca825d9497eb65e96d27bfeb14fa55a45e82d1",
+            "shard": "3/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s4of10/scores.json",
+            "sha256": "e7947e1f6520c72a3beb8f800148e4fc3b7272dd8593fb021e73499f974c8a39",
+            "shard": "4/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s5of10/scores.json",
+            "sha256": "5a8eeb9b8a60c8dea69186c694d3ea9f288d189e8a822af5419b3901514c4a04",
+            "shard": "5/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s6of10/scores.json",
+            "sha256": "7943627fe68c9e2720b273476e1a28596afa2d12552b76d73311b3fc3a3530b3",
+            "shard": "6/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s7of10/scores.json",
+            "sha256": "083cc99dc9397477572ac0f6b2e99b1abd7db224c934639711ad13f147d8ea5c",
+            "shard": "7/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s8of10/scores.json",
+            "sha256": "737de24ec48275bbc7ec48505157d927ebbd70d442129d85d34c81fa9af64791",
+            "shard": "8/10"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gsm8k_s9of10/scores.json",
+            "sha256": "5d5d3b2872b3393e2ecc804e7aafb516923ce37bf7c663c7e880d12e7a089bfe",
+            "shard": "9/10"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "aime24": {
+        "acc": 0.0,
+        "cut_share": 1.0,
+        "mean_tokens": 32768.0,
+        "problems": 30,
+        "complete": true,
+        "acc_lenient": 0.0125,
+        "ok": 0,
+        "total": 480,
+        "cut": 480,
+        "tokens_sum": 15728640,
+        "n_problems": 30,
+        "samples_per_problem": 16,
+        "ok_lenient": 6,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/aime24_s0of3/scores.json",
+            "sha256": "7a503c9f2f2cb41d4e7d6a0424176c1416267b99d05e2ae078c56b4664f33f21",
+            "shard": "0/3"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/aime24_s1of3/scores.json",
+            "sha256": "60040e06c70e677181027151494ef34cb116b4391f852eb30647ae831e7e3cff",
+            "shard": "1/3"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/aime24_s2of3/scores.json",
+            "sha256": "55fc0c9ebe4e704991d0333fe3dddbe81c9208efe4111e001757de4911fe391f",
+            "shard": "2/3"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "aime25": {
+        "acc": 0.0,
+        "cut_share": 1.0,
+        "mean_tokens": 32768.0,
+        "problems": 30,
+        "complete": true,
+        "acc_lenient": 0.0020833333333333333,
+        "ok": 0,
+        "total": 480,
+        "cut": 480,
+        "tokens_sum": 15728640,
+        "n_problems": 30,
+        "samples_per_problem": 16,
+        "ok_lenient": 1,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/aime25_s0of3/scores.json",
+            "sha256": "a344aded3f69d365cc86a5af26247f291a6186c6c2e5ee2bbbc4b2529d6e9bb7",
+            "shard": "0/3"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/aime25_s1of3/scores.json",
+            "sha256": "ef1c7fe4d174d00e4236a416486953a93e5e9562422a13fa08769375e02bf839",
+            "shard": "1/3"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/aime25_s2of3/scores.json",
+            "sha256": "29482320fd7ac3ccd1b848f3465244fce8971e4ea25626361f10ee957204b934",
+            "shard": "2/3"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "amc23": {
+        "acc": 0.0046875,
+        "cut_share": 0.9953125,
+        "mean_tokens": 32679.809375,
+        "problems": 40,
+        "complete": true,
+        "acc_lenient": 0.0796875,
+        "ok": 3,
+        "total": 640,
+        "cut": 637,
+        "tokens_sum": 20915078,
+        "n_problems": 40,
+        "samples_per_problem": 16,
+        "ok_lenient": 51,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/amc23_s0of4/scores.json",
+            "sha256": "56c9c41084bb461a1eb9985559a8d6dd8c657aa4ddc6039846479d5665f4911c",
+            "shard": "0/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/amc23_s1of4/scores.json",
+            "sha256": "a9b0f0bef426566c46cd10061317e42e5751e690b53e5cb68777ea70cc6be773",
+            "shard": "1/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/amc23_s2of4/scores.json",
+            "sha256": "0d4d521fd70ecde608840a554bb901f81dc9a9c5ef01b0e3e465404d64951264",
+            "shard": "2/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/amc23_s3of4/scores.json",
+            "sha256": "c42fb96e2bf10d35fc47a33e1c4f2cabfd019c3269cad303ff981d1f92536310",
+            "shard": "3/4"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "minerva": {
+        "acc": 0.014705882352941176,
+        "cut_share": 0.9816176470588235,
+        "mean_tokens": 32301.77573529412,
+        "problems": 272,
+        "complete": true,
+        "acc_lenient": 0.0744485294117647,
+        "ok": 16,
+        "total": 1088,
+        "cut": 1068,
+        "tokens_sum": 35144332,
+        "n_problems": 272,
+        "samples_per_problem": 4,
+        "ok_lenient": 81,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s0of6/scores.json",
+            "sha256": "1161c26b8bb20973db016b5236d6a16eda779639a8cbc1748b53f82b7668558a",
+            "shard": "0/6"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s1of6/scores.json",
+            "sha256": "23991d8ac6d1867917ed1b41fec0525cd9f84d1befc1639ae1309fc11f758252",
+            "shard": "1/6"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s2of6/scores.json",
+            "sha256": "8c30c16a5122c3aa5cbcfb578090d6140ba92c4f0b7ceebd5ce045a6cd89824a",
+            "shard": "2/6"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s3of6/scores.json",
+            "sha256": "e22fd4bdaa51e6b0448d24f525280a00b4407b7d2eafdb04b0f5b8425b0f1089",
+            "shard": "3/6"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s4of6/scores.json",
+            "sha256": "c09806b9a8a8b1b4e35e0d35d9e71f5361fc4efef6fbe497cbc0e6e37e28ea43",
+            "shard": "4/6"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/minerva_s5of6/scores.json",
+            "sha256": "98c92ab9bdea5131b074b0407bfeaac82b6d3aa1d5ccc0ffc1cf5d2afce23c06",
+            "shard": "5/6"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "olympiad": {
+        "acc": 0.013353115727002967,
+        "cut_share": 0.9870178041543026,
+        "mean_tokens": 32484.688427299705,
+        "problems": 674,
+        "complete": true,
+        "acc_lenient": 0.07010385756676558,
+        "ok": 36,
+        "total": 2696,
+        "cut": 2661,
+        "tokens_sum": 87578720,
+        "n_problems": 674,
+        "samples_per_problem": 4,
+        "ok_lenient": 189,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s0of12/scores.json",
+            "sha256": "abbf73ca4eb9b3c68c5bd3ea6d18d0ddb6d2ae88e225799fc82a07a674aea3ed",
+            "shard": "0/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s10of12/scores.json",
+            "sha256": "e4c3c708be5964423fe28af10aa6280d008a63d81167ea86b2bd989368ba0798",
+            "shard": "10/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s11of12/scores.json",
+            "sha256": "a166e495591cf660c5f0329ff6d96ad597c6d501a94b0a6fcafda92827531868",
+            "shard": "11/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s1of12/scores.json",
+            "sha256": "575047f6846786db2bde665533dc59634aaaf87c66a050d98f5529f181b221b4",
+            "shard": "1/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s2of12/scores.json",
+            "sha256": "5c100d31a325173888622d5d223bd2bf3ea87f45a0f095e3f51f49c75d7b8dec",
+            "shard": "2/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s3of12/scores.json",
+            "sha256": "7f8a6358e4167c9cfa87d794bc7fd7f0c629bed0ac3fc94e712f33ff754e1b57",
+            "shard": "3/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s4of12/scores.json",
+            "sha256": "79c2d99107b937e2659b255e5d6fa8d8a29bb2e7d73780cd12d86d67eb421586",
+            "shard": "4/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s5of12/scores.json",
+            "sha256": "7ccfdf86d2f654c171fbd40876c688bf0686ad0d3c66635af861f660bc698175",
+            "shard": "5/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s6of12/scores.json",
+            "sha256": "e873819535204a5270de4fdde32ff78bf69718e0606cfff7ee08f76d5ea886fd",
+            "shard": "6/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s7of12/scores.json",
+            "sha256": "e08266f217f06eb837dbf83bd7d86fffeb78fd1b2eee5d0e205b463e000a75e1",
+            "shard": "7/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s8of12/scores.json",
+            "sha256": "a947e924484a0476a3ceb7500acc42c2d3c219e790c85fff854650116c13ea1c",
+            "shard": "8/12"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/olympiad_s9of12/scores.json",
+            "sha256": "f7cea1841ad7f45aee89dfd1c0101c4b4fb8d8df0ee01922951021b0bbaa3c8e",
+            "shard": "9/12"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "mmlupro1k": {
+        "acc": 0.403,
+        "cut_share": 0.289,
+        "mean_tokens": 13705.696,
+        "problems": 1000,
+        "complete": true,
+        "acc_lenient": 0.403,
+        "ok": 403,
+        "total": 1000,
+        "cut": 289,
+        "tokens_sum": 13705696,
+        "n_problems": 1000,
+        "samples_per_problem": 1,
+        "ok_lenient": 403,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/mmlupro1k_s0of5/scores.json",
+            "sha256": "ece07adbefa403c8a87f4a193d3c13dc2b639fc84ad41e27be43a747e851c10f",
+            "shard": "0/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/mmlupro1k_s1of5/scores.json",
+            "sha256": "e60986104b992cfe946419f62ed182640e9ce3adc4d5cebc82889728a75bc97c",
+            "shard": "1/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/mmlupro1k_s2of5/scores.json",
+            "sha256": "2cd3c21c5c1c08495c5c169ec2b621e3e6a45e28e18115982d68c268529f2c06",
+            "shard": "2/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/mmlupro1k_s3of5/scores.json",
+            "sha256": "854d4f73ce39bc0087b44d6c23df7e70923e196a3ed603d7fef63eefb94d7738",
+            "shard": "3/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/mmlupro1k_s4of5/scores.json",
+            "sha256": "3bbb14d37ee16b2adf34cdbe708b9c0456711ec3eaa22c0b7f4137e3a731db53",
+            "shard": "4/5"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "gpqa": {
+        "acc": 0.22727272727272727,
+        "cut_share": 0.5946969696969697,
+        "mean_tokens": 23193.217171717173,
+        "problems": 198,
+        "complete": true,
+        "acc_lenient": 0.22727272727272727,
+        "ok": 180,
+        "total": 792,
+        "cut": 471,
+        "tokens_sum": 18369028,
+        "n_problems": 198,
+        "samples_per_problem": 4,
+        "ok_lenient": 180,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/gpqa_s0of4/scores.json",
+            "sha256": "3e16c5d27d9eea498c91e00e138b3843ea6e0edd1e4d60e865af918d70a72a14",
+            "shard": "0/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gpqa_s1of4/scores.json",
+            "sha256": "2836152d9d19ac2e95cdea9683c6ec89ea5af1a02d0c85d23c5c3e85c609ce5e",
+            "shard": "1/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gpqa_s2of4/scores.json",
+            "sha256": "315dcb37f897c009eb05dc543462a8a5725de66a139a1111da2ac41fd6a466b9",
+            "shard": "2/4"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/gpqa_s3of4/scores.json",
+            "sha256": "1fa71c7fb55c552bb3b626f0a1bec82a6f7529be01dc5910a174b7f4a32f298d",
+            "shard": "3/4"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "ifeval": {
+        "acc": 0.2097966728280961,
+        "cut_share": 0.7486136783733827,
+        "mean_tokens": 25296.210720887248,
+        "problems": 541,
+        "complete": true,
+        "acc_lenient": 0.2097966728280961,
+        "ok": 227,
+        "total": 1082,
+        "cut": 810,
+        "tokens_sum": 27370500,
+        "n_problems": 541,
+        "samples_per_problem": 2,
+        "ok_lenient": 227,
+        "parts": [
+          {
+            "path": "exp8_math/eval/unedited/parts/ifeval_s0of5/scores.json",
+            "sha256": "80dc17929a31f637fe4d10bee43b9e3ac1a91f4f4406d824eadc5c803522aaef",
+            "shard": "0/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/ifeval_s1of5/scores.json",
+            "sha256": "bfbeb1c8589b7f16727f6973acc11230122bfaeb8c2edf4b2ae6b65ef8e345b9",
+            "shard": "1/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/ifeval_s2of5/scores.json",
+            "sha256": "08b008adb8809feb6c9999274b03e123b7d497e875d75b02f61a22aa87982de2",
+            "shard": "2/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/ifeval_s3of5/scores.json",
+            "sha256": "00de3f824b6ccaef5c8cb7d351844a4937ecec57458a2895d70d4f73bbe35e9d",
+            "shard": "3/5"
+          },
+          {
+            "path": "exp8_math/eval/unedited/parts/ifeval_s4of5/scores.json",
+            "sha256": "5f0d037c17b19d5dc79d96002d7db40067a19af55e9389a1c16c795270be5c2a",
+            "shard": "4/5"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      }
+    },
+    "p50c": {
+      "math500": {
+        "acc": 0.481,
+        "cut_share": 0.3305,
+        "mean_tokens": 22037.1475,
+        "problems": 500,
+        "complete": true,
+        "acc_lenient": null,
+        "ok": 962,
+        "total": 2000,
+        "cut": 661,
+        "tokens_sum": 44074295,
+        "n_problems": 500,
+        "samples_per_problem": 4,
+        "ok_lenient": null,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s0of10/scores.json",
+            "sha256": "1673553760ae3285b8c3636e5b6ae2f21e3519bdb9dc1480d49ed63620948379",
+            "shard": "0/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s1of10/scores.json",
+            "sha256": "b20b03dac5ca86fa35fb6717edfa194ebf15b9d71520116caa7d49438df01939",
+            "shard": "1/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s2of10/scores.json",
+            "sha256": "033f2e70a3b78429e7367a56b372d78ff2d1dc0cb536d2c37d1954e8374b9b58",
+            "shard": "2/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s3of10/scores.json",
+            "sha256": "badcdb7d367f673c4c6769b9faf820a37dad48fe048f71b019f3da3db4be5d2d",
+            "shard": "3/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s4of10/scores.json",
+            "sha256": "d97fbfac3f549dc73badfe8887fc7dabed48a57e76193ea84ad19b6a47ba6042",
+            "shard": "4/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s5of10/scores.json",
+            "sha256": "d599218159aa5175f72e8398b5f1b202062319efd3dbb7f0bb42ba721a1bf9ee",
+            "shard": "5/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s6of10/scores.json",
+            "sha256": "65cae860cdee7d745cc90bc27b05b1cfd654d12101470d21e7f72187dab79a61",
+            "shard": "6/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s7of10/scores.json",
+            "sha256": "226d120caf2bd978995f0be687cf8b7ddf075a2d8796ed4490f2751c659839d2",
+            "shard": "7/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s8of10/scores.json",
+            "sha256": "9f099925496142d85e39baf7d463d52dcca37d024031b0ff6da0f052f62a9161",
+            "shard": "8/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/math500_s9of10/scores.json",
+            "sha256": "4255187c1e8f944218890e3b8b4cf60f153944dd786641b9ecc37dac10162750",
+            "shard": "9/10"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "gsm8k": {
+        "acc": 0.6709628506444276,
+        "cut_share": 0.07240333586050038,
+        "mean_tokens": 11993.395375284306,
+        "problems": 1319,
+        "complete": true,
+        "acc_lenient": null,
+        "ok": 1770,
+        "total": 2638,
+        "cut": 191,
+        "tokens_sum": 31638577,
+        "n_problems": 1319,
+        "samples_per_problem": 2,
+        "ok_lenient": null,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s0of10/scores.json",
+            "sha256": "4d203507eebb371e4381b26dc3f807cae2f08ffea6eada07adf27ec20082fad5",
+            "shard": "0/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s1of10/scores.json",
+            "sha256": "9a35cec1e6bd6184a68c9bcd879115c28c26abadf83d8763eecdc196d8efd6bf",
+            "shard": "1/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s2of10/scores.json",
+            "sha256": "ceac92f5ec48dbf571d3174b11f6aa12f4177797194e37a37d51e9f4595bccd1",
+            "shard": "2/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s3of10/scores.json",
+            "sha256": "21e8a897780af64bad53c88746daf231edc9d13cf79a180d5b1b3330f197f706",
+            "shard": "3/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s4of10/scores.json",
+            "sha256": "35e452760f5e258920e26e3de124dec1a737d948260e6ad81677695452fef0ce",
+            "shard": "4/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s5of10/scores.json",
+            "sha256": "f985ec36bff5d5080e59627be6938e5e84a9c70cc53f1ed0610c3b8a30dc0013",
+            "shard": "5/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s6of10/scores.json",
+            "sha256": "739cc41ad9f7cbc4355b0e5b8734962ede206d804e87f106528b6e264466d4e0",
+            "shard": "6/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s7of10/scores.json",
+            "sha256": "62153f697fc775144324a52848bdcc509db917378e025b2a89c4ba2ac1b191c4",
+            "shard": "7/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s8of10/scores.json",
+            "sha256": "c046d9c4ea2288d443ed30b6a263e35041d561f44db0c85b0681283854d36a11",
+            "shard": "8/10"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gsm8k_s9of10/scores.json",
+            "sha256": "cc7ade6c5a3ebe45959d8cdd170bbdb4e3ad266178b4697a1247b7f2a48fc394",
+            "shard": "9/10"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "aime24": {
+        "acc": 0.00625,
+        "cut_share": 0.6520833333333333,
+        "mean_tokens": 29258.995833333334,
+        "problems": 30,
+        "complete": true,
+        "acc_lenient": 0.025,
+        "ok": 3,
+        "total": 480,
+        "cut": 313,
+        "tokens_sum": 14044318,
+        "n_problems": 30,
+        "samples_per_problem": 16,
+        "ok_lenient": 12,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/aime24_s0of3/scores.json",
+            "sha256": "5cb0e5ac0bd084420811b01c86ad06a6b97e57be659457dcbb2ad2c98c4ff6fa",
+            "shard": "0/3"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/aime24_s1of3/scores.json",
+            "sha256": "5ff5931f1e548f7df2f65357252b0963f332b8958a54b49292ebcce99f28fd75",
+            "shard": "1/3"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/aime24_s2of3/scores.json",
+            "sha256": "98964e5031a1ab8ae87c90b3a7ed41ac600ce9bc4e99e584a8481957187c2bb3",
+            "shard": "2/3"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "aime25": {
+        "acc": 0.022916666666666665,
+        "cut_share": 0.6458333333333334,
+        "mean_tokens": 29408.039583333335,
+        "problems": 30,
+        "complete": true,
+        "acc_lenient": 0.029166666666666667,
+        "ok": 11,
+        "total": 480,
+        "cut": 310,
+        "tokens_sum": 14115859,
+        "n_problems": 30,
+        "samples_per_problem": 16,
+        "ok_lenient": 14,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/aime25_s0of3/scores.json",
+            "sha256": "37b44ea0ab565e1c547ca8ca0bfafda41ff671ddca8c6d8b36c9ce136a86524f",
+            "shard": "0/3"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/aime25_s1of3/scores.json",
+            "sha256": "111fc998bbf22d97c303993f047bf9363d7fc29cbb4598d700be50cd881e663c",
+            "shard": "1/3"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/aime25_s2of3/scores.json",
+            "sha256": "7d0c020645fefb0308ef5c2824342298ea8d2a9c68f5308e023c453bebfd58c4",
+            "shard": "2/3"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "amc23": {
+        "acc": 0.234375,
+        "cut_share": 0.5046875,
+        "mean_tokens": 27465.2828125,
+        "problems": 40,
+        "complete": true,
+        "acc_lenient": 0.284375,
+        "ok": 150,
+        "total": 640,
+        "cut": 323,
+        "tokens_sum": 17577781,
+        "n_problems": 40,
+        "samples_per_problem": 16,
+        "ok_lenient": 182,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/amc23_s0of4/scores.json",
+            "sha256": "c7bb5bf2ae9f5cb2906524a95c49c84bd47ab809ca8ea89b2a98af4f79412c2a",
+            "shard": "0/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/amc23_s1of4/scores.json",
+            "sha256": "c458de96d5bd9dd597c2534bec8d18f6ccba0c21ded45cae10358d38752741c4",
+            "shard": "1/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/amc23_s2of4/scores.json",
+            "sha256": "014df1ad30fb6b95f1b5309ffa7262418f6e70ed4c2f536cbc9e66b40143d6b6",
+            "shard": "2/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/amc23_s3of4/scores.json",
+            "sha256": "932f42a3f6f4664813c6b18990cfa567399f3b3519a10da391bb9cdf2a10fedf",
+            "shard": "3/4"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "minerva": {
+        "acc": 0.2536764705882353,
+        "cut_share": 0.25827205882352944,
+        "mean_tokens": 22485.914522058825,
+        "problems": 272,
+        "complete": true,
+        "acc_lenient": 0.27297794117647056,
+        "ok": 276,
+        "total": 1088,
+        "cut": 281,
+        "tokens_sum": 24464675,
+        "n_problems": 272,
+        "samples_per_problem": 4,
+        "ok_lenient": 297,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s0of6/scores.json",
+            "sha256": "1994473db083e188a8f922c01929d5f4f718791beb8b35396e83483052010df6",
+            "shard": "0/6"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s1of6/scores.json",
+            "sha256": "04df4633e2a40c516f370b5a2fde719ec9a42ba7a56bf8df4338e14ba992a538",
+            "shard": "1/6"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s2of6/scores.json",
+            "sha256": "d109d840966dc6b4bac2f8d9e0b3e522b7d6eebf417c0241b6e56595b1a2ada6",
+            "shard": "2/6"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s3of6/scores.json",
+            "sha256": "f36695dfb6dfd2fd9b9082de82b452da5f8360ed0f2a8beca062f17aff817acc",
+            "shard": "3/6"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s4of6/scores.json",
+            "sha256": "0e4e903c27a5a45238a0922cbc740223ec35ba57245bd60967465bf0e57fa4f4",
+            "shard": "4/6"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/minerva_s5of6/scores.json",
+            "sha256": "b158c5df74b86d1a13b8df1cbb0c4033fbf09cb8e9c4482916bedb0828811138",
+            "shard": "5/6"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "olympiad": {
+        "acc": 0.21810089020771514,
+        "cut_share": 0.46698813056379823,
+        "mean_tokens": 26679.96884272997,
+        "problems": 674,
+        "complete": true,
+        "acc_lenient": 0.2607566765578635,
+        "ok": 588,
+        "total": 2696,
+        "cut": 1259,
+        "tokens_sum": 71929196,
+        "n_problems": 674,
+        "samples_per_problem": 4,
+        "ok_lenient": 703,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s0of12/scores.json",
+            "sha256": "231577d604338c3eaeafc80173087fb029ba1884114de7064621247765e2c358",
+            "shard": "0/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s10of12/scores.json",
+            "sha256": "362ad3d9d501977157720b32107de7fea81970a895c299f1653e5ccf671d0d31",
+            "shard": "10/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s11of12/scores.json",
+            "sha256": "73aba87169919d741ac09a8da409caadfc5409c758f216b65640e9e9eef737f0",
+            "shard": "11/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s1of12/scores.json",
+            "sha256": "9740016f10081154b0c8b25c0f969a149edf24311e74bd963529f5acd8a5c3ed",
+            "shard": "1/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s2of12/scores.json",
+            "sha256": "598ee91891d02ae920ce3e5ff1ae668be0e444b88e636a8896d75974657a234f",
+            "shard": "2/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s3of12/scores.json",
+            "sha256": "b24b6462058b75de7e90f6eb8c413080514ca410ee56acdccb17b35a5629459d",
+            "shard": "3/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s4of12/scores.json",
+            "sha256": "313910a3d747e3e20cef21859ec22e83e09f378c4698ea5b6cfee84107119fd6",
+            "shard": "4/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s5of12/scores.json",
+            "sha256": "e04ebb18176b7d9407d8938f2f1a1acf9f3780620ad165451db276a5b167f5e7",
+            "shard": "5/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s6of12/scores.json",
+            "sha256": "652475bf506f8bc5df0cc22c25aab6069629c9c6674a39483f8e99131ea365ee",
+            "shard": "6/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s7of12/scores.json",
+            "sha256": "d538cb171c7e8c318f4f8e25a805410ab1160f8088374041d084a48e55b20a1b",
+            "shard": "7/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s8of12/scores.json",
+            "sha256": "5f2c3177cd93a19d42b85f37b59ae33a87a844bd27932a284bde868464bb9a82",
+            "shard": "8/12"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/olympiad_s9of12/scores.json",
+            "sha256": "76b3a263ea0e2fb1c4b9d6f83d7ab9259aaf12e04b16a4be9092c84535037b7c",
+            "shard": "9/12"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "mmlupro1k": {
+        "acc": 0.455,
+        "cut_share": 0.005,
+        "mean_tokens": 7558.804,
+        "problems": 1000,
+        "complete": true,
+        "acc_lenient": 0.455,
+        "ok": 455,
+        "total": 1000,
+        "cut": 5,
+        "tokens_sum": 7558804,
+        "n_problems": 1000,
+        "samples_per_problem": 1,
+        "ok_lenient": 455,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/mmlupro1k_s0of5/scores.json",
+            "sha256": "98b534c5bc135516af25683b5bcf8f17e7ab2cffd8ea0d12c552f203e37782bc",
+            "shard": "0/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/mmlupro1k_s1of5/scores.json",
+            "sha256": "7469a29155e571556b2a4a383c4aeb38ab158cb01bd86dcaa507eb4c725915ac",
+            "shard": "1/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/mmlupro1k_s2of5/scores.json",
+            "sha256": "fd741ed113a5baa464543bb0a5a3d48f23b763980b1b72f49d17b77b32bb99b1",
+            "shard": "2/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/mmlupro1k_s3of5/scores.json",
+            "sha256": "917653175f921be5648854f38ba5576aa300c4e8a4f4872e132e16af42f290c3",
+            "shard": "3/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/mmlupro1k_s4of5/scores.json",
+            "sha256": "3778df11a5d3b78c04f8416bea9128c8a36207e23e72590ca707a253a7c08940",
+            "shard": "4/5"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "gpqa": {
+        "acc": 0.3661616161616162,
+        "cut_share": 0.023989898989898988,
+        "mean_tokens": 12261.306818181818,
+        "problems": 198,
+        "complete": true,
+        "acc_lenient": 0.3661616161616162,
+        "ok": 290,
+        "total": 792,
+        "cut": 19,
+        "tokens_sum": 9710955,
+        "n_problems": 198,
+        "samples_per_problem": 4,
+        "ok_lenient": 290,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/gpqa_s0of4/scores.json",
+            "sha256": "83be62aa301942a86409d92091b13d9a862fbc1a5add57d058753497ce0a3052",
+            "shard": "0/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gpqa_s1of4/scores.json",
+            "sha256": "954da56012b851d9b6ef33117a89bac7395f247cbfde6374ed8a5abe78ea1672",
+            "shard": "1/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gpqa_s2of4/scores.json",
+            "sha256": "916ea865e9eb76735d96173f52e041bfbd5a863e2b117bab4b73f20419d6714a",
+            "shard": "2/4"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/gpqa_s3of4/scores.json",
+            "sha256": "618b205a126e6b17d36859d2475320c7eed5a2aaf273291339f34aa0cd24ded7",
+            "shard": "3/4"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      },
+      "ifeval": {
+        "acc": 0.6229205175600739,
+        "cut_share": 0.022181146025878003,
+        "mean_tokens": 4240.579482439926,
+        "problems": 541,
+        "complete": true,
+        "acc_lenient": 0.6229205175600739,
+        "ok": 674,
+        "total": 1082,
+        "cut": 24,
+        "tokens_sum": 4588307,
+        "n_problems": 541,
+        "samples_per_problem": 2,
+        "ok_lenient": 674,
+        "parts": [
+          {
+            "path": "exp8_math/eval/p50c/parts/ifeval_s0of5/scores.json",
+            "sha256": "1ddd7b220714ee28f0c5ced5f9efcfbcf1c969aff870a9a61dce9bde23c5fa09",
+            "shard": "0/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/ifeval_s1of5/scores.json",
+            "sha256": "20bd24b7249aa979709e7629fa1e519d1e832fe47a17ab85439bf1660b8a81d0",
+            "shard": "1/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/ifeval_s2of5/scores.json",
+            "sha256": "d2b320540c1913e6836939fc081f58d2265e7c33b6783ba36446c07355e7de77",
+            "shard": "2/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/ifeval_s3of5/scores.json",
+            "sha256": "21db06b679ffcb4c81dda1e1007a618c89fcbbb232a40948d16c9cafec1e2dbe",
+            "shard": "3/5"
+          },
+          {
+            "path": "exp8_math/eval/p50c/parts/ifeval_s4of5/scores.json",
+            "sha256": "5c43e63cc0f8eb65d25c1401a6d0afdbda9ad6924e2ddd49e5a44de141bbbba9",
+            "shard": "4/5"
+          }
+        ],
+        "arithmetic_readback": "reproduced",
+        "inference_verification_status": "not-comparable"
+      }
+    }
+  }
+}

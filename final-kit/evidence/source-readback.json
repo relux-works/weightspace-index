@@ -1,0 +1,106 @@
+{
+  "metric_count": 20,
+  "checks": [
+    {
+      "arm": "unedited",
+      "benchmark": "math500",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "gsm8k",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "aime24",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "aime25",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "amc23",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "minerva",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "olympiad",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "mmlupro1k",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "gpqa",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "unedited",
+      "benchmark": "ifeval",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "math500",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "gsm8k",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "aime24",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "aime25",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "amc23",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "minerva",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "olympiad",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "mmlupro1k",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "gpqa",
+      "counts_and_ratios_match": true
+    },
+    {
+      "arm": "p50c",
+      "benchmark": "ifeval",
+      "counts_and_ratios_match": true
+    }
+  ],
+  "arm_item_ids_equal": true
+}

@@ -1,0 +1,20 @@
+{
+  "dataset": "TIGER-Lab/MMLU-Pro",
+  "full_weight": 0.0316655585106383,
+  "global_indices": [
+    4692,
+    4794,
+    4733,
+    4809,
+    4657
+  ],
+  "indices": [
+    155,
+    257,
+    196,
+    272,
+    120
+  ],
+  "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "task": "mmlu_pro_history"
+}

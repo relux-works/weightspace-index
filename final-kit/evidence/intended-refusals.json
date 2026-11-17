@@ -1,0 +1,65 @@
+[
+  {
+    "case": "protocol-mismatch",
+    "expected_reason": "protocol/config mismatch",
+    "pass": true
+  },
+  {
+    "case": "config-mismatch",
+    "expected_reason": "protocol/config mismatch",
+    "pass": true
+  },
+  {
+    "case": "corrupt-seal",
+    "expected_reason": "REFUSED: bundle seal/inventory/privacy",
+    "pass": true
+  },
+  {
+    "case": "duplicate-unit",
+    "expected_reason": "missing/unexpected/duplicate paired units",
+    "pass": true
+  },
+  {
+    "case": "missing-unit",
+    "expected_reason": "REFUSED: unexpected root entry",
+    "pass": true
+  },
+  {
+    "case": "invalid-indices",
+    "expected_reason": "index out of range",
+    "pass": true
+  },
+  {
+    "case": "fallback-refused",
+    "expected_reason": "REFUSED: unsupported task",
+    "pass": true
+  },
+  {
+    "case": "failed-path-refuses-reuse",
+    "expected_reason": "REFUSED: existing bundle is not this completed request",
+    "pass": true
+  },
+  {
+    "case": "export-refuses-token-response",
+    "expected_reason": "REFUSED: export scan",
+    "pass": true
+  },
+  {
+    "case": "missing-paired-item",
+    "exit": 5,
+    "expected_reason": "missing/unexpected/duplicate paired units",
+    "pass": true
+  },
+  {
+    "case": "cross-benchmark",
+    "exit": 5,
+    "expected_reason": "selection identity mismatch",
+    "pass": true
+  },
+  {
+    "case": "paired-seed",
+    "exit": 5,
+    "expected_reason": "paired seed/A-A lineage mismatch",
+    "pass": true
+  }
+]

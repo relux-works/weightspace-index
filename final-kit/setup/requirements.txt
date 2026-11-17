@@ -1,0 +1,10 @@
+# Suite code stays upstream. Versions below are the actually exercised scorer/API environment.
+lm_eval[api,math]==0.4.13
+datasets==5.2.0
+math-verify==0.9.0
+sympy==1.14.0
+antlr4-python3-runtime==4.11.0
+latex2sympy2_extended==1.11.0
+nltk==3.10.4
+langdetect==1.0.9
+immutabledict==4.2.2

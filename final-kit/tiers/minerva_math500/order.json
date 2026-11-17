@@ -1,0 +1,2507 @@
+{
+  "indices": [
+    374,
+    413,
+    122,
+    183,
+    170,
+    404,
+    207,
+    111,
+    32,
+    142,
+    18,
+    314,
+    261,
+    324,
+    264,
+    237,
+    296,
+    489,
+    445,
+    432,
+    141,
+    107,
+    176,
+    217,
+    375,
+    447,
+    199,
+    253,
+    235,
+    357,
+    14,
+    74,
+    420,
+    17,
+    454,
+    494,
+    354,
+    252,
+    174,
+    490,
+    333,
+    452,
+    216,
+    61,
+    271,
+    443,
+    163,
+    54,
+    166,
+    87,
+    471,
+    481,
+    212,
+    3,
+    483,
+    245,
+    300,
+    274,
+    446,
+    47,
+    255,
+    179,
+    453,
+    147,
+    240,
+    475,
+    344,
+    12,
+    151,
+    234,
+    249,
+    2,
+    467,
+    491,
+    185,
+    256,
+    159,
+    418,
+    80,
+    230,
+    41,
+    350,
+    451,
+    318,
+    402,
+    91,
+    49,
+    169,
+    37,
+    96,
+    33,
+    202,
+    339,
+    366,
+    430,
+    313,
+    92,
+    239,
+    307,
+    228,
+    78,
+    58,
+    411,
+    381,
+    103,
+    120,
+    423,
+    345,
+    421,
+    42,
+    231,
+    373,
+    127,
+    343,
+    456,
+    273,
+    86,
+    260,
+    317,
+    496,
+    403,
+    397,
+    135,
+    428,
+    347,
+    124,
+    241,
+    85,
+    433,
+    218,
+    38,
+    194,
+    283,
+    291,
+    497,
+    28,
+    352,
+    302,
+    309,
+    292,
+    442,
+    424,
+    437,
+    203,
+    465,
+    59,
+    385,
+    1,
+    251,
+    36,
+    365,
+    408,
+    99,
+    268,
+    113,
+    368,
+    389,
+    158,
+    435,
+    232,
+    270,
+    90,
+    277,
+    110,
+    56,
+    226,
+    429,
+    137,
+    5,
+    473,
+    39,
+    153,
+    308,
+    371,
+    233,
+    68,
+    73,
+    331,
+    222,
+    149,
+    117,
+    455,
+    312,
+    262,
+    128,
+    340,
+    285,
+    306,
+    281,
+    214,
+    106,
+    197,
+    466,
+    341,
+    22,
+    395,
+    119,
+    439,
+    89,
+    476,
+    52,
+    60,
+    20,
+    316,
+    377,
+    126,
+    131,
+    23,
+    75,
+    320,
+    164,
+    431,
+    210,
+    325,
+    470,
+    351,
+    426,
+    472,
+    132,
+    290,
+    123,
+    462,
+    193,
+    311,
+    178,
+    94,
+    125,
+    328,
+    363,
+    213,
+    478,
+    168,
+    76,
+    287,
+    62,
+    477,
+    67,
+    370,
+    66,
+    407,
+    276,
+    25,
+    487,
+    29,
+    474,
+    65,
+    219,
+    189,
+    206,
+    336,
+    332,
+    191,
+    289,
+    130,
+    182,
+    279,
+    337,
+    416,
+    64,
+    43,
+    84,
+    24,
+    8,
+    165,
+    278,
+    330,
+    358,
+    482,
+    425,
+    184,
+    359,
+    376,
+    4,
+    35,
+    367,
+    173,
+    484,
+    186,
+    27,
+    44,
+    393,
+    167,
+    396,
+    372,
+    177,
+    101,
+    295,
+    398,
+    34,
+    100,
+    0,
+    298,
+    55,
+    390,
+    364,
+    221,
+    275,
+    181,
+    401,
+    247,
+    294,
+    121,
+    244,
+    198,
+    77,
+    105,
+    461,
+    388,
+    26,
+    175,
+    415,
+    392,
+    286,
+    405,
+    195,
+    360,
+    146,
+    485,
+    102,
+    79,
+    116,
+    263,
+    160,
+    383,
+    356,
+    436,
+    63,
+    400,
+    480,
+    419,
+    208,
+    304,
+    335,
+    40,
+    321,
+    386,
+    361,
+    460,
+    187,
+    378,
+    204,
+    250,
+    242,
+    243,
+    192,
+    161,
+    406,
+    227,
+    362,
+    444,
+    83,
+    448,
+    288,
+    150,
+    19,
+    140,
+    410,
+    81,
+    162,
+    414,
+    417,
+    495,
+    6,
+    379,
+    138,
+    154,
+    46,
+    7,
+    11,
+    449,
+    133,
+    427,
+    267,
+    499,
+    258,
+    315,
+    459,
+    438,
+    104,
+    108,
+    71,
+    211,
+    145,
+    9,
+    156,
+    329,
+    348,
+    259,
+    30,
+    97,
+    282,
+    493,
+    463,
+    322,
+    190,
+    394,
+    157,
+    50,
+    15,
+    196,
+    266,
+    69,
+    155,
+    303,
+    53,
+    248,
+    72,
+    486,
+    21,
+    305,
+    238,
+    382,
+    272,
+    384,
+    434,
+    441,
+    334,
+    246,
+    143,
+    144,
+    338,
+    257,
+    70,
+    136,
+    380,
+    93,
+    391,
+    148,
+    342,
+    269,
+    225,
+    114,
+    201,
+    369,
+    220,
+    323,
+    51,
+    327,
+    200,
+    479,
+    284,
+    265,
+    215,
+    188,
+    349,
+    152,
+    326,
+    236,
+    134,
+    457,
+    492,
+    118,
+    469,
+    10,
+    172,
+    458,
+    346,
+    293,
+    139,
+    297,
+    98,
+    488,
+    229,
+    115,
+    310,
+    422,
+    16,
+    171,
+    412,
+    13,
+    45,
+    440,
+    299,
+    209,
+    112,
+    88,
+    254,
+    57,
+    450,
+    498,
+    109,
+    353,
+    129,
+    95,
+    224,
+    205,
+    223,
+    387,
+    180,
+    464,
+    280,
+    399,
+    301,
+    31,
+    48,
+    409,
+    319,
+    468,
+    82,
+    355
+  ],
+  "mapping": {
+    "0": {
+      "local_index": 0,
+      "stratum": "Precalculus|level=2"
+    },
+    "1": {
+      "local_index": 0,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "2": {
+      "local_index": 0,
+      "stratum": "Algebra|level=3"
+    },
+    "3": {
+      "local_index": 0,
+      "stratum": "Number Theory|level=3"
+    },
+    "4": {
+      "local_index": 0,
+      "stratum": "Algebra|level=2"
+    },
+    "5": {
+      "local_index": 0,
+      "stratum": "Prealgebra|level=2"
+    },
+    "6": {
+      "local_index": 1,
+      "stratum": "Number Theory|level=3"
+    },
+    "7": {
+      "local_index": 0,
+      "stratum": "Precalculus|level=4"
+    },
+    "8": {
+      "local_index": 1,
+      "stratum": "Algebra|level=3"
+    },
+    "9": {
+      "local_index": 0,
+      "stratum": "Prealgebra|level=5"
+    },
+    "10": {
+      "local_index": 2,
+      "stratum": "Number Theory|level=3"
+    },
+    "11": {
+      "local_index": 1,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "12": {
+      "local_index": 0,
+      "stratum": "Number Theory|level=5"
+    },
+    "13": {
+      "local_index": 0,
+      "stratum": "Geometry|level=2"
+    },
+    "14": {
+      "local_index": 0,
+      "stratum": "Precalculus|level=1"
+    },
+    "15": {
+      "local_index": 0,
+      "stratum": "Precalculus|level=5"
+    },
+    "16": {
+      "local_index": 0,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "17": {
+      "local_index": 1,
+      "stratum": "Precalculus|level=4"
+    },
+    "18": {
+      "local_index": 0,
+      "stratum": "Geometry|level=1"
+    },
+    "19": {
+      "local_index": 0,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "20": {
+      "local_index": 2,
+      "stratum": "Algebra|level=3"
+    },
+    "21": {
+      "local_index": 1,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "22": {
+      "local_index": 0,
+      "stratum": "Algebra|level=5"
+    },
+    "23": {
+      "local_index": 1,
+      "stratum": "Algebra|level=5"
+    },
+    "24": {
+      "local_index": 2,
+      "stratum": "Algebra|level=5"
+    },
+    "25": {
+      "local_index": 2,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "26": {
+      "local_index": 0,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "27": {
+      "local_index": 1,
+      "stratum": "Prealgebra|level=2"
+    },
+    "28": {
+      "local_index": 1,
+      "stratum": "Precalculus|level=2"
+    },
+    "29": {
+      "local_index": 0,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "30": {
+      "local_index": 3,
+      "stratum": "Number Theory|level=3"
+    },
+    "31": {
+      "local_index": 0,
+      "stratum": "Prealgebra|level=4"
+    },
+    "32": {
+      "local_index": 0,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "33": {
+      "local_index": 0,
+      "stratum": "Algebra|level=4"
+    },
+    "34": {
+      "local_index": 1,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "35": {
+      "local_index": 0,
+      "stratum": "Number Theory|level=2"
+    },
+    "36": {
+      "local_index": 0,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "37": {
+      "local_index": 0,
+      "stratum": "Geometry|level=3"
+    },
+    "38": {
+      "local_index": 0,
+      "stratum": "Algebra|level=1"
+    },
+    "39": {
+      "local_index": 4,
+      "stratum": "Number Theory|level=3"
+    },
+    "40": {
+      "local_index": 2,
+      "stratum": "Prealgebra|level=2"
+    },
+    "41": {
+      "local_index": 0,
+      "stratum": "Geometry|level=4"
+    },
+    "42": {
+      "local_index": 1,
+      "stratum": "Algebra|level=2"
+    },
+    "43": {
+      "local_index": 3,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "44": {
+      "local_index": 1,
+      "stratum": "Prealgebra|level=5"
+    },
+    "45": {
+      "local_index": 1,
+      "stratum": "Geometry|level=3"
+    },
+    "46": {
+      "local_index": 2,
+      "stratum": "Precalculus|level=2"
+    },
+    "47": {
+      "local_index": 3,
+      "stratum": "Algebra|level=5"
+    },
+    "48": {
+      "local_index": 2,
+      "stratum": "Algebra|level=2"
+    },
+    "49": {
+      "local_index": 1,
+      "stratum": "Prealgebra|level=4"
+    },
+    "50": {
+      "local_index": 1,
+      "stratum": "Number Theory|level=5"
+    },
+    "51": {
+      "local_index": 1,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "52": {
+      "local_index": 2,
+      "stratum": "Prealgebra|level=5"
+    },
+    "53": {
+      "local_index": 3,
+      "stratum": "Precalculus|level=2"
+    },
+    "54": {
+      "local_index": 3,
+      "stratum": "Prealgebra|level=2"
+    },
+    "55": {
+      "local_index": 1,
+      "stratum": "Algebra|level=4"
+    },
+    "56": {
+      "local_index": 3,
+      "stratum": "Algebra|level=3"
+    },
+    "57": {
+      "local_index": 2,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "58": {
+      "local_index": 1,
+      "stratum": "Algebra|level=1"
+    },
+    "59": {
+      "local_index": 4,
+      "stratum": "Prealgebra|level=2"
+    },
+    "60": {
+      "local_index": 4,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "61": {
+      "local_index": 2,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "62": {
+      "local_index": 1,
+      "stratum": "Precalculus|level=5"
+    },
+    "63": {
+      "local_index": 5,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "64": {
+      "local_index": 2,
+      "stratum": "Precalculus|level=4"
+    },
+    "65": {
+      "local_index": 0,
+      "stratum": "Prealgebra|level=1"
+    },
+    "66": {
+      "local_index": 4,
+      "stratum": "Algebra|level=3"
+    },
+    "67": {
+      "local_index": 2,
+      "stratum": "Prealgebra|level=4"
+    },
+    "68": {
+      "local_index": 3,
+      "stratum": "Precalculus|level=4"
+    },
+    "69": {
+      "local_index": 0,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "70": {
+      "local_index": 1,
+      "stratum": "Number Theory|level=2"
+    },
+    "71": {
+      "local_index": 0,
+      "stratum": "Number Theory|level=4"
+    },
+    "72": {
+      "local_index": 1,
+      "stratum": "Geometry|level=2"
+    },
+    "73": {
+      "local_index": 2,
+      "stratum": "Algebra|level=4"
+    },
+    "74": {
+      "local_index": 4,
+      "stratum": "Precalculus|level=2"
+    },
+    "75": {
+      "local_index": 2,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "76": {
+      "local_index": 3,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "77": {
+      "local_index": 2,
+      "stratum": "Algebra|level=1"
+    },
+    "78": {
+      "local_index": 1,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "79": {
+      "local_index": 1,
+      "stratum": "Prealgebra|level=1"
+    },
+    "80": {
+      "local_index": 6,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "81": {
+      "local_index": 5,
+      "stratum": "Algebra|level=3"
+    },
+    "82": {
+      "local_index": 4,
+      "stratum": "Algebra|level=5"
+    },
+    "83": {
+      "local_index": 4,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "84": {
+      "local_index": 3,
+      "stratum": "Algebra|level=4"
+    },
+    "85": {
+      "local_index": 1,
+      "stratum": "Geometry|level=4"
+    },
+    "86": {
+      "local_index": 2,
+      "stratum": "Prealgebra|level=1"
+    },
+    "87": {
+      "local_index": 3,
+      "stratum": "Algebra|level=1"
+    },
+    "88": {
+      "local_index": 5,
+      "stratum": "Algebra|level=5"
+    },
+    "89": {
+      "local_index": 1,
+      "stratum": "Number Theory|level=4"
+    },
+    "90": {
+      "local_index": 0,
+      "stratum": "Prealgebra|level=3"
+    },
+    "91": {
+      "local_index": 6,
+      "stratum": "Algebra|level=3"
+    },
+    "92": {
+      "local_index": 3,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "93": {
+      "local_index": 4,
+      "stratum": "Algebra|level=4"
+    },
+    "94": {
+      "local_index": 3,
+      "stratum": "Prealgebra|level=5"
+    },
+    "95": {
+      "local_index": 5,
+      "stratum": "Precalculus|level=2"
+    },
+    "96": {
+      "local_index": 7,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "97": {
+      "local_index": 3,
+      "stratum": "Prealgebra|level=1"
+    },
+    "98": {
+      "local_index": 5,
+      "stratum": "Prealgebra|level=2"
+    },
+    "99": {
+      "local_index": 0,
+      "stratum": "Precalculus|level=3"
+    },
+    "100": {
+      "local_index": 0,
+      "stratum": "Geometry|level=5"
+    },
+    "101": {
+      "local_index": 8,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "102": {
+      "local_index": 1,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "103": {
+      "local_index": 9,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "104": {
+      "local_index": 2,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "105": {
+      "local_index": 1,
+      "stratum": "Prealgebra|level=3"
+    },
+    "106": {
+      "local_index": 5,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "107": {
+      "local_index": 2,
+      "stratum": "Number Theory|level=2"
+    },
+    "108": {
+      "local_index": 3,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "109": {
+      "local_index": 2,
+      "stratum": "Precalculus|level=5"
+    },
+    "110": {
+      "local_index": 3,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "111": {
+      "local_index": 0,
+      "stratum": "Counting & Probability|level=3"
+    },
+    "112": {
+      "local_index": 5,
+      "stratum": "Algebra|level=4"
+    },
+    "113": {
+      "local_index": 3,
+      "stratum": "Algebra|level=2"
+    },
+    "114": {
+      "local_index": 4,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "115": {
+      "local_index": 1,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "116": {
+      "local_index": 4,
+      "stratum": "Algebra|level=2"
+    },
+    "117": {
+      "local_index": 5,
+      "stratum": "Algebra|level=2"
+    },
+    "118": {
+      "local_index": 10,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "119": {
+      "local_index": 2,
+      "stratum": "Prealgebra|level=3"
+    },
+    "120": {
+      "local_index": 6,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "121": {
+      "local_index": 6,
+      "stratum": "Prealgebra|level=2"
+    },
+    "122": {
+      "local_index": 7,
+      "stratum": "Algebra|level=3"
+    },
+    "123": {
+      "local_index": 2,
+      "stratum": "Geometry|level=4"
+    },
+    "124": {
+      "local_index": 6,
+      "stratum": "Algebra|level=4"
+    },
+    "125": {
+      "local_index": 7,
+      "stratum": "Algebra|level=4"
+    },
+    "126": {
+      "local_index": 4,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "127": {
+      "local_index": 5,
+      "stratum": "Number Theory|level=3"
+    },
+    "128": {
+      "local_index": 8,
+      "stratum": "Algebra|level=3"
+    },
+    "129": {
+      "local_index": 1,
+      "stratum": "Geometry|level=5"
+    },
+    "130": {
+      "local_index": 2,
+      "stratum": "Number Theory|level=4"
+    },
+    "131": {
+      "local_index": 8,
+      "stratum": "Algebra|level=4"
+    },
+    "132": {
+      "local_index": 3,
+      "stratum": "Prealgebra|level=3"
+    },
+    "133": {
+      "local_index": 4,
+      "stratum": "Prealgebra|level=3"
+    },
+    "134": {
+      "local_index": 5,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "135": {
+      "local_index": 4,
+      "stratum": "Prealgebra|level=5"
+    },
+    "136": {
+      "local_index": 11,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "137": {
+      "local_index": 3,
+      "stratum": "Number Theory|level=4"
+    },
+    "138": {
+      "local_index": 4,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "139": {
+      "local_index": 5,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "140": {
+      "local_index": 4,
+      "stratum": "Number Theory|level=4"
+    },
+    "141": {
+      "local_index": 0,
+      "stratum": "Number Theory|level=1"
+    },
+    "142": {
+      "local_index": 1,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "143": {
+      "local_index": 1,
+      "stratum": "Precalculus|level=3"
+    },
+    "144": {
+      "local_index": 1,
+      "stratum": "Precalculus|level=1"
+    },
+    "145": {
+      "local_index": 12,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "146": {
+      "local_index": 9,
+      "stratum": "Algebra|level=3"
+    },
+    "147": {
+      "local_index": 13,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "148": {
+      "local_index": 4,
+      "stratum": "Algebra|level=1"
+    },
+    "149": {
+      "local_index": 3,
+      "stratum": "Number Theory|level=2"
+    },
+    "150": {
+      "local_index": 14,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "151": {
+      "local_index": 3,
+      "stratum": "Precalculus|level=5"
+    },
+    "152": {
+      "local_index": 2,
+      "stratum": "Geometry|level=5"
+    },
+    "153": {
+      "local_index": 5,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "154": {
+      "local_index": 3,
+      "stratum": "Geometry|level=5"
+    },
+    "155": {
+      "local_index": 6,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "156": {
+      "local_index": 2,
+      "stratum": "Precalculus|level=3"
+    },
+    "157": {
+      "local_index": 7,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "158": {
+      "local_index": 9,
+      "stratum": "Algebra|level=4"
+    },
+    "159": {
+      "local_index": 10,
+      "stratum": "Algebra|level=4"
+    },
+    "160": {
+      "local_index": 4,
+      "stratum": "Number Theory|level=2"
+    },
+    "161": {
+      "local_index": 6,
+      "stratum": "Algebra|level=2"
+    },
+    "162": {
+      "local_index": 5,
+      "stratum": "Prealgebra|level=5"
+    },
+    "163": {
+      "local_index": 6,
+      "stratum": "Algebra|level=5"
+    },
+    "164": {
+      "local_index": 6,
+      "stratum": "Precalculus|level=2"
+    },
+    "165": {
+      "local_index": 3,
+      "stratum": "Prealgebra|level=4"
+    },
+    "166": {
+      "local_index": 6,
+      "stratum": "Prealgebra|level=5"
+    },
+    "167": {
+      "local_index": 5,
+      "stratum": "Algebra|level=1"
+    },
+    "168": {
+      "local_index": 2,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "169": {
+      "local_index": 2,
+      "stratum": "Geometry|level=2"
+    },
+    "170": {
+      "local_index": 7,
+      "stratum": "Algebra|level=5"
+    },
+    "171": {
+      "local_index": 4,
+      "stratum": "Prealgebra|level=1"
+    },
+    "172": {
+      "local_index": 6,
+      "stratum": "Algebra|level=1"
+    },
+    "173": {
+      "local_index": 8,
+      "stratum": "Algebra|level=5"
+    },
+    "174": {
+      "local_index": 10,
+      "stratum": "Algebra|level=3"
+    },
+    "175": {
+      "local_index": 8,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "176": {
+      "local_index": 6,
+      "stratum": "Number Theory|level=3"
+    },
+    "177": {
+      "local_index": 2,
+      "stratum": "Geometry|level=3"
+    },
+    "178": {
+      "local_index": 7,
+      "stratum": "Prealgebra|level=2"
+    },
+    "179": {
+      "local_index": 4,
+      "stratum": "Precalculus|level=4"
+    },
+    "180": {
+      "local_index": 5,
+      "stratum": "Prealgebra|level=3"
+    },
+    "181": {
+      "local_index": 11,
+      "stratum": "Algebra|level=3"
+    },
+    "182": {
+      "local_index": 8,
+      "stratum": "Prealgebra|level=2"
+    },
+    "183": {
+      "local_index": 11,
+      "stratum": "Algebra|level=4"
+    },
+    "184": {
+      "local_index": 15,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "185": {
+      "local_index": 7,
+      "stratum": "Algebra|level=1"
+    },
+    "186": {
+      "local_index": 5,
+      "stratum": "Number Theory|level=4"
+    },
+    "187": {
+      "local_index": 8,
+      "stratum": "Algebra|level=1"
+    },
+    "188": {
+      "local_index": 9,
+      "stratum": "Algebra|level=5"
+    },
+    "189": {
+      "local_index": 4,
+      "stratum": "Geometry|level=5"
+    },
+    "190": {
+      "local_index": 3,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "191": {
+      "local_index": 7,
+      "stratum": "Algebra|level=2"
+    },
+    "192": {
+      "local_index": 3,
+      "stratum": "Geometry|level=3"
+    },
+    "193": {
+      "local_index": 6,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "194": {
+      "local_index": 16,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "195": {
+      "local_index": 6,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "196": {
+      "local_index": 9,
+      "stratum": "Algebra|level=1"
+    },
+    "197": {
+      "local_index": 2,
+      "stratum": "Number Theory|level=5"
+    },
+    "198": {
+      "local_index": 1,
+      "stratum": "Counting & Probability|level=3"
+    },
+    "199": {
+      "local_index": 9,
+      "stratum": "Prealgebra|level=2"
+    },
+    "200": {
+      "local_index": 4,
+      "stratum": "Prealgebra|level=4"
+    },
+    "201": {
+      "local_index": 6,
+      "stratum": "Number Theory|level=4"
+    },
+    "202": {
+      "local_index": 10,
+      "stratum": "Algebra|level=5"
+    },
+    "203": {
+      "local_index": 7,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "204": {
+      "local_index": 17,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "205": {
+      "local_index": 3,
+      "stratum": "Precalculus|level=3"
+    },
+    "206": {
+      "local_index": 7,
+      "stratum": "Precalculus|level=2"
+    },
+    "207": {
+      "local_index": 2,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "208": {
+      "local_index": 7,
+      "stratum": "Number Theory|level=3"
+    },
+    "209": {
+      "local_index": 5,
+      "stratum": "Number Theory|level=2"
+    },
+    "210": {
+      "local_index": 5,
+      "stratum": "Prealgebra|level=4"
+    },
+    "211": {
+      "local_index": 10,
+      "stratum": "Prealgebra|level=2"
+    },
+    "212": {
+      "local_index": 12,
+      "stratum": "Algebra|level=3"
+    },
+    "213": {
+      "local_index": 7,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "214": {
+      "local_index": 4,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "215": {
+      "local_index": 12,
+      "stratum": "Algebra|level=4"
+    },
+    "216": {
+      "local_index": 6,
+      "stratum": "Prealgebra|level=4"
+    },
+    "217": {
+      "local_index": 7,
+      "stratum": "Number Theory|level=4"
+    },
+    "218": {
+      "local_index": 8,
+      "stratum": "Algebra|level=2"
+    },
+    "219": {
+      "local_index": 7,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "220": {
+      "local_index": 7,
+      "stratum": "Prealgebra|level=5"
+    },
+    "221": {
+      "local_index": 8,
+      "stratum": "Number Theory|level=3"
+    },
+    "222": {
+      "local_index": 3,
+      "stratum": "Geometry|level=4"
+    },
+    "223": {
+      "local_index": 9,
+      "stratum": "Number Theory|level=3"
+    },
+    "224": {
+      "local_index": 5,
+      "stratum": "Precalculus|level=4"
+    },
+    "225": {
+      "local_index": 13,
+      "stratum": "Algebra|level=3"
+    },
+    "226": {
+      "local_index": 2,
+      "stratum": "Counting & Probability|level=3"
+    },
+    "227": {
+      "local_index": 4,
+      "stratum": "Precalculus|level=3"
+    },
+    "228": {
+      "local_index": 6,
+      "stratum": "Precalculus|level=4"
+    },
+    "229": {
+      "local_index": 7,
+      "stratum": "Prealgebra|level=4"
+    },
+    "230": {
+      "local_index": 8,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "231": {
+      "local_index": 13,
+      "stratum": "Algebra|level=4"
+    },
+    "232": {
+      "local_index": 18,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "233": {
+      "local_index": 8,
+      "stratum": "Precalculus|level=2"
+    },
+    "234": {
+      "local_index": 8,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "235": {
+      "local_index": 8,
+      "stratum": "Prealgebra|level=4"
+    },
+    "236": {
+      "local_index": 7,
+      "stratum": "Precalculus|level=4"
+    },
+    "237": {
+      "local_index": 2,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "238": {
+      "local_index": 11,
+      "stratum": "Algebra|level=5"
+    },
+    "239": {
+      "local_index": 5,
+      "stratum": "Geometry|level=5"
+    },
+    "240": {
+      "local_index": 9,
+      "stratum": "Prealgebra|level=4"
+    },
+    "241": {
+      "local_index": 12,
+      "stratum": "Algebra|level=5"
+    },
+    "242": {
+      "local_index": 13,
+      "stratum": "Algebra|level=5"
+    },
+    "243": {
+      "local_index": 3,
+      "stratum": "Geometry|level=2"
+    },
+    "244": {
+      "local_index": 8,
+      "stratum": "Prealgebra|level=5"
+    },
+    "245": {
+      "local_index": 9,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "246": {
+      "local_index": 9,
+      "stratum": "Algebra|level=2"
+    },
+    "247": {
+      "local_index": 9,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "248": {
+      "local_index": 8,
+      "stratum": "Precalculus|level=4"
+    },
+    "249": {
+      "local_index": 8,
+      "stratum": "Number Theory|level=4"
+    },
+    "250": {
+      "local_index": 14,
+      "stratum": "Algebra|level=4"
+    },
+    "251": {
+      "local_index": 5,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "252": {
+      "local_index": 14,
+      "stratum": "Algebra|level=5"
+    },
+    "253": {
+      "local_index": 6,
+      "stratum": "Prealgebra|level=3"
+    },
+    "254": {
+      "local_index": 6,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "255": {
+      "local_index": 9,
+      "stratum": "Precalculus|level=2"
+    },
+    "256": {
+      "local_index": 7,
+      "stratum": "Prealgebra|level=3"
+    },
+    "257": {
+      "local_index": 4,
+      "stratum": "Geometry|level=4"
+    },
+    "258": {
+      "local_index": 14,
+      "stratum": "Algebra|level=3"
+    },
+    "259": {
+      "local_index": 3,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "260": {
+      "local_index": 5,
+      "stratum": "Precalculus|level=3"
+    },
+    "261": {
+      "local_index": 4,
+      "stratum": "Geometry|level=3"
+    },
+    "262": {
+      "local_index": 5,
+      "stratum": "Prealgebra|level=1"
+    },
+    "263": {
+      "local_index": 5,
+      "stratum": "Geometry|level=4"
+    },
+    "264": {
+      "local_index": 6,
+      "stratum": "Geometry|level=5"
+    },
+    "265": {
+      "local_index": 10,
+      "stratum": "Algebra|level=2"
+    },
+    "266": {
+      "local_index": 8,
+      "stratum": "Prealgebra|level=3"
+    },
+    "267": {
+      "local_index": 1,
+      "stratum": "Geometry|level=1"
+    },
+    "268": {
+      "local_index": 1,
+      "stratum": "Number Theory|level=1"
+    },
+    "269": {
+      "local_index": 3,
+      "stratum": "Counting & Probability|level=3"
+    },
+    "270": {
+      "local_index": 10,
+      "stratum": "Algebra|level=1"
+    },
+    "271": {
+      "local_index": 9,
+      "stratum": "Number Theory|level=4"
+    },
+    "272": {
+      "local_index": 10,
+      "stratum": "Number Theory|level=4"
+    },
+    "273": {
+      "local_index": 10,
+      "stratum": "Prealgebra|level=4"
+    },
+    "274": {
+      "local_index": 7,
+      "stratum": "Geometry|level=5"
+    },
+    "275": {
+      "local_index": 11,
+      "stratum": "Algebra|level=2"
+    },
+    "276": {
+      "local_index": 15,
+      "stratum": "Algebra|level=5"
+    },
+    "277": {
+      "local_index": 11,
+      "stratum": "Prealgebra|level=4"
+    },
+    "278": {
+      "local_index": 10,
+      "stratum": "Number Theory|level=3"
+    },
+    "279": {
+      "local_index": 9,
+      "stratum": "Prealgebra|level=5"
+    },
+    "280": {
+      "local_index": 11,
+      "stratum": "Number Theory|level=4"
+    },
+    "281": {
+      "local_index": 12,
+      "stratum": "Prealgebra|level=4"
+    },
+    "282": {
+      "local_index": 15,
+      "stratum": "Algebra|level=4"
+    },
+    "283": {
+      "local_index": 9,
+      "stratum": "Prealgebra|level=3"
+    },
+    "284": {
+      "local_index": 4,
+      "stratum": "Precalculus|level=5"
+    },
+    "285": {
+      "local_index": 10,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "286": {
+      "local_index": 19,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "287": {
+      "local_index": 3,
+      "stratum": "Number Theory|level=5"
+    },
+    "288": {
+      "local_index": 5,
+      "stratum": "Precalculus|level=5"
+    },
+    "289": {
+      "local_index": 10,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "290": {
+      "local_index": 15,
+      "stratum": "Algebra|level=3"
+    },
+    "291": {
+      "local_index": 8,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "292": {
+      "local_index": 11,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "293": {
+      "local_index": 16,
+      "stratum": "Algebra|level=5"
+    },
+    "294": {
+      "local_index": 12,
+      "stratum": "Number Theory|level=4"
+    },
+    "295": {
+      "local_index": 6,
+      "stratum": "Precalculus|level=3"
+    },
+    "296": {
+      "local_index": 9,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "297": {
+      "local_index": 13,
+      "stratum": "Number Theory|level=4"
+    },
+    "298": {
+      "local_index": 9,
+      "stratum": "Precalculus|level=4"
+    },
+    "299": {
+      "local_index": 6,
+      "stratum": "Geometry|level=4"
+    },
+    "300": {
+      "local_index": 9,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "301": {
+      "local_index": 10,
+      "stratum": "Prealgebra|level=5"
+    },
+    "302": {
+      "local_index": 13,
+      "stratum": "Prealgebra|level=4"
+    },
+    "303": {
+      "local_index": 8,
+      "stratum": "Geometry|level=5"
+    },
+    "304": {
+      "local_index": 11,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "305": {
+      "local_index": 16,
+      "stratum": "Algebra|level=4"
+    },
+    "306": {
+      "local_index": 20,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "307": {
+      "local_index": 10,
+      "stratum": "Precalculus|level=2"
+    },
+    "308": {
+      "local_index": 9,
+      "stratum": "Geometry|level=5"
+    },
+    "309": {
+      "local_index": 11,
+      "stratum": "Number Theory|level=3"
+    },
+    "310": {
+      "local_index": 12,
+      "stratum": "Algebra|level=2"
+    },
+    "311": {
+      "local_index": 14,
+      "stratum": "Number Theory|level=4"
+    },
+    "312": {
+      "local_index": 4,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "313": {
+      "local_index": 11,
+      "stratum": "Prealgebra|level=5"
+    },
+    "314": {
+      "local_index": 4,
+      "stratum": "Geometry|level=2"
+    },
+    "315": {
+      "local_index": 17,
+      "stratum": "Algebra|level=4"
+    },
+    "316": {
+      "local_index": 13,
+      "stratum": "Algebra|level=2"
+    },
+    "317": {
+      "local_index": 21,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "318": {
+      "local_index": 14,
+      "stratum": "Algebra|level=2"
+    },
+    "319": {
+      "local_index": 16,
+      "stratum": "Algebra|level=3"
+    },
+    "320": {
+      "local_index": 10,
+      "stratum": "Geometry|level=5"
+    },
+    "321": {
+      "local_index": 12,
+      "stratum": "Prealgebra|level=5"
+    },
+    "322": {
+      "local_index": 17,
+      "stratum": "Algebra|level=3"
+    },
+    "323": {
+      "local_index": 7,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "324": {
+      "local_index": 7,
+      "stratum": "Geometry|level=4"
+    },
+    "325": {
+      "local_index": 5,
+      "stratum": "Geometry|level=2"
+    },
+    "326": {
+      "local_index": 11,
+      "stratum": "Precalculus|level=2"
+    },
+    "327": {
+      "local_index": 22,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "328": {
+      "local_index": 17,
+      "stratum": "Algebra|level=5"
+    },
+    "329": {
+      "local_index": 14,
+      "stratum": "Prealgebra|level=4"
+    },
+    "330": {
+      "local_index": 8,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "331": {
+      "local_index": 18,
+      "stratum": "Algebra|level=5"
+    },
+    "332": {
+      "local_index": 12,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "333": {
+      "local_index": 13,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "334": {
+      "local_index": 18,
+      "stratum": "Algebra|level=3"
+    },
+    "335": {
+      "local_index": 15,
+      "stratum": "Number Theory|level=4"
+    },
+    "336": {
+      "local_index": 11,
+      "stratum": "Algebra|level=1"
+    },
+    "337": {
+      "local_index": 10,
+      "stratum": "Prealgebra|level=3"
+    },
+    "338": {
+      "local_index": 12,
+      "stratum": "Number Theory|level=3"
+    },
+    "339": {
+      "local_index": 12,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "340": {
+      "local_index": 7,
+      "stratum": "Precalculus|level=3"
+    },
+    "341": {
+      "local_index": 18,
+      "stratum": "Algebra|level=4"
+    },
+    "342": {
+      "local_index": 11,
+      "stratum": "Prealgebra|level=3"
+    },
+    "343": {
+      "local_index": 3,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "344": {
+      "local_index": 10,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "345": {
+      "local_index": 19,
+      "stratum": "Algebra|level=3"
+    },
+    "346": {
+      "local_index": 19,
+      "stratum": "Algebra|level=4"
+    },
+    "347": {
+      "local_index": 20,
+      "stratum": "Algebra|level=3"
+    },
+    "348": {
+      "local_index": 4,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "349": {
+      "local_index": 10,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "350": {
+      "local_index": 6,
+      "stratum": "Number Theory|level=2"
+    },
+    "351": {
+      "local_index": 8,
+      "stratum": "Precalculus|level=3"
+    },
+    "352": {
+      "local_index": 10,
+      "stratum": "Precalculus|level=4"
+    },
+    "353": {
+      "local_index": 11,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "354": {
+      "local_index": 20,
+      "stratum": "Algebra|level=4"
+    },
+    "355": {
+      "local_index": 23,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "356": {
+      "local_index": 19,
+      "stratum": "Algebra|level=5"
+    },
+    "357": {
+      "local_index": 13,
+      "stratum": "Prealgebra|level=5"
+    },
+    "358": {
+      "local_index": 11,
+      "stratum": "Intermediate Algebra|level=2"
+    },
+    "359": {
+      "local_index": 14,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "360": {
+      "local_index": 9,
+      "stratum": "Precalculus|level=3"
+    },
+    "361": {
+      "local_index": 15,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "362": {
+      "local_index": 0,
+      "stratum": "Counting & Probability|level=1"
+    },
+    "363": {
+      "local_index": 15,
+      "stratum": "Algebra|level=2"
+    },
+    "364": {
+      "local_index": 16,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "365": {
+      "local_index": 4,
+      "stratum": "Number Theory|level=5"
+    },
+    "366": {
+      "local_index": 16,
+      "stratum": "Number Theory|level=4"
+    },
+    "367": {
+      "local_index": 21,
+      "stratum": "Algebra|level=4"
+    },
+    "368": {
+      "local_index": 6,
+      "stratum": "Geometry|level=2"
+    },
+    "369": {
+      "local_index": 11,
+      "stratum": "Prealgebra|level=2"
+    },
+    "370": {
+      "local_index": 2,
+      "stratum": "Precalculus|level=1"
+    },
+    "371": {
+      "local_index": 24,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "372": {
+      "local_index": 7,
+      "stratum": "Geometry|level=2"
+    },
+    "373": {
+      "local_index": 20,
+      "stratum": "Algebra|level=5"
+    },
+    "374": {
+      "local_index": 12,
+      "stratum": "Algebra|level=1"
+    },
+    "375": {
+      "local_index": 5,
+      "stratum": "Number Theory|level=5"
+    },
+    "376": {
+      "local_index": 8,
+      "stratum": "Geometry|level=4"
+    },
+    "377": {
+      "local_index": 13,
+      "stratum": "Number Theory|level=3"
+    },
+    "378": {
+      "local_index": 12,
+      "stratum": "Prealgebra|level=3"
+    },
+    "379": {
+      "local_index": 15,
+      "stratum": "Prealgebra|level=4"
+    },
+    "380": {
+      "local_index": 17,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "381": {
+      "local_index": 9,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "382": {
+      "local_index": 25,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "383": {
+      "local_index": 22,
+      "stratum": "Algebra|level=4"
+    },
+    "384": {
+      "local_index": 12,
+      "stratum": "Prealgebra|level=2"
+    },
+    "385": {
+      "local_index": 14,
+      "stratum": "Prealgebra|level=5"
+    },
+    "386": {
+      "local_index": 21,
+      "stratum": "Algebra|level=3"
+    },
+    "387": {
+      "local_index": 13,
+      "stratum": "Algebra|level=1"
+    },
+    "388": {
+      "local_index": 21,
+      "stratum": "Algebra|level=5"
+    },
+    "389": {
+      "local_index": 5,
+      "stratum": "Geometry|level=3"
+    },
+    "390": {
+      "local_index": 22,
+      "stratum": "Algebra|level=5"
+    },
+    "391": {
+      "local_index": 23,
+      "stratum": "Algebra|level=5"
+    },
+    "392": {
+      "local_index": 6,
+      "stratum": "Precalculus|level=5"
+    },
+    "393": {
+      "local_index": 22,
+      "stratum": "Algebra|level=3"
+    },
+    "394": {
+      "local_index": 26,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "395": {
+      "local_index": 14,
+      "stratum": "Algebra|level=1"
+    },
+    "396": {
+      "local_index": 13,
+      "stratum": "Prealgebra|level=3"
+    },
+    "397": {
+      "local_index": 13,
+      "stratum": "Prealgebra|level=2"
+    },
+    "398": {
+      "local_index": 16,
+      "stratum": "Prealgebra|level=4"
+    },
+    "399": {
+      "local_index": 14,
+      "stratum": "Prealgebra|level=2"
+    },
+    "400": {
+      "local_index": 11,
+      "stratum": "Geometry|level=5"
+    },
+    "401": {
+      "local_index": 27,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "402": {
+      "local_index": 10,
+      "stratum": "Precalculus|level=3"
+    },
+    "403": {
+      "local_index": 17,
+      "stratum": "Number Theory|level=4"
+    },
+    "404": {
+      "local_index": 1,
+      "stratum": "Counting & Probability|level=1"
+    },
+    "405": {
+      "local_index": 17,
+      "stratum": "Prealgebra|level=4"
+    },
+    "406": {
+      "local_index": 2,
+      "stratum": "Number Theory|level=1"
+    },
+    "407": {
+      "local_index": 23,
+      "stratum": "Algebra|level=4"
+    },
+    "408": {
+      "local_index": 7,
+      "stratum": "Precalculus|level=5"
+    },
+    "409": {
+      "local_index": 18,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "410": {
+      "local_index": 15,
+      "stratum": "Prealgebra|level=2"
+    },
+    "411": {
+      "local_index": 14,
+      "stratum": "Prealgebra|level=3"
+    },
+    "412": {
+      "local_index": 19,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "413": {
+      "local_index": 16,
+      "stratum": "Algebra|level=2"
+    },
+    "414": {
+      "local_index": 24,
+      "stratum": "Algebra|level=4"
+    },
+    "415": {
+      "local_index": 6,
+      "stratum": "Number Theory|level=5"
+    },
+    "416": {
+      "local_index": 11,
+      "stratum": "Precalculus|level=3"
+    },
+    "417": {
+      "local_index": 24,
+      "stratum": "Algebra|level=5"
+    },
+    "418": {
+      "local_index": 25,
+      "stratum": "Algebra|level=5"
+    },
+    "419": {
+      "local_index": 11,
+      "stratum": "Precalculus|level=4"
+    },
+    "420": {
+      "local_index": 12,
+      "stratum": "Precalculus|level=3"
+    },
+    "421": {
+      "local_index": 8,
+      "stratum": "Precalculus|level=5"
+    },
+    "422": {
+      "local_index": 28,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "423": {
+      "local_index": 7,
+      "stratum": "Number Theory|level=5"
+    },
+    "424": {
+      "local_index": 26,
+      "stratum": "Algebra|level=5"
+    },
+    "425": {
+      "local_index": 9,
+      "stratum": "Precalculus|level=5"
+    },
+    "426": {
+      "local_index": 6,
+      "stratum": "Geometry|level=3"
+    },
+    "427": {
+      "local_index": 17,
+      "stratum": "Algebra|level=2"
+    },
+    "428": {
+      "local_index": 20,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "429": {
+      "local_index": 13,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "430": {
+      "local_index": 16,
+      "stratum": "Prealgebra|level=2"
+    },
+    "431": {
+      "local_index": 12,
+      "stratum": "Precalculus|level=4"
+    },
+    "432": {
+      "local_index": 29,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "433": {
+      "local_index": 7,
+      "stratum": "Number Theory|level=2"
+    },
+    "434": {
+      "local_index": 15,
+      "stratum": "Prealgebra|level=5"
+    },
+    "435": {
+      "local_index": 27,
+      "stratum": "Algebra|level=5"
+    },
+    "436": {
+      "local_index": 12,
+      "stratum": "Counting & Probability|level=4"
+    },
+    "437": {
+      "local_index": 23,
+      "stratum": "Algebra|level=3"
+    },
+    "438": {
+      "local_index": 8,
+      "stratum": "Number Theory|level=2"
+    },
+    "439": {
+      "local_index": 14,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "440": {
+      "local_index": 24,
+      "stratum": "Algebra|level=3"
+    },
+    "441": {
+      "local_index": 18,
+      "stratum": "Prealgebra|level=4"
+    },
+    "442": {
+      "local_index": 25,
+      "stratum": "Algebra|level=4"
+    },
+    "443": {
+      "local_index": 26,
+      "stratum": "Algebra|level=4"
+    },
+    "444": {
+      "local_index": 10,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "445": {
+      "local_index": 21,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "446": {
+      "local_index": 27,
+      "stratum": "Algebra|level=4"
+    },
+    "447": {
+      "local_index": 6,
+      "stratum": "Prealgebra|level=1"
+    },
+    "448": {
+      "local_index": 8,
+      "stratum": "Number Theory|level=5"
+    },
+    "449": {
+      "local_index": 15,
+      "stratum": "Algebra|level=1"
+    },
+    "450": {
+      "local_index": 9,
+      "stratum": "Number Theory|level=5"
+    },
+    "451": {
+      "local_index": 14,
+      "stratum": "Number Theory|level=3"
+    },
+    "452": {
+      "local_index": 18,
+      "stratum": "Algebra|level=2"
+    },
+    "453": {
+      "local_index": 19,
+      "stratum": "Algebra|level=2"
+    },
+    "454": {
+      "local_index": 10,
+      "stratum": "Precalculus|level=5"
+    },
+    "455": {
+      "local_index": 5,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "456": {
+      "local_index": 5,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "457": {
+      "local_index": 3,
+      "stratum": "Number Theory|level=1"
+    },
+    "458": {
+      "local_index": 15,
+      "stratum": "Prealgebra|level=3"
+    },
+    "459": {
+      "local_index": 28,
+      "stratum": "Algebra|level=5"
+    },
+    "460": {
+      "local_index": 19,
+      "stratum": "Prealgebra|level=4"
+    },
+    "461": {
+      "local_index": 28,
+      "stratum": "Algebra|level=4"
+    },
+    "462": {
+      "local_index": 9,
+      "stratum": "Number Theory|level=2"
+    },
+    "463": {
+      "local_index": 20,
+      "stratum": "Algebra|level=2"
+    },
+    "464": {
+      "local_index": 15,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "465": {
+      "local_index": 18,
+      "stratum": "Number Theory|level=4"
+    },
+    "466": {
+      "local_index": 11,
+      "stratum": "Precalculus|level=5"
+    },
+    "467": {
+      "local_index": 17,
+      "stratum": "Prealgebra|level=2"
+    },
+    "468": {
+      "local_index": 29,
+      "stratum": "Algebra|level=4"
+    },
+    "469": {
+      "local_index": 25,
+      "stratum": "Algebra|level=3"
+    },
+    "470": {
+      "local_index": 30,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "471": {
+      "local_index": 16,
+      "stratum": "Prealgebra|level=3"
+    },
+    "472": {
+      "local_index": 16,
+      "stratum": "Algebra|level=1"
+    },
+    "473": {
+      "local_index": 16,
+      "stratum": "Prealgebra|level=5"
+    },
+    "474": {
+      "local_index": 6,
+      "stratum": "Intermediate Algebra|level=1"
+    },
+    "475": {
+      "local_index": 11,
+      "stratum": "Counting & Probability|level=5"
+    },
+    "476": {
+      "local_index": 18,
+      "stratum": "Prealgebra|level=2"
+    },
+    "477": {
+      "local_index": 15,
+      "stratum": "Number Theory|level=3"
+    },
+    "478": {
+      "local_index": 31,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "479": {
+      "local_index": 10,
+      "stratum": "Number Theory|level=5"
+    },
+    "480": {
+      "local_index": 12,
+      "stratum": "Precalculus|level=2"
+    },
+    "481": {
+      "local_index": 32,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "482": {
+      "local_index": 11,
+      "stratum": "Number Theory|level=5"
+    },
+    "483": {
+      "local_index": 13,
+      "stratum": "Precalculus|level=3"
+    },
+    "484": {
+      "local_index": 16,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "485": {
+      "local_index": 6,
+      "stratum": "Counting & Probability|level=2"
+    },
+    "486": {
+      "local_index": 7,
+      "stratum": "Geometry|level=3"
+    },
+    "487": {
+      "local_index": 4,
+      "stratum": "Number Theory|level=1"
+    },
+    "488": {
+      "local_index": 17,
+      "stratum": "Prealgebra|level=5"
+    },
+    "489": {
+      "local_index": 17,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "490": {
+      "local_index": 33,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "491": {
+      "local_index": 18,
+      "stratum": "Prealgebra|level=5"
+    },
+    "492": {
+      "local_index": 14,
+      "stratum": "Precalculus|level=3"
+    },
+    "493": {
+      "local_index": 29,
+      "stratum": "Algebra|level=5"
+    },
+    "494": {
+      "local_index": 34,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "495": {
+      "local_index": 22,
+      "stratum": "Intermediate Algebra|level=4"
+    },
+    "496": {
+      "local_index": 18,
+      "stratum": "Intermediate Algebra|level=3"
+    },
+    "497": {
+      "local_index": 12,
+      "stratum": "Geometry|level=5"
+    },
+    "498": {
+      "local_index": 35,
+      "stratum": "Intermediate Algebra|level=5"
+    },
+    "499": {
+      "local_index": 9,
+      "stratum": "Geometry|level=4"
+    }
+  },
+  "seed": "20261117-supplement2-v1"
+}

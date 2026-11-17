@@ -1,0 +1,118 @@
+{
+  "card_math": {
+    "output_type": "generate_until",
+    "num_fewshot": 0,
+    "generation_kwargs": {
+      "until": [],
+      "do_sample": true,
+      "max_gen_toks": 32768,
+      "temperature": 1.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0.0,
+      "presence_penalty": 1.5,
+      "repetition_penalty": 1.0,
+      "chat_template_kwargs": {
+        "enable_thinking": true
+      }
+    },
+    "filter_list": null,
+    "dataset_kwargs": {
+      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be"
+    },
+    "metadata": {
+      "version": 1,
+      "protocol_qualified": false,
+      "config_source": "tasks/card_math.yaml"
+    },
+    "rows": 500
+  },
+  "mmlu_pro_business": {
+    "output_type": "generate_until",
+    "num_fewshot": 5,
+    "generation_kwargs": {
+      "until": [
+        "Question:"
+      ],
+      "max_gen_toks": 2048,
+      "do_sample": false,
+      "temperature": 0.0
+    },
+    "filter_list": [
+      {
+        "name": "custom-extract",
+        "filter": [
+          {
+            "function": "regex",
+            "regex_pattern": "answer is \\(?([ABCDEFGHIJ])\\)?"
+          },
+          {
+            "function": "take_first"
+          }
+        ]
+      }
+    ],
+    "dataset_kwargs": {
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    },
+    "metadata": {
+      "version": 3.1,
+      "config_source": "lm_eval/tasks/mmlu_pro/mmlu_pro_business.yaml"
+    },
+    "rows": 789
+  },
+  "mmlu_pro_biology": {
+    "output_type": "generate_until",
+    "num_fewshot": 5,
+    "generation_kwargs": {
+      "until": [
+        "Question:"
+      ],
+      "max_gen_toks": 2048,
+      "do_sample": false,
+      "temperature": 0.0
+    },
+    "filter_list": [
+      {
+        "name": "custom-extract",
+        "filter": [
+          {
+            "function": "regex",
+            "regex_pattern": "answer is \\(?([ABCDEFGHIJ])\\)?"
+          },
+          {
+            "function": "take_first"
+          }
+        ]
+      }
+    ],
+    "dataset_kwargs": {
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be"
+    },
+    "metadata": {
+      "version": 3.1,
+      "config_source": "lm_eval/tasks/mmlu_pro/mmlu_pro_biology.yaml"
+    },
+    "rows": 717
+  },
+  "minerva_math500": {
+    "output_type": "generate_until",
+    "num_fewshot": 4,
+    "generation_kwargs": {
+      "until": [
+        "Problem:"
+      ],
+      "do_sample": false,
+      "temperature": 0.0
+    },
+    "filter_list": null,
+    "dataset_kwargs": {
+      "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be"
+    },
+    "metadata": {
+      "version": 3.1,
+      "config_source": "lm_eval/tasks/minerva_math/minerva_math500.yaml"
+    },
+    "rows": 500
+  }
+}

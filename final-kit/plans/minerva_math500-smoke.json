@@ -1,0 +1,12 @@
+{
+  "dataset": "HuggingFaceH4/MATH-500",
+  "indices": [
+    374,
+    413,
+    122
+  ],
+  "population": 500,
+  "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+  "seed": "20261117-supplement2-v1",
+  "task": "minerva_math500"
+}

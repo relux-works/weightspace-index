@@ -1,0 +1,6 @@
+{
+  "synthetic_only": true,
+  "positive_full_category_weight_control": true,
+  "negative_missing_category_intended_refusal": true,
+  "no_model_score_claim": true
+}

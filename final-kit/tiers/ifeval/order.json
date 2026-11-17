@@ -1,0 +1,2712 @@
+{
+  "indices": [
+    360,
+    419,
+    97,
+    254,
+    429,
+    406,
+    142,
+    540,
+    269,
+    452,
+    316,
+    459,
+    500,
+    74,
+    86,
+    159,
+    19,
+    18,
+    506,
+    393,
+    331,
+    119,
+    490,
+    168,
+    85,
+    153,
+    493,
+    348,
+    211,
+    516,
+    427,
+    280,
+    329,
+    458,
+    451,
+    520,
+    531,
+    312,
+    64,
+    416,
+    12,
+    489,
+    183,
+    507,
+    486,
+    88,
+    311,
+    257,
+    69,
+    501,
+    428,
+    71,
+    436,
+    189,
+    503,
+    96,
+    248,
+    144,
+    200,
+    34,
+    135,
+    447,
+    177,
+    426,
+    73,
+    199,
+    169,
+    213,
+    470,
+    128,
+    443,
+    150,
+    205,
+    31,
+    537,
+    315,
+    53,
+    259,
+    412,
+    44,
+    28,
+    276,
+    274,
+    113,
+    245,
+    84,
+    171,
+    271,
+    494,
+    514,
+    409,
+    341,
+    115,
+    413,
+    497,
+    369,
+    466,
+    432,
+    327,
+    228,
+    55,
+    116,
+    240,
+    302,
+    283,
+    394,
+    448,
+    176,
+    95,
+    231,
+    163,
+    423,
+    80,
+    480,
+    112,
+    110,
+    301,
+    1,
+    172,
+    87,
+    528,
+    62,
+    152,
+    91,
+    347,
+    214,
+    324,
+    82,
+    198,
+    397,
+    181,
+    278,
+    354,
+    539,
+    100,
+    378,
+    282,
+    38,
+    194,
+    530,
+    404,
+    263,
+    11,
+    358,
+    103,
+    526,
+    473,
+    186,
+    474,
+    355,
+    13,
+    180,
+    417,
+    321,
+    522,
+    56,
+    41,
+    77,
+    151,
+    424,
+    373,
+    2,
+    415,
+    121,
+    136,
+    270,
+    317,
+    499,
+    352,
+    157,
+    22,
+    314,
+    225,
+    521,
+    319,
+    130,
+    300,
+    60,
+    5,
+    391,
+    453,
+    454,
+    223,
+    335,
+    438,
+    158,
+    35,
+    534,
+    93,
+    203,
+    431,
+    126,
+    217,
+    288,
+    36,
+    197,
+    222,
+    141,
+    149,
+    344,
+    289,
+    496,
+    236,
+    275,
+    92,
+    140,
+    134,
+    338,
+    382,
+    146,
+    23,
+    442,
+    195,
+    25,
+    471,
+    131,
+    94,
+    40,
+    367,
+    63,
+    384,
+    350,
+    260,
+    220,
+    279,
+    418,
+    170,
+    511,
+    349,
+    380,
+    340,
+    252,
+    160,
+    61,
+    76,
+    456,
+    273,
+    323,
+    58,
+    156,
+    524,
+    538,
+    207,
+    179,
+    421,
+    196,
+    216,
+    127,
+    210,
+    515,
+    256,
+    117,
+    125,
+    24,
+    111,
+    48,
+    244,
+    108,
+    377,
+    368,
+    81,
+    190,
+    218,
+    51,
+    264,
+    527,
+    238,
+    446,
+    46,
+    174,
+    291,
+    509,
+    293,
+    59,
+    481,
+    221,
+    386,
+    3,
+    498,
+    52,
+    105,
+    462,
+    47,
+    124,
+    226,
+    468,
+    230,
+    14,
+    99,
+    292,
+    337,
+    209,
+    50,
+    304,
+    107,
+    154,
+    175,
+    21,
+    361,
+    533,
+    101,
+    45,
+    303,
+    297,
+    444,
+    478,
+    332,
+    342,
+    450,
+    215,
+    519,
+    477,
+    356,
+    237,
+    243,
+    371,
+    70,
+    202,
+    42,
+    441,
+    403,
+    345,
+    510,
+    89,
+    325,
+    267,
+    67,
+    208,
+    513,
+    469,
+    83,
+    162,
+    261,
+    29,
+    147,
+    339,
+    425,
+    229,
+    485,
+    132,
+    106,
+    313,
+    68,
+    165,
+    472,
+    483,
+    138,
+    272,
+    206,
+    398,
+    192,
+    262,
+    33,
+    532,
+    139,
+    72,
+    389,
+    407,
+    164,
+    20,
+    178,
+    523,
+    16,
+    375,
+    388,
+    285,
+    437,
+    15,
+    372,
+    246,
+    109,
+    290,
+    122,
+    287,
+    411,
+    346,
+    90,
+    0,
+    422,
+    414,
+    439,
+    366,
+    396,
+    102,
+    508,
+    434,
+    182,
+    390,
+    525,
+    4,
+    467,
+    155,
+    166,
+    465,
+    307,
+    295,
+    224,
+    26,
+    161,
+    326,
+    284,
+    505,
+    440,
+    536,
+    365,
+    381,
+    376,
+    10,
+    400,
+    30,
+    251,
+    370,
+    235,
+    57,
+    233,
+    39,
+    455,
+    379,
+    488,
+    475,
+    479,
+    212,
+    322,
+    502,
+    401,
+    201,
+    219,
+    129,
+    484,
+    445,
+    66,
+    104,
+    79,
+    148,
+    98,
+    492,
+    359,
+    133,
+    299,
+    27,
+    351,
+    37,
+    227,
+    495,
+    374,
+    395,
+    120,
+    402,
+    242,
+    310,
+    328,
+    336,
+    253,
+    247,
+    535,
+    286,
+    17,
+    265,
+    318,
+    320,
+    420,
+    232,
+    184,
+    334,
+    308,
+    191,
+    187,
+    504,
+    239,
+    430,
+    457,
+    277,
+    363,
+    7,
+    330,
+    54,
+    43,
+    123,
+    137,
+    167,
+    65,
+    408,
+    118,
+    266,
+    476,
+    410,
+    460,
+    294,
+    529,
+    482,
+    173,
+    487,
+    364,
+    343,
+    357,
+    362,
+    75,
+    333,
+    461,
+    78,
+    435,
+    433,
+    114,
+    258,
+    405,
+    145,
+    298,
+    387,
+    383,
+    449,
+    512,
+    392,
+    188,
+    185,
+    249,
+    491,
+    234,
+    296,
+    6,
+    49,
+    32,
+    305,
+    517,
+    463,
+    464,
+    204,
+    306,
+    255,
+    353,
+    399,
+    250,
+    9,
+    193,
+    385,
+    241,
+    268,
+    518,
+    8,
+    309,
+    281,
+    143
+  ],
+  "mapping": {
+    "0": {
+      "local_index": 0,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "1": {
+      "local_index": 0,
+      "stratum": "punctuation:no_comma"
+    },
+    "2": {
+      "local_index": 0,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "3": {
+      "local_index": 0,
+      "stratum": "detectable_format:title"
+    },
+    "4": {
+      "local_index": 0,
+      "stratum": "change_case:english_lowercase"
+    },
+    "5": {
+      "local_index": 0,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "6": {
+      "local_index": 0,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "7": {
+      "local_index": 0,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "8": {
+      "local_index": 1,
+      "stratum": "change_case:english_lowercase"
+    },
+    "9": {
+      "local_index": 0,
+      "stratum": "keywords:existence"
+    },
+    "10": {
+      "local_index": 0,
+      "stratum": "length_constraints:number_words"
+    },
+    "11": {
+      "local_index": 0,
+      "stratum": "detectable_format:json_format"
+    },
+    "12": {
+      "local_index": 0,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "13": {
+      "local_index": 2,
+      "stratum": "change_case:english_lowercase"
+    },
+    "14": {
+      "local_index": 1,
+      "stratum": "length_constraints:number_words"
+    },
+    "15": {
+      "local_index": 1,
+      "stratum": "detectable_format:json_format"
+    },
+    "16": {
+      "local_index": 0,
+      "stratum": "combination:two_responses"
+    },
+    "17": {
+      "local_index": 1,
+      "stratum": "combination:two_responses"
+    },
+    "18": {
+      "local_index": 0,
+      "stratum": "language:response_language"
+    },
+    "19": {
+      "local_index": 0,
+      "stratum": "keywords:letter_frequency"
+    },
+    "20": {
+      "local_index": 1,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "21": {
+      "local_index": 0,
+      "stratum": "startend:end_checker"
+    },
+    "22": {
+      "local_index": 1,
+      "stratum": "keywords:letter_frequency"
+    },
+    "23": {
+      "local_index": 2,
+      "stratum": "keywords:letter_frequency"
+    },
+    "24": {
+      "local_index": 2,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "25": {
+      "local_index": 0,
+      "stratum": "change_case:english_capital"
+    },
+    "26": {
+      "local_index": 2,
+      "stratum": "detectable_format:json_format"
+    },
+    "27": {
+      "local_index": 1,
+      "stratum": "keywords:existence"
+    },
+    "28": {
+      "local_index": 0,
+      "stratum": "keywords:forbidden_words"
+    },
+    "29": {
+      "local_index": 3,
+      "stratum": "detectable_format:json_format"
+    },
+    "30": {
+      "local_index": 3,
+      "stratum": "change_case:english_lowercase"
+    },
+    "31": {
+      "local_index": 1,
+      "stratum": "language:response_language"
+    },
+    "32": {
+      "local_index": 1,
+      "stratum": "punctuation:no_comma"
+    },
+    "33": {
+      "local_index": 3,
+      "stratum": "keywords:letter_frequency"
+    },
+    "34": {
+      "local_index": 2,
+      "stratum": "combination:two_responses"
+    },
+    "35": {
+      "local_index": 2,
+      "stratum": "punctuation:no_comma"
+    },
+    "36": {
+      "local_index": 0,
+      "stratum": "keywords:frequency"
+    },
+    "37": {
+      "local_index": 0,
+      "stratum": "startend:quotation"
+    },
+    "38": {
+      "local_index": 2,
+      "stratum": "length_constraints:number_words"
+    },
+    "39": {
+      "local_index": 1,
+      "stratum": "change_case:english_capital"
+    },
+    "40": {
+      "local_index": 1,
+      "stratum": "startend:quotation"
+    },
+    "41": {
+      "local_index": 1,
+      "stratum": "startend:end_checker"
+    },
+    "42": {
+      "local_index": 2,
+      "stratum": "startend:end_checker"
+    },
+    "43": {
+      "local_index": 1,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "44": {
+      "local_index": 2,
+      "stratum": "keywords:existence"
+    },
+    "45": {
+      "local_index": 4,
+      "stratum": "detectable_format:json_format"
+    },
+    "46": {
+      "local_index": 0,
+      "stratum": "detectable_content:postscript"
+    },
+    "47": {
+      "local_index": 2,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "48": {
+      "local_index": 3,
+      "stratum": "length_constraints:number_words"
+    },
+    "49": {
+      "local_index": 4,
+      "stratum": "length_constraints:number_words"
+    },
+    "50": {
+      "local_index": 2,
+      "stratum": "language:response_language"
+    },
+    "51": {
+      "local_index": 1,
+      "stratum": "detectable_format:title"
+    },
+    "52": {
+      "local_index": 3,
+      "stratum": "keywords:existence"
+    },
+    "53": {
+      "local_index": 0,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "54": {
+      "local_index": 1,
+      "stratum": "keywords:frequency"
+    },
+    "55": {
+      "local_index": 4,
+      "stratum": "keywords:existence"
+    },
+    "56": {
+      "local_index": 1,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "57": {
+      "local_index": 2,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "58": {
+      "local_index": 5,
+      "stratum": "detectable_format:json_format"
+    },
+    "59": {
+      "local_index": 4,
+      "stratum": "keywords:letter_frequency"
+    },
+    "60": {
+      "local_index": 1,
+      "stratum": "detectable_content:postscript"
+    },
+    "61": {
+      "local_index": 1,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "62": {
+      "local_index": 1,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "63": {
+      "local_index": 2,
+      "stratum": "detectable_format:title"
+    },
+    "64": {
+      "local_index": 3,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "65": {
+      "local_index": 3,
+      "stratum": "combination:two_responses"
+    },
+    "66": {
+      "local_index": 3,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "67": {
+      "local_index": 5,
+      "stratum": "keywords:existence"
+    },
+    "68": {
+      "local_index": 4,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "69": {
+      "local_index": 4,
+      "stratum": "change_case:english_lowercase"
+    },
+    "70": {
+      "local_index": 2,
+      "stratum": "detectable_content:postscript"
+    },
+    "71": {
+      "local_index": 1,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "72": {
+      "local_index": 4,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "73": {
+      "local_index": 5,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "74": {
+      "local_index": 6,
+      "stratum": "keywords:existence"
+    },
+    "75": {
+      "local_index": 1,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "76": {
+      "local_index": 2,
+      "stratum": "change_case:english_capital"
+    },
+    "77": {
+      "local_index": 3,
+      "stratum": "detectable_format:title"
+    },
+    "78": {
+      "local_index": 2,
+      "stratum": "keywords:frequency"
+    },
+    "79": {
+      "local_index": 5,
+      "stratum": "keywords:letter_frequency"
+    },
+    "80": {
+      "local_index": 2,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "81": {
+      "local_index": 7,
+      "stratum": "keywords:existence"
+    },
+    "82": {
+      "local_index": 3,
+      "stratum": "detectable_content:postscript"
+    },
+    "83": {
+      "local_index": 5,
+      "stratum": "change_case:english_lowercase"
+    },
+    "84": {
+      "local_index": 3,
+      "stratum": "startend:end_checker"
+    },
+    "85": {
+      "local_index": 2,
+      "stratum": "startend:quotation"
+    },
+    "86": {
+      "local_index": 1,
+      "stratum": "keywords:forbidden_words"
+    },
+    "87": {
+      "local_index": 3,
+      "stratum": "language:response_language"
+    },
+    "88": {
+      "local_index": 0,
+      "stratum": "combination:repeat_prompt"
+    },
+    "89": {
+      "local_index": 3,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "90": {
+      "local_index": 3,
+      "stratum": "keywords:frequency"
+    },
+    "91": {
+      "local_index": 8,
+      "stratum": "keywords:existence"
+    },
+    "92": {
+      "local_index": 2,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "93": {
+      "local_index": 6,
+      "stratum": "change_case:english_lowercase"
+    },
+    "94": {
+      "local_index": 1,
+      "stratum": "combination:repeat_prompt"
+    },
+    "95": {
+      "local_index": 7,
+      "stratum": "change_case:english_lowercase"
+    },
+    "96": {
+      "local_index": 9,
+      "stratum": "keywords:existence"
+    },
+    "97": {
+      "local_index": 8,
+      "stratum": "change_case:english_lowercase"
+    },
+    "98": {
+      "local_index": 4,
+      "stratum": "detectable_content:postscript"
+    },
+    "99": {
+      "local_index": 2,
+      "stratum": "combination:repeat_prompt"
+    },
+    "100": {
+      "local_index": 4,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "101": {
+      "local_index": 4,
+      "stratum": "detectable_format:title"
+    },
+    "102": {
+      "local_index": 5,
+      "stratum": "detectable_format:title"
+    },
+    "103": {
+      "local_index": 3,
+      "stratum": "change_case:english_capital"
+    },
+    "104": {
+      "local_index": 9,
+      "stratum": "change_case:english_lowercase"
+    },
+    "105": {
+      "local_index": 2,
+      "stratum": "keywords:forbidden_words"
+    },
+    "106": {
+      "local_index": 4,
+      "stratum": "combination:two_responses"
+    },
+    "107": {
+      "local_index": 5,
+      "stratum": "combination:two_responses"
+    },
+    "108": {
+      "local_index": 2,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "109": {
+      "local_index": 10,
+      "stratum": "change_case:english_lowercase"
+    },
+    "110": {
+      "local_index": 6,
+      "stratum": "detectable_format:title"
+    },
+    "111": {
+      "local_index": 2,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "112": {
+      "local_index": 0,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "113": {
+      "local_index": 5,
+      "stratum": "detectable_content:postscript"
+    },
+    "114": {
+      "local_index": 6,
+      "stratum": "detectable_content:postscript"
+    },
+    "115": {
+      "local_index": 7,
+      "stratum": "detectable_format:title"
+    },
+    "116": {
+      "local_index": 3,
+      "stratum": "keywords:forbidden_words"
+    },
+    "117": {
+      "local_index": 6,
+      "stratum": "keywords:letter_frequency"
+    },
+    "118": {
+      "local_index": 5,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "119": {
+      "local_index": 5,
+      "stratum": "length_constraints:number_words"
+    },
+    "120": {
+      "local_index": 6,
+      "stratum": "length_constraints:number_words"
+    },
+    "121": {
+      "local_index": 3,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "122": {
+      "local_index": 4,
+      "stratum": "change_case:english_capital"
+    },
+    "123": {
+      "local_index": 4,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "124": {
+      "local_index": 3,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "125": {
+      "local_index": 3,
+      "stratum": "combination:repeat_prompt"
+    },
+    "126": {
+      "local_index": 10,
+      "stratum": "keywords:existence"
+    },
+    "127": {
+      "local_index": 4,
+      "stratum": "startend:end_checker"
+    },
+    "128": {
+      "local_index": 11,
+      "stratum": "change_case:english_lowercase"
+    },
+    "129": {
+      "local_index": 5,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "130": {
+      "local_index": 4,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "131": {
+      "local_index": 4,
+      "stratum": "keywords:forbidden_words"
+    },
+    "132": {
+      "local_index": 6,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "133": {
+      "local_index": 4,
+      "stratum": "combination:repeat_prompt"
+    },
+    "134": {
+      "local_index": 6,
+      "stratum": "detectable_format:json_format"
+    },
+    "135": {
+      "local_index": 7,
+      "stratum": "detectable_content:postscript"
+    },
+    "136": {
+      "local_index": 4,
+      "stratum": "keywords:frequency"
+    },
+    "137": {
+      "local_index": 5,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "138": {
+      "local_index": 5,
+      "stratum": "keywords:frequency"
+    },
+    "139": {
+      "local_index": 3,
+      "stratum": "punctuation:no_comma"
+    },
+    "140": {
+      "local_index": 4,
+      "stratum": "language:response_language"
+    },
+    "141": {
+      "local_index": 6,
+      "stratum": "combination:two_responses"
+    },
+    "142": {
+      "local_index": 8,
+      "stratum": "detectable_content:postscript"
+    },
+    "143": {
+      "local_index": 7,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "144": {
+      "local_index": 3,
+      "stratum": "startend:quotation"
+    },
+    "145": {
+      "local_index": 5,
+      "stratum": "change_case:english_capital"
+    },
+    "146": {
+      "local_index": 12,
+      "stratum": "change_case:english_lowercase"
+    },
+    "147": {
+      "local_index": 3,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "148": {
+      "local_index": 7,
+      "stratum": "combination:two_responses"
+    },
+    "149": {
+      "local_index": 9,
+      "stratum": "detectable_content:postscript"
+    },
+    "150": {
+      "local_index": 8,
+      "stratum": "detectable_format:title"
+    },
+    "151": {
+      "local_index": 1,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "152": {
+      "local_index": 6,
+      "stratum": "change_case:english_capital"
+    },
+    "153": {
+      "local_index": 8,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "154": {
+      "local_index": 10,
+      "stratum": "detectable_content:postscript"
+    },
+    "155": {
+      "local_index": 5,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "156": {
+      "local_index": 4,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "157": {
+      "local_index": 13,
+      "stratum": "change_case:english_lowercase"
+    },
+    "158": {
+      "local_index": 6,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "159": {
+      "local_index": 6,
+      "stratum": "keywords:frequency"
+    },
+    "160": {
+      "local_index": 7,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "161": {
+      "local_index": 5,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "162": {
+      "local_index": 7,
+      "stratum": "keywords:letter_frequency"
+    },
+    "163": {
+      "local_index": 8,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "164": {
+      "local_index": 9,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "165": {
+      "local_index": 5,
+      "stratum": "startend:end_checker"
+    },
+    "166": {
+      "local_index": 10,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "167": {
+      "local_index": 7,
+      "stratum": "length_constraints:number_words"
+    },
+    "168": {
+      "local_index": 6,
+      "stratum": "startend:end_checker"
+    },
+    "169": {
+      "local_index": 5,
+      "stratum": "combination:repeat_prompt"
+    },
+    "170": {
+      "local_index": 3,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "171": {
+      "local_index": 6,
+      "stratum": "combination:repeat_prompt"
+    },
+    "172": {
+      "local_index": 4,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "173": {
+      "local_index": 9,
+      "stratum": "detectable_format:title"
+    },
+    "174": {
+      "local_index": 6,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "175": {
+      "local_index": 7,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "176": {
+      "local_index": 7,
+      "stratum": "startend:end_checker"
+    },
+    "177": {
+      "local_index": 8,
+      "stratum": "startend:end_checker"
+    },
+    "178": {
+      "local_index": 7,
+      "stratum": "combination:repeat_prompt"
+    },
+    "179": {
+      "local_index": 2,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "180": {
+      "local_index": 8,
+      "stratum": "keywords:letter_frequency"
+    },
+    "181": {
+      "local_index": 14,
+      "stratum": "change_case:english_lowercase"
+    },
+    "182": {
+      "local_index": 11,
+      "stratum": "detectable_content:postscript"
+    },
+    "183": {
+      "local_index": 6,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "184": {
+      "local_index": 7,
+      "stratum": "change_case:english_capital"
+    },
+    "185": {
+      "local_index": 9,
+      "stratum": "keywords:letter_frequency"
+    },
+    "186": {
+      "local_index": 4,
+      "stratum": "startend:quotation"
+    },
+    "187": {
+      "local_index": 5,
+      "stratum": "startend:quotation"
+    },
+    "188": {
+      "local_index": 15,
+      "stratum": "change_case:english_lowercase"
+    },
+    "189": {
+      "local_index": 6,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "190": {
+      "local_index": 5,
+      "stratum": "keywords:forbidden_words"
+    },
+    "191": {
+      "local_index": 6,
+      "stratum": "keywords:forbidden_words"
+    },
+    "192": {
+      "local_index": 6,
+      "stratum": "startend:quotation"
+    },
+    "193": {
+      "local_index": 7,
+      "stratum": "keywords:forbidden_words"
+    },
+    "194": {
+      "local_index": 8,
+      "stratum": "combination:repeat_prompt"
+    },
+    "195": {
+      "local_index": 8,
+      "stratum": "length_constraints:number_words"
+    },
+    "196": {
+      "local_index": 12,
+      "stratum": "detectable_content:postscript"
+    },
+    "197": {
+      "local_index": 9,
+      "stratum": "combination:repeat_prompt"
+    },
+    "198": {
+      "local_index": 8,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "199": {
+      "local_index": 7,
+      "stratum": "keywords:frequency"
+    },
+    "200": {
+      "local_index": 9,
+      "stratum": "length_constraints:number_words"
+    },
+    "201": {
+      "local_index": 10,
+      "stratum": "detectable_format:title"
+    },
+    "202": {
+      "local_index": 9,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "203": {
+      "local_index": 10,
+      "stratum": "keywords:letter_frequency"
+    },
+    "204": {
+      "local_index": 9,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "205": {
+      "local_index": 5,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "206": {
+      "local_index": 11,
+      "stratum": "keywords:existence"
+    },
+    "207": {
+      "local_index": 8,
+      "stratum": "keywords:frequency"
+    },
+    "208": {
+      "local_index": 8,
+      "stratum": "keywords:forbidden_words"
+    },
+    "209": {
+      "local_index": 6,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "210": {
+      "local_index": 7,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "211": {
+      "local_index": 11,
+      "stratum": "keywords:letter_frequency"
+    },
+    "212": {
+      "local_index": 8,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "213": {
+      "local_index": 7,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "214": {
+      "local_index": 7,
+      "stratum": "startend:quotation"
+    },
+    "215": {
+      "local_index": 10,
+      "stratum": "combination:repeat_prompt"
+    },
+    "216": {
+      "local_index": 10,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "217": {
+      "local_index": 9,
+      "stratum": "keywords:forbidden_words"
+    },
+    "218": {
+      "local_index": 8,
+      "stratum": "startend:quotation"
+    },
+    "219": {
+      "local_index": 3,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "220": {
+      "local_index": 13,
+      "stratum": "detectable_content:postscript"
+    },
+    "221": {
+      "local_index": 5,
+      "stratum": "language:response_language"
+    },
+    "222": {
+      "local_index": 11,
+      "stratum": "detectable_format:title"
+    },
+    "223": {
+      "local_index": 11,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "224": {
+      "local_index": 9,
+      "stratum": "startend:quotation"
+    },
+    "225": {
+      "local_index": 10,
+      "stratum": "length_constraints:number_words"
+    },
+    "226": {
+      "local_index": 4,
+      "stratum": "punctuation:no_comma"
+    },
+    "227": {
+      "local_index": 9,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "228": {
+      "local_index": 8,
+      "stratum": "change_case:english_capital"
+    },
+    "229": {
+      "local_index": 4,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "230": {
+      "local_index": 12,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "231": {
+      "local_index": 12,
+      "stratum": "keywords:letter_frequency"
+    },
+    "232": {
+      "local_index": 6,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "233": {
+      "local_index": 9,
+      "stratum": "startend:end_checker"
+    },
+    "234": {
+      "local_index": 0,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "235": {
+      "local_index": 14,
+      "stratum": "detectable_content:postscript"
+    },
+    "236": {
+      "local_index": 8,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "237": {
+      "local_index": 10,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "238": {
+      "local_index": 9,
+      "stratum": "keywords:frequency"
+    },
+    "239": {
+      "local_index": 6,
+      "stratum": "language:response_language"
+    },
+    "240": {
+      "local_index": 10,
+      "stratum": "startend:quotation"
+    },
+    "241": {
+      "local_index": 11,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "242": {
+      "local_index": 12,
+      "stratum": "detectable_format:title"
+    },
+    "243": {
+      "local_index": 7,
+      "stratum": "language:response_language"
+    },
+    "244": {
+      "local_index": 5,
+      "stratum": "punctuation:no_comma"
+    },
+    "245": {
+      "local_index": 11,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "246": {
+      "local_index": 11,
+      "stratum": "length_constraints:number_words"
+    },
+    "247": {
+      "local_index": 6,
+      "stratum": "punctuation:no_comma"
+    },
+    "248": {
+      "local_index": 10,
+      "stratum": "keywords:forbidden_words"
+    },
+    "249": {
+      "local_index": 11,
+      "stratum": "combination:repeat_prompt"
+    },
+    "250": {
+      "local_index": 9,
+      "stratum": "change_case:english_capital"
+    },
+    "251": {
+      "local_index": 13,
+      "stratum": "keywords:letter_frequency"
+    },
+    "252": {
+      "local_index": 12,
+      "stratum": "combination:repeat_prompt"
+    },
+    "253": {
+      "local_index": 10,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "254": {
+      "local_index": 13,
+      "stratum": "combination:repeat_prompt"
+    },
+    "255": {
+      "local_index": 15,
+      "stratum": "detectable_content:postscript"
+    },
+    "256": {
+      "local_index": 16,
+      "stratum": "change_case:english_lowercase"
+    },
+    "257": {
+      "local_index": 7,
+      "stratum": "punctuation:no_comma"
+    },
+    "258": {
+      "local_index": 12,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "259": {
+      "local_index": 13,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "260": {
+      "local_index": 8,
+      "stratum": "combination:two_responses"
+    },
+    "261": {
+      "local_index": 11,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "262": {
+      "local_index": 17,
+      "stratum": "change_case:english_lowercase"
+    },
+    "263": {
+      "local_index": 10,
+      "stratum": "keywords:frequency"
+    },
+    "264": {
+      "local_index": 7,
+      "stratum": "detectable_format:json_format"
+    },
+    "265": {
+      "local_index": 16,
+      "stratum": "detectable_content:postscript"
+    },
+    "266": {
+      "local_index": 10,
+      "stratum": "startend:end_checker"
+    },
+    "267": {
+      "local_index": 10,
+      "stratum": "change_case:english_capital"
+    },
+    "268": {
+      "local_index": 8,
+      "stratum": "language:response_language"
+    },
+    "269": {
+      "local_index": 8,
+      "stratum": "detectable_format:json_format"
+    },
+    "270": {
+      "local_index": 11,
+      "stratum": "change_case:english_capital"
+    },
+    "271": {
+      "local_index": 8,
+      "stratum": "punctuation:no_comma"
+    },
+    "272": {
+      "local_index": 12,
+      "stratum": "change_case:english_capital"
+    },
+    "273": {
+      "local_index": 11,
+      "stratum": "keywords:forbidden_words"
+    },
+    "274": {
+      "local_index": 9,
+      "stratum": "combination:two_responses"
+    },
+    "275": {
+      "local_index": 5,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "276": {
+      "local_index": 11,
+      "stratum": "startend:quotation"
+    },
+    "277": {
+      "local_index": 14,
+      "stratum": "keywords:letter_frequency"
+    },
+    "278": {
+      "local_index": 15,
+      "stratum": "keywords:letter_frequency"
+    },
+    "279": {
+      "local_index": 13,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "280": {
+      "local_index": 9,
+      "stratum": "language:response_language"
+    },
+    "281": {
+      "local_index": 14,
+      "stratum": "combination:repeat_prompt"
+    },
+    "282": {
+      "local_index": 12,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "283": {
+      "local_index": 10,
+      "stratum": "combination:two_responses"
+    },
+    "284": {
+      "local_index": 12,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "285": {
+      "local_index": 11,
+      "stratum": "startend:end_checker"
+    },
+    "286": {
+      "local_index": 15,
+      "stratum": "combination:repeat_prompt"
+    },
+    "287": {
+      "local_index": 12,
+      "stratum": "keywords:existence"
+    },
+    "288": {
+      "local_index": 12,
+      "stratum": "startend:quotation"
+    },
+    "289": {
+      "local_index": 12,
+      "stratum": "startend:end_checker"
+    },
+    "290": {
+      "local_index": 16,
+      "stratum": "keywords:letter_frequency"
+    },
+    "291": {
+      "local_index": 14,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "292": {
+      "local_index": 18,
+      "stratum": "change_case:english_lowercase"
+    },
+    "293": {
+      "local_index": 19,
+      "stratum": "change_case:english_lowercase"
+    },
+    "294": {
+      "local_index": 13,
+      "stratum": "startend:quotation"
+    },
+    "295": {
+      "local_index": 12,
+      "stratum": "keywords:forbidden_words"
+    },
+    "296": {
+      "local_index": 6,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "297": {
+      "local_index": 13,
+      "stratum": "change_case:english_capital"
+    },
+    "298": {
+      "local_index": 13,
+      "stratum": "keywords:existence"
+    },
+    "299": {
+      "local_index": 14,
+      "stratum": "change_case:english_capital"
+    },
+    "300": {
+      "local_index": 11,
+      "stratum": "combination:two_responses"
+    },
+    "301": {
+      "local_index": 11,
+      "stratum": "keywords:frequency"
+    },
+    "302": {
+      "local_index": 16,
+      "stratum": "combination:repeat_prompt"
+    },
+    "303": {
+      "local_index": 7,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "304": {
+      "local_index": 7,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "305": {
+      "local_index": 9,
+      "stratum": "detectable_format:json_format"
+    },
+    "306": {
+      "local_index": 12,
+      "stratum": "combination:two_responses"
+    },
+    "307": {
+      "local_index": 14,
+      "stratum": "keywords:existence"
+    },
+    "308": {
+      "local_index": 15,
+      "stratum": "keywords:existence"
+    },
+    "309": {
+      "local_index": 17,
+      "stratum": "keywords:letter_frequency"
+    },
+    "310": {
+      "local_index": 12,
+      "stratum": "keywords:frequency"
+    },
+    "311": {
+      "local_index": 8,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "312": {
+      "local_index": 17,
+      "stratum": "detectable_content:postscript"
+    },
+    "313": {
+      "local_index": 18,
+      "stratum": "detectable_content:postscript"
+    },
+    "314": {
+      "local_index": 7,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "315": {
+      "local_index": 10,
+      "stratum": "detectable_format:json_format"
+    },
+    "316": {
+      "local_index": 14,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "317": {
+      "local_index": 16,
+      "stratum": "keywords:existence"
+    },
+    "318": {
+      "local_index": 15,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "319": {
+      "local_index": 9,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "320": {
+      "local_index": 13,
+      "stratum": "startend:end_checker"
+    },
+    "321": {
+      "local_index": 13,
+      "stratum": "combination:two_responses"
+    },
+    "322": {
+      "local_index": 10,
+      "stratum": "language:response_language"
+    },
+    "323": {
+      "local_index": 14,
+      "stratum": "startend:quotation"
+    },
+    "324": {
+      "local_index": 14,
+      "stratum": "combination:two_responses"
+    },
+    "325": {
+      "local_index": 17,
+      "stratum": "combination:repeat_prompt"
+    },
+    "326": {
+      "local_index": 13,
+      "stratum": "keywords:frequency"
+    },
+    "327": {
+      "local_index": 11,
+      "stratum": "language:response_language"
+    },
+    "328": {
+      "local_index": 20,
+      "stratum": "change_case:english_lowercase"
+    },
+    "329": {
+      "local_index": 15,
+      "stratum": "change_case:english_capital"
+    },
+    "330": {
+      "local_index": 18,
+      "stratum": "combination:repeat_prompt"
+    },
+    "331": {
+      "local_index": 10,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "332": {
+      "local_index": 15,
+      "stratum": "startend:quotation"
+    },
+    "333": {
+      "local_index": 15,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "334": {
+      "local_index": 16,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "335": {
+      "local_index": 13,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "336": {
+      "local_index": 18,
+      "stratum": "keywords:letter_frequency"
+    },
+    "337": {
+      "local_index": 19,
+      "stratum": "keywords:letter_frequency"
+    },
+    "338": {
+      "local_index": 11,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "339": {
+      "local_index": 14,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "340": {
+      "local_index": 20,
+      "stratum": "keywords:letter_frequency"
+    },
+    "341": {
+      "local_index": 21,
+      "stratum": "keywords:letter_frequency"
+    },
+    "342": {
+      "local_index": 17,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "343": {
+      "local_index": 9,
+      "stratum": "punctuation:no_comma"
+    },
+    "344": {
+      "local_index": 16,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "345": {
+      "local_index": 13,
+      "stratum": "detectable_format:title"
+    },
+    "346": {
+      "local_index": 16,
+      "stratum": "startend:quotation"
+    },
+    "347": {
+      "local_index": 13,
+      "stratum": "keywords:forbidden_words"
+    },
+    "348": {
+      "local_index": 21,
+      "stratum": "change_case:english_lowercase"
+    },
+    "349": {
+      "local_index": 9,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "350": {
+      "local_index": 10,
+      "stratum": "punctuation:no_comma"
+    },
+    "351": {
+      "local_index": 14,
+      "stratum": "keywords:forbidden_words"
+    },
+    "352": {
+      "local_index": 17,
+      "stratum": "startend:quotation"
+    },
+    "353": {
+      "local_index": 17,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "354": {
+      "local_index": 18,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "355": {
+      "local_index": 10,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "356": {
+      "local_index": 11,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "357": {
+      "local_index": 11,
+      "stratum": "detectable_format:json_format"
+    },
+    "358": {
+      "local_index": 12,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "359": {
+      "local_index": 14,
+      "stratum": "startend:end_checker"
+    },
+    "360": {
+      "local_index": 12,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "361": {
+      "local_index": 14,
+      "stratum": "keywords:frequency"
+    },
+    "362": {
+      "local_index": 19,
+      "stratum": "combination:repeat_prompt"
+    },
+    "363": {
+      "local_index": 8,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "364": {
+      "local_index": 22,
+      "stratum": "keywords:letter_frequency"
+    },
+    "365": {
+      "local_index": 8,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "366": {
+      "local_index": 20,
+      "stratum": "combination:repeat_prompt"
+    },
+    "367": {
+      "local_index": 19,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "368": {
+      "local_index": 16,
+      "stratum": "change_case:english_capital"
+    },
+    "369": {
+      "local_index": 20,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "370": {
+      "local_index": 15,
+      "stratum": "combination:two_responses"
+    },
+    "371": {
+      "local_index": 16,
+      "stratum": "combination:two_responses"
+    },
+    "372": {
+      "local_index": 13,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "373": {
+      "local_index": 13,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "374": {
+      "local_index": 9,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "375": {
+      "local_index": 19,
+      "stratum": "detectable_content:postscript"
+    },
+    "376": {
+      "local_index": 14,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "377": {
+      "local_index": 15,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "378": {
+      "local_index": 14,
+      "stratum": "detectable_format:title"
+    },
+    "379": {
+      "local_index": 15,
+      "stratum": "keywords:forbidden_words"
+    },
+    "380": {
+      "local_index": 22,
+      "stratum": "change_case:english_lowercase"
+    },
+    "381": {
+      "local_index": 15,
+      "stratum": "detectable_format:title"
+    },
+    "382": {
+      "local_index": 16,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "383": {
+      "local_index": 18,
+      "stratum": "startend:quotation"
+    },
+    "384": {
+      "local_index": 15,
+      "stratum": "keywords:frequency"
+    },
+    "385": {
+      "local_index": 19,
+      "stratum": "startend:quotation"
+    },
+    "386": {
+      "local_index": 15,
+      "stratum": "startend:end_checker"
+    },
+    "387": {
+      "local_index": 16,
+      "stratum": "keywords:forbidden_words"
+    },
+    "388": {
+      "local_index": 18,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "389": {
+      "local_index": 15,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "390": {
+      "local_index": 19,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "391": {
+      "local_index": 16,
+      "stratum": "startend:end_checker"
+    },
+    "392": {
+      "local_index": 16,
+      "stratum": "detectable_format:title"
+    },
+    "393": {
+      "local_index": 17,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "394": {
+      "local_index": 20,
+      "stratum": "detectable_content:postscript"
+    },
+    "395": {
+      "local_index": 21,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "396": {
+      "local_index": 9,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "397": {
+      "local_index": 17,
+      "stratum": "startend:end_checker"
+    },
+    "398": {
+      "local_index": 17,
+      "stratum": "keywords:forbidden_words"
+    },
+    "399": {
+      "local_index": 18,
+      "stratum": "startend:end_checker"
+    },
+    "400": {
+      "local_index": 22,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "401": {
+      "local_index": 16,
+      "stratum": "keywords:frequency"
+    },
+    "402": {
+      "local_index": 13,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "403": {
+      "local_index": 17,
+      "stratum": "keywords:frequency"
+    },
+    "404": {
+      "local_index": 12,
+      "stratum": "language:response_language"
+    },
+    "405": {
+      "local_index": 19,
+      "stratum": "startend:end_checker"
+    },
+    "406": {
+      "local_index": 16,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "407": {
+      "local_index": 13,
+      "stratum": "language:response_language"
+    },
+    "408": {
+      "local_index": 21,
+      "stratum": "detectable_content:postscript"
+    },
+    "409": {
+      "local_index": 23,
+      "stratum": "change_case:english_lowercase"
+    },
+    "410": {
+      "local_index": 17,
+      "stratum": "keywords:existence"
+    },
+    "411": {
+      "local_index": 18,
+      "stratum": "keywords:forbidden_words"
+    },
+    "412": {
+      "local_index": 17,
+      "stratum": "change_case:english_capital"
+    },
+    "413": {
+      "local_index": 14,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "414": {
+      "local_index": 14,
+      "stratum": "language:response_language"
+    },
+    "415": {
+      "local_index": 15,
+      "stratum": "language:response_language"
+    },
+    "416": {
+      "local_index": 20,
+      "stratum": "startend:end_checker"
+    },
+    "417": {
+      "local_index": 11,
+      "stratum": "punctuation:no_comma"
+    },
+    "418": {
+      "local_index": 21,
+      "stratum": "startend:end_checker"
+    },
+    "419": {
+      "local_index": 18,
+      "stratum": "change_case:english_capital"
+    },
+    "420": {
+      "local_index": 12,
+      "stratum": "detectable_format:json_format"
+    },
+    "421": {
+      "local_index": 17,
+      "stratum": "combination:two_responses"
+    },
+    "422": {
+      "local_index": 17,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "423": {
+      "local_index": 13,
+      "stratum": "detectable_format:json_format"
+    },
+    "424": {
+      "local_index": 21,
+      "stratum": "combination:repeat_prompt"
+    },
+    "425": {
+      "local_index": 16,
+      "stratum": "language:response_language"
+    },
+    "426": {
+      "local_index": 23,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "427": {
+      "local_index": 18,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "428": {
+      "local_index": 17,
+      "stratum": "detectable_format:title"
+    },
+    "429": {
+      "local_index": 18,
+      "stratum": "combination:two_responses"
+    },
+    "430": {
+      "local_index": 18,
+      "stratum": "detectable_format:title"
+    },
+    "431": {
+      "local_index": 19,
+      "stratum": "change_case:english_capital"
+    },
+    "432": {
+      "local_index": 19,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "433": {
+      "local_index": 19,
+      "stratum": "combination:two_responses"
+    },
+    "434": {
+      "local_index": 20,
+      "stratum": "combination:two_responses"
+    },
+    "435": {
+      "local_index": 18,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "436": {
+      "local_index": 17,
+      "stratum": "language:response_language"
+    },
+    "437": {
+      "local_index": 15,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "438": {
+      "local_index": 18,
+      "stratum": "language:response_language"
+    },
+    "439": {
+      "local_index": 19,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "440": {
+      "local_index": 22,
+      "stratum": "combination:repeat_prompt"
+    },
+    "441": {
+      "local_index": 12,
+      "stratum": "punctuation:no_comma"
+    },
+    "442": {
+      "local_index": 10,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "443": {
+      "local_index": 23,
+      "stratum": "keywords:letter_frequency"
+    },
+    "444": {
+      "local_index": 18,
+      "stratum": "keywords:existence"
+    },
+    "445": {
+      "local_index": 14,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "446": {
+      "local_index": 21,
+      "stratum": "combination:two_responses"
+    },
+    "447": {
+      "local_index": 20,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "448": {
+      "local_index": 21,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "449": {
+      "local_index": 20,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "450": {
+      "local_index": 20,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "451": {
+      "local_index": 19,
+      "stratum": "keywords:forbidden_words"
+    },
+    "452": {
+      "local_index": 11,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "453": {
+      "local_index": 23,
+      "stratum": "combination:repeat_prompt"
+    },
+    "454": {
+      "local_index": 19,
+      "stratum": "detectable_format:title"
+    },
+    "455": {
+      "local_index": 19,
+      "stratum": "keywords:existence"
+    },
+    "456": {
+      "local_index": 20,
+      "stratum": "keywords:existence"
+    },
+    "457": {
+      "local_index": 24,
+      "stratum": "change_case:english_lowercase"
+    },
+    "458": {
+      "local_index": 21,
+      "stratum": "keywords:existence"
+    },
+    "459": {
+      "local_index": 24,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "460": {
+      "local_index": 20,
+      "stratum": "keywords:forbidden_words"
+    },
+    "461": {
+      "local_index": 16,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "462": {
+      "local_index": 20,
+      "stratum": "startend:quotation"
+    },
+    "463": {
+      "local_index": 17,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "464": {
+      "local_index": 18,
+      "stratum": "keywords:frequency"
+    },
+    "465": {
+      "local_index": 20,
+      "stratum": "change_case:english_capital"
+    },
+    "466": {
+      "local_index": 12,
+      "stratum": "length_constraints:number_words"
+    },
+    "467": {
+      "local_index": 24,
+      "stratum": "keywords:letter_frequency"
+    },
+    "468": {
+      "local_index": 12,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "469": {
+      "local_index": 13,
+      "stratum": "length_constraints:number_words"
+    },
+    "470": {
+      "local_index": 10,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "471": {
+      "local_index": 22,
+      "stratum": "keywords:existence"
+    },
+    "472": {
+      "local_index": 20,
+      "stratum": "detectable_format:title"
+    },
+    "473": {
+      "local_index": 21,
+      "stratum": "keywords:forbidden_words"
+    },
+    "474": {
+      "local_index": 25,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "475": {
+      "local_index": 18,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "476": {
+      "local_index": 21,
+      "stratum": "change_case:english_capital"
+    },
+    "477": {
+      "local_index": 25,
+      "stratum": "keywords:letter_frequency"
+    },
+    "478": {
+      "local_index": 22,
+      "stratum": "keywords:forbidden_words"
+    },
+    "479": {
+      "local_index": 24,
+      "stratum": "combination:repeat_prompt"
+    },
+    "480": {
+      "local_index": 26,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "481": {
+      "local_index": 21,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "482": {
+      "local_index": 19,
+      "stratum": "language:response_language"
+    },
+    "483": {
+      "local_index": 25,
+      "stratum": "combination:repeat_prompt"
+    },
+    "484": {
+      "local_index": 14,
+      "stratum": "detectable_format:json_format"
+    },
+    "485": {
+      "local_index": 19,
+      "stratum": "change_case:capital_word_frequency"
+    },
+    "486": {
+      "local_index": 15,
+      "stratum": "detectable_format:json_format"
+    },
+    "487": {
+      "local_index": 25,
+      "stratum": "change_case:english_lowercase"
+    },
+    "488": {
+      "local_index": 21,
+      "stratum": "startend:quotation"
+    },
+    "489": {
+      "local_index": 19,
+      "stratum": "keywords:frequency"
+    },
+    "490": {
+      "local_index": 13,
+      "stratum": "punctuation:no_comma"
+    },
+    "491": {
+      "local_index": 27,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "492": {
+      "local_index": 22,
+      "stratum": "detectable_format:number_bullet_lists"
+    },
+    "493": {
+      "local_index": 26,
+      "stratum": "combination:repeat_prompt"
+    },
+    "494": {
+      "local_index": 21,
+      "stratum": "length_constraints:number_paragraphs"
+    },
+    "495": {
+      "local_index": 20,
+      "stratum": "language:response_language"
+    },
+    "496": {
+      "local_index": 28,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "497": {
+      "local_index": 13,
+      "stratum": "detectable_format:multiple_sections"
+    },
+    "498": {
+      "local_index": 22,
+      "stratum": "change_case:english_capital"
+    },
+    "499": {
+      "local_index": 23,
+      "stratum": "keywords:forbidden_words"
+    },
+    "500": {
+      "local_index": 21,
+      "stratum": "detectable_format:title"
+    },
+    "501": {
+      "local_index": 26,
+      "stratum": "keywords:letter_frequency"
+    },
+    "502": {
+      "local_index": 14,
+      "stratum": "punctuation:no_comma"
+    },
+    "503": {
+      "local_index": 23,
+      "stratum": "change_case:english_capital"
+    },
+    "504": {
+      "local_index": 22,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "505": {
+      "local_index": 21,
+      "stratum": "language:response_language"
+    },
+    "506": {
+      "local_index": 11,
+      "stratum": "length_constraints:nth_paragraph_first_word"
+    },
+    "507": {
+      "local_index": 29,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "508": {
+      "local_index": 15,
+      "stratum": "punctuation:no_comma"
+    },
+    "509": {
+      "local_index": 27,
+      "stratum": "combination:repeat_prompt"
+    },
+    "510": {
+      "local_index": 30,
+      "stratum": "detectable_format:number_highlighted_sections"
+    },
+    "511": {
+      "local_index": 22,
+      "stratum": "language:response_language"
+    },
+    "512": {
+      "local_index": 23,
+      "stratum": "language:response_language"
+    },
+    "513": {
+      "local_index": 22,
+      "stratum": "startend:quotation"
+    },
+    "514": {
+      "local_index": 20,
+      "stratum": "keywords:frequency"
+    },
+    "515": {
+      "local_index": 24,
+      "stratum": "language:response_language"
+    },
+    "516": {
+      "local_index": 22,
+      "stratum": "detectable_format:title"
+    },
+    "517": {
+      "local_index": 15,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "518": {
+      "local_index": 23,
+      "stratum": "detectable_format:title"
+    },
+    "519": {
+      "local_index": 26,
+      "stratum": "change_case:english_lowercase"
+    },
+    "520": {
+      "local_index": 23,
+      "stratum": "startend:quotation"
+    },
+    "521": {
+      "local_index": 16,
+      "stratum": "detectable_format:json_format"
+    },
+    "522": {
+      "local_index": 22,
+      "stratum": "detectable_content:postscript"
+    },
+    "523": {
+      "local_index": 24,
+      "stratum": "detectable_format:title"
+    },
+    "524": {
+      "local_index": 25,
+      "stratum": "detectable_format:title"
+    },
+    "525": {
+      "local_index": 22,
+      "stratum": "startend:end_checker"
+    },
+    "526": {
+      "local_index": 23,
+      "stratum": "keywords:existence"
+    },
+    "527": {
+      "local_index": 16,
+      "stratum": "length_constraints:number_sentences"
+    },
+    "528": {
+      "local_index": 28,
+      "stratum": "combination:repeat_prompt"
+    },
+    "529": {
+      "local_index": 23,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "530": {
+      "local_index": 24,
+      "stratum": "detectable_content:number_placeholders"
+    },
+    "531": {
+      "local_index": 22,
+      "stratum": "combination:two_responses"
+    },
+    "532": {
+      "local_index": 1,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "533": {
+      "local_index": 2,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "534": {
+      "local_index": 3,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "535": {
+      "local_index": 4,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "536": {
+      "local_index": 5,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "537": {
+      "local_index": 6,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "538": {
+      "local_index": 7,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "539": {
+      "local_index": 8,
+      "stratum": "detectable_format:constrained_response"
+    },
+    "540": {
+      "local_index": 9,
+      "stratum": "detectable_format:constrained_response"
+    }
+  },
+  "seed": "20261117-supplement2-v1"
+}

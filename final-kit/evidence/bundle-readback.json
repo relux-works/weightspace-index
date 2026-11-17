@@ -1,0 +1,101 @@
+{
+  "attempts": [
+    {
+      "bundle": "bundles/card-math/aa-a/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/card-math/aa-b/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/minerva_math500/aa-a/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/minerva_math500/aa-b/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/minerva_math500/killed/interrupted",
+      "state": "failed",
+      "exit_status": 65,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/minerva_math500/killed/recovery",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/minerva_math500/private-rejected/synthetic-detector",
+      "state": "export-refused",
+      "exit_status": 65,
+      "sealed": false,
+      "seal_readback": false,
+      "current_bash_source_fingerprints": false
+    },
+    {
+      "bundle": "bundles/minerva_math500/tier-cli/range",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/mmlu_pro/aa-a/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/mmlu_pro/aa-b/smoke",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    },
+    {
+      "bundle": "bundles/mmlu_pro/tier-cli/range",
+      "state": "complete-unqualified",
+      "exit_status": 0,
+      "sealed": true,
+      "seal_readback": true,
+      "current_bash_source_fingerprints": true
+    }
+  ],
+  "counts": {
+    "all": 11,
+    "sealed": 10,
+    "complete": 9,
+    "failed": 1,
+    "export_refused": 1
+  },
+  "powershell_execution": "UNVERIFIED",
+  "powershell_static_candidate_sha256": "e584c798f1ae6d3fffe399fe86b78fb72fc84554e54540e16d23fe50d3732719"
+}

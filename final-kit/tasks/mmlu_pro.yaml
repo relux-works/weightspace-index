@@ -1,0 +1,6 @@
+# Direct full group selection; shards use the child selectors.
+group: day1_mmlu_pro
+task:
+  - mmlu_pro
+dataset_kwargs:
+  revision: b189ec765aa7ed75c8acfea42df31fdae71f97be

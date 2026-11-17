@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "record_type": "index-measured",
+  "template_only": true,
+  "run_id": "REQUIRED-stable-run-id",
+  "model_id": "qwen35-0.8b",
+  "patch_id": "none",
+  "protocol_id": "lm_eval-0.4.13-qwen35-text-thinking-32k-math500-mmlupro-tiers-v2",
+  "benchmark_id": "minerva_math500",
+  "performed_by": "index",
+  "trust_level": "submitted",
+  "verification_status": "unverified",
+  "claim_ids": [],
+  "claim_verifications": [],
+  "scores": [
+    {
+      "metric": "exact_match",
+      "value": null,
+      "unit": "fraction",
+      "estimator": "frozen full-stratum weighted mean",
+      "uncertainty": null,
+      "output_cap_tokens": 32768,
+      "coverage_ref": "#/coverage"
+    },
+    {
+      "metric": "math_verify",
+      "value": null,
+      "unit": "fraction",
+      "estimator": "frozen full-stratum weighted mean",
+      "uncertainty": null,
+      "output_cap_tokens": 32768,
+      "coverage_ref": "#/coverage"
+    }
+  ],
+  "tier": {
+    "id": "n197",
+    "repetitions": 1,
+    "output_cap_tokens": 32768
+  },
+  "coverage": {
+    "state": "not-started",
+    "completed_items": 0,
+    "expected_items": 197,
+    "completed_draws": 0,
+    "expected_draws": 197,
+    "population_items": 500,
+    "fraction": 0.0,
+    "score_publishable": false
+  },
+  "bundles": [
+    {
+      "bundle_id": "REQUIRED-stable-bundle-id",
+      "manifest_path": "bundles/minerva_math500/REQUIRED-label/REQUIRED-shard/manifest.json",
+      "manifest_sha256": null,
+      "seal_path": "bundles/minerva_math500/REQUIRED-label/REQUIRED-shard/SHA256SUMS",
+      "seal_sha256": null,
+      "artifact_ref": {
+        "path": "artifacts/REQUIRED-bundle.tar.gz",
+        "sha256": null
+      }
+    }
+  ],
+  "lineage_ref": "REQUIRED-relative-lineage-path",
+  "summary_path": "runs/REQUIRED-stable-run-id/summary.json",
+  "qualification": "unverified",
+  "display_series": "index-measured",
+  "notes": "Template only; null score values must remain unpublished until the complete declared tier and required evidence exist. Null hashes are missing, never valid seals."
+}

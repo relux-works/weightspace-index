@@ -1,0 +1,6 @@
+{
+  "claim": "Pinned source arithmetic distinguishes unchanged counts from a one-count mutation.",
+  "positive_accepted": true,
+  "changed_numerator_rejected": true,
+  "limitation": "Arithmetic only, no inference reproduction or independent cap reclassification."
+}

@@ -1,0 +1,11 @@
+{
+  "requests": 8,
+  "all_profile_checks_passed": true,
+  "paired_prompt_counts": [
+    2,
+    2,
+    2,
+    2
+  ],
+  "no_real_engine_claim": true
+}

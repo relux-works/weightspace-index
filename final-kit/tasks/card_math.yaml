@@ -1,0 +1,40 @@
+# CARD-REPLICATION transport candidate. Scoring BLOCKED; see CARD-SCORING-BLOCKED.md.
+task: card_math
+dataset_path: HuggingFaceH4/MATH-500
+dataset_name: default
+dataset_kwargs:
+  revision: 6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be
+training_split: null
+test_split: test
+output_type: generate_until
+process_docs: !function lm_eval.tasks.minerva_math.utils.process_docs
+doc_to_text: |-
+  {{problem}}
+
+  Please reason step by step, and put your final answer within \boxed{}.
+doc_to_target: '{{answer}}'
+process_results: !function lm_eval.tasks.minerva_math.utils.process_results
+num_fewshot: 0
+repeats: 1
+generation_kwargs:
+  until: []
+  do_sample: true
+  max_gen_toks: 32768
+  temperature: 1.0
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+  presence_penalty: 1.5
+  repetition_penalty: 1.0
+  chat_template_kwargs:
+    enable_thinking: true
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+  - metric: math_verify
+    aggregation: mean
+    higher_is_better: true
+metadata:
+  version: 1
+  protocol_qualified: false

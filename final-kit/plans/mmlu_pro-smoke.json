@@ -1,0 +1,12 @@
+{
+  "dataset": "TIGER-Lab/MMLU-Pro",
+  "indices": [
+    2719,
+    623,
+    3415
+  ],
+  "population": 12032,
+  "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "seed": "20261117-supplement2-v1",
+  "task": "mmlu_pro"
+}

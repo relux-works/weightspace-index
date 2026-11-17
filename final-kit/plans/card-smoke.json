@@ -1,0 +1,52 @@
+{
+  "task": "card-math",
+  "dataset": "HuggingFaceH4/MATH-500",
+  "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+  "split": "test",
+  "index_base": 0,
+  "choice": "12 fixed indices spaced across the ordered 500-row test split, including both endpoints. Selection tests identity and glue, not a representative accuracy estimate.",
+  "indices": [
+    0,
+    45,
+    91,
+    136,
+    181,
+    227,
+    272,
+    318,
+    363,
+    408,
+    454,
+    499
+  ],
+  "shards": [
+    {
+      "id": "pilot-a",
+      "endpoint": "A",
+      "selection_offset": 0,
+      "count": 6,
+      "indices": [
+        0,
+        45,
+        91,
+        136,
+        181,
+        227
+      ]
+    },
+    {
+      "id": "pilot-b",
+      "endpoint": "B",
+      "selection_offset": 6,
+      "count": 6,
+      "indices": [
+        272,
+        318,
+        363,
+        408,
+        454,
+        499
+      ]
+    }
+  ]
+}

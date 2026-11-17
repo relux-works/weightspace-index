@@ -57,6 +57,16 @@ cargo run --locked -- check ..
 
 Cargo writes build artifacts to `tool/target/`. The `weightspace` binary checks records offline, builds/applies replacements, and regenerates the catalogs, tables and client lookups described in [structure](docs/structure.md#generated-files). For an installed binary, use `weightspace check <repository>` or `weightspace generate <repository>`; the default repository is the current directory. To verify downloaded payloads, use `shasum -a 256 <file>` and `wc -c < <file>`; these print the hash and byte count without writing files. See the [tool guide](tool/README.md) for all commands.
 
+The separate [durable local paired runner](benchmark/README.md) is a standard-library
+Go CLI under `benchmark/`. With Go 1.26.8+, build it using
+`cd benchmark && go build -o ../.temp/benchmark/bench ./cmd/bench` after creating
+`.temp/benchmark/`. It runs explicitly selected local adapters, journals request
+receipts, resumes accepted work and gates final export on the exact frozen
+paired target. It does not qualify a model or grade quality. The guide documents
+`validate`, `run`, `status`, `final` and contributor test/race/vet/format commands.
+Binaries and scratch go in ignored `.temp/`; journals, persistent sibling lock
+files and sealed exports go in the operator's private run directory.
+
 ## Licenses and attribution
 
 There is no repository license file yet; that is an owner decision. Each patch carries its own license and notices in `notices/`, and nothing here relicenses third-party material. See [NOTICE](NOTICE.md).

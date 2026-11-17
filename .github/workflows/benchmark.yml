@@ -1,0 +1,48 @@
+name: benchmark
+
+on:
+  pull_request:
+    paths: ['benchmark/**', '.github/workflows/benchmark.yml']
+  push:
+    branches: [main]
+    paths: ['benchmark/**', '.github/workflows/benchmark.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  local-runner:
+    name: local runner (${{ matrix.lane }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lane: [test, race, vet, format, cli-smoke]
+    defaults:
+      run:
+        working-directory: benchmark
+    steps:
+      # Pinned to v7.0.1, matching the repository checks workflow.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      # Pinned to the observed v6 commit.
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: '1.26.8'
+          cache: false
+      - name: Test
+        if: matrix.lane == 'test'
+        run: go test -count=1 ./...
+      - name: Race
+        if: matrix.lane == 'race'
+        run: go test -race -count=1 ./...
+      - name: Vet
+        if: matrix.lane == 'vet'
+        run: go vet ./...
+      - name: Format
+        if: matrix.lane == 'format'
+        run: test -z "$(gofmt -l .)"
+      - name: Real CLI controls
+        if: matrix.lane == 'cli-smoke'
+        run: go test -count=1 -run 'TestCLI(CompleteAndResume|FinalGateControl|ConcurrencyAndSignal)$' .

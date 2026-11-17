@@ -57,6 +57,7 @@ fn main() -> ExitCode {
             patch,
             rank,
             factor_dtype,
+            tensor_shapes,
             method,
             out,
             expect_tensor_sha256,
@@ -66,21 +67,47 @@ fn main() -> ExitCode {
             debug_assert_eq!(factor_dtype, "f32");
             let result = cli::parse_expect(&expect_tensor_sha256).and_then(|expected| {
                 with_cx(temp_dir, |cx| {
-                    weightspace_tools::derive_lora::derive_lora(
-                        &weightspace_tools::derive_lora::DeriveLora {
-                            model,
-                            patch,
-                            rank,
-                            out: out.clone(),
-                            expect_tensor_sha256: expected,
-                            method: if method == "svd" {
-                                weightspace_tools::derive_lora::Method::Svd
-                            } else {
-                                weightspace_tools::derive_lora::Method::Selector
+                    use weightspace_tools::derive_lora::*;
+                    if method == "selector-exact" {
+                        if rank.is_some() {
+                            return Err(ToolError::InvalidArgument {
+                                detail: "selector-exact chooses rank per tensor; omit --rank"
+                                    .into(),
+                            });
+                        }
+                        derive_exact_lora(
+                            &DeriveExactLora {
+                                model,
+                                tensor_shapes,
+                                patch,
+                                out: out.clone(),
+                                expect_tensor_sha256: expected,
                             },
-                        },
-                        cx,
-                    )
+                            cx,
+                        )
+                    } else {
+                        let model = model.ok_or_else(|| ToolError::InvalidArgument {
+                            detail: "explicit-rank methods require --model".into(),
+                        })?;
+                        let rank = rank.ok_or_else(|| ToolError::InvalidArgument {
+                            detail: "explicit-rank methods require --rank".into(),
+                        })?;
+                        derive_lora(
+                            &DeriveLora {
+                                model,
+                                patch,
+                                rank,
+                                out: out.clone(),
+                                expect_tensor_sha256: expected,
+                                method: if method == "svd" {
+                                    Method::Svd
+                                } else {
+                                    Method::Selector
+                                },
+                            },
+                            cx,
+                        )
+                    }
                 })
             });
             println!("{}", weightspace_tools::derive_lora::DISCLAIMER);

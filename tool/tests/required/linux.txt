@@ -28,6 +28,7 @@ derive_lora::tests::selector_exactness
 derive_lora::tests::wide_spectrum
 determinism
 drift_is_reported_and_repaired
+dual_records_and_broken_provenance_controls
 duplicate_header_fields_bom_and_invalid_utf8_refused
 duplicate_manifest_field_refused
 duplicate_root_tensors_key_refused
@@ -59,8 +60,11 @@ manifest_gate
 models_catalog_controls
 models_catalog_layout_controls
 nonfinite_refusals
+numeric_coverage_limits_are_explicit
+numerical_loss_is_reported_without_a_gate
 official_acceptances_pinned
 official_descriptor_parity
+offline_sparse_and_shape_refusals
 output::tests::is_within_is_componentwise_case_insensitive
 output::tests::missing_output_parent_refused
 output::tests::output_final_symlink_and_existing_refused
@@ -76,6 +80,8 @@ patch::plan::tests::choose_thresholds
 patch::plan::tests::multi_tensor_choice_matches_brute_force_oracle
 patch::plan::tests::reviewer_flip_bf16_w200_23_changes
 patch::plan::tests::serialized_len_matches_official_serializer_sweep
+per_tensor_full_and_sparse_deterministic
+per_tensor_option_and_output_refusals
 progress_reports_chunk_bytes_inside_long_phases
 progress_reports_phases_and_bytes
 progress_reports_snapshot_hash_and_verify_hash_bytes
@@ -116,4 +122,7 @@ symlinked_model_dir_spellings_refused
 tensor_hash_with_progress_reports_chunks_and_cancels
 truncated_svd_reports_loss
 truncating_original_after_open_is_harmless
+unsupported_coverage_is_reported
+verified_base_full_form_offline_check_boundary
+verified_base_publication_profile
 wrong_sparse_old_refused

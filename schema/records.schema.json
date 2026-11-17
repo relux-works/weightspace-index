@@ -119,6 +119,7 @@
     },
 
     "versionFile": {
+      "description": "One source form per version. Dual publication is expected for every entry; unsupported conversion coverage remains an explicit gap. V1 does not require derived files globally. Canonical adapter.safetensors/lora-report.json claims are checked together by layout, including provenance and measured report consistency where offline rebuilding is possible. Full-form tensors are descriptor/binding-checked only; their lora_B values and numeric report claims cannot be recomputed offline without the base.",
       "oneOf": [
         {
           "type": "object",

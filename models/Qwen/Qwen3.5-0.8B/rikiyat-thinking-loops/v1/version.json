@@ -14,6 +14,44 @@
           "path": "files/replacements.safetensors"
         }
       ]
+    },
+    {
+      "name": "adapter.safetensors",
+      "role": "derived",
+      "sha256": "53d5a44772695f7c5eb9492c7559f16da501ecb5aadbeacc536f17ebd166f910",
+      "size_bytes": 2359816,
+      "locators": [
+        {
+          "kind": "index-path",
+          "path": "files/adapter.safetensors"
+        }
+      ],
+      "derived_from": [
+        "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9"
+      ],
+      "tool": {
+        "name": "weightspace derive-lora",
+        "version": "0.2.0"
+      }
+    },
+    {
+      "name": "lora-report.json",
+      "role": "derived",
+      "sha256": "55357f2e972894d4e99cd377b9cb0bb15a9e98b56e5cae7ba547530137d3aaf3",
+      "size_bytes": 5850,
+      "locators": [
+        {
+          "kind": "index-path",
+          "path": "files/lora-report.json"
+        }
+      ],
+      "derived_from": [
+        "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9"
+      ],
+      "tool": {
+        "name": "weightspace derive-lora",
+        "version": "0.2.0"
+      }
     }
   ]
 }

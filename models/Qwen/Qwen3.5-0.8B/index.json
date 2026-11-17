@@ -35,6 +35,38 @@
               "role": "source",
               "sha256": "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9",
               "size_bytes": 1563032
+            },
+            {
+              "derived_from": [
+                "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9"
+              ],
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "index-path",
+                  "path": "rikiyat-thinking-loops/v1/files/adapter.safetensors"
+                }
+              ],
+              "name": "adapter.safetensors",
+              "role": "derived",
+              "sha256": "53d5a44772695f7c5eb9492c7559f16da501ecb5aadbeacc536f17ebd166f910",
+              "size_bytes": 2359816
+            },
+            {
+              "derived_from": [
+                "62c555179d5133102991bb00278d8babdba59cca673e65386e3ea37d0eae4fd9"
+              ],
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "index-path",
+                  "path": "rikiyat-thinking-loops/v1/files/lora-report.json"
+                }
+              ],
+              "name": "lora-report.json",
+              "role": "derived",
+              "sha256": "55357f2e972894d4e99cd377b9cb0bb15a9e98b56e5cae7ba547530137d3aaf3",
+              "size_bytes": 5850
             }
           ],
           "runs": [],

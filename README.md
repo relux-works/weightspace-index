@@ -7,7 +7,7 @@
 
 An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
 
-**Status:** the index contains a first replacement patch for Qwen3.5-0.8B. CI runs offline schema, layout, digest and generated-output checks. The `weightspace` command-line tool ([user guide](tool/README.md)) builds and applies replacement patches and runs those checks offline. Inclusion does not establish a quality improvement.
+**Status:** the index contains a first replacement patch for Qwen3.5-0.8B. CI runs offline schema, layout, digest and generated-output checks. The entry also contains a derived experimental LoRA adapter and numerical report; runtime loading is UNQUALIFIED and study claims do not transfer. The `weightspace` command-line tool ([user guide](tool/README.md)) builds/applies replacements, derives per-tensor LoRA selectors, and runs those checks offline. Inclusion does not establish a quality improvement.
 
 ## Browse
 
@@ -55,7 +55,7 @@ cargo run --locked -- generate ..
 cargo run --locked -- check ..
 ```
 
-Cargo writes build artifacts to `tool/target/`. The `weightspace` binary checks records offline, builds/applies replacements, and regenerates the catalogs, tables and client lookups described in [structure](docs/structure.md#generated-files). For an installed binary, use `weightspace check <repository>` or `weightspace generate <repository>`; the default repository is the current directory. To verify downloaded payloads, use `shasum -a 256 <file>` and `wc -c < <file>`; these print the hash and byte count without writing files. See the [tool guide](tool/README.md) for all commands.
+Cargo writes build artifacts to `tool/target/`. The `weightspace` binary checks records and canonical dual-form pairs offline, builds/applies replacements, derives experimental LoRA selectors (`weightspace derive-lora --patch <patch> --tensor-shapes <shapes.json> --method selector-exact --factor-dtype f32 --out <new-directory>` writes adapter/report there), and regenerates the catalogs, tables and client lookups described in [structure](docs/structure.md#generated-files). For an installed binary, use `weightspace check <repository>` or `weightspace generate <repository>`; the default repository is the current directory. To verify downloaded payloads, use `shasum -a 256 <file>` and `wc -c < <file>`; these print the hash and byte count without writing files. See the [tool guide](tool/README.md) for all commands.
 
 ## Licenses and attribution
 

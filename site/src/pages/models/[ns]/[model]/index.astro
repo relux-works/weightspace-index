@@ -41,7 +41,7 @@ const forms = [...new Set(releases.flatMap(v => formats(v)))];
     </section>
     {measured.length > 0 && <section class="flow-section" id="results"><h2>Benchmark evidence</h2>
       {comparisons.map(({ group, ranking }) => <GroupResults group={group} ranking={ranking}/>)}
-      {measured.slice(0, 4).map((v,i) => measured.length === 1 ? <Evidence version={v}/> : <details class="fold" open={i === 0}>
+      {measured.slice(0, 4).map((v,i) => base.patches.length === 1 ? <Evidence version={v}/> : <details class="fold" open={i === 0}>
         <summary>{authorReport(v)?.name ?? v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}
       {measured.length > 4 && <details class="fold"><summary>{measured.length - 4} more patch reports</summary>
         {measured.slice(4).map(v => <details class="fold"><summary>{v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}</details>}

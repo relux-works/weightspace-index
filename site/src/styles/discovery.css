@@ -152,7 +152,7 @@
   .catalog-home .footprint { order: 2; margin-top: 1.8rem; }
   .release-head { grid-template-columns: minmax(0,1fr); }
   .discovery-hero, .release-head { padding-block: 1.8rem; }
-  .hero-copy h1 { max-width: 12ch; font-size: 3.25rem; }
+  .hero-copy h1 { max-width: none; font-size: 2.9rem; }
   .hero-copy p { font-size: 1rem; }
   .footprint { padding: 1rem 1.15rem; }
   .fp-plots { margin: .9rem 0 .65rem; }

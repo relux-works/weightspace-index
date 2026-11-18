@@ -312,6 +312,175 @@ fn rehash_report(v: &Path) {
     });
 }
 
+// Proves an alternate summation of the same nine unit deltas survives offline
+// validation with unchanged selectors/factor bytes. It does not emulate Windows.
+#[test]
+fn offline_report_accepts_norm_roundoff() {
+    let f = Fixture::new(false);
+    fs::write(
+        &f.patch,
+        st_bytes(&[
+            (
+                "sparse#idx",
+                Dtype::I64,
+                &[9],
+                i64s(&(0..9).collect::<Vec<_>>()),
+            ),
+            ("sparse#old", Dtype::BF16, &[9], u16s(&[0x3f80; 9])),
+            ("sparse#new", Dtype::BF16, &[9], u16s(&[0x4000; 9])),
+        ]),
+    )
+    .unwrap();
+    write(&f.shapes, &json!({"sparse":[3,4]}));
+    let out = f.temp.path().join("derived");
+    success(f.derive(&out, false));
+    let root = f.temp.path().join("catalog");
+    let v = host(&root, &f, &out);
+    let report_path = v.join("files/lora-report.json");
+    let mut report = read(&report_path);
+    let norm = &mut report["tensors"]["sparse"]["exact_delta_frobenius_norm"];
+    let rebuilt = norm.as_f64().unwrap();
+    let iterative = (0..9).fold(0.0f64, |acc, _| (acc * acc + 1.0).sqrt());
+    // Both paths calculate sqrt(1^2 + ... + 1^2), in a safe finite range.
+    let alternate = if rebuilt == iterative {
+        9.0f64.sqrt()
+    } else {
+        iterative
+    };
+    assert_ne!(
+        rebuilt, alternate,
+        "the control must change the metric bits"
+    );
+    assert!((rebuilt - alternate).abs() / rebuilt < 1e-14);
+    println!("norm rebuilt={rebuilt:.17e}, alternate={alternate:.17e}");
+    *norm = json!(alternate);
+    write(&report_path, &report);
+    assert_ne!(
+        read(&report_path)["tensors"]["sparse"]["exact_delta_frobenius_norm"],
+        json!(rebuilt)
+    );
+    rehash_report(&v);
+    assert_eq!(
+        fs::read(v.join("files/adapter.safetensors")).unwrap(),
+        fs::read(out.join("adapter.safetensors")).unwrap()
+    );
+    let errors = weightspace_tools::layout::check_models(records(), &root.join("models"));
+    assert!(errors.is_empty(), "{errors:#?}");
+}
+
+// Proves small relative drift in each hypot-derived metric is accepted while
+// larger drift, erased tiny errors, changed zeros/nulls/types/keys and exact
+// integer-derived means are refused. Validation preserves all checked bytes.
+#[test]
+fn offline_report_enforces_metric_boundaries() {
+    let f = Fixture::new(false);
+    fs::write(
+        &f.patch,
+        st_bytes(&[
+            ("sparse#idx", Dtype::I64, &[2], i64s(&[0, 6])),
+            ("sparse#old", Dtype::BF16, &[2], u16s(&[0x3080, 0x4e80])),
+            ("sparse#new", Dtype::BF16, &[2], u16s(&[0x3f80; 2])),
+            ("single#idx", Dtype::I64, &[1], i64s(&[0])),
+            ("single#old", Dtype::BF16, &[1], u16s(&[0x3080])),
+            ("single#new", Dtype::BF16, &[1], u16s(&[0x3f80])),
+            ("zero#idx", Dtype::I64, &[1], i64s(&[0])),
+            ("zero#old", Dtype::BF16, &[1], u16s(&[0x3f80])),
+            ("zero#new", Dtype::BF16, &[1], u16s(&[0x3f80])),
+        ]),
+    )
+    .unwrap();
+    write(
+        &f.shapes,
+        &json!({"sparse":[3,4],"single":[2,2],"zero":[1,1]}),
+    );
+    let out = f.temp.path().join("derived");
+    success(f.derive(&out, false));
+    let original = read(&out.join("lora-report.json"));
+    let mut cases = vec![("unmodified".to_owned(), original.clone(), true)];
+    for key in [
+        "delta_frobenius_error",
+        "exact_delta_frobenius_norm",
+        "relative_delta_error",
+        "baked_frobenius_error",
+    ] {
+        let value = original["tensors"]["sparse"][key].as_f64().unwrap();
+        assert!(
+            value > 0.0,
+            "{key} must exercise nonzero relative tolerance"
+        );
+        for (label, replacement, accepted) in [
+            ("near-below", json!(value * (1.0 - 5e-13)), true),
+            ("near-above", json!(value * (1.0 + 5e-13)), true),
+            ("far-below", json!(value * (1.0 - 2e-12)), false),
+            ("far-above", json!(value * (1.0 + 2e-12)), false),
+            ("negative", json!(-value), false),
+            ("null", json!(null), false),
+            ("integer", json!(0), false),
+            ("string", json!(value.to_string()), false),
+        ] {
+            let mut report = original.clone();
+            report["tensors"]["sparse"][key] = replacement;
+            cases.push((format!("{key}-{label}"), report, accepted));
+        }
+    }
+    assert_eq!(
+        original["tensors"]["single"]["delta_frobenius_error"],
+        2.0f64.powi(-30)
+    );
+    assert_eq!(
+        original["tensors"]["zero"]["relative_delta_error"],
+        json!(null)
+    );
+    for (tensor, key, replacement) in [
+        ("single", "delta_frobenius_error", json!(0.0)),
+        ("single", "baked_frobenius_error", json!(1e-30)),
+        ("zero", "relative_delta_error", json!(0.0)),
+        ("sparse", "mean_ulp_measured_elements", json!(0.0)),
+        ("single", "mean_ulp_measured_active_elements", json!(1e-30)),
+        ("single", "measured_elements", json!(2)),
+        ("single", "stored_delta_exact", json!(true)),
+        ("single", "unexpected_metric", json!(0.0)),
+    ] {
+        let mut report = original.clone();
+        report["tensors"][tensor][key] = replacement;
+        cases.push((format!("{tensor}-{key}"), report, false));
+    }
+    let mut missing = original.clone();
+    remove(&mut missing["tensors"]["sparse"], "baked_frobenius_error");
+    cases.push(("missing-key".to_owned(), missing, false));
+    for (label, report, accepted) in cases {
+        let root = f.temp.path().join(&label);
+        let v = host(&root, &f, &out);
+        let report_path = v.join("files/lora-report.json");
+        write(&report_path, &report);
+        rehash_report(&v);
+        let paths = [
+            report_path,
+            v.join("files/adapter.safetensors"),
+            v.join("files/replacements.safetensors"),
+            v.join("version.json"),
+        ];
+        let before = paths.each_ref().map(|path| fs::read(path).unwrap());
+        let errors = weightspace_tools::layout::check_models(records(), &root.join("models"));
+        if accepted {
+            assert!(errors.is_empty(), "{label}: {errors:#?}");
+        } else {
+            assert!(
+                errors
+                    .iter()
+                    .any(|e| e
+                        .contains("offline tensor report differs from rebuilt source evidence")),
+                "{label}: {errors:#?}"
+            );
+        }
+        assert_eq!(
+            before,
+            paths.each_ref().map(|path| fs::read(path).unwrap()),
+            "{label}"
+        );
+    }
+}
+
 // Proves a docs/example-style dual entry passes schema/layout/generation/check;
 // each planted provenance, pair, digest, rank, metric or method violation fails.
 #[test]

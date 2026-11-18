@@ -316,6 +316,42 @@ fn analyze(
     ))
 }
 
+/// Only hypot-derived evidence admits platform math roundoff: symmetric 1e-12
+/// relative tolerance, with no absolute floor to hide zero/tiny errors. Other fields,
+/// including integer measurements, selectors, nulls and object keys stay exact.
+fn tensor_report_matches(stored: &Value, rebuilt: &Value) -> bool {
+    let (Some(stored), Some(rebuilt)) = (stored.as_object(), rebuilt.as_object()) else {
+        return false;
+    };
+    stored.len() == rebuilt.len()
+        && rebuilt.iter().all(|(key, expected)| {
+            let Some(actual) = stored.get(key) else {
+                return false;
+            };
+            if matches!(
+                key.as_str(),
+                "delta_frobenius_error"
+                    | "exact_delta_frobenius_norm"
+                    | "relative_delta_error"
+                    | "baked_frobenius_error"
+            ) && expected.is_f64()
+            {
+                if !actual.is_f64() {
+                    return false;
+                }
+                let a = actual.as_f64().expect("F64 metric");
+                let b = expected.as_f64().expect("F64 metric");
+                a.is_finite()
+                    && b.is_finite()
+                    && a >= 0.0
+                    && b >= 0.0
+                    && (a - b).abs() <= 1e-12 * a.max(b)
+            } else {
+                actual == expected
+            }
+        })
+}
+
 /// Checks format/method/ranks, source coverage, factor descriptors and bytes.
 /// Sparse-old mode also independently rebuilds the selectors and measured
 /// tensor reports from the snapshot source plus the report's explicit shapes.
@@ -421,7 +457,7 @@ pub fn check_exact_publication(
         }
         if offline {
             let (expected, metrics, _) = analyze(&patch, tensor, name, None, shape, &cx)?;
-            if *t != metrics {
+            if !tensor_report_matches(t, &metrics) {
                 return Err(invalid(
                     "offline tensor report differs from rebuilt source evidence",
                 ));

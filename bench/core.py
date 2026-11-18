@@ -459,6 +459,7 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
     complete = c.complete(p)
     first = c.sessions[0].record
     by = {sess.record["performed_by"] for sess in c.sessions}
+    performed_by = next(iter(by)) if len(by) == 1 else "third-party"
     out = {}
     for side, variant in enumerate(VARIANTS, start=1):
         other = VARIANTS[2 - side]
@@ -476,7 +477,7 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
         run = {
             "contract_version": 1,
             "profile": v.profile["id"],
-            "performed_by": by.pop() if len(by) == 1 else "third-party",
+            "performed_by": performed_by,
             "protocol": p.named(),
             "dataset": p.dataset_named(),
             "settings": {

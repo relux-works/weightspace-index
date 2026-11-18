@@ -141,11 +141,11 @@ def test_end_to_end(repo, capsys):
     assert bench("run", *ARGS, "--seed", "99", "--dry-run") == 1
     assert "not one of the protocol's seeds" in capsys.readouterr().err
 
-    assert run(repo, "--items", "0:2") == 0          # items 2 and 14
+    assert run(repo, "--items", "0:2", "--performed-by", "index") == 0  # items 2 and 14
     out = capsys.readouterr().out
     assert "seed 1234, 2 items (items 0:2): [2, 14]" in out
     assert "1/2 pairs with identical replies" in out
-    assert run(repo) == 0                            # random: only item 17 is open
+    assert run(repo, "--performed-by", "index") == 0  # random: only item 17 is open
     assert "1 items (random among pairs filed 0 time(s)): [17]" in capsys.readouterr().out
 
     first = sessions(repo)[0]
@@ -156,9 +156,11 @@ def test_end_to_end(repo, capsys):
                 for r in sent} == {(1234, 1.0, 20, 1.5, 32768)}
         assert sent[0]["stop"] == [] and sent[0]["chat_template_kwargs"] == {"enable_thinking": True}
         # The settings carry the card's math prompt in place of the stock one.
-        prompt = sent[0]["messages"][-1]["content"]
-        assert prompt.endswith("fraction.\nPlease reason step by step, and put your final answer within \\boxed{}.")
-        assert "Problem:" not in prompt
+        # Replies come back in any order, so look at every prompt.
+        prompts = [r["messages"][-1]["content"] for r in sent]
+        card = "\nPlease reason step by step, and put your final answer within \\boxed{}."
+        assert all(q.endswith(card) and "Problem:" not in q for q in prompts)
+        assert any(q.endswith("fraction." + card) for q in prompts)  # item 2
     assert str(repo["root"]) not in (first / "session.json").read_text()
 
     capsys.readouterr()
@@ -169,6 +171,7 @@ def test_end_to_end(repo, capsys):
     patched = json.loads((root / f"{ENTRY}/runs/{RUN_ID}/run.json").read_text())
     base = json.loads((root / f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1/run.json").read_text())
     assert patched["state"] == base["state"] == "COMPLETE"
+    assert patched["performed_by"] == base["performed_by"] == "index"
     assert patched["score"]["value"] == pytest.approx(2 / 3)
     assert base["score"]["value"] == pytest.approx(1 / 3)
     assert patched["settings"]["paired_with"] == f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"
@@ -186,6 +189,9 @@ def test_repeat_counts_once(repo, capsys):
     assert '"parallel": true' in (sessions(repo)[-1] / "session.json").read_text()
     assert bench("check") == 1                       # merged runs are stale
     assert bench("merge") == 0 and bench("check") == 0
+    root = repo["root"]  # sessions by index and by a third party
+    for path in (f"{ENTRY}/runs/{RUN_ID}", f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"):
+        assert json.loads((root / path / "run.json").read_text())["performed_by"] == "third-party"
     capsys.readouterr()
     assert bench("compare", *ARGS) == 0
     c = json.loads(capsys.readouterr().out.split("\n\n")[0])

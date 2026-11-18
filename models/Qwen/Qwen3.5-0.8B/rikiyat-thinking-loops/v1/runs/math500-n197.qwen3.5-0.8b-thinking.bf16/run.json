@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "profile": "bf16",
-  "performed_by": "third-party",
+  "performed_by": "index",
   "protocol": {
     "name": "bench/protocols/math500-n197.json",
     "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"

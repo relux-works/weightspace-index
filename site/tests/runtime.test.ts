@@ -52,15 +52,16 @@ function version(files: FileEntry[]): Version {
 test("native PEFT instructions acquire both companion files and pin the base revision", () => {
   const guide = runtimeGuide(version([file("adapter_model.safetensors"), file("adapter_config.json")]));
   const vllm = guide.tabs.find(t => t.name === "vLLM")!;
-  assert.match(vllm.command, /adapter_config.json/);
-  assert.match(vllm.command, /adapter_model.safetensors/);
+  assert.match(vllm.prepare!, /adapter_config.json/);
+  assert.match(vllm.prepare!, /adapter_model.safetensors/);
+  assert.match(vllm.command, /^vllm serve /);
   assert.match(vllm.command, /--revision abcd/);
   assert.match(vllm.command, /--max-lora-rank/);
 });
 test("a GGUF-only adapter has a llama.cpp command and no PEFT load command", () => {
   const guide = runtimeGuide(version([file("adapter.gguf")]));
   assert.equal(guide.download?.name, "adapter.gguf");
-  assert.match(guide.tabs.find(t => t.name === "llama.cpp")!.command, /--lora/);
+  assert.match(guide.tabs.find(t => t.name === "llama.cpp")!.command, /^llama-server .* --lora /);
   assert.ok(!guide.tabs.some(t => t.name === "vLLM"));
 });
 test("unpaired weights are downloadable as files but never get runtime commands", () => {

@@ -45,8 +45,27 @@ export function combinationStudies(base: Base, version?: Version) {
 }
 
 
+export const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+
+/** The overview matrix describes pairs of currently downloadable releases. */
+export function pairStudies(studies: { members: { slug: string; release: Pick<Version, "isLatest" | "status"> }[] }[]) {
+  const pairs = new Map<string, number[]>();
+  studies.forEach(({ members }, index) => {
+    if (members.length !== 2 || !members.every(m => m.release.isLatest && m.release.status === "active")) return;
+    const key = pairKey(members[0].slug, members[1].slug);
+    const hits = pairs.get(key) ?? [];
+    hits.push(index);
+    pairs.set(key, hits);
+  });
+  return pairs;
+}
+
+export function bestSingle(alone: number[], direction: Study["direction"]) {
+  return direction === "higher" ? Math.max(...alone) : Math.min(...alone);
+}
+
 export function jointOutcome(joint: number, alone: number[], direction: Study["direction"]) {
-  const best = direction === "higher" ? Math.max(...alone) : Math.min(...alone);
+  const best = bestSingle(alone, direction);
   if (best === joint) return "Matches the best single patch";
   if (direction === "higher" ? joint < best : joint > best) return "Below the best single patch";
   return alone.length === 2 ? "Better than either patch alone" : "Better than each patch alone";

@@ -37,7 +37,10 @@ export function enhanceTabs(root: ParentNode = document) {
     });
     for (const trigger of document.querySelectorAll<HTMLElement>("[data-tab-select]")) {
       trigger.addEventListener("click", () => {
-        const i = tabs.findIndex(t => t.dataset.label === trigger.dataset.tabSelect);
+        const target = trigger.dataset.tabSelect;
+        const selected = tabs.findIndex(t => t.getAttribute("aria-selected") === "true");
+        const i = target === "lora" && tabs[selected]?.dataset.format === "lora" ? selected
+          : tabs.findIndex(t => t.dataset.label === target || t.dataset.format === target);
         if (i < 0) return;
         select(i);
         // The setup is the next step after a download: bring it into view if it is not.

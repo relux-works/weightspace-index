@@ -24,19 +24,19 @@ const profile = base.profiles[0];
   <div class="wrap page-flow">
     <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><span aria-current="page">{base.model}</span></nav>
     <header class="model-hero">
-      <h1><span class="h1-ns">{base.ns}/</span>{base.model}</h1>
+      <h1>{base.model}</h1>
       <p class="model-meta">
-        <span>{plural(base.patches.length, "patch", "patches")}</span>
+        <span>{base.ns}</span>
         {forms.length > 0 && <span>{forms.join(" + ")}</span>}
-        {studies.length > 0 && <a href="#combinations">{plural(studies.length, "combination")} tested</a>}
+        {studies.length > 0 && <a href="#combinations">{plural(studies.length, "combination study", "combination studies")}</a>}
         {profile && <a href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`}>Base weights on Hugging Face <Arrow dir="out" /></a>}
       </p>
     </header>
 
     <section class="flow-section" id="patches">
-      <div class="directory-head"><h2 class="visually-hidden">Patches</h2>{base.patches.length > 3 && <Filter target="patch-list" label="Filter patches" noun="patches"/>}</div>
+      <div class="directory-head"><h2>Available patches</h2>{base.patches.length > 3 && <Filter target="patch-list" label="Filter patches" noun="patches"/>}</div>
       <p class="filter-status" id="patch-list-status" role="status"></p>
-      <div id="patch-list" class="pcards">{base.patches.map(patch => <PatchCard patch={patch} />)}</div>
+      <div id="patch-list" class="patch-directory">{base.patches.map(patch => <PatchCard patch={patch} />)}</div>
       {!base.patches.length && <p class="quiet-row">This model has no published patches yet. Its supported base files are listed below.</p>}
     </section>
 
@@ -45,12 +45,12 @@ const profile = base.profiles[0];
       <ModelResults base={base} />
     </section>}
 
-    {base.patches.length > 1 && <section class="flow-section" id="combinations">
+    <section class="flow-section" id="combinations">
       <h2>Patch combinations</h2>
       <CombinationMatrix base={base} />
-    </section>}
+    </section>
 
-    <section class="flow-section" id="profiles"><h2>Base files</h2>
+    <section class="flow-section" id="profiles"><h2>Model details</h2>
       {base.profiles.map(p => <details class="fold" id={`profile-${p.id}`}><summary>{p.id.toUpperCase()} · {p.source.repo_id} <code>@{p.source.revision.slice(0,7)}</code></summary>
         <FileList files={profileFiles(p)} showRole={false} /></details>)}
       <details class="fold" id="records"><summary>Model record and benchmark runs</summary><a href={base.baseRecord.view}>Base record</a>

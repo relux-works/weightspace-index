@@ -9,6 +9,7 @@ import "@fontsource/roboto-mono/600.css";
 import "../styles/global.css";
 import "../styles/discovery.css";
 import "../styles/experience.css";
+import "../styles/catalog-pages.css";
 import { DEMO } from "../lib/config.ts";
 import reluxLight from "../assets/brand/relux-lockup-horizontal.svg?raw";
 import reluxDark from "../assets/brand/relux-lockup-horizontal-dark.svg?raw";
@@ -132,7 +133,11 @@ const logo = (svg: string, variant: string) =>
           setTimeout(() => button.removeAttribute("data-copied"), 1400);
         } catch {
           // No clipboard access: select the text so the keyboard shortcut copies it.
-          if (from) getSelection()?.selectAllChildren(from);
+          if (from) {
+            const disclosure = from.closest("details");
+            if (disclosure) disclosure.open = true;
+            getSelection()?.selectAllChildren(from);
+          }
           const message = from ? "Copy blocked. The text is selected; copy it with your keyboard." : "Copy blocked. Select the text and copy it with your keyboard.";
           button.setAttribute("title", message);
           button.setAttribute("aria-label", message);

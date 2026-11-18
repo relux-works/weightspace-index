@@ -1,0 +1,44 @@
+---
+import { scoreAxis } from "../../lib/score-axis.ts";
+import Arrow from "../Arrow.astro";
+import { authorReport } from "../../data/reports.ts";
+import { sourceLabels } from "../../lib/catalog.ts";
+import { editStats, fmt, previewResult, results } from "../../lib/insight.ts";
+import type { Version } from "../../lib/types.ts";
+interface Props { version: Version }
+const { version } = Astro.props;
+const patch = version.patch;
+const report = authorReport(version);
+const result = previewResult(results(version));
+const stats = editStats(version);
+const layers = stats?.tensors.slice(0, 2) ?? [];
+const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : result && sourceLabels[result.source];
+const bars = result ? [{ label: "Base", value: result.base }, { label: "Patched", value: result.patched }] : [];
+const axis = result && scoreAxis([result.base, result.patched], result.unit);
+---
+<aside class="patch-preview" aria-label="Featured patch">
+  <header>
+    <h2>{report?.name ?? patch.title}</h2>
+    <p>{patch.base.model} · {version.label}{patch.base.dir.startsWith("docs/example/") && " · Synthetic example"}</p>
+  </header>
+  {layers.length > 0 && <figure class="column-map">
+    <figcaption>Edited input columns</figcaption>
+    {layers.map(t => <div class="column-line">
+      <span>Layer {t.layer}</span>
+      <svg viewBox="0 0 400 24" preserveAspectRatio="none" role="img" aria-label={`${t.active} of ${t.cols} columns edited in ${t.short}`}>
+        {t.columns.map(c => <line x1={(c + .5) / t.cols * 400} x2={(c + .5) / t.cols * 400} y1="0" y2="24" />)}
+      </svg>
+    </div>)}
+  </figure>}
+  {result ? <figure class="sample-score">
+    <figcaption><strong>{result.benchmark} {result.metric}</strong>
+      <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>
+    </figcaption>
+    {bars.map(({label, value}) =>
+      <div class="sample-row"><span>{label}</span>
+        <i aria-hidden="true"><b style={axis!.bar(value)}></b></i>
+        <strong>{fmt(value, result.unit)}</strong>
+      </div>)}
+  </figure> : <p>{report?.goal ?? patch.summary}</p>}
+  <a class="preview-link" href={patch.url}>Explore this patch <Arrow /></a>
+</aside>

@@ -1,12 +1,7 @@
 // A small POSIX-shell highlighter for the copyable recipes. It only wraps
 // tokens in spans; the text content stays byte-for-byte what gets copied.
-// `@@ORIGIN@@` marks where the page fills in its own origin, so site-hosted
-// downloads become absolute URLs in the copied command.
-export const ORIGIN = "@@ORIGIN@@";
-
 const esc = (s: string) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 const span = (cls: string, t: string) => `<span class="sh-${cls}">${esc(t)}</span>`;
-const origin = (html: string) => html.replaceAll(ORIGIN, '<span data-origin></span>');
 
 const TOKEN = /(\s+)|('[^']*'|"(?:\\.|[^"\\])*")|(\$\([^)]*\)|\$\{?\w+\}?)|(&&|\|\||\||;|\\$|<<-?\s*'?\w+'?|>>?)|([^\s'"|;&<>]+)|([\s\S])/g;
 
@@ -20,7 +15,7 @@ function line(text: string, expectCmd: boolean): string {
     else if (op) { html += span("op", t); if (/^(&&|\|\||\||;)$/.test(op)) expectCmd = true; }
     else if (word && expectCmd && !/^\w+=/.test(word)) { html += span("cmd", t); expectCmd = false; }
     else if (word?.startsWith("-") && word.length > 1) html += span("flag", t);
-    else if (word && /^(https?:\/\/|@@ORIGIN@@)/.test(word)) html += span("url", t);
+    else if (word && /^(https?:\/\/)/.test(word)) html += span("url", t);
     else html += esc(t);
   }
   return html;
@@ -43,5 +38,5 @@ export function highlight(src: string): string {
     const trimmed = text.trimEnd();
     expectCmd = !trimmed.endsWith("\\") || /(&&|\|\|)\s*\\?$/.test(trimmed);
   }
-  return origin(out.join("\n"));
+  return out.join("\n");
 }

@@ -3,24 +3,22 @@
 // so patches can be compared without mixing self-reported and independent
 // numbers (rule 9).
 import type { Base } from "../../lib/types.ts";
-import { activeVersion } from "../../lib/catalog.ts";
+import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
 import { authorReport } from "../../data/reports.ts";
-import { results, pending, fmt, signed, gain, type Result } from "../../lib/insight.ts";
+import { results, pending, groupEvidence, fmt, signed, gain, type Result } from "../../lib/insight.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
 const all = releases.flatMap(v => results(v));
 const waiting = releases.flatMap(v => pending(v));
 const nameOf = (r: { version: Result["version"] }) => authorReport(r.version)?.name ?? r.version.patch.title;
-const groups = ([["self", "Self-reported", (r: Result) => r.source === "author"], ["indep", "Independently measured", (r: Result) => r.source !== "author"]] as const)
-  .map(([cls, label, pick]) => ({ cls, label, rows: all.filter(pick).toSorted((a, b) => a.benchmark.localeCompare(b.benchmark) || gain(b) - gain(a)) }))
-  .filter(g => g.rows.length);
+const groups = groupEvidence(all, waiting, []).filter(g => g.scores.length || g.progress.length);
 ---
 {groups.map(g => <div class="rtable-wrap">
-  <p class="rgroup-head"><span class:list={["src-chip", g.cls]}>{g.label}</span></p>
-  <table class="rtable">
+  <p class="rgroup-head"><span class:list={["src-chip", g.source === "author" ? "self" : "indep"]}>{sourceLabels[g.source]}</span></p>
+  {g.scores.length > 0 && <table class="rtable">
     <thead><tr><th>Benchmark</th><th>Patch</th><th class="num">Base</th><th class="num">Patched</th><th class="num">Change</th></tr></thead>
-    <tbody>{g.rows.map(r => {
+    <tbody>{g.scores.map(r => {
       const d = gain(r);
       return <tr>
         <td>{r.benchmark}{r.metric && <small> {r.metric}</small>}</td>
@@ -30,7 +28,7 @@ const groups = ([["self", "Self-reported", (r: Result) => r.source === "author"]
         <td class="num"><span class:list={["delta", d > 0 ? "up" : d < 0 ? "down" : "flat"]}>{signed(r.patched - r.base, r.unit)}</span></td>
       </tr>;
     })}</tbody>
-  </table>
+  </table>}
+  {g.progress.length > 0 && <p class="rnote">Measurement in progress · {g.progress.map((w, i) => <>{i > 0 && ", "}<a href={w.href}>{nameOf(w)} · {w.benchmark}</a> ({w.filed}/{w.total} item–seed pairs)</>)}</p>}
 </div>)}
-{waiting.length > 0 && <p class="rnote">Being measured: {waiting.map((w, i) => <>{i > 0 && ", "}<a href={w.href}>{nameOf(w)} · {w.benchmark}</a> ({w.filed}/{w.total})</>)}</p>}
-{!groups.length && !waiting.length && <p class="quiet-row">No scored results yet.</p>}
+{!groups.length && <p class="quiet-row">No scored results yet.</p>}

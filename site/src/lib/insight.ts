@@ -4,18 +4,12 @@
 // from and are never ranked across sources (rule 9).
 import { authorReport } from "../data/reports.ts";
 import { activeVersion, footprint, readCoverage } from "./catalog.ts";
-import { combinationStudies, jointOutcome } from "./combinations.ts";
+import { bestSingle, combinationStudies, jointOutcome } from "./combinations.ts";
 import { exists, readBytes, readJson } from "./files.ts";
 import { rankable } from "./queries.ts";
 import type { Base, Run, Version } from "./types.ts";
 
 export type Source = "author" | "index" | "third-party";
-
-export const SOURCE_NOTE: Record<Source, string> = {
-  author: "Self-reported",
-  index: "Independently measured",
-  "third-party": "Independently measured",
-};
 
 export interface Result {
   source: Source;
@@ -102,16 +96,21 @@ export function pending(v: Version | undefined): Pending[] {
   });
 }
 
-export const gain = (r: Result) => (r.patched - r.base) * (r.higherIsBetter ? 1 : -1);
+export const gain = (r: Pick<Result, "base" | "patched" | "higherIsBetter">) => (r.patched - r.base) * (r.higherIsBetter ? 1 : -1);
 
-/** The single result that best tells what the patch does: the largest improvement, independent sources first. */
-export function headline(v: Version | undefined): Result | undefined {
-  const all = results(v);
-  const independent = all.filter(r => r.source !== "author");
-  const pool = independent.some(r => gain(r) > 0) ? independent : all;
-  // Prefer a score that goes up: "+40 pts on MATH-500" reads faster than a falling failure rate.
-  const rising = pool.filter(r => r.higherIsBetter);
-  return (rising.length ? rising : pool).toSorted((a, b) => gain(b) - gain(a))[0];
+/** Preserve the performer on scores, partial coverage and underlying run records. */
+export function groupEvidence(scores: Result[], progress: Pending[], runs: Run[]) {
+  return (["author", "index", "third-party"] as const).map(source => ({
+    source,
+    scores: scores.filter(r => r.source === source),
+    progress: progress.filter(r => r.source === source),
+    runs: runs.filter(r => r.record.performed_by === source),
+  }));
+}
+
+/** Pick a representative comparison without sorting different protocols by effect size. */
+export function previewResult(rows: Result[]) {
+  return rows.find(r => r.source === "index") ?? rows.find(r => r.source === "third-party") ?? rows[0];
 }
 
 export function signed(n: number, unit = "") {
@@ -177,13 +176,6 @@ export function editStats(v: Version | undefined): EditStats | null {
   };
 }
 
-/** A release whose edit footprint and author results make a good worked example. */
-export function featured(bases: Base[]) {
-  const releases = bases.flatMap(b => b.patches.map(activeVersion)).filter((v): v is Version => !!v);
-  const real = releases.filter(v => !v.dir.includes("docs/example/"));
-  return (real.length ? real : releases).find(v => editStats(v) && headline(v)) ?? real.find(v => headline(v));
-}
-
 /** The release with the most benchmark evidence: scored results plus filed runs. Real releases before examples. */
 export function mostBenchmarked(bases: Base[]) {
   const releases = bases.flatMap(b => b.patches.map(activeVersion)).filter((v): v is Version => !!v);
@@ -217,7 +209,7 @@ export function combos(base: Base, version?: Version) {
   return combinationStudies(base, version).map(s => {
     const outcome = jointOutcome(s.together, s.members.map(m => m.alone), s.direction);
     const verdict: Verdict = outcome.startsWith("Better") ? "amplify" : outcome.startsWith("Matches") ? "neutral" : "interfere";
-    return { ...s, outcome, verdict };
+    return { ...s, outcome, verdict, best: bestSingle(s.members.map(m => m.alone), s.direction) };
   });
 }
 

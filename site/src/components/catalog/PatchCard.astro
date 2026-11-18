@@ -1,36 +1,25 @@
 ---
-// One patch on its model page: name, one line on what it does, its strongest
-// results, and the two downloads.
 import Arrow from "../Arrow.astro";
 import type { Patch } from "../../lib/types.ts";
 import { activeVersion, discoveryText, formats } from "../../lib/catalog.ts";
 import { authorReport } from "../../data/reports.ts";
-import { results, pending, gain, signed, SOURCE_NOTE } from "../../lib/insight.ts";
 import GetButtons from "./GetButtons.astro";
+import PatchResults from "./PatchResults.astro";
 interface Props { patch: Patch }
 const { patch } = Astro.props;
 const v = activeVersion(patch);
 const report = authorReport(v);
-const all = results(v);
-const independent = all.filter(r => r.source !== "author");
-const pool = independent.length ? independent : all;
-const rising = pool.filter(r => r.higherIsBetter && gain(r) > 0);
-const shown = (rising.length ? rising : pool).toSorted((a, b) => gain(b) - gain(a)).slice(0, 3);
-const trend = (r: typeof pool[number]) => (gain(r) > 0 ? "up" : gain(r) < 0 ? "down" : "flat");
-const waiting = pending(v)[0];
 const name = report?.name ?? patch.title;
+const terms = [discoveryText(patch.base.address, [patch], formats(v)), name, report?.goal ?? ""].join(" ").toLowerCase();
 ---
-<article class="pcard" data-search={discoveryText(patch.base.address, [patch], formats(v)) + " " + (report?.goal ?? "").toLowerCase()}>
-  <div class="pcard-main">
+<article class="patch-entry" data-search={terms}>
+  <div class="patch-entry-main">
     <h3><a href={patch.url}>{name}</a></h3>
-    <p class="pcard-by">{patch.authors.map(a => a.name).join(", ")}</p>
-    <p class="pcard-goal">{report?.goal ?? patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
-    {shown.length > 0 && <p class="pcard-res">
-      {shown.map(r => <span><b class={trend(r)}>{signed(r.patched - r.base, r.unit)}</b> {r.benchmark}</span>)}
-      <span class:list={["src-chip", shown[0].source === "author" ? "self" : "indep"]}>{SOURCE_NOTE[shown[0].source]}</span>
-    </p>}
-    {waiting && !independent.length && <p class="pcard-wip">Being measured: {waiting.filed} of {waiting.total} runs done</p>}
-    <a class="pcard-more" href={patch.url}>Results and setup <Arrow /></a>
+    <p class="entry-credit">{patch.authors.map(a => a.name).join(", ")}{v && <> · {v.label} · {v.profile.id.toUpperCase()}</>}</p>
+    <p class="entry-goal">{report?.goal ?? patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+    <div class="entry-actions"><a class="btn primary" href={patch.url}>{v ? "View patch" : "Version history"} <Arrow /></a>
+      {v && <GetButtons version={v} compact />}
+    </div>
   </div>
-  {v ? <GetButtons version={v} /> : <a class="btn" href={patch.url}>Version history</a>}
+  {v && <PatchResults version={v} compact />}
 </article>

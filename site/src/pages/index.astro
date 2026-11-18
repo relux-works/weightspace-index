@@ -1,88 +1,29 @@
 ---
-import Arrow from "../components/Arrow.astro";
 import Page from "../layouts/Page.astro";
 import ModelCard from "../components/catalog/ModelCard.astro";
 import Filter from "../components/catalog/Filter.astro";
-import FlipDemo from "../components/viz/FlipDemo.astro";
-import Heat from "../components/viz/Heat.astro";
-import { href, loadIndex } from "../lib/index.ts";
-import { featured } from "../lib/insight.ts";
+import PatchPreview from "../components/viz/PatchPreview.astro";
+import { loadIndex } from "../lib/index.ts";
+import { mostBenchmarked } from "../lib/insight.ts";
 import { plural } from "../lib/format.ts";
-const cols = [2, 7, 8];
-const index = loadIndex();
-const models = index.bases;
-const example = featured(models);
-const patchCount = models.reduce((n, b) => n + b.patches.length, 0);
+const models = loadIndex().bases;
+const featured = mostBenchmarked(models);
 ---
-<Page title="Weightspace Index" nav="models" description="Patch your model: small, exact weight edits for open models, benchmarked by their authors and independently, ready to download as a replacement or a LoRA.">
-  <section class="home-hero">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <h1>Patch your model.</h1>
-        <p class="hero-lead">Small, exact weight edits that make open models measurably better, ready for vLLM, llama.cpp and Transformers.</p>
-        <form class="hero-search" action={href("search/")} method="get" role="search">
-          <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.6"/></svg>
-          <input type="search" name="q" placeholder="Try qwen, math or loops" aria-label="Find a model or patch" autocomplete="off" />
-          <button class="btn primary" type="submit">Search</button>
-        </form>
-        <div class="hero-actions">
-          <a class="text-link" href={href("how-it-works/")}>How patches work <Arrow /></a>
-        </div>
-      </div>
-      {example && <FlipDemo version={example} />}
+<Page title="Weightspace Index" nav="models" description="Find weight patches for your base model, compare benchmark evidence, and download a LoRA adapter or a direct replacement.">
+  <div class:list={["wrap landing", { "with-preview": featured }]}>
+    <div class="find-model">
+      <header class="find-intro">
+        <h1>Find a patch for<br />your model.</h1>
+        <p>Compare weight edits for open models. Download a LoRA for your runtime or apply a direct replacement.</p>
+      </header>
+      <section class="directory" id="models" aria-labelledby="directory-heading">
+        <div class="directory-label"><h2 id="directory-heading">Choose a base model</h2><span>{plural(models.length, "model")}</span></div>
+        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" />}
+        <p class="filter-status" role="status" id="model-list-status"></p>
+        <ul class="model-list" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
+        {!models.length && <p class="quiet-row">No models have been published yet.</p>}
+      </section>
     </div>
-  </section>
-
-  <section id="models" class="home-band">
-    <div class="wrap">
-      <div class="band-title">
-        <div><h2>Choose your base model</h2><p>{plural(models.length, "model")} · {plural(patchCount, "patch", "patches")}</p></div>
-        {models.length > 1 && <Filter target="model-list" label="Filter models, patches or authors" noun="models" />}
-      </div>
-      <p class="filter-status" role="status" id="model-list-status"></p>
-      <div class="mlist">
-        <p class="mlist-head" aria-hidden="true"><span>Model</span><span>Patches</span><span>Best result</span></p>
-        <ul class="mlist-rows" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
-      </div>
-      {models.length === 0 && <p class="quiet-row">The catalog is ready for its first model.</p>}
-    </div>
-  </section>
-
-  <section class="home-band subtle what" aria-labelledby="what-h">
-    <div class="wrap">
-      <div class="band-title"><h2 id="what-h">A patch is a tiny, exact change to the weights</h2>
-        <a class="text-link" href={href("how-it-works/")}>Patch vs LoRA, explained <Arrow /></a></div>
-      <div class="equation">
-        <div class="eq-term"><Heat rows={12} cols={12} kind="w" seed={3} cell={10} /><p>Your model</p></div>
-        <span class="eq-op" aria-hidden="true">+</span>
-        <div class="eq-forms">
-          <div class="eq-opt"><Heat rows={12} cols={12} kind="delta" edited={cols} seed={3} cell={10} /><small>Patch</small></div>
-          
-          <div class="eq-opt"><div class="eq-lora"><Heat rows={12} cols={cols.length} kind="b" edited={cols} seed={3} cell={10} /><span class="eq-x" aria-hidden="true">×</span><Heat rows={cols.length} cols={12} kind="a" edited={cols} seed={3} cell={10} /></div><small>LoRA</small></div>
-        </div>
-        <span class="eq-op" aria-hidden="true">=</span>
-        <div class="eq-term"><Heat rows={12} cols={12} kind="patched" edited={cols} seed={3} cell={10} /><p>A better model</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="home-band" aria-labelledby="proof-h">
-    <div class="wrap">
-      <div class="band-title"><div><h2 id="proof-h">Every result says who measured it</h2></div></div>
-      <div class="proof">
-        <article>
-          <h3 class="src-chip self">Self-reported</h3>
-          <p>The author's own numbers, linked to their write-up. Never ranked against ours.</p>
-        </article>
-        <article>
-          <h3 class="src-chip indep">Independently measured</h3>
-          <p>We rerun base and patch on the same prompts and seeds.</p>
-        </article>
-        <article>
-          <h3 class="src-chip combo">Tested together</h3>
-          <p>Pairs of patches run side by side, so you know which ones stack.</p>
-        </article>
-      </div>
-    </div>
-  </section>
+    {featured && <PatchPreview version={featured} />}
+  </div>
 </Page>

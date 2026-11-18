@@ -1,6 +1,6 @@
 # Weightspace Index site
 
-The static Astro site helps readers choose a base model, compare patches and download a release. The stable patch URL holds the latest active release: its downloads (direct replacement and LoRA), results, runtime commands, edit map and combination studies. Version URLs stay available for reproducibility. `/how-it-works/` explains patches and LoRAs visually. See `DESIGN.md` for the reader journey.
+The static Astro directory filters models in place by model, patch, purpose or author. The model page presents each patch’s goal, downloads and a benchmark snapshot grouped by performer. The stable patch URL holds the latest active release: its downloads (direct replacement and LoRA), results, runtime commands, edit map and combination studies. Version URLs stay available for reproducibility. `/how-it-works/` explains patches and LoRAs visually. See `DESIGN.md` for the reader journey.
 
 ## Run locally
 
@@ -26,7 +26,7 @@ The default production build excludes the demo model, its files and its combinat
 - In-repository downloads are served from the site under their SHA-256 and filename. External artifacts use their pinned locators. Each supported canonical LoRA can produce a PEFT bundle with the original factor bytes, runtime configuration, notices and provenance. A verified architecture-specific GGUF export can travel in the same archive.
 - Each published author study in `src/data/reports.ts` names its source and applies to a specific release artifact and base revision. Independent measurements come from run records and keep their performer, profile, settings and completion state.
 - Optional joint studies are read from `bench/combinations/<namespace>/<model>/`. The synthetic example lives below `docs/example/bench/combinations/`. See the [benchmark notes](../docs/benchmarking.md#combination-studies).
-- Directory search, paging, runtime tabs and copy buttons use local JavaScript. Navigation, the complete directory, download links, evidence and every recipe work as static HTML. Fonts and visualizations are served locally.
+- Each runtime tab shows the launch command. Its copy button includes the full download, checksum, preparation and launch recipe. Without JavaScript, readers can download the file and expand the same preparation steps. Directory search, paging, runtime tabs and copy buttons use local JavaScript. Navigation, the complete directory, download links, evidence and every recipe work as static HTML. Fonts and visualizations are served locally.
 
 ## Build settings
 

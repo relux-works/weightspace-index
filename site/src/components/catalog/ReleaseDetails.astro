@@ -16,6 +16,7 @@ const bench = v ? benchCommands(index, v) : [];
 ---
 <section class="flow-section" id="records">
   <h2>Release details</h2>
+  <slot />
   {v && <details class="fold"><summary>Files and checksums</summary><FileList files={v.files} />
     {guide?.download && <p class="small break">{guide.download.name} · SHA-256 <code>{guide.download.sha256}</code></p>}
     <h3>Target base</h3><FileList files={profileFiles(v.profile)} showRole={false} /></details>}

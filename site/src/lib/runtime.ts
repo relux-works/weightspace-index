@@ -6,7 +6,7 @@ import type { FileEntry, Version } from "./types.ts";
 import { adapterBundle } from "./runtime-package.ts";
 
 interface Download { href: string; name: string; sizeBytes: number; label: string; sha256: string }
-interface RuntimeTab { name: string; note: string; command: string; docs: string; setup?: string }
+export interface RuntimeTab { name: string; note: string; command: string; docs: string; setup?: string; setupLabel?: string; prepare?: string }
 export interface RuntimeGuide { download: Download | null; tabs: RuntimeTab[] }
 
 const LLAMA_DOCS = "https://github.com/ggml-org/llama.cpp/blob/ece963f41b0b02d7a0d61436ae365762c073a4c8/tools/server/README.md";
@@ -31,7 +31,7 @@ function llamaTab(v: Version, prepare: string, adapter: string, packaged: boolea
     note: packaged
       ? "Use the included F32 GGUF adapter with a base GGUF from the pinned revision. The bundle includes the llama.cpp load-check details."
       : "Use a base GGUF from the pinned revision with the GGUF adapter.",
-    command: [prepare, `llama-server -m ${base} --lora ${adapter}`].filter(Boolean).join("\n"),
+    prepare, command: `llama-server -m ${base} --lora ${adapter}`,
   };
 }
 
@@ -46,13 +46,13 @@ function peftTabs(v: Version, prepare: string, dir: string, rank?: number): Runt
     tabs.push({
       name: "vLLM", docs: "https://docs.vllm.ai/en/stable/features/lora/",
       note: `Select ${moduleName} in the request’s model field. vLLM serving has not been tested for this adapter.`,
-      command: [prepare, `vllm serve ${repo_id} --revision ${revision} \\`, `  --enable-lora --max-lora-rank ${cap} \\`, `  --lora-modules ${moduleName}=${dir}`].join("\n"),
+      prepare, command: [`vllm serve ${repo_id} --revision ${revision} \\`, `  --enable-lora --max-lora-rank ${cap} \\`, `  --lora-modules ${moduleName}=${dir}`].join("\n"),
     });
   }
   tabs.push({
     name: "Transformers", docs: "https://huggingface.co/docs/peft/quicktour",
     note: "Load the pinned checkpoint and attach the adapter with Transformers, PyTorch and PEFT installed.",
-    command: [prepare, "python3 - <<'PY'", "import transformers", "from peft import PeftModel", "",
+    prepare, command: ["python3 - <<'PY'", "import transformers", "from peft import PeftModel", "",
       `repo, rev = "${repo_id}", "${revision}"`,
       "config = transformers.AutoConfig.from_pretrained(repo, revision=rev)",
       "model_class = getattr(transformers, config.architectures[0])",

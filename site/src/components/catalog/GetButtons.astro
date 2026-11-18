@@ -1,25 +1,23 @@
 ---
-// The two downloads every patch exists for, as first-class buttons. On the
-// patch page each one also selects its setup tab.
 import type { Version } from "../../lib/types.ts";
 import { downloadUrl } from "../../lib/catalog.ts";
 import { runtimeGuide } from "../../lib/runtime.ts";
 import { humanBytes } from "../../lib/format.ts";
-interface Props { version: Version; size?: "lg" | "md"; loraTab?: string }
-const { version: v, size = "md", loraTab } = Astro.props;
-const lora = runtimeGuide(v).download;
-const source = v.patch.kind === "replacement" ? v.files.find(f => f.role === "source") : undefined;
-const icon = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+interface Props { version: Version; compact?: boolean }
+const { version: v, compact = false } = Astro.props;
+const guide = runtimeGuide(v);
+const lora = guide.download;
+const sources = v.patch.kind === "replacement" ? v.files.filter(f => f.role === "source") : [];
+const items = [
+  ...(lora ? [{ label: "LoRA adapter", hint: guide.tabs.length ? `Load at runtime · ${lora.label}` : lora.label, href: lora.href, filename: lora.name, size: lora.sizeBytes, tab: "lora" }] : []),
+  ...sources.map(f => ({ label: sources.length === 1 ? "Direct replacement" : f.name, hint: "Bake into a model copy", href: downloadUrl(f), filename: f.name, size: f.size_bytes, tab: "weightspace" })),
+];
 ---
-<div class:list={["get", size]}>
-  {lora && <a class="get-btn lora" href={lora.href} download={lora.name} data-tab-select={loraTab}>
-    <span class="get-ic" set:html={icon} />
-    <span class="get-txt"><strong>LoRA adapter</strong><small>Load in your runtime</small></span>
-    <span class="get-size">{humanBytes(lora.sizeBytes)}</span>
-  </a>}
-  {source && <a class="get-btn repl" href={downloadUrl(source)} download={source.name} data-tab-select={loraTab ? "weightspace" : undefined}>
-    <span class="get-ic" set:html={icon} />
-    <span class="get-txt"><strong>Direct replacement</strong><small>Apply to the weights once</small></span>
-    <span class="get-size">{humanBytes(source.size_bytes)}</span>
-  </a>}
+<div class:list={["file-choices", { compact }]}>
+  {items.map(file => <a href={file.href} download={file.filename} data-tab-select={compact ? undefined : file.tab} aria-label={`Download ${file.label} · ${humanBytes(file.size)}`}>
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span><strong>{file.label}</strong>{!compact && <small>{file.hint}</small>}</span>
+    {!compact && <span class="file-size">{humanBytes(file.size)}</span>}
+  </a>)}
+  {!items.length && <a href={`${v.isLatest ? v.patch.url : v.url}#records`}>Browse release files</a>}
 </div>

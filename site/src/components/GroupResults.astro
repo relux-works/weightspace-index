@@ -15,31 +15,30 @@ const pending = group.runs.filter((r) => r.record.state !== "COMPLETE" || typeof
 ---
 <article class="card" id={group.id}>
   <div class="card-head">
-    <h3 class="grow">{group.protocolLabel} <span class="muted" style="font-weight:400">· {group.settingsLabel}</span></h3>
+    <h3>{group.protocolLabel} <span class="muted">· {group.settingsLabel}</span></h3>
     <span class="tag" title="Base profile">{group.profile.id}</span>
-    <a class="small" href={href(`compare/#${group.id}`)}>Compare runs →</a>
+    <a class="small" href={href(`compare/#${group.id}`)}>Compare runs</a>
   </div>
-  <p class="small muted" style="margin-top:-4px">
-    Dataset <span class="mono">{group.dataset.name}</span>. Results here never mix profiles, protocols, datasets or settings.
+  <p class="small muted">
+    Dataset <span class="mono break">{group.dataset.name}</span>. One profile, protocol, dataset and settings; nothing from other groups is mixed in.
   </p>
 
   {ranks.map((r) => (
-    <div class="stack" style="margin-top:14px">
-      <div class="row">
-        <strong class="small">{BUCKET_LABEL[r.bucket]}</strong>
-        <span class="muted small">· {plural(r.runs.length, "complete run")}</span>
-      </div>
+    <div class="stack" style="margin-top: var(--space-6)">
+      <p class="eyebrow">{BUCKET_LABEL[r.bucket]} · {plural(r.runs.length, "complete run")}</p>
       {r.best.length > 0 ? (
-        <div class="callout">
-          <strong>Best single patch:</strong>{" "}
-          {r.best.map((b, i) => (
-            <>{i > 0 && ", "}<a href={b.url}>{barLabel(b)}</a></>
-          ))}{" "}
-          with <span class="mono">{r.best[0].record.score.value}</span> {r.metric} ({r.unit}), the highest recorded score among active patched versions here.
-          {r.best.length > 1 && " These versions share it."}
+        <div class="best">
+          <span class="best-value">{r.best[0].record.score.value}</span>
+          <div>
+            <p class="eyebrow">Best single patch{r.best.length > 1 ? " (tie)" : ""}</p>
+            <p>
+              {r.best.map((b, i) => <>{i > 0 && ", "}<a href={b.url}>{barLabel(b)}</a></>)}
+              <span class="muted"> · {r.metric} ({r.unit}), the highest recorded score among active patched versions in this group</span>
+            </p>
+          </div>
         </div>
       ) : (
-        <div class="callout">No complete run of a patched version in this group yet.</div>
+        <p class="muted small">No complete run of an active patched version in this group yet.</p>
       )}
       <BarChart
         caption={`${group.label}: ${r.metric}`}
@@ -57,12 +56,9 @@ const pending = group.runs.filter((r) => r.record.state !== "COMPLETE" || typeof
   ))}
 
   {pending.length > 0 && (
-    <div style="margin-top:14px">
-      {ranks.length === 0 && (
-        <p class="empty" style="margin-bottom:10px">
-          <strong>No complete runs yet.</strong> Rankings and charts use COMPLETE runs only; the runs below are not ranked.
-        </p>
-      )}
+    <div class="stack" style="margin-top: var(--space-6)">
+      <p class="eyebrow">{ranks.length === 0 ? "No complete runs yet" : "Not ranked"} · {plural(pending.length, "run")}</p>
+      <p class="small muted">Rankings and charts use COMPLETE runs with a recorded score only.</p>
       <div class="table-wrap">
         <table class="compact">
           <thead><tr><th>Run</th><th>Measured by</th><th>State</th><th>Score</th></tr></thead>

@@ -37,3 +37,20 @@ Every page, value and download link comes from the HEAD commit, shown in the hea
 ## Runtime
 
 No CDNs, analytics or third-party scripts. The pages use two small inline scripts: copy buttons, and search over `search.json`, which is generated at build time.
+Fonts are self-hosted from the Fontsource packages and served with the site.
+
+## Dependencies
+
+Exact versions are pinned in `package.json` and `package-lock.json`.
+
+| Package | Why |
+|---|---|
+| `astro` | Static site generator. |
+| `@astrojs/markdown-satteri`, `satteri` | Astro's Markdown processor for patch cards. |
+| `@fontsource-variable/inter` | UI typeface (Relux family type roles), self-hosted. |
+| `@fontsource-variable/inter-tight` | Display typeface for headings, self-hosted. |
+| `@fontsource/roboto-mono` | Technical typeface for digests, commands and labels, self-hosted. |
+
+## Design
+
+The site follows the Relux product-family web design system. The design contract, token source and intentional deviations are recorded in [DESIGN.md](DESIGN.md).

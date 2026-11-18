@@ -4,40 +4,41 @@ import Badge from "../../../../components/Badge.astro";
 import Command from "../../../../components/Command.astro";
 import FileList from "../../../../components/FileList.astro";
 import GroupResults from "../../../../components/GroupResults.astro";
+import Head from "../../../../components/Head.astro";
 import Score from "../../../../components/Score.astro";
+import Section from "../../../../components/Section.astro";
 import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
 import { hfDownload, profileDir, verify } from "../../../../lib/commands.ts";
-import { plural } from "../../../../lib/format.ts";
 
 export function getStaticPaths() {
   return loadIndex().bases.map((base) => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
 }
 interface Props { base: Base }
 const { base } = Astro.props;
-const index = loadIndex();
 ---
 <Page
   title={base.address}
   description={`Weight patches for ${base.address}: files, versions and recorded benchmark results.`}
   nav="models"
-  crumbs={[{ label: "Models", href: href() }, { label: base.address }]}
 >
-  <header class="page-head">
-    <div class="title-row">
-      <h1>{base.address}</h1>
-    </div>
-    <p class="lede">{plural(base.patches.length, "patch", "patches")} · {plural(base.profiles.length, "profile")} · {plural(base.runs.length, "benchmark run")}</p>
-  </header>
+  <Head crumbs={[{ label: "Models", href: href() }, { label: base.address }]} eyebrow="Base model">
+    <h1 class="break">{base.address}</h1>
+    <dl class="facts">
+      <div><dt>Patches</dt><dd>{base.patches.length}</dd></div>
+      <div><dt>Profiles</dt><dd><span class="row">{base.profiles.map((p) => <a class="tag" href={`#profile-${p.id}`}>{p.id}</a>)}</span></dd></div>
+      <div><dt>Benchmark runs</dt><dd>{base.runs.length === 0 ? <span class="muted">no benchmarks submitted</span> : base.runs.length}</dd></div>
+      <div><dt>Benchmark groups</dt><dd>{base.groups.length}</dd></div>
+    </dl>
+    <nav class="toc" aria-label="On this page">
+      <a href="#patches">Patches</a>
+      <a href="#results">Results</a>
+      <a href="#combinations">Combinations</a>
+      <a href="#profiles">Profiles</a>
+      <a href="#records">Records</a>
+    </nav>
+  </Head>
 
-  <nav class="toc" aria-label="On this page">
-    <a href="#patches">Patches</a>
-    <a href="#results">Results</a>
-    <a href="#combinations">Combinations</a>
-    <a href="#profiles">Profiles</a>
-  </nav>
-
-  <section class="section" id="patches">
-    <header><h2>Patches</h2></header>
+  <Section title="Patches" id="patches">
     {base.patches.length === 0 ? (
       <p class="empty"><strong>No patches for this base yet.</strong></p>
     ) : (
@@ -50,9 +51,9 @@ const index = loadIndex();
               return (
                 <tr>
                   <td>
-                    <a href={p.url}><strong>{p.title}</strong></a>
-                    <div class="small muted">{p.summary}</div>
-                    {p.tags.length > 0 && <div class="row" style="margin-top:4px">{p.tags.map((t) => <span class="tag">{t}</span>)}</div>}
+                    <a class="title" href={p.url}>{p.title}</a>
+                    <span class="sub">{p.summary}</span>
+                    {p.tags.length > 0 && <div class="row" style="margin-top: var(--space-2)">{p.tags.map((t) => <a class="tag" href={href(`search/?tag=${encodeURIComponent(t)}`)}>{t}</a>)}</div>}
                   </td>
                   <td>{p.kind}</td>
                   <td class="nowrap">
@@ -73,51 +74,49 @@ const index = loadIndex();
         </table>
       </div>
     )}
-  </section>
+  </Section>
 
-  <section class="section" id="results">
-    <header>
-      <h2>Results</h2>
-      <p>Grouped by profile, protocol, dataset and settings. Each group is ranked on its own; scores are shown exactly as recorded.</p>
-    </header>
+  <Section title="Results" id="results" subtle>
+    <Fragment slot="intro">
+      Grouped by profile, protocol, dataset and settings. Each group is ranked on its own, and index-measured results are kept apart from reported ones. Scores are shown as recorded.
+    </Fragment>
     {base.groups.length === 0 ? (
-      <p class="empty"><strong>No benchmarks submitted</strong> for this base.</p>
+      <p class="empty"><strong>No benchmarks submitted</strong>No run records exist for this base.</p>
     ) : (
-      <div class="stack">{base.groups.map((g) => <GroupResults group={g} />)}</div>
+      <div class="cards">{base.groups.map((g) => <GroupResults group={g} />)}</div>
     )}
-  </section>
+  </Section>
 
-  <section class="section" id="combinations">
-    <header><h2>Measured combinations</h2></header>
+  <Section title="Measured combinations" id="combinations">
+    <Fragment slot="intro">Combinations are ranked only when a run measured them, never estimated from single patches.</Fragment>
     <p class="empty">
-      <strong>No measured combinations.</strong> Every run in the index measures the unpatched base or a single patch version. Combinations are ranked only when measured, never estimated from single patches.
+      <strong>No measured combinations</strong>Every run in the index measures the unpatched base or a single patch version.
     </p>
-  </section>
+  </Section>
 
-  <section class="section" id="profiles">
-    <header>
-      <h2>Profiles</h2>
-      <p>The exact base files each patch version targets. Download at the pinned revision and check every file before applying anything.</p>
-    </header>
-    <div class="stack">
+  <Section title="Profiles" id="profiles">
+    <Fragment slot="intro">The exact base files each patch version targets. Download at the pinned revision and check every file before applying anything.</Fragment>
+    <div class="subsections">
       {base.profiles.map((profile) => {
         const baseline = base.baselineRuns.filter((r) => r.record.profile === profile.id);
         return (
-          <article class="card" id={`profile-${profile.id}`}>
-            <div class="card-head">
-              <h3 class="grow"><span class="tag">{profile.id}</span></h3>
+          <article class="subsection" id={`profile-${profile.id}`}>
+            <div class="subsection-head">
+              <h3>Profile <span class="mono">{profile.id}</span></h3>
               <a class="small" href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`} rel="noopener noreferrer">
-                {profile.source.repo_id}@{profile.source.revision.slice(0, 7)}
+                <span class="mono">{profile.source.repo_id}@{profile.source.revision.slice(0, 7)}</span>
               </a>
             </div>
             <FileList files={profileFiles(profile)} showRole={false} />
-            <Command title="Download the profile" command={hfDownload(base, profile)} />
-            {profile.files.map((f) => (
-              <Command title={`Check ${f.path}`} command={verify(`${profileDir(base, profile)}/${f.path}`)} />
-            ))}
+            <div class="cmds">
+              <Command title="Download the profile" command={hfDownload(base, profile)} />
+              {profile.files.map((f) => (
+                <Command title={`Check ${f.path}`} command={verify(`${profileDir(base, profile)}/${f.path}`)} />
+              ))}
+            </div>
             {baseline.length > 0 && (
-              <div>
-                <h4 class="small" style="margin:14px 0 6px">Baseline runs on this profile</h4>
+              <div class="stack">
+                <p class="eyebrow">Baseline runs on this profile</p>
                 <div class="table-wrap">
                   <table class="compact">
                     <thead><tr><th>Run</th><th>Protocol · settings</th><th>Measured by</th><th>State</th><th>Score</th></tr></thead>
@@ -140,10 +139,10 @@ const index = loadIndex();
         );
       })}
     </div>
-  </section>
+  </Section>
 
-  <section class="section">
-    <header><h2>Records</h2></header>
+  <Section title="Records" id="records">
+    <Fragment slot="intro">The base record this page is built from.</Fragment>
     <FileList files={[base.baseRecord]} showRole={false} />
-  </section>
+  </Section>
 </Page>

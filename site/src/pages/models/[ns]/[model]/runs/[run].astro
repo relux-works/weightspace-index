@@ -16,7 +16,6 @@ const base = run.base;
   title={`Baseline run ${run.id} · ${base.address}`}
   description={`Benchmark run of the unpatched ${base.address}.`}
   nav="models"
-  crumbs={[{ label: "Models", href: href() }, { label: base.address, href: base.url }, { label: "runs" }, { label: run.id }]}
 >
-  <RunView run={run} />
+  <RunView run={run} crumbs={[{ label: "Models", href: href() }, { label: base.address, href: base.url }, { label: "runs" }, { label: run.id }]} />
 </Page>

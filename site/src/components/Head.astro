@@ -1,0 +1,27 @@
+---
+// The opening band of a page: breadcrumbs, an optional eyebrow, then the
+// title block passed as the default slot.
+interface Props {
+  crumbs?: { label: string; href?: string }[];
+  eyebrow?: string;
+}
+const { crumbs = [], eyebrow } = Astro.props;
+---
+<section class="band-head">
+  <div class="wrap">
+    {crumbs.length > 0 && (
+      <nav class="crumbs" aria-label="Breadcrumb">
+        {crumbs.map((c, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true">/</span>}
+            {c.href ? <a href={c.href}>{c.label}</a> : <span aria-current={i === crumbs.length - 1 ? "page" : undefined}>{c.label}</span>}
+          </>
+        ))}
+      </nav>
+    )}
+    <div class="page-head">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <slot />
+    </div>
+  </div>
+</section>

@@ -1,0 +1,337 @@
+/* Relux product family token contract (relux-product-web-design, assets/tokens.css).
+   Copied unchanged except for the font stacks, which name the self-hosted
+   Fontsource families first, and the site addition at the end (the footer's
+   ink surface in the light theme). Components use these roles, never literals. */
+:root {
+  color-scheme: light dark;
+
+  /* Typography */
+  --font-display: "Inter Tight Variable", "Inter Tight", "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-ui: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --font-arabic: "Noto Sans Arabic", "Inter", sans-serif;
+  --font-hebrew: "Noto Sans Hebrew", "Inter", sans-serif;
+  --font-armenian: "Noto Sans Armenian", "Inter", sans-serif;
+  --font-georgian: "Noto Sans Georgian", "Inter", sans-serif;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Layout */
+  --layout-max: 73.75rem;
+  --layout-reading: 45rem;
+  --layout-gutter: 1.5rem;
+  --layout-header-height: 4.25rem;
+  --layout-section: 6rem;
+  --layout-section-mobile: 4rem;
+
+  /* Geometry */
+  --radius-control: 0.25rem;
+  --radius-surface: 0.5rem;
+
+  /* Motion */
+  --motion-press: 90ms;
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Immutable Relux Works identity colors. Do not remap these per product. */
+  --color-brand-red: #F60D10;
+  --color-brand-ink: #181A18;
+  --color-brand-white: #FFFFFF;
+}
+
+/* Baseline Relux palette. Replace product expression colors as a complete tested set. */
+/* palette:light:start */
+:root {
+  --color-bg: #f4f6f4;
+  --color-surface-subtle: #e9ede9;
+  --color-surface: #fafbfa;
+  --color-surface-raised: #fafbfa;
+  --color-surface-hover: #eef1ee;
+
+  --color-text: #181a18;
+  --color-text-muted: #4d554f;
+  --color-text-faint: #626a64;
+  --color-text-inverse: #f4f6f4;
+
+  --color-border: #d0d6d1;
+  --color-border-strong: #788179;
+  --color-divider: #d0d6d1;
+
+  --color-control: #fafbfa;
+  --color-control-hover: #eef1ee;
+  --color-control-pressed: #e9ede9;
+  --color-control-text: #181a18;
+  --color-strong-action: #181a18;
+  --color-strong-action-hover: #303630;
+  --color-on-strong-action: #f4f6f4;
+
+  --color-accent: #c20a0c;
+  --color-accent-hover: #a80608;
+  --color-accent-pressed: #a80608;
+  --color-accent-soft: rgba(246, 13, 16, 0.09);
+  --color-on-accent: #f7f9f7;
+
+  --color-link: #a80608;
+  --color-link-hover: #810406;
+  --color-focus: #c20a0c;
+
+  --color-success: #1b7049;
+  --color-warning: #765500;
+  --color-error: #b42318;
+  --color-info: #165f80;
+
+  --color-selection-bg: #f3d1d0;
+  --color-selection-text: #181a18;
+  --color-scrim: rgba(24, 26, 24, 0.42);
+  --color-material: rgba(250, 251, 250, 0.82);
+  --shadow-overlay: 0 18px 45px rgba(20, 24, 20, 0.14);
+}
+/* palette:light:end */
+
+@media (prefers-color-scheme: dark) {
+  /* palette:dark:start */
+  :root {
+    --color-bg: #111411;
+    --color-surface-subtle: #171b17;
+    --color-surface: #1c211c;
+    --color-surface-raised: #252b25;
+    --color-surface-hover: #252b25;
+
+    --color-text: #e7ebe7;
+    --color-text-muted: #bbc4bc;
+    --color-text-faint: #9aa59b;
+    --color-text-inverse: #151815;
+
+    --color-border: #353c35;
+    --color-border-strong: #727e74;
+    --color-divider: #353c35;
+
+    --color-control: #1c211c;
+    --color-control-hover: #252b25;
+    --color-control-pressed: #171b17;
+    --color-control-text: #e7ebe7;
+    --color-strong-action: #e7ebe7;
+    --color-strong-action-hover: #f1f3f1;
+    --color-on-strong-action: #151815;
+
+    --color-accent: #ff6961;
+    --color-accent-hover: #ff817b;
+    --color-accent-pressed: #ff817b;
+    --color-accent-soft: rgba(255, 105, 97, 0.15);
+    --color-on-accent: #151815;
+
+    --color-link: #ff817b;
+    --color-link-hover: #ff9a94;
+    --color-focus: #ff817b;
+
+    --color-success: #67e39d;
+    --color-warning: #f0b35c;
+    --color-error: #ff817b;
+    --color-info: #64d2ff;
+
+    --color-selection-bg: #742c29;
+    --color-selection-text: #f0f3f0;
+    --color-scrim: rgba(7, 10, 7, 0.62);
+    --color-material: rgba(28, 33, 28, 0.84);
+    --shadow-overlay: 0 18px 48px rgba(7, 10, 7, 0.48);
+  }
+  /* palette:dark:end */
+}
+
+@media (prefers-contrast: more) {
+  /* palette:light-contrast:start */
+  :root {
+    --color-bg: #f4f6f4;
+    --color-surface-subtle: #e5e9e5;
+    --color-surface: #fafbfa;
+    --color-surface-raised: #fafbfa;
+    --color-surface-hover: #e1e6e1;
+
+    --color-text: #101310;
+    --color-text-muted: #303630;
+    --color-text-faint: #414941;
+    --color-text-inverse: #f7f9f7;
+
+    --color-border: #737d74;
+    --color-border-strong: #59635a;
+    --color-divider: #737d74;
+
+    --color-control: #fafbfa;
+    --color-control-hover: #e1e6e1;
+    --color-control-pressed: #e5e9e5;
+    --color-control-text: #101310;
+    --color-strong-action: #101310;
+    --color-strong-action-hover: #252b25;
+    --color-on-strong-action: #f7f9f7;
+
+    --color-accent: #8f0406;
+    --color-accent-hover: #700204;
+    --color-accent-pressed: #700204;
+    --color-accent-soft: rgba(143, 4, 6, 0.14);
+    --color-on-accent: #f7f9f7;
+
+    --color-link: #8f0406;
+    --color-link-hover: #700204;
+    --color-focus: #8f0406;
+
+    --color-success: #0c5333;
+    --color-warning: #5c4100;
+    --color-error: #882018;
+    --color-info: #0d4f6b;
+
+    --color-selection-bg: #f1c5c4;
+    --color-selection-text: #101310;
+    --color-scrim: rgba(16, 19, 16, 0.58);
+    --color-material: #fafbfa;
+    --shadow-overlay: 0 18px 45px rgba(16, 19, 16, 0.20);
+  }
+  /* palette:light-contrast:end */
+}
+
+@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+  /* palette:dark-contrast:start */
+  :root {
+    --color-bg: #0e110e;
+    --color-surface-subtle: #151915;
+    --color-surface: #1a1f1a;
+    --color-surface-raised: #252b25;
+    --color-surface-hover: #252b25;
+
+    --color-text: #f0f3f0;
+    --color-text-muted: #d0d7d0;
+    --color-text-faint: #bac4bb;
+    --color-text-inverse: #111411;
+
+    --color-border: #69746b;
+    --color-border-strong: #89948b;
+    --color-divider: #69746b;
+
+    --color-control: #1a1f1a;
+    --color-control-hover: #252b25;
+    --color-control-pressed: #151915;
+    --color-control-text: #f0f3f0;
+    --color-strong-action: #f0f3f0;
+    --color-strong-action-hover: #f7f9f7;
+    --color-on-strong-action: #111411;
+
+    --color-accent: #ffa29c;
+    --color-accent-hover: #ffb5b0;
+    --color-accent-pressed: #ffb5b0;
+    --color-accent-soft: rgba(255, 162, 156, 0.20);
+    --color-on-accent: #111411;
+
+    --color-link: #ff9a92;
+    --color-link-hover: #ffb5b0;
+    --color-focus: #ff9a92;
+
+    --color-success: #67e39d;
+    --color-warning: #ffd08a;
+    --color-error: #ffa29c;
+    --color-info: #8cddff;
+
+    --color-selection-bg: #742c29;
+    --color-selection-text: #f0f3f0;
+    --color-scrim: rgba(5, 8, 5, 0.72);
+    --color-material: #1a1f1a;
+    --shadow-overlay: 0 18px 48px rgba(5, 8, 5, 0.58);
+  }
+  /* palette:dark-contrast:end */
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --color-material: var(--color-surface-raised);
+    --shadow-overlay: none;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --color-brand-red: CanvasText;
+    --color-brand-ink: CanvasText;
+    --color-brand-white: CanvasText;
+    --color-bg: Canvas;
+    --color-surface-subtle: Canvas;
+    --color-surface: Canvas;
+    --color-surface-raised: Canvas;
+    --color-surface-hover: Canvas;
+    --color-text: CanvasText;
+    --color-text-muted: CanvasText;
+    --color-text-faint: CanvasText;
+    --color-text-inverse: Canvas;
+    --color-border: CanvasText;
+    --color-border-strong: CanvasText;
+    --color-divider: CanvasText;
+    --color-control: ButtonFace;
+    --color-control-hover: ButtonFace;
+    --color-control-pressed: Highlight;
+    --color-control-text: ButtonText;
+    --color-strong-action: ButtonFace;
+    --color-strong-action-hover: ButtonFace;
+    --color-on-strong-action: ButtonText;
+    --color-accent: LinkText;
+    --color-accent-hover: LinkText;
+    --color-accent-pressed: LinkText;
+    --color-accent-soft: transparent;
+    --color-on-accent: Canvas;
+    --color-link: LinkText;
+    --color-link-hover: LinkText;
+    --color-focus: Highlight;
+    --color-success: CanvasText;
+    --color-warning: CanvasText;
+    --color-error: CanvasText;
+    --color-info: CanvasText;
+    --color-selection-bg: Highlight;
+    --color-selection-text: HighlightText;
+    --color-scrim: Canvas;
+    --color-material: Canvas;
+    --shadow-overlay: none;
+  }
+}
+
+/* Site addition: in the light theme the footer is an ink surface (#181a18,
+   the Relux ink). Inside it, the roles take the family's tuned dark palette
+   (and its increased-contrast variant), so text, links and focus stay legible.
+   Forced colors keep the system palette. See site/DESIGN.md. */
+@media (prefers-color-scheme: light) and (not (forced-colors: active)) {
+  .site-footer {
+    color-scheme: dark;
+    --color-surface-subtle: #181a18;
+    --color-text: #e7ebe7;
+    --color-text-muted: #bbc4bc;
+    --color-text-faint: #9aa59b;
+    --color-border: #353c35;
+    --color-border-strong: #727e74;
+    --color-divider: #353c35;
+    --color-accent: #ff6961;
+    --color-link: #ff817b;
+    --color-link-hover: #ff9a94;
+    --color-focus: #ff817b;
+    --color-selection-bg: #742c29;
+    --color-selection-text: #f0f3f0;
+  }
+}
+@media (prefers-color-scheme: light) and (prefers-contrast: more) and (not (forced-colors: active)) {
+  .site-footer {
+    --color-text: #f0f3f0;
+    --color-text-muted: #d0d7d0;
+    --color-text-faint: #bac4bb;
+    --color-border: #69746b;
+    --color-border-strong: #89948b;
+    --color-divider: #69746b;
+    --color-accent: #ffa29c;
+    --color-link: #ff9a92;
+    --color-link-hover: #ffb5b0;
+    --color-focus: #ff9a92;
+  }
+}

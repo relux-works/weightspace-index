@@ -1,5 +1,6 @@
 ---
 import Page from "../layouts/Page.astro";
+import Head from "../components/Head.astro";
 import { href, loadIndex } from "../lib/index.ts";
 import { FACETS, facetValues, searchEntries } from "../lib/search.ts";
 
@@ -10,32 +11,37 @@ const options = Object.fromEntries(
 );
 ---
 <Page title="Search" nav="search" description="Search patch versions by base, profile, kind, tag, license, status, benchmark and evidence.">
-  <header class="page-head">
-    <h1>Search</h1>
-    <p class="lede">Every patch version in the index. Filters combine; the address bar keeps them, so a search can be shared.</p>
-  </header>
+  <Head eyebrow="Search">
+    <h1>Patch versions</h1>
+    <p class="lead">Every patch version in the index. Filters combine, and the address bar keeps them, so a search can be shared.</p>
+    <form id="search" class="search-form" role="search" data-src={href("search.json")}>
+      <div class="search-box">
+        <input type="search" name="q" placeholder="Title, summary, slug, author, tag" aria-label="Search text" autocomplete="off" />
+      </div>
+      <div class="filters">
+        {FACETS.map(([k, label]) => (
+          <label class="field">
+            <span>{label}</span>
+            <select name={k}>
+              <option value="">Any</option>
+              {options[k].map((o) => <option value={o}>{o}</option>)}
+            </select>
+          </label>
+        ))}
+      </div>
+      <div class="row">
+        <span id="count" class="result-count grow" aria-live="polite"></span>
+        <button type="reset" class="btn quiet">Clear filters</button>
+      </div>
+    </form>
+  </Head>
 
-  <form id="search" class="search-form" role="search" data-src={href("search.json")}>
-    <input type="search" name="q" placeholder="Title, summary, slug, author, tag" aria-label="Search text" autocomplete="off" />
-    <div class="filters">
-      {FACETS.map(([k, label]) => (
-        <label>
-          <span>{label}</span>
-          <select name={k}>
-            <option value="">Any</option>
-            {options[k].map((o) => <option value={o}>{o}</option>)}
-          </select>
-        </label>
-      ))}
+  <section class="band">
+    <div class="wrap">
+      <noscript><p class="empty"><strong>Search needs JavaScript</strong>Browse from <a href={href()}>Models</a> instead.</p></noscript>
+      <ul id="results" class="results"></ul>
     </div>
-    <div class="row small">
-      <span id="count" class="muted grow" aria-live="polite"></span>
-      <button type="reset" class="btn ghost">Clear</button>
-    </div>
-  </form>
-
-  <noscript><p class="empty"><strong>Search needs JavaScript.</strong> Browse from <a href={href()}>Models</a> instead.</p></noscript>
-  <ul id="results" class="results"></ul>
+  </section>
 
   <script>
     type Entry = {
@@ -99,31 +105,31 @@ const options = Object.fromEntries(
       });
       list.replaceChildren(
         ...hits.map((e) => {
-          const li = el("li", "card");
-          const head = el("div", "card-head");
-          const a = el("a", "grow");
+          const li = el("li");
+          const main = el("div");
+          const h = el("h3");
+          const a = el("a");
           a.href = e.url;
-          a.append(el("strong", undefined, e.title), document.createTextNode(" "), el("span", "muted", e.version));
-          head.append(a, badge(e.status));
-          if (e.latest) head.append(el("span", "badge accent", "latest"));
-          const meta = el("div", "row small muted");
-          meta.append(
-            el("span", undefined, e.base),
-            el("span", "tag", e.profile),
-            el("span", undefined, e.kind),
-            el("span", undefined, e.license),
-            ...e.tags.map((t) => el("span", "tag", t)),
-          );
-          const ev = el("div", "row");
-          ev.append(...e.evidence.map(badge), ...e.benchmarks.map((b) => el("span", "tag", b)));
-          li.append(head, el("p", "small", e.summary), meta, ev);
+          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.version));
+          h.append(a);
+          const sub = el("div", "row small muted");
+          sub.style.marginTop = "var(--space-2)";
+          sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.kind} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
+          main.append(h, el("p", undefined, e.summary), sub);
+          const meta = el("div", "meta");
+          meta.append(badge(e.status));
+          if (e.latest) meta.append(el("span", "badge accent", "latest"));
+          meta.append(...e.evidence.map(badge), ...e.benchmarks.map((b) => el("span", "tag", b)));
+          li.append(main, meta);
           return li;
         }),
       );
       count.textContent = `${hits.length} of ${entries.length} version${entries.length === 1 ? "" : "s"}`;
       if (!hits.length && entries.length) {
-        const li = el("li", "empty");
-        li.append(el("strong", undefined, "No versions match."), document.createTextNode(" Clear a filter or the search text."));
+        const li = el("li", "empty-row");
+        const box = el("p", "empty");
+        box.append(el("strong", undefined, "No versions match"), document.createTextNode("Clear a filter or the search text."));
+        li.append(box);
         list.append(li);
       }
     }

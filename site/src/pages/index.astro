@@ -1,31 +1,40 @@
 ---
 import Page from "../layouts/Page.astro";
 import Badge from "../components/Badge.astro";
+import Section from "../components/Section.astro";
 import { allRuns, allVersions, href, loadIndex } from "../lib/index.ts";
-import { plural } from "../lib/format.ts";
 
 const index = loadIndex();
 const versions = allVersions(index);
 const runs = allRuns(index);
 const patches = index.bases.flatMap((b) => b.patches);
+const counts: [string, string, number][] = [
+  ["base model", "base models", index.bases.length],
+  ["patch", "patches", patches.length],
+  ["version", "versions", versions.length],
+  ["benchmark run", "benchmark runs", runs.length],
+];
 ---
 <Page title="Weightspace Index" nav="models" description="An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.">
-  <section class="page-head" style="margin-top:12px">
-    <h1 style="font-size:2rem">Find the change. Check the bytes. Read the evidence.</h1>
-    <p class="lede">
-      An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
-    </p>
-    <form action={href("search/")} method="get" class="row" style="margin-top:6px;max-width:560px" role="search">
-      <input type="search" name="q" placeholder="Search patches, models, authors, tags" aria-label="Search the index" style="flex:1" />
-      <button class="btn primary" type="submit">Search</button>
-    </form>
-    <p class="small muted" style="margin:0">
-      {plural(index.bases.length, "base model")} · {plural(patches.length, "patch", "patches")} · {plural(versions.length, "version")} · {plural(runs.length, "benchmark run")}
-    </p>
+  <section class="band-head">
+    <div class="wrap page-head">
+      <p class="eyebrow">Open index · commit {index.short}</p>
+      <h1 class="statement">Weight patches for open models</h1>
+      <p class="lead">
+        What each patch changes, the exact base files it was made for, where to download it, and how it measured. Every value on this site comes from a record at the pinned commit.
+      </p>
+      <form action={href("search/")} method="get" class="home-search" role="search">
+        <input type="search" name="q" placeholder="Search patches, models, authors, tags" aria-label="Search the index" />
+        <button class="btn primary" type="submit">Search</button>
+      </form>
+      <dl class="counts">
+        {counts.map(([one, many, n]) => <div><dt>{n === 1 ? one : many}</dt><dd>{n}</dd></div>)}
+      </dl>
+    </div>
   </section>
 
-  <section class="section">
-    <header><h2>Models</h2><p>Every base with patches in the index. Pick the one you run.</p></header>
+  <Section title="Models" id="models">
+    <Fragment slot="intro">Every base with patches in the index. Pick the one you run.</Fragment>
     {index.bases.length === 0 ? (
       <p class="empty"><strong>No bases in the index yet.</strong></p>
     ) : (
@@ -37,7 +46,7 @@ const patches = index.bases.flatMap((b) => b.patches);
               const states = new Set(b.runs.map((r) => r.record.state));
               return (
                 <tr>
-                  <td><a href={b.url}><strong>{b.address}</strong></a></td>
+                  <td><a class="title" href={b.url}>{b.address}</a></td>
                   <td><span class="row">{b.profiles.map((p) => <span class="tag">{p.id}</span>)}</span></td>
                   <td class="num">{b.patches.length}</td>
                   <td>
@@ -45,7 +54,7 @@ const patches = index.bases.flatMap((b) => b.patches);
                       <span class="muted">no benchmarks submitted</span>
                     ) : (
                       <span class="row">
-                        <span>{plural(b.runs.length, "run")}</span>
+                        <span>{b.runs.length} {b.runs.length === 1 ? "run" : "runs"}</span>
                         {[...states].map((s) => <Badge state={s} />)}
                       </span>
                     )}
@@ -57,22 +66,25 @@ const patches = index.bases.flatMap((b) => b.patches);
         </table>
       </div>
     )}
-  </section>
+  </Section>
 
-  <section class="section">
-    <header><h2>Using a patch</h2></header>
-    <div class="grid-2">
-      <div class="card">
-        <h3 style="margin-bottom:6px">1. Pick and check</h3>
-        <p class="small muted">Open your base, then a patch version. Each file shows its size and SHA-256; check every download against them and stop on any mismatch.</p>
-      </div>
-      <div class="card">
-        <h3 style="margin-bottom:6px">2. Apply and measure</h3>
-        <p class="small muted">Version pages give the documented commands, filled in for that version: download the pinned base, verify, apply, and benchmark with bench.</p>
-      </div>
-    </div>
-    <p class="callout callout-warning small" style="margin-top:12px">
-      Patched models may behave unexpectedly or unsafely. Repository inclusion, redistribution and published results do not guarantee safety. Assess patches for your intended use. <a href={index.docsAt("DISCLAIMER.md")}>Read the disclaimer</a>.
-    </p>
-  </section>
+  <Section title="Using a patch" id="using" subtle>
+    <Fragment slot="intro">
+      Patched models may behave unexpectedly or unsafely. Inclusion, redistribution and published results do not guarantee safety. <a href={index.docsAt("DISCLAIMER.md")}>Read the disclaimer</a>.
+    </Fragment>
+    <ol class="howto">
+      <li>
+        <h3>Pick a version</h3>
+        <p>Open your base model, then a patch. Version pages list the profile it targets, its files and every recorded result.</p>
+      </li>
+      <li>
+        <h3>Check the bytes</h3>
+        <p>Each file shows its size and SHA-256. Check every download against them and stop on any mismatch.</p>
+      </li>
+      <li>
+        <h3>Apply and measure</h3>
+        <p>Version pages give the documented commands, filled in for that version: download the pinned base, verify, apply, and benchmark with bench.</p>
+      </li>
+    </ol>
+  </Section>
 </Page>

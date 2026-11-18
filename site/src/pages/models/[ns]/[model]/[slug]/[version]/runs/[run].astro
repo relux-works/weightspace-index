@@ -24,13 +24,12 @@ const base = run.base;
   title={`Run ${run.id} · ${v.patch.slug} ${v.label}`}
   description={`Benchmark run of ${v.patch.title} ${v.label} on ${base.address}.`}
   nav="models"
-  crumbs={[
+>
+  <RunView run={run} crumbs={[
     { label: "Models", href: href() },
     { label: base.address, href: base.url },
     { label: v.patch.slug, href: v.patch.url },
     { label: v.label, href: v.url },
     { label: run.id },
-  ]}
->
-  <RunView run={run} />
+  ]} />
 </Page>

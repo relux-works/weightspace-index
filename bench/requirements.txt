@@ -1,0 +1,9 @@
+# Harness for every protocol in bench/protocols/. Exact pins: another
+# scorer version can score the same reply differently, so `python -m bench
+# run` refuses any other installed version. Install into the Python
+# environment that runs lm_eval (the model server can live elsewhere).
+lm_eval[api,math]==0.4.13
+math-verify==0.9.0
+latex2sympy2_extended==1.11.0
+sympy==1.14.0
+antlr4-python3-runtime==4.11.0

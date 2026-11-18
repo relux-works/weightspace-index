@@ -9,7 +9,7 @@ The index collects open-source weight patches, identifies each one exactly, and 
 - **Humans** open the folder of the base model they run and see every patch for it, with a generated results table.
 - **Client tools** fetch only the small index of the one model a user selected, never the whole repository.
 - **Each patch has one stable name.** Updates are new versions under that name; "latest" is computed.
-- **Baselines are measured once per profile** and reused by every patch on that base.
+- **Baselines are measured once per profile** and reused by every patch on that base. The exception is a paired benchmark, where base and patched answer the same items in the same sessions: its baseline belongs to one patch version and is filed in the base's `runs/` with the patch's slug and version in its run ID (see [benchmarking.md](benchmarking.md)).
 - **Paths are permanent** and **each fact is recorded once**: anything that can be read from a file or a path is generated, not authored.
 - **No new conventions where one exists.** Formats and adapter behavior follow what Hugging Face, PEFT and llama.cpp already do.
 

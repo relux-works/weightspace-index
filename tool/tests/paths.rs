@@ -2,7 +2,6 @@ mod common;
 
 use std::collections::BTreeMap;
 use std::fs;
-#[cfg(unix)]
 use std::path::{Path, PathBuf};
 
 use common::*;
@@ -47,6 +46,54 @@ fn sharded_model_refused() {
     assert!(matches!(err, ToolError::ShardedModel { .. }), "{err}");
     assert!(!out.exists());
 }
+const ONE_SHARD: &str = "model.safetensors-00001-of-00001.safetensors";
+
+fn one_shard_model(dir: &Path, mapped_to: &str) -> (PathBuf, PathBuf, String) {
+    let (patch, model, _) = simple_patch(dir);
+    fs::rename(model.join("model.safetensors"), model.join(ONE_SHARD)).unwrap();
+    let index = format!("{{\"metadata\":{{}},\"weight_map\":{{\"w\":\"{mapped_to}\"}}}}\n");
+    fs::write(model.join("model.safetensors.index.json"), &index).unwrap();
+    (patch, model, index)
+}
+
+#[test]
+fn one_shard_indexed_model_applies() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, index) = one_shard_model(tmp.path(), ONE_SHARD);
+    let out = tmp.path().join("patched");
+    apply(&ApplyReplacement {
+        patch,
+        model,
+        out: out.clone(),
+        expect_tensor_sha256: BTreeMap::new(),
+    })
+    .unwrap();
+    assert!(out.join(ONE_SHARD).is_file());
+    assert!(!out.join("model.safetensors").exists());
+    assert_eq!(
+        fs::read_to_string(out.join("model.safetensors.index.json")).unwrap(),
+        index
+    );
+}
+
+#[test]
+fn index_naming_another_shard_refused() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, _) =
+        one_shard_model(tmp.path(), "model.safetensors-00002-of-00002.safetensors");
+    let out = tmp.path().join("patched");
+    let err = apply(&ApplyReplacement {
+        patch,
+        model,
+        out: out.clone(),
+        expect_tensor_sha256: BTreeMap::new(),
+    })
+    .err()
+    .unwrap();
+    assert!(matches!(err, ToolError::ShardedModel { .. }), "{err}");
+    assert!(!out.exists());
+}
+
 #[cfg(unix)]
 #[test]
 fn symlink_rules() {

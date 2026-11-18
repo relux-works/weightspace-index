@@ -1,0 +1,83 @@
+---
+// One benchmark group on a base page: the best single patch and a chart of
+// recorded scores when complete runs exist, otherwise the runs in progress.
+import type { Group } from "../lib/index.ts";
+import { href } from "../lib/index.ts";
+import { BUCKET_LABEL, barLabel, rankings } from "../lib/rank.ts";
+import { plural } from "../lib/format.ts";
+import Badge from "./Badge.astro";
+import BarChart from "./BarChart.astro";
+import Score from "./Score.astro";
+interface Props { group: Group }
+const { group } = Astro.props;
+const ranks = rankings(group);
+const pending = group.runs.filter((r) => r.record.state !== "COMPLETE" || typeof r.record.score.value !== "number");
+---
+<article class="card" id={group.id}>
+  <div class="card-head">
+    <h3 class="grow">{group.protocolLabel} <span class="muted" style="font-weight:400">· {group.settingsLabel}</span></h3>
+    <span class="tag" title="Base profile">{group.profile.id}</span>
+    <a class="small" href={href(`compare/#${group.id}`)}>Compare runs →</a>
+  </div>
+  <p class="small muted" style="margin-top:-4px">
+    Dataset <span class="mono">{group.dataset.name}</span>. Results here never mix profiles, protocols, datasets or settings.
+  </p>
+
+  {ranks.map((r) => (
+    <div class="stack" style="margin-top:14px">
+      <div class="row">
+        <strong class="small">{BUCKET_LABEL[r.bucket]}</strong>
+        <span class="muted small">· {plural(r.runs.length, "complete run")}</span>
+      </div>
+      {r.best.length > 0 ? (
+        <div class="callout">
+          <strong>Best single patch:</strong>{" "}
+          {r.best.map((b, i) => (
+            <>{i > 0 && ", "}<a href={b.url}>{barLabel(b)}</a></>
+          ))}{" "}
+          with <span class="mono">{r.best[0].record.score.value}</span> {r.metric} ({r.unit}), the highest recorded score among active patched versions here.
+          {r.best.length > 1 && " These versions share it."}
+        </div>
+      ) : (
+        <div class="callout">No complete run of a patched version in this group yet.</div>
+      )}
+      <BarChart
+        caption={`${group.label}: ${r.metric}`}
+        metric={r.metric}
+        unit={r.unit}
+        bars={r.runs.map((run) => ({
+          label: barLabel(run),
+          sub: `n = ${run.record.score.denominator} · ${run.record.performed_by}`,
+          value: run.record.score.value!,
+          href: run.url,
+          base: !run.version,
+        }))}
+      />
+    </div>
+  ))}
+
+  {pending.length > 0 && (
+    <div style="margin-top:14px">
+      {ranks.length === 0 && (
+        <p class="empty" style="margin-bottom:10px">
+          <strong>No complete runs yet.</strong> Rankings and charts use COMPLETE runs only; the runs below are not ranked.
+        </p>
+      )}
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Run</th><th>Measured by</th><th>State</th><th>Score</th></tr></thead>
+          <tbody>
+            {pending.map((r) => (
+              <tr>
+                <td><a href={r.url}>{barLabel(r)}</a></td>
+                <td>{r.record.performed_by}</td>
+                <td><Badge state={r.record.state} /></td>
+                <td><Score score={r.record.score} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )}
+</article>

@@ -1,0 +1,21 @@
+{
+  "name": "weightspace-index-site",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "dependencies": {
+    "@astrojs/markdown-satteri": "0.4.10",
+    "astro": "7.4.12",
+    "satteri": "0.11.7"
+  },
+  "scripts": {
+    "dev": "node scripts/run.mjs dev",
+    "dev:example": "WS_INDEX_ROOT=docs/example node scripts/run.mjs dev",
+    "build": "node scripts/run.mjs build",
+    "build:example": "WS_INDEX_ROOT=docs/example node scripts/run.mjs build",
+    "preview": "node scripts/run.mjs preview",
+    "test": "node scripts/run.mjs test"
+  }
+}

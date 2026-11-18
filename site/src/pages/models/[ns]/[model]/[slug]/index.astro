@@ -1,0 +1,100 @@
+---
+import { getEntry, render } from "astro:content";
+import Page from "../../../../../layouts/Page.astro";
+import Badge from "../../../../../components/Badge.astro";
+import FileList from "../../../../../components/FileList.astro";
+import { href, loadIndex, type Patch } from "../../../../../lib/index.ts";
+import { fail } from "../../../../../lib/files.ts";
+
+export function getStaticPaths() {
+  return loadIndex().bases.flatMap((base) =>
+    base.patches.map((patch) => ({ params: { ns: base.ns, model: base.model, slug: patch.slug }, props: { patch } })),
+  );
+}
+interface Props { patch: Patch }
+const { patch } = Astro.props;
+const base = patch.base;
+const entry = patch.card ? await getEntry("cards", `${base.address}/${patch.slug}`) : undefined;
+if (patch.card && !entry) fail(`${patch.card.repoPath} was not loaded by the cards collection`);
+const Card = entry ? (await render(entry)).Content : null;
+const latest = patch.versions.find((v) => v.n === patch.latest) ?? null;
+const versions = [...patch.versions].sort((a, b) => b.n - a.n);
+---
+<Page
+  title={`${patch.title} · ${base.address}`}
+  description={patch.summary}
+  nav="models"
+  crumbs={[{ label: "Models", href: href() }, { label: base.address, href: base.url }, { label: patch.slug }]}
+>
+  <header class="page-head">
+    <div class="title-row">
+      <h1>{patch.title}</h1>
+      <span class="tag">{patch.kind}</span>
+    </div>
+    <p class="lede">{patch.summary}</p>
+    <div class="row">
+      {latest ? (
+        <a class="btn primary" href={latest.url}>Get {latest.label}</a>
+      ) : (
+        <span class="badge warn">No active version</span>
+      )}
+      {patch.tags.map((t) => <a class="tag" href={href(`search/?tag=${encodeURIComponent(t)}`)}>{t}</a>)}
+    </div>
+  </header>
+
+  <dl class="facts">
+    <div><dt>Base</dt><dd><a href={base.url}>{base.address}</a></dd></div>
+    <div><dt>Kind</dt><dd>{patch.kind}</dd></div>
+    <div><dt>License</dt><dd>{patch.license}</dd></div>
+    <div>
+      <dt>Authors</dt>
+      <dd>{patch.authors.map((a, i) => <>{i > 0 && ", "}{a.url ? <a href={a.url} rel="noopener noreferrer nofollow">{a.name}</a> : a.name}</>)}</dd>
+    </div>
+    <div><dt>Submitted by</dt><dd><a href={`https://github.com/${patch.submitter}`} rel="noopener noreferrer nofollow">{patch.submitter}</a></dd></div>
+    <div><dt>Latest</dt><dd>{latest ? latest.label : "none"}</dd></div>
+  </dl>
+
+  <section class="section" id="versions">
+    <header><h2>Versions</h2></header>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Version</th><th>Status</th><th>Profile</th><th>Changes</th><th>Evidence</th></tr></thead>
+        <tbody>
+          {versions.map((v) => (
+            <tr>
+              <td class="nowrap"><a href={v.url}><strong>{v.label}</strong></a>{v.isLatest && <span class="muted small"> latest</span>}</td>
+              <td><Badge state={v.status} /></td>
+              <td><span class="tag">{v.profile.id}</span></td>
+              <td class="small">{v.changelog}</td>
+              <td><span class="row">{v.evidence.map((e) => <Badge state={e} />)}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="card">
+    <header>
+      <h2>Patch card</h2>
+      <p>Written by the submitter. Claims here are theirs; recorded results are on the version pages.</p>
+    </header>
+    {Card ? (
+      <article class="prose card"><Card /></article>
+    ) : (
+      <p class="empty"><strong>No card.</strong> This patch has no README.md.</p>
+    )}
+  </section>
+
+  {patch.notices.length > 0 && (
+    <section class="section" id="notices">
+      <header><h2>Notices</h2><p>License and attribution files that travel with this patch.</p></header>
+      <FileList files={patch.notices} showRole={false} />
+    </section>
+  )}
+
+  <section class="section">
+    <header><h2>Records</h2></header>
+    <FileList files={[patch.record, ...(patch.card ? [patch.card.file] : [])]} showRole={false} />
+  </section>
+</Page>

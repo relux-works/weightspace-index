@@ -1,0 +1,6 @@
+---
+import { tone } from "../lib/format.ts";
+interface Props { state: string; label?: string; title?: string; plain?: boolean }
+const { state, label, title, plain } = Astro.props;
+---
+<span class:list={["badge", tone(state), { plain }]} title={title}>{label ?? state}</span>

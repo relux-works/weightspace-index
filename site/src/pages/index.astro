@@ -1,0 +1,78 @@
+---
+import Page from "../layouts/Page.astro";
+import Badge from "../components/Badge.astro";
+import { allRuns, allVersions, href, loadIndex } from "../lib/index.ts";
+import { plural } from "../lib/format.ts";
+
+const index = loadIndex();
+const versions = allVersions(index);
+const runs = allRuns(index);
+const patches = index.bases.flatMap((b) => b.patches);
+---
+<Page title="Weightspace Index" nav="models" description="An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.">
+  <section class="page-head" style="margin-top:12px">
+    <h1 style="font-size:2rem">Find the change. Check the bytes. Read the evidence.</h1>
+    <p class="lede">
+      An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
+    </p>
+    <form action={href("search/")} method="get" class="row" style="margin-top:6px;max-width:560px" role="search">
+      <input type="search" name="q" placeholder="Search patches, models, authors, tags" aria-label="Search the index" style="flex:1" />
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+    <p class="small muted" style="margin:0">
+      {plural(index.bases.length, "base model")} · {plural(patches.length, "patch", "patches")} · {plural(versions.length, "version")} · {plural(runs.length, "benchmark run")}
+    </p>
+  </section>
+
+  <section class="section">
+    <header><h2>Models</h2><p>Every base with patches in the index. Pick the one you run.</p></header>
+    {index.bases.length === 0 ? (
+      <p class="empty"><strong>No bases in the index yet.</strong></p>
+    ) : (
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Base</th><th>Profiles</th><th class="num">Patches</th><th>Benchmarks</th></tr></thead>
+          <tbody>
+            {index.bases.map((b) => {
+              const states = new Set(b.runs.map((r) => r.record.state));
+              return (
+                <tr>
+                  <td><a href={b.url}><strong>{b.address}</strong></a></td>
+                  <td><span class="row">{b.profiles.map((p) => <span class="tag">{p.id}</span>)}</span></td>
+                  <td class="num">{b.patches.length}</td>
+                  <td>
+                    {b.runs.length === 0 ? (
+                      <span class="muted">no benchmarks submitted</span>
+                    ) : (
+                      <span class="row">
+                        <span>{plural(b.runs.length, "run")}</span>
+                        {[...states].map((s) => <Badge state={s} />)}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+  <section class="section">
+    <header><h2>Using a patch</h2></header>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:6px">1. Pick and check</h3>
+        <p class="small muted">Open your base, then a patch version. Each file shows its size and SHA-256; check every download against them and stop on any mismatch.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:6px">2. Apply and measure</h3>
+        <p class="small muted">Version pages give the documented commands, filled in for that version: download the pinned base, verify, apply, and benchmark with bench.</p>
+      </div>
+    </div>
+    <p class="callout callout-warning small" style="margin-top:12px">
+      Patched models may behave unexpectedly or unsafely. Repository inclusion, redistribution and published results do not guarantee safety. Assess patches for your intended use. <a href={index.docsAt("DISCLAIMER.md")}>Read the disclaimer</a>.
+    </p>
+  </section>
+</Page>

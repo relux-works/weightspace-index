@@ -1,0 +1,189 @@
+---
+// One run: what was measured, how, by whom, and its per-item outcomes next to
+// the paired run's. Values are shown as recorded; nothing is derived from them
+// beyond counting outcome lines.
+import Badge from "./Badge.astro";
+import Command from "./Command.astro";
+import FileList from "./FileList.astro";
+import Hash from "./Hash.astro";
+import Score from "./Score.astro";
+import { loadIndex, pairedFrom, type Run } from "../lib/index.ts";
+import { benchForRun } from "../lib/commands.ts";
+import { duration, plural, utc } from "../lib/format.ts";
+import { barLabel } from "../lib/rank.ts";
+interface Props { run: Run }
+const { run } = Astro.props;
+const index = loadIndex();
+const r = run.record;
+const partner = run.paired ?? pairedFrom(run)[0] ?? null;
+const bench = benchForRun(index, run);
+const settings = r.settings ?? {};
+const { sessions: _s, results: _r, model_files: modelFiles, harness, ...shownSettings } = settings;
+
+type Outcome = Record<string, unknown>;
+const key = (o: Outcome) => `${String(o.id)}|${String(o.seed ?? "")}`;
+const mine = run.outcomes ?? [];
+const theirs = new Map((partner?.outcomes ?? []).map((o) => [key(o), o]));
+const COLS = ["score", "finish_reason", "completion_tokens"].filter((c) => mine.some((o) => c in o));
+const finishCounts = (list: Outcome[]) => {
+  const m = new Map<string, number>();
+  for (const o of list) if (typeof o.finish_reason === "string") m.set(o.finish_reason, (m.get(o.finish_reason) ?? 0) + 1);
+  return [...m.entries()];
+};
+const show = (v: unknown) => (v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
+const partnerName = partner ? barLabel(partner) : "";
+---
+<header class="page-head">
+  <div class="title-row">
+    <h1>{run.protocolLabel} <span class="muted">· {run.settingsLabel}</span></h1>
+    <Badge state={r.state} />
+  </div>
+  <p class="lede">
+    {run.version ? <>Run of <a href={run.version.url}>{run.version.patch.slug} {run.version.label}</a></> : <>Baseline run of the unpatched base</>}
+    {" "}on profile <span class="mono">{r.profile}</span>, measured by {r.performed_by}.
+  </p>
+</header>
+
+{r.state === "INCOMPLETE" && (
+  <p class="callout callout-warning">
+    <strong>INCOMPLETE run.</strong> It is shown for transparency and is not ranked or charted.
+    {r.score.state === "UNKNOWN" && <> Score UNKNOWN: {r.score.reason} (owner: {r.score.owner}).</>}
+  </p>
+)}
+
+<dl class="facts">
+  <div><dt>Score</dt><dd><Score score={r.score} /></dd></div>
+  <div><dt>State</dt><dd><Badge state={r.state} /></dd></div>
+  <div><dt>Measured by</dt><dd>{r.performed_by}</dd></div>
+  <div><dt>Base</dt><dd><a href={run.base.url}>{run.base.address}</a> · profile <span class="mono">{r.profile}</span></dd></div>
+  <div><dt>Treatment</dt><dd>{run.version ? <a href={run.version.url}>{barLabel(run)}</a> : "unpatched base"}</dd></div>
+  <div><dt>Protocol</dt><dd><span class="mono">{r.protocol.name}</span><br /><Hash value={r.protocol.sha256} /></dd></div>
+  <div><dt>Dataset</dt><dd><span class="mono">{r.dataset.name}</span><br /><Hash value={r.dataset.sha256} /></dd></div>
+  <div><dt>Settings</dt><dd><span class="mono">{typeof settings.file === "string" ? settings.file : run.settingsLabel}</span>{typeof settings.sha256 === "string" && <><br /><Hash value={settings.sha256} /></>}</dd></div>
+  <div>
+    <dt>Paired run</dt>
+    <dd>
+      {partner ? (
+        <span class="row"><a href={partner.url}>{partnerName}</a><Badge state={partner.record.state} /><Score score={partner.record.score} compact /></span>
+      ) : (
+        <span class="muted">none recorded</span>
+      )}
+    </dd>
+  </div>
+</dl>
+
+<section class="section" id="outcomes">
+  <header>
+    <h2>Outcomes</h2>
+    <p>
+      {run.outcomes ? <>{plural(mine.length, "line")} in the outcomes file{partner?.outcomes ? <>, side by side with the paired run ({partnerName}) by item and seed</> : null}.</> : "The outcomes file is hosted outside this repository; download it below."}
+    </p>
+  </header>
+  {run.outcomes && (
+    <>
+      {COLS.includes("finish_reason") && (
+        <p class="small">
+          Finish reasons: {finishCounts(mine).map(([k, n], i) => <>{i > 0 && ", "}<span class="mono">{k}</span> {n}</>)}
+          {partner?.outcomes && <> · paired run: {finishCounts(partner.outcomes).map(([k, n], i) => <>{i > 0 && ", "}<span class="mono">{k}</span> {n}</>)}</>}
+        </p>
+      )}
+      <div class="table-wrap">
+        <table class="compact">
+          <thead>
+            <tr>
+              <th>Item</th><th>Seed</th>
+              {COLS.map((c) => <th>{c.replace(/_/g, " ")}</th>)}
+              {partner?.outcomes && COLS.map((c) => <th class="muted">paired {c.replace(/_/g, " ")}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {mine.map((o) => {
+              const p = theirs.get(key(o));
+              return (
+                <tr>
+                  <td class="mono">{show(o.id)}</td>
+                  <td class="mono">{show(o.seed)}</td>
+                  {COLS.map((c) => <td class="mono">{show(o[c])}</td>)}
+                  {partner?.outcomes && COLS.map((c) => <td class="mono muted">{p ? show(p[c]) : "not filed"}</td>)}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+</section>
+
+<section class="section" id="settings">
+  <header><h2>Settings and harness</h2></header>
+  <div class="stack">
+    {harness && (
+      <div class="table-wrap">
+        <table class="compact">
+          <thead><tr><th>Harness package</th><th>Version</th></tr></thead>
+          <tbody>
+            {Object.entries<string>(harness.packages ?? {}).map(([k, val]) => <tr><td class="mono">{k}</td><td class="mono">{val}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    )}
+    <details>
+      <summary>Settings as recorded</summary>
+      <pre class="mono small">{JSON.stringify(shownSettings, null, 2)}</pre>
+    </details>
+    {modelFiles && (
+      <details>
+        <summary>Model file digests ({Object.keys(modelFiles).length})</summary>
+        <div class="table-wrap">
+          <table class="compact">
+            <tbody>{Object.entries<string>(modelFiles).map(([k, val]) => <tr><td class="mono small">{k}</td><td class="mono small" style="overflow-wrap:anywhere">{val}</td></tr>)}</tbody>
+          </table>
+        </div>
+      </details>
+    )}
+  </div>
+</section>
+
+{run.sessions.length > 0 && (
+  <section class="section" id="sessions">
+    <header><h2>Sessions</h2><p>bench sessions behind this run, as filed under bench/results.</p></header>
+    <div class="stack">
+      {run.sessions.map((s) => (
+        <article class="card">
+          <div class="card-head"><h3 class="grow mono">{s.name}</h3></div>
+          <dl class="facts">
+            <div><dt>Started</dt><dd>{utc(s.record.started)}</dd></div>
+            <div><dt>Run by</dt><dd>{s.record.performed_by}</dd></div>
+            <div><dt>Hardware</dt><dd>{s.record.hardware}</dd></div>
+            <div><dt>Seed</dt><dd class="mono">{s.record.seed}</dd></div>
+            <div><dt>Items</dt><dd><span class="mono">{s.record.items.join(", ")}</span></dd></div>
+            <div><dt>Concurrency</dt><dd class="mono">{s.record.concurrency}</dd></div>
+            <div><dt>Base half</dt><dd>vLLM {s.record.base.server.version} · {duration(s.record.base.seconds)} · <span class="mono small">{s.record.base.server.args.join(" ")}</span></dd></div>
+            <div><dt>Patched half</dt><dd>vLLM {s.record.patched.server.version} · {duration(s.record.patched.seconds)} · <span class="mono small">{s.record.patched.server.args.join(" ")}</span></dd></div>
+          </dl>
+          <details>
+            <summary>Session files ({s.files.length})</summary>
+            <FileList files={s.files} showRole={false} />
+          </details>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<section class="section" id="files">
+  <header><h2>Files</h2></header>
+  <FileList
+    files={[run.outcomesFile, ...(run.resourcesFile ? [run.resourcesFile] : []), ...(run.protocolFile ? [run.protocolFile] : []), ...(run.settingsFile ? [run.settingsFile] : []), run.recordFile]}
+    showRole={false}
+  />
+</section>
+
+{bench && (
+  <section class="section" id="bench">
+    <header><h2>Progress and comparison</h2><p>From a checkout of the index.</p></header>
+    <Command title="Progress" command={bench.status} />
+    <Command title="Compare with the paired run" command={bench.compare} />
+  </section>
+)}

@@ -1,0 +1,257 @@
+---
+import Page from "../../../../../../layouts/Page.astro";
+import Badge from "../../../../../../components/Badge.astro";
+import Command from "../../../../../../components/Command.astro";
+import FileList from "../../../../../../components/FileList.astro";
+import Score from "../../../../../../components/Score.astro";
+import { NO_BENCHMARKS, href, loadIndex, type Version } from "../../../../../../lib/index.ts";
+import { apply, benchCommands, hfDownload, profileDir, verify } from "../../../../../../lib/commands.ts";
+import { plural } from "../../../../../../lib/format.ts";
+
+export function getStaticPaths() {
+  return loadIndex().bases.flatMap((base) =>
+    base.patches.flatMap((patch) =>
+      patch.versions.map((version) => ({
+        params: { ns: base.ns, model: base.model, slug: patch.slug, version: version.label },
+        props: { version },
+      })),
+    ),
+  );
+}
+interface Props { version: Version }
+const { version: v } = Astro.props;
+const index = loadIndex();
+const patch = v.patch;
+const base = patch.base;
+const profile = v.profile;
+const dir = profileDir(base, profile);
+const sources = v.files.filter((f) => f.role === "source");
+const derived = v.files.filter((f) => f.role === "derived");
+const plan = apply(v);
+const bench = benchCommands(index, v);
+const latest = patch.versions.find((x) => x.n === patch.latest) ?? null;
+const noEvidence = v.evidence.length === 1 && v.evidence[0] === NO_BENCHMARKS;
+---
+<Page
+  title={`${patch.title} ${v.label} · ${base.address}`}
+  description={patch.summary}
+  nav="models"
+  crumbs={[
+    { label: "Models", href: href() },
+    { label: base.address, href: base.url },
+    { label: patch.slug, href: patch.url },
+    { label: v.label },
+  ]}
+>
+  <header class="page-head">
+    <div class="title-row">
+      <h1>{patch.title} <span class="muted">{v.label}</span></h1>
+      <Badge state={v.status} />
+      {v.isLatest && <Badge state="latest" />}
+    </div>
+    <p class="lede">{v.changelog}</p>
+  </header>
+
+  {v.status !== "active" && (
+    <p class="callout callout-warning">
+      This version is <strong>{v.status}</strong>.
+      {latest && latest !== v ? <> The latest active version is <a href={latest.url}>{latest.label}</a>.</> : " The patch has no active version."}
+    </p>
+  )}
+
+  <dl class="facts">
+    <div><dt>Base</dt><dd><a href={base.url}>{base.address}</a></dd></div>
+    <div><dt>Profile</dt><dd><a href={`${base.url}#profile-${profile.id}`}><span class="tag">{profile.id}</span></a> <span class="muted small">{profile.source.repo_id}@{profile.source.revision.slice(0, 7)}</span></dd></div>
+    <div><dt>Kind</dt><dd>{patch.kind}</dd></div>
+    <div><dt>License</dt><dd>{patch.license}</dd></div>
+    <div><dt>Patch</dt><dd><a href={patch.url}>{patch.slug}</a> · {plural(patch.versions.length, "version")}</dd></div>
+  </dl>
+
+  <nav class="toc" aria-label="On this page" style="margin-top:20px">
+    <a href="#evidence">Evidence</a>
+    <a href="#files">Files</a>
+    <a href="#use">Use this version</a>
+    {bench.length > 0 && <a href="#benchmark">Benchmark it</a>}
+  </nav>
+
+  <section class="section" id="evidence">
+    <header>
+      <h2>Evidence</h2>
+      <p>Recorded for this version on profile <span class="mono">{profile.id}</span>. Nothing here applies to other versions or profiles.</p>
+    </header>
+
+    {noEvidence ? (
+      <p class="empty"><strong>No benchmarks submitted</strong> for this version.</p>
+    ) : (
+      <div class="stack">
+        <div class="row">{v.evidence.map((e) => <Badge state={e} />)}</div>
+
+        {v.runs.length > 0 && (
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Run</th><th>Measured by</th><th>State</th><th>Score</th><th>Paired baseline</th></tr></thead>
+              <tbody>
+                {v.runs.map((r) => (
+                  <tr>
+                    <td>
+                      <a href={r.url}>{r.protocolLabel}</a>
+                      <div class="small muted">{r.settingsLabel}</div>
+                    </td>
+                    <td>{r.record.performed_by}</td>
+                    <td><Badge state={r.record.state} /></td>
+                    <td><Score score={r.record.score} /></td>
+                    <td>
+                      {r.paired ? (
+                        <span class="stack" style="gap:2px">
+                          <a href={r.paired.url} class="small">unpatched base</a>
+                          <span class="row"><Badge state={r.paired.record.state} /><Score score={r.paired.record.score} compact /></span>
+                        </span>
+                      ) : (
+                        <span class="muted small">none recorded</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {v.comparisons.map((c) => (
+          <article class="card" id={`comparison-${c.id}`}>
+            <div class="card-head">
+              <h3 class="grow">Comparison <span class="mono">{c.id}</span></h3>
+              <Badge state={c.record.state} />
+            </div>
+            <dl class="facts">
+              <div><dt>Estimand</dt><dd>{c.record.estimand}</dd></div>
+              <div><dt>Baseline run</dt><dd><a href={c.baseline.url} class="mono">{c.baseline.id}</a></dd></div>
+              <div><dt>Patched run</dt><dd><a href={c.patched.url} class="mono">{c.patched.id}</a></dd></div>
+              {c.record.denominator !== undefined && <div><dt>Denominator</dt><dd class="mono">{c.record.denominator}</dd></div>}
+              {c.record.uncertainty && <div><dt>Uncertainty</dt><dd>{c.record.uncertainty}</dd></div>}
+              {c.record.reason && <div><dt>Reason</dt><dd>{c.record.reason}</dd></div>}
+            </dl>
+            <FileList files={[...(c.matched ? [c.matched] : []), c.file]} showRole={false} />
+          </article>
+        ))}
+
+        {v.assessments.map((a) => (
+          <article class="card" id={`assessment-${a.id}`}>
+            <div class="card-head">
+              <h3 class="grow">Assessment <span class="mono">{a.id}</span></h3>
+              <Badge state={a.record.decision} />
+            </div>
+            <dl class="facts">
+              <div><dt>Intended use</dt><dd>{a.record.intended_use}</dd></div>
+              <div><dt>Reason</dt><dd>{a.record.reason}</dd></div>
+              {a.record.owner && <div><dt>Owner</dt><dd>{a.record.owner}</dd></div>}
+              {a.comparisons.length > 0 && (
+                <div><dt>Comparisons</dt><dd>{a.comparisons.map((c, i) => <>{i > 0 && ", "}<a href={`#comparison-${c.id}`} class="mono">{c.id}</a></>)}</dd></div>
+              )}
+            </dl>
+            <FileList files={[...(a.policy ? [a.policy] : []), a.file]} showRole={false} />
+          </article>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <section class="section" id="files">
+    <header>
+      <h2>Files</h2>
+      <p>
+        Source files are what the submitter published; derived files were made from them by the named tool.
+        Check size and SHA-256 after every download.
+      </p>
+    </header>
+    <FileList files={v.files} />
+  </section>
+
+  <section class="section" id="use">
+    <header>
+      <h2>Use this version</h2>
+      <p>Documented commands, filled in from the records. Each one links the document it comes from.</p>
+    </header>
+    <ol class="steps">
+      <li>
+        <h3>Download the base at its pinned revision</h3>
+        <p class="small muted">Profile <span class="mono">{profile.id}</span>: {profile.source.repo_id} at revision <span class="mono">{profile.source.revision}</span>.</p>
+        <Command command={hfDownload(base, profile)} />
+      </li>
+      <li>
+        <h3>Check the base files</h3>
+        <p class="small muted">Each result must match the size and SHA-256 recorded for the profile. Stop on any mismatch.</p>
+        <div class="table-wrap">
+          <table class="compact">
+            <thead><tr><th>File</th><th class="num">Bytes</th><th>SHA-256</th></tr></thead>
+            <tbody>
+              {profile.files.map((f) => (
+                <tr><td class="mono small">{f.path}</td><td class="num mono small">{f.size_bytes}</td><td class="mono small" style="overflow-wrap:anywhere">{f.sha256}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {profile.files.map((f) => <Command command={verify(`${dir}/${f.path}`)} />)}
+      </li>
+      <li>
+        <h3>Download and check the patch</h3>
+        <p class="small muted">
+          {sources.length === 1 ? <>Download <span class="mono">{sources[0].name}</span> from <a href="#files">Files</a>, then compare it with the recorded size and SHA-256.</> : <>Download the source files from <a href="#files">Files</a> and compare each with its recorded size and SHA-256.</>}
+        </p>
+        {sources.map((f) => (
+          <>
+            <div class="table-wrap">
+              <table class="compact">
+                <tbody><tr><td class="mono small">{f.name}</td><td class="num mono small">{f.size_bytes}</td><td class="mono small" style="overflow-wrap:anywhere">{f.sha256}</td></tr></tbody>
+              </table>
+            </div>
+            <Command command={verify(f.name)} />
+          </>
+        ))}
+      </li>
+      <li>
+        <h3>{patch.kind === "replacement" ? "Apply it to a copy" : "Load it"}</h3>
+        {plan.command ? (
+          <>
+            <p class="small muted">apply writes the patched model to a new folder; the downloaded base is not modified. Install the weightspace tool first (see the linked README).</p>
+            <Command command={plan.command} />
+          </>
+        ) : null}
+        {plan.notes.map((n) => <p class="callout callout-note">{n}</p>)}
+        {plan.needsDigests.length > 0 && (
+          <ul class="small mono">{plan.needsDigests.map((t) => <li>{t}</li>)}</ul>
+        )}
+        {derived.length > 0 && (
+          <p class="small muted">
+            Derived files ({derived.map((f) => f.name).join(", ")}) are a separate treatment: results recorded for this version do not carry over to them, and loading them in a runtime is not qualified.
+            See <a href={index.docsAt("tool/README.md") + "#derive-experimental-lora-factors"}>tool/README.md</a> and <a href={index.docsAt("docs/workflows.md")}>docs/workflows.md</a>.
+          </p>
+        )}
+      </li>
+    </ol>
+  </section>
+
+  {bench.length > 0 && (
+    <section class="section" id="benchmark">
+      <header>
+        <h2>Benchmark it</h2>
+        <p>From a checkout of the index, after installing the harness: bench downloads the pinned base, builds the patched copy, and runs base then patched on the same seed and items. Shown for each protocol and settings already used on this profile.</p>
+      </header>
+      <div class="stack">
+        {bench.map((b) => (
+          <article class="card">
+            <div class="card-head"><h3 class="grow">{b.protocol} <span class="muted" style="font-weight:400">· {b.settings}</span></h3></div>
+            <Command title="Run" command={b.run} />
+            <Command title="Progress" command={b.status} />
+            <Command title="Compare with the paired base" command={b.compare} />
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <header><h2>Records</h2></header>
+    <FileList files={[v.record]} showRole={false} />
+  </section>
+</Page>

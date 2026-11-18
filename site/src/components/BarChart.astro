@@ -1,0 +1,72 @@
+---
+// Horizontal bars of recorded scores, plain SVG. Callers pass only COMPLETE
+// runs with a numeric score from one group (same profile, protocol, dataset,
+// settings, metric and unit) and one measured-by bucket.
+export interface Bar {
+  label: string;
+  sub: string;
+  value: number;
+  href: string;
+  base: boolean;
+}
+interface Props {
+  bars: Bar[];
+  metric: string;
+  unit: string;
+  caption: string;
+}
+const { bars, metric, unit, caption } = Astro.props;
+
+const W = 760;
+const ROW = 40;
+const LABEL = 250;
+const VALUE = 70;
+const TOP = 6;
+const AXIS = 22;
+const plot = W - LABEL - VALUE - 12;
+const values = bars.map((b) => b.value);
+const lo = Math.min(0, ...values);
+const hi = unit === "fraction" ? Math.max(1, ...values) : niceMax(Math.max(...values, 0));
+const span = hi - lo || 1;
+const x = (v: number) => LABEL + ((v - lo) / span) * plot;
+const ticks = Array.from({ length: 5 }, (_, i) => lo + (span * i) / 4);
+const H = TOP + bars.length * ROW + AXIS;
+
+function niceMax(v: number): number {
+  if (v <= 0) return 1;
+  const p = 10 ** Math.floor(Math.log10(v));
+  const n = v / p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+}
+function tick(v: number): string {
+  return Number.isInteger(v) ? String(v) : String(Number(v.toPrecision(3)));
+}
+const aria = `${caption}. ${bars.map((b) => `${b.label}: ${b.value}`).join("; ")}.`;
+---
+<figure class="chart" style="margin:0">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={aria}>
+    {ticks.map((t) => (
+      <g>
+        <line class="grid" x1={x(t)} x2={x(t)} y1={TOP - 2} y2={TOP + bars.length * ROW} stroke-dasharray="2 3"></line>
+        <text class="axis" x={x(t)} y={H - 6} text-anchor="middle">{tick(t)}</text>
+      </g>
+    ))}
+    {bars.map((b, i) => {
+      const y = TOP + i * ROW;
+      return (
+        <a href={b.href}>
+          <text class="label" x={0} y={y + 16}>{b.label.length > 34 ? b.label.slice(0, 33) + "…" : b.label}<title>{b.label}</title></text>
+          <text class="sub" x={0} y={y + 32}>{b.sub}</text>
+          <rect class="track" x={LABEL} y={y + 8} width={plot} height={20} rx="4"></rect>
+          <rect class:list={["bar", { base: b.base }]} x={Math.min(x(0), x(b.value))} y={y + 8} width={Math.max(2, Math.abs(x(b.value) - x(0)))} height={20} rx="4"></rect>
+          <text class="value" x={W - 4} y={y + 23} text-anchor="end">{b.value}</text>
+        </a>
+      );
+    })}
+  </svg>
+  <figcaption class="legend">
+    <span><i></i>patched version</span>
+    <span><i class="base"></i>unpatched base</span>
+    <span>{metric} ({unit}), as recorded</span>
+  </figcaption>
+</figure>

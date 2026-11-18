@@ -1,0 +1,103 @@
+---
+import "../styles/global.css";
+import { loadIndex, href } from "../lib/index.ts";
+
+interface Props {
+  title: string;
+  description?: string;
+  crumbs?: { label: string; href?: string }[];
+  nav?: "models" | "search" | "compare";
+}
+const { title, description, crumbs = [], nav } = Astro.props;
+const index = loadIndex();
+const commitUrl = `https://github.com/${index.githubRepo}/tree/${index.commit}`;
+const docTitle = title === "Weightspace Index" ? title : `${title} · Weightspace Index`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{index.example ? `[Example] ${docTitle}` : docTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {index.example && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="referrer" content="no-referrer" />
+    <link rel="icon" href={href("favicon.svg")} type="image/svg+xml" />
+  </head>
+  <body>
+    {index.example && (
+      <div class="banner banner-example">Synthetic example data from docs/example: not real patches, files or results.</div>
+    )}
+    {index.dirty.length > 0 && (
+      <div class="banner banner-dirty">
+        Development build: {index.dirty.length} index file(s) differ from commit {index.short}. Download links point at the commit, not these files.
+      </div>
+    )}
+    <header class="topbar">
+      <div class="wrap">
+        <a class="brand" href={href()}>
+          <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+            <rect x="1.5" y="1.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+            <path d="M5.5 7.5 7.5 13l2.5-6 2.5 6 2-5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span class="brand-text">Weightspace Index</span>
+        </a>
+        <nav class="nav" aria-label="Site">
+          <a href={href()} aria-current={nav === "models" ? "page" : undefined}>Models</a>
+          <a href={href("search/")} aria-current={nav === "search" ? "page" : undefined}>Search</a>
+          <a href={href("compare/")} aria-current={nav === "compare" ? "page" : undefined}>Compare</a>
+        </nav>
+        <a class="pin" href={commitUrl} title={`Every value and download on this site is from index commit ${index.commit}`}>
+          <span>index @ </span>{index.short}
+        </a>
+      </div>
+    </header>
+    <main>
+      <div class="wrap">
+        {crumbs.length > 0 && (
+          <nav class="crumbs" aria-label="Breadcrumb">
+            {crumbs.map((c, i) => (
+              <>
+                {i > 0 && <span class="sep">/</span>}
+                {c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}
+              </>
+            ))}
+          </nav>
+        )}
+        <slot />
+      </div>
+    </main>
+    <footer class="site">
+      <div class="wrap">
+        <div>
+          Built from <a href={commitUrl}>{index.githubRepo}@{index.short}</a> · record contract version 1 ·
+          <a href={index.docsAt("DISCLAIMER.md")}>Disclaimer</a> ·
+          <a href={index.docsAt("docs/structure.md")}>How the index works</a>
+        </div>
+        <div>Patched models may behave unexpectedly or unsafely. Inclusion, redistribution and published results do not guarantee safety.</div>
+      </div>
+    </footer>
+    <script>
+      // Copy buttons: data-copy holds the text, or data-copy-from names an element whose text is copied.
+      document.addEventListener("click", async (event) => {
+        const button = (event.target as Element | null)?.closest<HTMLElement>("[data-copy],[data-copy-from]");
+        if (!button) return;
+        const from = button.dataset.copyFrom ? document.getElementById(button.dataset.copyFrom) : null;
+        const text = from ? (from.textContent ?? "") : (button.dataset.copy ?? "");
+        try {
+          await navigator.clipboard.writeText(text);
+          const label = button.querySelector("[data-label]");
+          const previous = label?.textContent;
+          button.setAttribute("data-copied", "");
+          if (label) label.textContent = "Copied";
+          setTimeout(() => {
+            button.removeAttribute("data-copied");
+            if (label && previous) label.textContent = previous;
+          }, 1400);
+        } catch {
+          button.setAttribute("title", "Copy failed: select the text instead");
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,140 @@
+---
+import Page from "../layouts/Page.astro";
+import { href, loadIndex } from "../lib/index.ts";
+import { FACETS, facetValues, searchEntries } from "../lib/search.ts";
+
+const index = loadIndex();
+const entries = searchEntries(index);
+const options = Object.fromEntries(
+  FACETS.map(([k]) => [k, [...new Set(entries.flatMap((e) => facetValues(e, k)))].sort((a, b) => a.localeCompare(b))]),
+);
+---
+<Page title="Search" nav="search" description="Search patch versions by base, profile, kind, tag, license, status, benchmark and evidence.">
+  <header class="page-head">
+    <h1>Search</h1>
+    <p class="lede">Every patch version in the index. Filters combine; the address bar keeps them, so a search can be shared.</p>
+  </header>
+
+  <form id="search" class="search-form" role="search" data-src={href("search.json")}>
+    <input type="search" name="q" placeholder="Title, summary, slug, author, tag" aria-label="Search text" autocomplete="off" />
+    <div class="filters">
+      {FACETS.map(([k, label]) => (
+        <label>
+          <span>{label}</span>
+          <select name={k}>
+            <option value="">Any</option>
+            {options[k].map((o) => <option value={o}>{o}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+    <div class="row small">
+      <span id="count" class="muted grow" aria-live="polite"></span>
+      <button type="reset" class="btn ghost">Clear</button>
+    </div>
+  </form>
+
+  <noscript><p class="empty"><strong>Search needs JavaScript.</strong> Browse from <a href={href()}>Models</a> instead.</p></noscript>
+  <ul id="results" class="results"></ul>
+
+  <script>
+    type Entry = {
+      url: string; base: string; profile: string; slug: string; title: string; summary: string; kind: string;
+      tags: string[]; license: string; authors: string[]; submitter: string; version: string; status: string;
+      latest: boolean; benchmarks: string[]; evidence: string[];
+    };
+    const form = document.getElementById("search") as HTMLFormElement;
+    const list = document.getElementById("results") as HTMLUListElement;
+    const count = document.getElementById("count") as HTMLElement;
+    const keys = ["base", "profile", "kind", "tag", "license", "status", "benchmark", "evidence"] as const;
+    const values = (e: Entry, k: (typeof keys)[number]): string[] =>
+      k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : [e[k] as string];
+    const tones: Record<string, string> = {
+      active: "ok", "complete run": "ok", deprecated: "neutral", withdrawn: "bad",
+      "INCOMPLETE run": "warn", "UNKNOWN score": "warn", "MATCHED comparison": "info", "REFUSED comparison": "bad",
+    };
+    let entries: Entry[] = [];
+
+    function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+    function badge(text: string) {
+      const tone = tones[text] ?? (text.endsWith(" assessment") ? (text.startsWith("SUPPORTED") ? "ok" : text.startsWith("REJECT") ? "bad" : "warn") : "neutral");
+      return el("span", `badge ${tone}`, text);
+    }
+
+    function readUrl() {
+      const p = new URLSearchParams(location.search);
+      (form.elements.namedItem("q") as HTMLInputElement).value = p.get("q") ?? "";
+      for (const k of keys) {
+        const s = form.elements.namedItem(k) as HTMLSelectElement;
+        const v = p.get(k) ?? "";
+        s.value = [...s.options].some((o) => o.value === v) ? v : "";
+      }
+    }
+    function writeUrl() {
+      const p = new URLSearchParams();
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim();
+      if (q) p.set("q", q);
+      for (const k of keys) {
+        const v = (form.elements.namedItem(k) as HTMLSelectElement).value;
+        if (v) p.set(k, v);
+      }
+      const s = p.toString();
+      history.replaceState(null, "", s ? `?${s}` : location.pathname);
+    }
+
+    function render() {
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim().toLowerCase();
+      const words = q ? q.split(/\s+/) : [];
+      const chosen = keys.map((k) => [k, (form.elements.namedItem(k) as HTMLSelectElement).value] as const).filter(([, v]) => v);
+      const hits = entries.filter((e) => {
+        if (!chosen.every(([k, v]) => values(e, k).includes(v))) return false;
+        if (!words.length) return true;
+        const hay = [e.title, e.summary, e.slug, e.base, e.submitter, ...e.authors, ...e.tags, e.version].join(" ").toLowerCase();
+        return words.every((w) => hay.includes(w));
+      });
+      list.replaceChildren(
+        ...hits.map((e) => {
+          const li = el("li", "card");
+          const head = el("div", "card-head");
+          const a = el("a", "grow");
+          a.href = e.url;
+          a.append(el("strong", undefined, e.title), document.createTextNode(" "), el("span", "muted", e.version));
+          head.append(a, badge(e.status));
+          if (e.latest) head.append(el("span", "badge accent", "latest"));
+          const meta = el("div", "row small muted");
+          meta.append(
+            el("span", undefined, e.base),
+            el("span", "tag", e.profile),
+            el("span", undefined, e.kind),
+            el("span", undefined, e.license),
+            ...e.tags.map((t) => el("span", "tag", t)),
+          );
+          const ev = el("div", "row");
+          ev.append(...e.evidence.map(badge), ...e.benchmarks.map((b) => el("span", "tag", b)));
+          li.append(head, el("p", "small", e.summary), meta, ev);
+          return li;
+        }),
+      );
+      count.textContent = `${hits.length} of ${entries.length} version${entries.length === 1 ? "" : "s"}`;
+      if (!hits.length && entries.length) {
+        const li = el("li", "empty");
+        li.append(el("strong", undefined, "No versions match."), document.createTextNode(" Clear a filter or the search text."));
+        list.append(li);
+      }
+    }
+
+    form.addEventListener("input", () => { writeUrl(); render(); });
+    form.addEventListener("submit", (ev) => ev.preventDefault());
+    form.addEventListener("reset", () => setTimeout(() => { writeUrl(); render(); }));
+    readUrl();
+    fetch(form.dataset.src!)
+      .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+      .then((d: { entries: Entry[] }) => { entries = d.entries; render(); })
+      .catch(() => { count.textContent = "Could not load the search data."; });
+  </script>
+</Page>

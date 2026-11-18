@@ -1,0 +1,149 @@
+---
+import Page from "../../../../layouts/Page.astro";
+import Badge from "../../../../components/Badge.astro";
+import Command from "../../../../components/Command.astro";
+import FileList from "../../../../components/FileList.astro";
+import GroupResults from "../../../../components/GroupResults.astro";
+import Score from "../../../../components/Score.astro";
+import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
+import { hfDownload, profileDir, verify } from "../../../../lib/commands.ts";
+import { plural } from "../../../../lib/format.ts";
+
+export function getStaticPaths() {
+  return loadIndex().bases.map((base) => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
+}
+interface Props { base: Base }
+const { base } = Astro.props;
+const index = loadIndex();
+---
+<Page
+  title={base.address}
+  description={`Weight patches for ${base.address}: files, versions and recorded benchmark results.`}
+  nav="models"
+  crumbs={[{ label: "Models", href: href() }, { label: base.address }]}
+>
+  <header class="page-head">
+    <div class="title-row">
+      <h1>{base.address}</h1>
+    </div>
+    <p class="lede">{plural(base.patches.length, "patch", "patches")} · {plural(base.profiles.length, "profile")} · {plural(base.runs.length, "benchmark run")}</p>
+  </header>
+
+  <nav class="toc" aria-label="On this page">
+    <a href="#patches">Patches</a>
+    <a href="#results">Results</a>
+    <a href="#combinations">Combinations</a>
+    <a href="#profiles">Profiles</a>
+  </nav>
+
+  <section class="section" id="patches">
+    <header><h2>Patches</h2></header>
+    {base.patches.length === 0 ? (
+      <p class="empty"><strong>No patches for this base yet.</strong></p>
+    ) : (
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Patch</th><th>Kind</th><th>Latest</th><th>License</th><th>Evidence (latest)</th></tr></thead>
+          <tbody>
+            {base.patches.map((p) => {
+              const latest = p.versions.find((v) => v.n === p.latest) ?? null;
+              return (
+                <tr>
+                  <td>
+                    <a href={p.url}><strong>{p.title}</strong></a>
+                    <div class="small muted">{p.summary}</div>
+                    {p.tags.length > 0 && <div class="row" style="margin-top:4px">{p.tags.map((t) => <span class="tag">{t}</span>)}</div>}
+                  </td>
+                  <td>{p.kind}</td>
+                  <td class="nowrap">
+                    {latest ? <a href={latest.url}>{latest.label}</a> : <span class="muted">no active version</span>}
+                  </td>
+                  <td class="nowrap">{p.license}</td>
+                  <td>
+                    {latest ? (
+                      <span class="row">{latest.evidence.map((e) => <Badge state={e} />)}</span>
+                    ) : (
+                      <span class="muted">none</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+  <section class="section" id="results">
+    <header>
+      <h2>Results</h2>
+      <p>Grouped by profile, protocol, dataset and settings. Each group is ranked on its own; scores are shown exactly as recorded.</p>
+    </header>
+    {base.groups.length === 0 ? (
+      <p class="empty"><strong>No benchmarks submitted</strong> for this base.</p>
+    ) : (
+      <div class="stack">{base.groups.map((g) => <GroupResults group={g} />)}</div>
+    )}
+  </section>
+
+  <section class="section" id="combinations">
+    <header><h2>Measured combinations</h2></header>
+    <p class="empty">
+      <strong>No measured combinations.</strong> Every run in the index measures the unpatched base or a single patch version. Combinations are ranked only when measured, never estimated from single patches.
+    </p>
+  </section>
+
+  <section class="section" id="profiles">
+    <header>
+      <h2>Profiles</h2>
+      <p>The exact base files each patch version targets. Download at the pinned revision and check every file before applying anything.</p>
+    </header>
+    <div class="stack">
+      {base.profiles.map((profile) => {
+        const baseline = base.baselineRuns.filter((r) => r.record.profile === profile.id);
+        return (
+          <article class="card" id={`profile-${profile.id}`}>
+            <div class="card-head">
+              <h3 class="grow"><span class="tag">{profile.id}</span></h3>
+              <a class="small" href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`} rel="noopener noreferrer">
+                {profile.source.repo_id}@{profile.source.revision.slice(0, 7)}
+              </a>
+            </div>
+            <FileList files={profileFiles(profile)} showRole={false} />
+            <Command title="Download the profile" command={hfDownload(base, profile)} />
+            {profile.files.map((f) => (
+              <Command title={`Check ${f.path}`} command={verify(`${profileDir(base, profile)}/${f.path}`)} />
+            ))}
+            {baseline.length > 0 && (
+              <div>
+                <h4 class="small" style="margin:14px 0 6px">Baseline runs on this profile</h4>
+                <div class="table-wrap">
+                  <table class="compact">
+                    <thead><tr><th>Run</th><th>Protocol · settings</th><th>Measured by</th><th>State</th><th>Score</th></tr></thead>
+                    <tbody>
+                      {baseline.map((r) => (
+                        <tr>
+                          <td><a href={r.url} class="mono small">{r.id}</a></td>
+                          <td>{r.protocolLabel} · {r.settingsLabel}</td>
+                          <td>{r.record.performed_by}</td>
+                          <td><Badge state={r.record.state} /></td>
+                          <td><Score score={r.record.score} compact /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="section">
+    <header><h2>Records</h2></header>
+    <FileList files={[base.baseRecord]} showRole={false} />
+  </section>
+</Page>

@@ -1,0 +1,14 @@
+# Dependencies (restored from package-lock.json with `npm ci`)
+node_modules/
+
+# Build output and Astro's caches
+dist/
+dist-example/
+.astro/
+
+# Local environment and logs
+.env
+.env.*
+npm-debug.log*
+*.log
+.DS_Store

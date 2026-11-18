@@ -8,6 +8,7 @@ const copyIcon = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="t
 const doneIcon = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8.5 3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 ---
 <button
+  hidden
   type="button"
   class:list={["btn", { icon: !label, quiet: quiet || !label }]}
   data-copy={from ? undefined : text}

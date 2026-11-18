@@ -122,6 +122,9 @@ const logo = (svg: string, variant: string) =>
       import "../scripts/slide.ts";
       // Copy buttons: data-copy holds the text, or data-copy-from names an element
       // whose text is copied. Only an attribute changes; .swap keeps the width.
+      for (const control of document.querySelectorAll<HTMLButtonElement>("button[data-copy],button[data-copy-from]")) {
+        control.hidden = false;
+      }
       document.addEventListener("click", async (event) => {
         const button = (event.target as Element | null)?.closest<HTMLElement>("[data-copy],[data-copy-from]");
         if (!button) return;

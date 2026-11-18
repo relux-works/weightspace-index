@@ -1,56 +1,43 @@
 ---
+// Setup, one tab per runtime. Each tab is a single script that starts with a
+// download from the terminal, so a reader copies once and runs it. LoRA
+// runtimes come first; the weightspace tab applies the direct replacement to a
+// copy of the base. Without JavaScript every panel shows with its own heading.
+import Arrow from "../Arrow.astro";
 import CopyButton from "../CopyButton.astro";
-interface Tab { name: string; note: string; command: string; docs: string; setup?: string }
-interface Props { tabs: Tab[] }
-const { tabs } = Astro.props;
+import { highlight, ORIGIN } from "../../lib/shell.ts";
+interface Tab { name: string; note: string; command: string; docs: string; setup?: string; setupLabel?: string }
+interface File { href: string; name: string; size: string }
+interface Props { tabs: Tab[]; lora?: File | null; replacement?: File | null }
+const { tabs, lora, replacement } = Astro.props;
+const isBake = (t: Tab) => t.name === "Weightspace";
+const url = (f: File) => (/^https?:/.test(f.href) ? f.href : ORIGIN + f.href);
+const fetch = (f: File) => `curl -fLO ${url(f)}`;
+function script(tab: Tab) {
+  const file = isBake(tab) ? replacement : lora;
+  const parts: string[] = [];
+  let n = 1;
+  if (file) parts.push(`# ${n++}. Download the ${isBake(tab) ? "patch" : "adapter"} (${file.size})`, fetch(file));
+  if (tab.setup) parts.push("", `# ${n++}. ${tab.setupLabel ?? "Get the pinned base model"}`, tab.setup);
+  parts.push("", `# ${n}. ${isBake(tab) ? "Fetch the pinned base, check its hashes, apply the patch to a copy" : "Run"}`, tab.command);
+  return parts.join("\n");
+}
 ---
-{tabs.length > 0 && <div class="runtime-tabs">
-  <div class="runtime-selector" hidden role="tablist" aria-label="Runtime">
-    {tabs.map((tab, i) => <button role="tab" type="button" id={`tab-${i}`} aria-controls={`panel-${i}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}>{tab.name}</button>)}
+{tabs.length > 0 && <div class="setup" data-tabs id="runtime">
+  <div class="setup-tabs" data-slide="line" role="tablist" hidden aria-label="Runtime">
+    {tabs.map((tab, i) => <button role="tab" type="button" data-label={isBake(tab) ? "weightspace" : tab.name} aria-selected={i === 0 ? "true" : "false"}>
+      {isBake(tab) ? "weightspace" : tab.name}<small>{isBake(tab) ? "replacement" : "LoRA"}</small></button>)}
   </div>
-  {tabs.map((tab,i) => <div class="runtime-panel" id={`panel-${i}`}>
-    <h4>{tab.name}</h4><p>{tab.note}</p>
-    {tab.setup && <details class="fold"><summary>Prepare the base GGUF</summary><figure class="terminal"><figcaption>Shell<CopyButton from={`setup-${i}`} label="Copy" /></figcaption><pre id={`setup-${i}`}>{tab.setup}</pre></figure></details>}
-    <figure class="terminal"><figcaption>Shell<CopyButton from={`recipe-${i}`} label="Copy" /></figcaption>
-      <pre id={`recipe-${i}`}>{tab.command}</pre></figure>
-    <a class="small" href={tab.docs}>Runtime documentation ↗</a>
+  {tabs.map((tab, i) => <div class="setup-panel" data-panel>
+    <h3 class="panel-title">{isBake(tab) ? "weightspace" : tab.name}</h3>
+    <p class="setup-note">{tab.note} <a href={tab.docs}>{tab.name === "Weightspace" ? "weightspace docs" : `${tab.name} docs`} <Arrow dir="out" /></a></p>
+    <figure class="terminal sh">
+      <figcaption><span>{isBake(tab) ? "Download, then apply" : "Download, then run"}</span><CopyButton from={`recipe-${i}`} label="Copy" /></figcaption>
+      <pre id={`recipe-${i}`} set:html={highlight(script(tab))} />
+    </figure>
   </div>)}
 </div>}
 <script>
-  for (const group of document.querySelectorAll(".runtime-tabs")) {
-    const list = group.querySelector<HTMLElement>('[role="tablist"]')!;
-    const tabs = [...list.querySelectorAll<HTMLButtonElement>("button")];
-    const panels = [...group.querySelectorAll<HTMLElement>(".runtime-panel")];
-    const select = (i: number) => {
-      tabs.forEach((tab, n) => {
-        tab.setAttribute("aria-selected", String(i === n));
-        tab.tabIndex = i === n ? 0 : -1;
-        panels[n].hidden = i !== n;
-      });
-    };
-    panels.forEach((panel, i) => {
-      panel.setAttribute("role", "tabpanel");
-      panel.setAttribute("aria-labelledby", tabs[i].id);
-      panel.tabIndex = 0;
-    });
-    tabs.forEach((tab, i) => {
-      tab.addEventListener("click", () => select(i));
-      tab.addEventListener("keydown", e => {
-        const navigation: Record<string, number> = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i + tabs.length - 1) % tabs.length, Home: 0, End: tabs.length - 1 };
-        const next = navigation[e.key];
-        if (next === undefined) return;
-        e.preventDefault();
-        select(next);
-        tabs[next].focus();
-      });
-    });
-    for (const link of document.querySelectorAll<HTMLElement>("[data-recipe]")) {
-      link.addEventListener("click", () => {
-        const i = tabs.findIndex(tab => tab.textContent?.trim() === link.dataset.recipe);
-        if (i >= 0) select(i);
-      });
-    }
-    list.hidden = false;
-    select(0);
-  }
+  import "../../scripts/tabs.ts";
+  for (const el of document.querySelectorAll<HTMLElement>("[data-origin]")) el.textContent = location.origin;
 </script>

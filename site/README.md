@@ -1,6 +1,6 @@
 # Weightspace Index site
 
-The static Astro site helps readers choose a base model, compare patches and download a release. The stable patch URL contains the latest active release, its downloads, benchmark evidence and runtime commands. Version URLs remain available for reproducibility.
+The static Astro site helps readers choose a base model, compare patches and download a release. The stable patch URL holds the latest active release: its downloads (direct replacement and LoRA), results, runtime commands, edit map and combination studies. Version URLs stay available for reproducibility. `/how-it-works/` explains patches and LoRAs visually. See `DESIGN.md` for the reader journey.
 
 ## Run locally
 

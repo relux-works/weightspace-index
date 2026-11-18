@@ -8,6 +8,7 @@ import "@fontsource/roboto-mono/500.css";
 import "@fontsource/roboto-mono/600.css";
 import "../styles/global.css";
 import "../styles/discovery.css";
+import "../styles/experience.css";
 import { DEMO } from "../lib/config.ts";
 import reluxLight from "../assets/brand/relux-lockup-horizontal.svg?raw";
 import reluxDark from "../assets/brand/relux-lockup-horizontal-dark.svg?raw";
@@ -22,7 +23,7 @@ import { loadIndex, href } from "../lib/index.ts";
 interface Props {
   title: string;
   description?: string;
-  nav?: "models" | "search" | "compare";
+  nav?: "models" | "search" | "compare" | "learn";
 }
 const { title, description, nav } = Astro.props;
 const index = loadIndex();
@@ -48,15 +49,16 @@ const logo = (svg: string, variant: string) =>
     <link rel="icon" href={href("favicon-dark.svg")} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     {examplePage && (
       <div class="banner banner-example">
-        <div class="wrap"><span class="eyebrow">Example data</span><span>Synthetic records from docs/example: not real patches, files or results.</span></div>
+        <div class="wrap"><strong>Example data.</strong><span>Synthetic records from docs/example: not real patches, files or results.</span></div>
       </div>
     )}
     {index.dirty.length > 0 && (
       <div class="banner banner-dirty">
         <div class="wrap">
-          <span class="eyebrow">Development build</span>
+          <strong>Development build.</strong>
           <span>{index.dirty.length} index file(s) differ from commit {index.short}. Repository links point at the pinned commit.</span>
         </div>
       </div>
@@ -71,8 +73,8 @@ const logo = (svg: string, variant: string) =>
         </a>
         <nav class="site-nav" aria-label="Site">
           <a href={href()} aria-current={nav === "models" ? "page" : undefined}>Models</a>
+          <a href={href("how-it-works/")} aria-current={nav === "learn" ? "page" : undefined}>How it works</a>
           <a href={href("search/")} aria-current={nav === "search" ? "page" : undefined}>Search</a>
-          <a href={href("compare/")} aria-current={nav === "compare" ? "page" : undefined}>Compare</a>
         </nav>
         <div class="site-header__actions">
           <a class="gh-link" href={commitUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on GitHub at commit ${index.short} (opens in a new tab)`} title={`Every value and download on this site is from index commit ${index.commit}`}>
@@ -81,7 +83,7 @@ const logo = (svg: string, variant: string) =>
         </div>
       </div>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <footer class="site-footer">
@@ -92,6 +94,8 @@ const logo = (svg: string, variant: string) =>
             Built from <a href={commitUrl}><span class="mono">{index.githubRepo}@{index.short}</span></a>, record contract version 1.
           </p>
           <nav aria-label="Index documents">
+            <a href={href("how-it-works/")}>Patch vs LoRA</a>
+            <a href={href("compare/")}>All benchmark runs</a>
             <a href={index.docsAt("docs/structure.md")}>How the index works</a>
             <a href={index.docsAt("DISCLAIMER.md")}>Disclaimer</a>
             <a href={`https://github.com/${index.githubRepo}`}>Source</a>
@@ -104,7 +108,7 @@ const logo = (svg: string, variant: string) =>
           </p>
         </div>
         <div class="operator">
-          <span class="eyebrow">A project of</span>
+          <span class="operator-label">A project of</span>
           <a class="relux" href="https://github.com/relux-works" aria-label="Relux Works">
             <Fragment set:html={logo(reluxLight, "light")} />
             <Fragment set:html={logo(reluxDark, "dark")} />
@@ -114,6 +118,7 @@ const logo = (svg: string, variant: string) =>
       </div>
     </footer>
     <script>
+      import "../scripts/slide.ts";
       // Copy buttons: data-copy holds the text, or data-copy-from names an element
       // whose text is copied. Only an attribute changes; .swap keeps the width.
       document.addEventListener("click", async (event) => {
@@ -126,7 +131,11 @@ const logo = (svg: string, variant: string) =>
           button.setAttribute("data-copied", "");
           setTimeout(() => button.removeAttribute("data-copied"), 1400);
         } catch {
-          button.setAttribute("title", "Copy failed: select the text instead");
+          // No clipboard access: select the text so the keyboard shortcut copies it.
+          if (from) getSelection()?.selectAllChildren(from);
+          const message = from ? "Copy blocked. The text is selected; copy it with your keyboard." : "Copy blocked. Select the text and copy it with your keyboard.";
+          button.setAttribute("title", message);
+          button.setAttribute("aria-label", message);
         }
       });
     </script>

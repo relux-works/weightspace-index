@@ -15,7 +15,7 @@ const order = (a: Run, b: Run) =>
   (a.version ? 1 : 0) - (b.version ? 1 : 0) || barLabel(a).localeCompare(barLabel(b)) || a.id.localeCompare(b.id);
 ---
 <Page title="Compare" nav="compare" description="Benchmark runs side by side, one table per profile, protocol, dataset and settings.">
-  <Head eyebrow="Compare">
+  <Head>
     <h1>Runs side by side</h1>
     <p class="lead">
       One table per base, profile, protocol, dataset and settings. Runs in different tables are not comparable and are never ranked together. Scores are as recorded; no differences or intervals are computed here.

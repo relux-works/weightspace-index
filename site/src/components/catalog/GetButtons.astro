@@ -1,0 +1,25 @@
+---
+// The two downloads every patch exists for, as first-class buttons. On the
+// patch page each one also selects its setup tab.
+import type { Version } from "../../lib/types.ts";
+import { downloadUrl } from "../../lib/catalog.ts";
+import { runtimeGuide } from "../../lib/runtime.ts";
+import { humanBytes } from "../../lib/format.ts";
+interface Props { version: Version; size?: "lg" | "md"; loraTab?: string }
+const { version: v, size = "md", loraTab } = Astro.props;
+const lora = runtimeGuide(v).download;
+const source = v.patch.kind === "replacement" ? v.files.find(f => f.role === "source") : undefined;
+const icon = `<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+---
+<div class:list={["get", size]}>
+  {lora && <a class="get-btn lora" href={lora.href} download={lora.name} data-tab-select={loraTab}>
+    <span class="get-ic" set:html={icon} />
+    <span class="get-txt"><strong>LoRA adapter</strong><small>Load in your runtime</small></span>
+    <span class="get-size">{humanBytes(lora.sizeBytes)}</span>
+  </a>}
+  {source && <a class="get-btn repl" href={downloadUrl(source)} download={source.name} data-tab-select={loraTab ? "weightspace" : undefined}>
+    <span class="get-ic" set:html={icon} />
+    <span class="get-txt"><strong>Direct replacement</strong><small>Apply to the weights once</small></span>
+    <span class="get-size">{humanBytes(source.size_bytes)}</span>
+  </a>}
+</div>

@@ -1,0 +1,80 @@
+---
+// Patch vs LoRA explainer. Not tied to any one model: the drawings are
+// illustrations and the calculator works for any matrix shape.
+import Arrow from "../components/Arrow.astro";
+import Page from "../layouts/Page.astro";
+import PatchAnatomy from "../components/viz/PatchAnatomy.astro";
+import StorageCalc from "../components/viz/StorageCalc.astro";
+import { loadIndex } from "../lib/index.ts";
+import { mostBenchmarked, editStats } from "../lib/insight.ts";
+import { runtimeGuide } from "../lib/runtime.ts";
+import { authorReport } from "../data/reports.ts";
+const benchmarked = mostBenchmarked(loadIndex().bases);
+const stats = editStats(benchmarked);
+const shipped = benchmarked && stats ? {
+  name: authorReport(benchmarked)?.name ?? benchmarked.patch.title,
+  href: benchmarked.patch.url,
+  loraDownload: runtimeGuide(benchmarked).download?.sizeBytes ?? null,
+  loraUnpacked: stats.loraBytes,
+  replacement: stats.replacementBytes,
+} : undefined;
+const picks = [
+  { id: "vllm", label: "vLLM", fmt: "LoRA adapter", why: "Serve it with --enable-lora; the base stays loaded once." },
+  { id: "llama", label: "llama.cpp", fmt: "LoRA adapter", why: "Pass the GGUF adapter with --lora next to your base GGUF." },
+  { id: "hf", label: "Transformers", fmt: "LoRA adapter", why: "Load it with PeftModel on top of the pinned checkpoint." },
+  { id: "ship", label: "My own checkpoint", fmt: "Direct replacement", why: "Apply it once with weightspace and ship a plain model." },
+  { id: "speed", label: "No cost per token", fmt: "Direct replacement", why: "Runs at the base model's speed. A LoRA adds work to every token." },
+];
+---
+<Page title="How it works" nav="learn" description="What a weight patch is, and why the index ships every patch both as a direct replacement and as a LoRA adapter.">
+  <section class="learn-hero">
+    <div class="wrap">
+      <h1>One exact edit.<br /><span>Two ways to ship it.</span></h1>
+    </div>
+  </section>
+
+  <section class="home-band"><div class="wrap">
+    <div class="band-title"><h2>What a patch actually changes</h2></div>
+    <PatchAnatomy />
+  </div></section>
+
+  <section class="home-band subtle"><div class="wrap">
+    <div class="band-title"><h2>Which file do I need?</h2></div>
+    <div class="picker" data-picker>
+      <div class="picker-opts" data-slide="line" role="group" aria-label="I use">
+        {picks.map((p, i) => <button type="button" data-pick={p.id} aria-pressed={i === 0 ? "true" : "false"} data-ms="4200">
+          <span>{i < 3 ? `I run ${p.label}` : `I want ${p.label.toLowerCase()}`}</span></button>)}
+      </div>
+      <div class="picker-stage">
+        {picks.map(p => <div class="picker-answer" data-answer={p.id}>
+          <p class="picker-for">{p.label}</p><p class="picker-fmt">{p.fmt}</p><p>{p.why}</p>
+        </div>)}
+      </div>
+    </div>
+  </div></section>
+
+  <section class="home-band"><div class="wrap">
+    <div class="band-title"><h2>Which file is smaller depends on the matrix</h2></div>
+    <StorageCalc shipped={shipped} />
+  </div></section>
+
+  <section class="home-band subtle"><div class="wrap bench-cta">
+    <h2>We benchmark every patch</h2>
+    {benchmarked && <a class="btn primary" href={`${benchmarked.patch.url}#results`}>See the benchmarks <Arrow /></a>}
+  </div></section>
+</Page>
+<script>
+  import { autoCycle } from "../scripts/cycle.ts";
+  for (const root of document.querySelectorAll<HTMLElement>("[data-picker]")) {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-pick]")];
+    const answers = [...root.querySelectorAll<HTMLElement>("[data-answer]")];
+    const pick = (id: string) => {
+      buttons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pick === id)));
+      answers.forEach(a => a.toggleAttribute("data-on", a.dataset.answer === id));
+    };
+    const stop = autoCycle(root, buttons, i => pick(buttons[i].dataset.pick!));
+    buttons.forEach(b => b.addEventListener("click", () => { stop(); pick(b.dataset.pick!); }));
+    root.classList.add("js");
+    pick(buttons[0].dataset.pick!);
+  }
+</script>

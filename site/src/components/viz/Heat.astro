@@ -1,0 +1,28 @@
+---
+// A small weight matrix drawn as a heatmap. kind "w": base weights (blue, by
+// magnitude). "delta": the change alone, red by strength, blank where nothing
+// changes. "patched": base weights with the edited columns carrying the change.
+// "b" / "a": LoRA factors. Values are illustrative unless `values` is given.
+// The svg carries --cols and --rows so a page can size it from one cell size.
+import { weight, change } from "../../lib/heat.ts";
+interface Props {
+  rows: number; cols: number; kind: "w" | "delta" | "patched" | "b" | "a";
+  edited?: number[]; seed?: number; cell?: number; label?: string; class?: string;
+}
+const { rows, cols, kind, edited = [], seed = 0, cell = 10, label, class: cls } = Astro.props;
+const g = cell * 0.16;
+const cells: { x: number; y: number; c: string; v: number; k?: number }[] = [];
+for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+  const k = edited.indexOf(j);
+  let c = "hw", v = weight(i, j, seed);
+  if (kind === "delta") { c = k >= 0 && change(i, j, seed) ? "hd" : "h0"; v = k >= 0 ? change(i, j, seed) : 0; }
+  else if (kind === "patched" && k >= 0 && change(i, j, seed)) { c = "hd"; v = change(i, j, seed); }
+  else if (kind === "b") { c = "hd"; v = change(i, edited[j] ?? j, seed); }
+  else if (kind === "a") { const on = edited[i] === j; c = on ? "ha" : "h0"; v = on ? 1 : 0; }
+  cells.push({ x: j * cell, y: i * cell, c, v, k: kind === "b" ? j : kind === "a" ? (edited[i] === j ? i : undefined) : k >= 0 ? k : undefined });
+}
+---
+<svg class:list={["heat", cls]} viewBox={`0 0 ${cols * cell} ${rows * cell}`} style={`--cols:${cols};--rows:${rows}`} role={label ? "img" : undefined} aria-label={label} aria-hidden={label ? undefined : "true"}>
+  {cells.map(c => <rect x={c.x + g / 2} y={c.y + g / 2} width={cell - g} height={cell - g} rx={cell * 0.12}
+    class={c.c} style={`--v:${c.v.toFixed(2)}`} data-k={c.k} />)}
+</svg>

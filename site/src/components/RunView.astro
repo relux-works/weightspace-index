@@ -35,13 +35,13 @@ const finishCounts = (list: Outcome[]) => {
 const show = (v: unknown) => (v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
 const partnerName = partner ? barLabel(partner) : "";
 ---
-<Head crumbs={crumbs} eyebrow={run.version ? "Benchmark run" : "Baseline run"}>
+<Head crumbs={crumbs}>
   <div class="title-row">
     <h1>{run.protocolLabel} <span class="muted">· {run.settingsLabel}</span></h1>
     <Badge state={r.state} />
   </div>
   <p class="lead">
-    {run.version ? <>Run of <a href={run.version.url}>{run.version.patch.slug} {run.version.label}</a></> : <>Run of the unpatched base</>}
+    {run.version ? <>Benchmark run of <a href={run.version.url}>{run.version.patch.slug} {run.version.label}</a></> : <>Baseline run of the unpatched base</>}
     {" "}on profile <span class="mono">{r.profile}</span>, measured by {r.performed_by}.
   </p>
   {r.state === "INCOMPLETE" && (

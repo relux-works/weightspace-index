@@ -1,0 +1,90 @@
+---
+// What a release edits, from its own files: where the edited columns sit in
+// each matrix, and how strongly each sampled weight in them moves (the exact
+// old and new values stored in the replacement). Hovering a cell reads it out.
+import type { Version } from "../../lib/types.ts";
+import { editStats, editDeltas, strength, compact, percent } from "../../lib/insight.ts";
+interface Props { version: Version }
+const { version: v } = Astro.props;
+const stats = editStats(v)!;
+const deltas = editDeltas(v, 16);
+const whole = stats.modelParams ?? stats.tensorElements;
+const C = 8; // cell size in the heatmap's viewBox
+const num = (n: number) => +n.toPrecision(4);
+---
+<div class="editmap">
+  <p class="edit-summary">
+    <span><b>{compact(stats.elements)}</b> weights changed</span>
+    <span><b>{percent(stats.elements, whole)}</b> of {stats.modelParams ? "the model" : "the edited matrices"}</span>
+    <span><b>{stats.tensors.length}</b> {stats.tensors.length === 1 ? "matrix" : "matrices"}</span>
+  </p>
+  {deltas.length ? deltas.map(t => <figure class="edit-t" data-edit
+      data-cells={JSON.stringify(t.cells.map(r => r.map(c => c ? [num(c.old), num(c.new)] : 0)))}
+      data-rows={JSON.stringify(t.sampleRows)} data-cols={JSON.stringify(t.columns)}>
+    <figcaption><span class="mono">{t.short}</span><span>{t.columns.length} of {t.cols.toLocaleString("en-US")} columns · {t.changed.toLocaleString("en-US")} values</span></figcaption>
+    <svg class="edit-pos" viewBox="0 0 1000 14" preserveAspectRatio="none" aria-hidden="true">
+      <rect width="1000" height="14" />
+      {t.columns.map(c => <line x1={(c + 0.5) / t.cols * 1000} x2={(c + 0.5) / t.cols * 1000} y1="0" y2="14" />)}
+    </svg>
+    <div class="edit-heat-wrap">
+      <svg class="edit-heat" viewBox={`0 0 ${t.columns.length * C} ${t.sampleRows.length * C}`} role="img" tabindex="0"
+        aria-label={`${t.short}: change in ${t.sampleRows.length} sampled rows of each of the ${t.columns.length} edited columns. Arrow keys read single values.`}>
+        {t.cells.map((row, i) => row.map((c, j) => <rect x={j * C + .6} y={i * C + .6} width={C - 1.2} height={C - 1.2} rx="1"
+          class={c ? undefined : "u"} style={c ? `opacity:${(0.1 + 0.9 * strength(c, t.scale)).toFixed(2)}` : undefined} />))}
+        <rect class="edit-cursor" x="-20" y="-20" width={C} height={C} rx="1.5" />
+      </svg>
+      <output class="edit-read" aria-live="off" hidden></output>
+    </div>
+    <p class="edit-pos-cap">Edited columns side by side, {t.sampleRows.length} of {t.rows.toLocaleString("en-US")} rows shown</p>
+  </figure>) : stats.tensors.map(t => <figure class="edit-t">
+    <figcaption><span class="mono">{t.short}</span><span>{t.active} of {t.cols.toLocaleString("en-US")} input columns</span></figcaption>
+    <svg class="edit-pos" viewBox="0 0 1000 14" preserveAspectRatio="none" aria-hidden="true">
+      <rect width="1000" height="14" />
+      {t.columns.map(c => <line x1={(c + 0.5) / t.cols * 1000} x2={(c + 0.5) / t.cols * 1000} y1="0" y2="14" />)}
+    </svg>
+  </figure>)}
+  {deltas.length > 0 && <p class="heat-key"><span>Smaller change</span><i class="ramp"></i><span>Larger change</span><i class="none"></i><span>Unchanged</span></p>}
+</div>
+<script>
+  for (const fig of document.querySelectorAll<HTMLElement>("[data-edit]")) {
+    const cells: (0 | [number, number])[][] = JSON.parse(fig.dataset.cells!);
+    const rows: number[] = JSON.parse(fig.dataset.rows!);
+    const cols: number[] = JSON.parse(fig.dataset.cols!);
+    const svg = fig.querySelector<SVGSVGElement>(".edit-heat")!;
+    const cursor = svg.querySelector<SVGRectElement>(".edit-cursor")!;
+    const out = fig.querySelector<HTMLOutputElement>(".edit-read")!;
+    const C = 8;
+    let at = [0, 0];
+    // Pointer, touch and arrow keys all read one cell; only the keyboard path is announced.
+    const show = (i: number, j: number, announce: boolean) => {
+      at = [i, j];
+      out.setAttribute("aria-live", announce ? "polite" : "off");
+      cursor.setAttribute("x", String(j * C)); cursor.setAttribute("y", String(i * C));
+      const c = cells[i][j];
+      const d = c ? c[1] - c[0] : 0;
+      out.textContent = `row ${rows[i].toLocaleString("en-US")}, column ${cols[j].toLocaleString("en-US")} · ` +
+        (c ? `${c[0]} → ${c[1]} (${d > 0 ? "+" : "−"}${Math.abs(+d.toPrecision(3))})` : "unchanged");
+      out.hidden = false;
+      out.style.left = `${((j + 0.5) / cols.length) * 100}%`;
+      out.style.top = `${(i / rows.length) * 100}%`;
+    };
+    const hide = () => { out.hidden = true; cursor.setAttribute("x", "-20"); };
+    const fromPointer = (e: PointerEvent) => {
+      const box = svg.getBoundingClientRect();
+      const j = Math.min(cols.length - 1, Math.max(0, Math.floor(((e.clientX - box.left) / box.width) * cols.length)));
+      const i = Math.min(rows.length - 1, Math.max(0, Math.floor(((e.clientY - box.top) / box.height) * rows.length)));
+      show(i, j, false);
+    };
+    svg.addEventListener("pointermove", fromPointer);
+    svg.addEventListener("pointerdown", fromPointer);
+    svg.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") hide(); });
+    svg.addEventListener("focus", () => show(at[0], at[1], true));
+    svg.addEventListener("blur", hide);
+    svg.addEventListener("keydown", e => {
+      const step = ({ ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] } as Record<string, number[]>)[e.key];
+      if (!step) return;
+      e.preventDefault();
+      show(Math.min(rows.length - 1, Math.max(0, at[0] + step[0])), Math.min(cols.length - 1, Math.max(0, at[1] + step[1])), true);
+    });
+  }
+</script>

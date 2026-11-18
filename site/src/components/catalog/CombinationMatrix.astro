@@ -1,0 +1,102 @@
+---
+// Joint studies as a patch × patch matrix (model page) or as the list of
+// studies that include one release (patch page). Each study shows the measured
+// base, each member alone and all members together, from one measuring source.
+import type { Base, Version } from "../../lib/types.ts";
+import { loadIndex } from "../../lib/index.ts";
+import { activeVersion } from "../../lib/catalog.ts";
+import { authorReport } from "../../data/reports.ts";
+import { combos, signed, fmt, SOURCE_NOTE, VERDICT_LABEL } from "../../lib/insight.ts";
+interface Props { base: Base; version?: Version }
+const { base, version } = Astro.props;
+const index = loadIndex();
+const studies = combos(base, version);
+const nameOf = (v: Version) => authorReport(v)?.name ?? v.patch.title;
+const patches = base.patches.filter(p => activeVersion(p));
+const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+const byPair = new Map(studies.filter(s => s.members.length === 2).map((s, i) => [pairKey(s.members[0].slug, s.members[1].slug), { s, i: studies.indexOf(s) }]));
+const showMatrix = !version && patches.length >= 2;
+const untested = version ? patches.filter(p => p !== version.patch && !studies.some(s => s.members.some(m => m.slug === p.slug))) : [];
+const id = (i: number) => `combo-${i}`;
+// The legend names only what the matrix actually shows.
+const pairs = patches.slice(1).flatMap((row, r) => patches.slice(0, r + 1).map(col => byPair.get(pairKey(row.slug, col.slug))));
+const shownKinds = new Set<string>(pairs.map(h => h ? h.s.verdict : "untested"));
+const legend = [
+  { kind: "amplify", text: "Amplify: better than either alone" },
+  { kind: "neutral", text: "No extra gain" },
+  { kind: "interfere", text: "Interfere: worse than the best alone" },
+  { kind: "untested", text: "Not tested yet" },
+];
+---
+<div class="combos" data-combos>
+  {!studies.length && <p class="quiet-row">{patches.length < 2 && !version
+    ? "Combinations are tested once a second patch is published for this model."
+    : version && patches.length < 2 ? "This is the only patch for its model so far; combinations are tested once a second one is published."
+    : "No joint benchmark has been filed yet."}</p>}
+  {(showMatrix || studies.length > 0) && <div class:list={["combo-layout", { single: !showMatrix }]}>
+    {showMatrix && <div class="combo-matrix-wrap">
+      <table class="combo-matrix" style={`--n:${patches.length}`}>
+        <caption class="visually-hidden">Patch pairs and how they behave together</caption>
+        <thead><tr><td></td>{patches.slice(0, -1).map(p => <th scope="col"><span>{nameOf(activeVersion(p)!)}</span></th>)}</tr></thead>
+        <tbody>
+          {patches.slice(1).map((row, r) => <tr>
+            <th scope="row">{nameOf(activeVersion(row)!)}</th>
+            {patches.slice(0, -1).map((col, c) => {
+              if (c > r) return <td class="void"></td>;
+              const hit = byPair.get(pairKey(row.slug, col.slug));
+              if (!hit) return <td><span class="cell untested" title="Not tested yet">·</span></td>;
+              const best = Math.max(...hit.s.members.map(m => m.alone));
+              return <td><button type="button" class:list={["cell", hit.s.verdict]} data-show={id(hit.i)} aria-controls={id(hit.i)}
+                aria-label={`${nameOf(activeVersion(row)!)} with ${nameOf(activeVersion(col)!)}: ${VERDICT_LABEL[hit.s.verdict]}`}>
+                <b>{signed(hit.s.together - best, hit.s.unit)}</b><small>{VERDICT_LABEL[hit.s.verdict]}</small></button></td>;
+            })}
+          </tr>)}
+        </tbody>
+      </table>
+      <ul class="combo-legend">{legend.filter(l => shownKinds.has(l.kind)).map(l => <li class={l.kind}>{l.text}</li>)}</ul>
+    </div>}
+    <div class="combo-details">
+      {studies.map((s, i) => {
+        const rows = [
+          { label: "Unpatched base", value: s.baseline, kind: "base" },
+          ...s.members.map(m => ({ label: `${nameOf(m.release)} alone`, value: m.alone, kind: "alone", href: m.release.isLatest ? m.release.patch.url : m.release.url })),
+          { label: "Together", value: s.together, kind: "joint" },
+        ];
+        const hi = Math.max(s.unit === "%" ? 100 : 0, ...rows.map(r => r.value)) || 1;
+        const best = Math.max(...s.members.map(m => m.alone));
+        return <article class="combo-card" id={id(i)} data-combo>
+          <div class="combo-head">
+            <div><p class="studymeta"><span class:list={["src-chip", s.measured_by === "author" ? "self" : "indep"]}>{SOURCE_NOTE[s.measured_by]}</span> · {s.benchmark} · {s.denominator} items</p>
+              <h3>{s.members.map((m, k) => <>{k > 0 && <span class="plus"> + </span>}{nameOf(m.release)}</>)}</h3></div>
+            <span class:list={["verdict", s.verdict]}>{VERDICT_LABEL[s.verdict]}</span>
+          </div>
+          <div class="combo-bars" style={`--best:${(100 * best) / hi}%`}>
+            {rows.map(r => <div class:list={["cb-row", r.kind, s.verdict]}>
+              <span class="cb-label">{r.href ? <a href={r.href}>{r.label}</a> : r.label}</span>
+              <span class="cb-track"><i style={`width:${(100 * r.value) / hi}%`}></i></span>
+              <span class="cb-val">{fmt(r.value, s.unit)}</span>
+            </div>)}
+          </div>
+          <p class="combo-reading"><strong>{s.outcome}</strong> · together {fmt(s.together, s.unit)} vs best single {fmt(best, s.unit)} ({signed(s.together - best, s.unit)})</p>
+          <details class="fold"><summary>How this was measured</summary><p>{s.protocol}</p>
+            <ul>{s.members.map(m => <li>{m.artifact.name} · scale {m.scale}</li>)}</ul><a href={index.docsAt(s.file)}>Measurement record</a></details>
+        </article>;
+      })}
+    </div>
+  </div>}
+  {untested.length > 0 && <p class="untested-list">Not yet tested with: {untested.map((p, i) => <>{i > 0 && ", "}<a href={p.url}>{nameOf(activeVersion(p)!)}</a></>)}</p>}
+</div>
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>("[data-combos]")) {
+    const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-show]")];
+    const cards = [...root.querySelectorAll<HTMLElement>("[data-combo]")];
+    if (!buttons.length) continue;
+    const linked = new Set(buttons.map(b => b.dataset.show));
+    const show = (id: string) => {
+      cards.forEach(c => { c.hidden = linked.has(c.id) && c.id !== id; });
+      buttons.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.show === id)));
+    };
+    buttons.forEach(b => b.addEventListener("click", () => show(b.dataset.show!)));
+    show(buttons[0].dataset.show!);
+  }
+</script>

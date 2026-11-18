@@ -1,52 +1,55 @@
 ---
+import Arrow from "../../../../components/Arrow.astro";
 import Page from "../../../../layouts/Page.astro";
 import FileList from "../../../../components/FileList.astro";
-import GroupResults from "../../../../components/GroupResults.astro";
-import { rankings } from "../../../../lib/rank.ts";
-import Evidence from "../../../../components/catalog/Evidence.astro";
-import Combinations from "../../../../components/catalog/Combinations.astro";
 import Filter from "../../../../components/catalog/Filter.astro";
-import PatchRow from "../../../../components/catalog/PatchRow.astro";
+import PatchCard from "../../../../components/catalog/PatchCard.astro";
+import ModelResults from "../../../../components/catalog/ModelResults.astro";
+import CombinationMatrix from "../../../../components/catalog/CombinationMatrix.astro";
 import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
 import { activeVersion, formats } from "../../../../lib/catalog.ts";
+import { combos } from "../../../../lib/insight.ts";
 import { plural } from "../../../../lib/format.ts";
-import { authorReport } from "../../../../data/reports.ts";
 export function getStaticPaths() {
   return loadIndex().bases.map(base => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
 }
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
-const measured = releases.filter(v => v.runs.length || authorReport(v));
-const comparisons = base.groups.flatMap(group => rankings(group).flatMap(r => {
-  const runs = r.runs.filter(run => !run.version || run.version.isLatest);
-  return new Set(runs.flatMap(run => run.version ? [run.version.patch.slug] : [])).size > 1
-    ? [{ group, ranking: { ...r, runs } }] : [];
-}));
 const forms = [...new Set(releases.flatMap(v => formats(v)))];
+const studies = combos(base);
+const profile = base.profiles[0];
 ---
-<Page title={base.address} description={`Browse and download patches for ${base.address}.`} nav="models">
+<Page title={base.address} description={`Patches for ${base.address}: results, combinations and downloads.`} nav="models">
   <div class="wrap page-flow">
     <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><span aria-current="page">{base.model}</span></nav>
-    <header class="model-head overview"><p class="context-label">{base.ns} / Base model</p><h1>{base.model}</h1>
-      <div class="model-facts"><span>{plural(base.patches.length, "patch", "patches")}</span>{forms.length > 0 && <span>{forms.join(" + ")}</span>}
-        <a href="#profiles">{base.profiles.map(p => p.id.toUpperCase()).join(" / ")}</a></div>
+    <header class="model-hero">
+      <h1><span class="h1-ns">{base.ns}/</span>{base.model}</h1>
+      <p class="model-meta">
+        <span>{plural(base.patches.length, "patch", "patches")}</span>
+        {forms.length > 0 && <span>{forms.join(" + ")}</span>}
+        {studies.length > 0 && <a href="#combinations">{plural(studies.length, "combination")} tested</a>}
+        {profile && <a href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`}>Base weights on Hugging Face <Arrow dir="out" /></a>}
+      </p>
     </header>
-    <nav class="local-nav" aria-label="Model sections"><a href="#patches">Patches</a>{measured.length > 0 && <a href="#results">Benchmarks</a>}<a href="#combinations">Combinations</a><a href="#profiles">Base files</a></nav>
+
     <section class="flow-section" id="patches">
-      <div class="directory-head"><h2>Available patches</h2>{base.patches.length > 1 && <Filter target="patch-list" label="Filter patches" noun="patches"/>}</div>
+      <div class="directory-head"><h2 class="visually-hidden">Patches</h2>{base.patches.length > 3 && <Filter target="patch-list" label="Filter patches" noun="patches"/>}</div>
       <p class="filter-status" id="patch-list-status" role="status"></p>
-      <div id="patch-list">{base.patches.map(patch => <PatchRow patch={patch} />)}</div>
+      <div id="patch-list" class="pcards">{base.patches.map(patch => <PatchCard patch={patch} />)}</div>
       {!base.patches.length && <p class="quiet-row">This model has no published patches yet. Its supported base files are listed below.</p>}
     </section>
-    {measured.length > 0 && <section class="flow-section" id="results"><h2>Benchmark evidence</h2>
-      {comparisons.map(({ group, ranking }) => <GroupResults group={group} ranking={ranking}/>)}
-      {measured.slice(0, 4).map((v,i) => base.patches.length === 1 ? <Evidence version={v}/> : <details class="fold" open={i === 0}>
-        <summary>{authorReport(v)?.name ?? v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}
-      {measured.length > 4 && <details class="fold"><summary>{measured.length - 4} more patch reports</summary>
-        {measured.slice(4).map(v => <details class="fold"><summary>{v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}</details>}
+
+    {base.patches.length > 1 && <section class="flow-section" id="results">
+      <h2>Compare patches</h2>
+      <ModelResults base={base} />
     </section>}
-    <Combinations base={base} />
+
+    {base.patches.length > 1 && <section class="flow-section" id="combinations">
+      <h2>Patch combinations</h2>
+      <CombinationMatrix base={base} />
+    </section>}
+
     <section class="flow-section" id="profiles"><h2>Base files</h2>
       {base.profiles.map(p => <details class="fold" id={`profile-${p.id}`}><summary>{p.id.toUpperCase()} · {p.source.repo_id} <code>@{p.source.revision.slice(0,7)}</code></summary>
         <FileList files={profileFiles(p)} showRole={false} /></details>)}

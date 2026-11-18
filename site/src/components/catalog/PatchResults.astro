@@ -1,0 +1,35 @@
+---
+// A release's results: the author's own numbers and independent measurements,
+// each under its own label, never in one list (rule 9).
+import Arrow from "../Arrow.astro";
+import type { Version } from "../../lib/types.ts";
+import { authorReport } from "../../data/reports.ts";
+import { results, pending } from "../../lib/insight.ts";
+import ResultList from "../viz/ResultList.astro";
+import RunSummary from "./RunSummary.astro";
+interface Props { version: Version }
+const { version: v } = Astro.props;
+const all = results(v);
+const indep = all.filter(r => r.source !== "author");
+const self = all.filter(r => r.source === "author");
+const waiting = pending(v);
+const report = authorReport(v);
+const authors = v.patch.authors.map(a => a.name).join(", ");
+---
+<div class="presults">
+  {self.length > 0 && <div class="rgroup">
+    <p class="rgroup-head"><span class="src-chip self">Self-reported</span><span>by {authors}{report && <> · <a href={report.url}>source <Arrow dir="out" /></a></>}</span></p>
+    <ResultList rows={self.map(r => ({ ...r, label: r.benchmark, sub: r.metric, href: undefined }))} />
+    {report && <details class="fold"><summary>Study conditions</summary><p>{report.scope}</p></details>}
+  </div>}
+  <div class="rgroup">
+    <p class="rgroup-head"><span class="src-chip indep">Independently measured</span></p>
+    {indep.length > 0 && <ResultList rows={indep.map(r => ({ ...r, label: r.benchmark, sub: r.metric, href: r.href }))} />}
+    {waiting.map(w => <a class="rpending" href={w.href}>
+      <span><strong>{w.benchmark}</strong> being measured · {w.filed} of {w.total} runs done</span>
+      <progress value={w.filed} max={w.total}></progress>
+    </a>)}
+    {!indep.length && !waiting.length && <p class="rempty">Not measured yet. <a href="#benchmark">Run the benchmark</a> and file the result.</p>}
+    {v.runs.length > 0 && <details class="fold"><summary>Run records ({v.runs.length})</summary>{v.runs.map(r => <RunSummary version={v} run={r} />)}</details>}
+  </div>
+</div>

@@ -1,22 +1,25 @@
 ---
+// One row of the model directory: the model, its patches and the best recorded gain.
+import Arrow from "../Arrow.astro";
 import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
+import { headline, signed, gain, SOURCE_NOTE } from "../../lib/insight.ts";
 import type { Base } from "../../lib/types.ts";
-import { plural } from "../../lib/format.ts";
 import { authorReport } from "../../data/reports.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const versions = base.patches.map(activeVersion).filter(v => !!v);
 const forms = [...new Set(versions.flatMap(v => formats(v)))];
 const synthetic = base.dir.startsWith("docs/example/");
-const patchNames = base.patches.slice(0, 2).map(p => authorReport(activeVersion(p))?.name ?? p.title);
 const terms = discoveryText(base.address, base.patches, forms) + " " + versions.map(v => authorReport(v)?.goal ?? "").join(" ").toLowerCase();
+const best = versions.map(v => headline(v)).filter(r => !!r).toSorted((a, b) => gain(b!) - gain(a!))[0];
+const trend = best ? (gain(best) > 0 ? "up" : gain(best) < 0 ? "down" : "flat") : "";
+const names = versions.map(v => authorReport(v)?.name ?? v.patch.title);
 ---
-<article class="model-tile" data-search={terms}>
-  <a class="model-link" href={base.url}>
-    <div class="model-top"><span class="model-symbol" aria-hidden="true">▱<i>▱</i></span><span>{base.ns}</span>{synthetic && <span class="demo-tag">Demo</span>}</div>
-    <h3>{base.model}</h3>
-    <p class="tile-sub">{plural(base.patches.length, "patch", "patches")}<span>·</span>{base.profiles.length > 1 ? plural(base.profiles.length, "profile") : base.profiles[0]?.id.toUpperCase()}</p>
-    {patchNames.length > 0 && <p class="tile-patches">{patchNames.join(" · ")}{base.patches.length > 2 && ` +${base.patches.length - 2} more`}</p>}
-    <div class="model-bottom"><div class="chips">{forms.length ? forms.map(f => <span>{f}</span>) : <span>Base model</span>}</div><span class="tile-arrow" aria-hidden="true">→</span></div>
+<li class="model-tile" data-search={terms}>
+  <a class="mrow" href={base.url}>
+    <span class="mrow-name"><small>{base.ns}{synthetic && <span class="demo-tag">Demo</span>}</small><strong>{base.model}</strong></span>
+    <span class="mrow-patches">{names.length ? <><b>{names.length}</b> {names.slice(0, 2).join(", ")}{names.length > 2 && ` +${names.length - 2}`}</> : <span class="muted">No patches yet</span>}</span>
+    <span class="mrow-best">{best ? <><span><b class={trend}>{signed(best.patched - best.base, best.unit)}</b> {best.benchmark}</span><span class:list={["src-chip", best.source === "author" ? "self" : "indep"]}>{SOURCE_NOTE[best.source]}</span></> : <span class="muted">No results yet</span>}</span>
+    <span class="mrow-go"><Arrow /></span>
   </a>
-</article>
+</li>

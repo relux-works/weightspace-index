@@ -1,0 +1,22 @@
+---
+// Before → after for one measuring source. One row per result: the number that
+// matters, the change, and a thin bar with the base marked. Rows from different
+// sources are never passed in together (rule 9).
+import { fmt, signed, gain, type Result } from "../../lib/insight.ts";
+interface Row extends Pick<Result, "base" | "patched" | "unit" | "higherIsBetter"> { label: string; sub?: string; href?: string }
+interface Props { rows: Row[] }
+const { rows } = Astro.props;
+const max = rows.every(r => r.unit === "%") ? 100 : Math.max(...rows.flatMap(r => [r.base, r.patched]), 1) * 1.1;
+const pct = (n: number) => `${Math.max(0, Math.min(100, (100 * n) / max)).toFixed(1)}%`;
+---
+<ul class="rlist">
+  {rows.map(r => {
+    const g = gain(r);
+    return <li class:list={["rrow", g > 0 ? "up" : g < 0 ? "down" : "flat"]} style={`--b:${pct(r.base)};--p:${pct(r.patched)}`}>
+      <span class="rname">{r.href ? <a href={r.href}>{r.label}</a> : r.label}{(r.sub || !r.higherIsBetter) && <small>{[r.sub, !r.higherIsBetter && "lower is better"].filter(Boolean).join(" · ")}</small>}</span>
+      <span class="rbar" aria-hidden="true"><i></i><b></b></span>
+      <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
+      <span class:list={["delta", g > 0 ? "up" : g < 0 ? "down" : "flat"]}>{signed(r.patched - r.base, r.unit)}</span>
+    </li>;
+  })}
+</ul>

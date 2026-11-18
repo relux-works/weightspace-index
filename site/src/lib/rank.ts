@@ -6,18 +6,17 @@
 import { measuredBy, rankable, runLabel, type Group, type Run } from "./index.ts";
 
 export interface Ranking {
-  bucket: "index" | "reported";
+  bucket: Run["record"]["performed_by"];
   metric: string;
   unit: string;
   /** Highest recorded score first; ties keep record order. */
   runs: Run[];
-  /** Active versions sharing the highest recorded score among patched runs. */
-  best: Run[];
 }
 
 export const BUCKET_LABEL = {
   index: "Measured by the index",
-  reported: "Reported by authors or third parties",
+  author: "Reported by the patch author",
+  "third-party": "Reported by a contributor",
 } as const;
 
 export function rankings(g: Group): Ranking[] {
@@ -28,17 +27,14 @@ export function rankings(g: Group): Ranking[] {
     const bucket = measuredBy(run);
     const key = `${bucket}|${s.metric}|${s.unit}`;
     let r = by.get(key);
-    if (!r) by.set(key, (r = { bucket, metric: s.metric!, unit: s.unit!, runs: [], best: [] }));
+    if (!r) by.set(key, (r = { bucket, metric: s.metric!, unit: s.unit!, runs: [] }));
     r.runs.push(run);
   }
-  const out = [...by.values()].sort((a, b) => (a.bucket === b.bucket ? 0 : a.bucket === "index" ? -1 : 1));
+  const order = ["index", "third-party", "author"];
+  const out = [...by.values()].sort((a, b) => order.indexOf(a.bucket) - order.indexOf(b.bucket));
   for (const r of out) {
     r.runs.sort((a, b) => b.record.score.value! - a.record.score.value!);
-    const patched = r.runs.filter((x) => x.version && x.version.status === "active");
-    if (patched.length) {
-      const top = patched[0].record.score.value!;
-      r.best = patched.filter((x) => x.record.score.value === top);
-    }
+
   }
   return out;
 }

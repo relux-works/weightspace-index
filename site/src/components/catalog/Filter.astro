@@ -1,0 +1,38 @@
+---
+interface Props { target: string; label: string; noun: string }
+const { target, label, noun } = Astro.props;
+---
+<div class="catalog-filter" data-filter-for={target} data-noun={noun} hidden>
+  <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.6"/></svg>
+  <input type="search" placeholder={label} aria-label={label} aria-controls={target}/>
+</div>
+<script>
+  import { filteredPage } from "../../lib/filter.ts";
+  for (const filter of document.querySelectorAll<HTMLElement>("[data-filter-for]")) {
+    const list = document.getElementById(filter.dataset.filterFor!)!;
+    const rows = [...list.querySelectorAll<HTMLElement>("[data-search]")];
+    const input = filter.querySelector("input")!;
+    const status = document.getElementById(list.id + "-status")!;
+    filter.hidden = false;
+    const more = document.createElement("button");
+    more.className = "btn load-more";
+    more.type = "button";
+    list.after(more);
+    const pageSize = 8;
+    const searchText = rows.map(row => row.dataset.search!);
+    let limit = pageSize;
+    const apply = () => {
+      const { visible, matched } = filteredPage(searchText, input.value, limit);
+      const shown = new Set(visible);
+      rows.forEach((row, i) => { row.hidden = !shown.has(i); });
+      const noun = filter.dataset.noun;
+      more.hidden = visible.length === matched;
+      more.textContent = `Show ${Math.min(pageSize, matched - visible.length)} more ${noun}`;
+      status.textContent = !matched ? `No matching ${noun}. Try another name or clear your search.`
+        : input.value || matched > pageSize ? `${visible.length} of ${matched} ${noun} shown` : "";
+    };
+    input.addEventListener("input", () => { limit = pageSize; apply(); });
+    more.addEventListener("click", () => { limit += pageSize; apply(); });
+    apply();
+  }
+</script>

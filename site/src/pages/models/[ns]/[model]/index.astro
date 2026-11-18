@@ -1,148 +1,57 @@
 ---
 import Page from "../../../../layouts/Page.astro";
-import Badge from "../../../../components/Badge.astro";
-import Command from "../../../../components/Command.astro";
 import FileList from "../../../../components/FileList.astro";
 import GroupResults from "../../../../components/GroupResults.astro";
-import Head from "../../../../components/Head.astro";
-import Score from "../../../../components/Score.astro";
-import Section from "../../../../components/Section.astro";
+import { rankings } from "../../../../lib/rank.ts";
+import Evidence from "../../../../components/catalog/Evidence.astro";
+import Combinations from "../../../../components/catalog/Combinations.astro";
+import Filter from "../../../../components/catalog/Filter.astro";
+import PatchRow from "../../../../components/catalog/PatchRow.astro";
 import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
-import { hfDownload, profileDir, verify } from "../../../../lib/commands.ts";
-
+import { activeVersion, formats } from "../../../../lib/catalog.ts";
+import { plural } from "../../../../lib/format.ts";
+import { authorReport } from "../../../../data/reports.ts";
 export function getStaticPaths() {
-  return loadIndex().bases.map((base) => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
+  return loadIndex().bases.map(base => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
 }
 interface Props { base: Base }
 const { base } = Astro.props;
+const releases = base.patches.map(activeVersion).filter(v => !!v);
+const measured = releases.filter(v => v.runs.length || authorReport(v));
+const comparisons = base.groups.flatMap(group => rankings(group).flatMap(r => {
+  const runs = r.runs.filter(run => !run.version || run.version.isLatest);
+  return new Set(runs.flatMap(run => run.version ? [run.version.patch.slug] : [])).size > 1
+    ? [{ group, ranking: { ...r, runs } }] : [];
+}));
+const forms = [...new Set(releases.flatMap(v => formats(v)))];
 ---
-<Page
-  title={base.address}
-  description={`Weight patches for ${base.address}: files, versions and recorded benchmark results.`}
-  nav="models"
->
-  <Head crumbs={[{ label: "Models", href: href() }, { label: base.address }]} eyebrow="Base model">
-    <h1 class="break">{base.address}</h1>
-    <dl class="facts">
-      <div><dt>Patches</dt><dd>{base.patches.length}</dd></div>
-      <div><dt>Profiles</dt><dd><span class="row">{base.profiles.map((p) => <a class="tag" href={`#profile-${p.id}`}>{p.id}</a>)}</span></dd></div>
-      <div><dt>Benchmark runs</dt><dd>{base.runs.length === 0 ? <span class="muted">no benchmarks submitted</span> : base.runs.length}</dd></div>
-      <div><dt>Benchmark groups</dt><dd>{base.groups.length}</dd></div>
-    </dl>
-    <nav class="toc" aria-label="On this page">
-      <a href="#patches">Patches</a>
-      <a href="#results">Results</a>
-      <a href="#combinations">Combinations</a>
-      <a href="#profiles">Profiles</a>
-      <a href="#records">Records</a>
-    </nav>
-  </Head>
-
-  <Section title="Patches" id="patches">
-    {base.patches.length === 0 ? (
-      <p class="empty"><strong>No patches for this base yet.</strong></p>
-    ) : (
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Patch</th><th>Kind</th><th>Latest</th><th>License</th><th>Evidence (latest)</th></tr></thead>
-          <tbody>
-            {base.patches.map((p) => {
-              const latest = p.versions.find((v) => v.n === p.latest) ?? null;
-              return (
-                <tr>
-                  <td>
-                    <a class="title" href={p.url}>{p.title}</a>
-                    <span class="sub">{p.summary}</span>
-                    {p.tags.length > 0 && <div class="row" style="margin-top: var(--space-2)">{p.tags.map((t) => <a class="tag" href={href(`search/?tag=${encodeURIComponent(t)}`)}>{t}</a>)}</div>}
-                  </td>
-                  <td>{p.kind}</td>
-                  <td class="nowrap">
-                    {latest ? <a href={latest.url}>{latest.label}</a> : <span class="muted">no active version</span>}
-                  </td>
-                  <td class="nowrap">{p.license}</td>
-                  <td>
-                    {latest ? (
-                      <span class="row">{latest.evidence.map((e) => <Badge state={e} />)}</span>
-                    ) : (
-                      <span class="muted">none</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </Section>
-
-  <Section title="Results" id="results" subtle>
-    <Fragment slot="intro">
-      Grouped by profile, protocol, dataset and settings. Each group is ranked on its own, and index-measured results are kept apart from reported ones. Scores are shown as recorded.
-    </Fragment>
-    {base.groups.length === 0 ? (
-      <p class="empty"><strong>No benchmarks submitted</strong>No run records exist for this base.</p>
-    ) : (
-      <div class="cards">{base.groups.map((g) => <GroupResults group={g} />)}</div>
-    )}
-  </Section>
-
-  <Section title="Measured combinations" id="combinations">
-    <Fragment slot="intro">Combinations are ranked only when a run measured them, never estimated from single patches.</Fragment>
-    <p class="empty">
-      <strong>No measured combinations</strong>Every run in the index measures the unpatched base or a single patch version.
-    </p>
-  </Section>
-
-  <Section title="Profiles" id="profiles">
-    <Fragment slot="intro">The exact base files each patch version targets. Download at the pinned revision and check every file before applying anything.</Fragment>
-    <div class="subsections">
-      {base.profiles.map((profile) => {
-        const baseline = base.baselineRuns.filter((r) => r.record.profile === profile.id);
-        return (
-          <article class="subsection" id={`profile-${profile.id}`}>
-            <div class="subsection-head">
-              <h3>Profile <span class="mono">{profile.id}</span></h3>
-              <a class="small" href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`} rel="noopener noreferrer">
-                <span class="mono">{profile.source.repo_id}@{profile.source.revision.slice(0, 7)}</span>
-              </a>
-            </div>
-            <FileList files={profileFiles(profile)} showRole={false} />
-            <div class="cmds">
-              <Command title="Download the profile" command={hfDownload(base, profile)} />
-              {profile.files.map((f) => (
-                <Command title={`Check ${f.path}`} command={verify(`${profileDir(base, profile)}/${f.path}`)} />
-              ))}
-            </div>
-            {baseline.length > 0 && (
-              <div class="stack">
-                <p class="eyebrow">Baseline runs on this profile</p>
-                <div class="table-wrap">
-                  <table class="compact">
-                    <thead><tr><th>Run</th><th>Protocol · settings</th><th>Measured by</th><th>State</th><th>Score</th></tr></thead>
-                    <tbody>
-                      {baseline.map((r) => (
-                        <tr>
-                          <td><a href={r.url} class="mono small">{r.id}</a></td>
-                          <td>{r.protocolLabel} · {r.settingsLabel}</td>
-                          <td>{r.record.performed_by}</td>
-                          <td><Badge state={r.record.state} /></td>
-                          <td><Score score={r.record.score} compact /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </article>
-        );
-      })}
-    </div>
-  </Section>
-
-  <Section title="Records" id="records">
-    <Fragment slot="intro">The base record this page is built from.</Fragment>
-    <FileList files={[base.baseRecord]} showRole={false} />
-  </Section>
+<Page title={base.address} description={`Browse and download patches for ${base.address}.`} nav="models">
+  <div class="wrap page-flow">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><span aria-current="page">{base.model}</span></nav>
+    <header class="model-head overview"><p class="context-label">{base.ns} / Base model</p><h1>{base.model}</h1>
+      <div class="model-facts"><span>{plural(base.patches.length, "patch", "patches")}</span>{forms.length > 0 && <span>{forms.join(" + ")}</span>}
+        <a href="#profiles">{base.profiles.map(p => p.id.toUpperCase()).join(" / ")}</a></div>
+    </header>
+    <nav class="local-nav" aria-label="Model sections"><a href="#patches">Patches</a>{measured.length > 0 && <a href="#results">Benchmarks</a>}<a href="#combinations">Combinations</a><a href="#profiles">Base files</a></nav>
+    <section class="flow-section" id="patches">
+      <div class="directory-head"><h2>Available patches</h2>{base.patches.length > 1 && <Filter target="patch-list" label="Filter patches" noun="patches"/>}</div>
+      <p class="filter-status" id="patch-list-status" role="status"></p>
+      <div id="patch-list">{base.patches.map(patch => <PatchRow patch={patch} />)}</div>
+      {!base.patches.length && <p class="quiet-row">This model has no published patches yet. Its supported base files are listed below.</p>}
+    </section>
+    {measured.length > 0 && <section class="flow-section" id="results"><h2>Benchmark evidence</h2>
+      {comparisons.map(({ group, ranking }) => <GroupResults group={group} ranking={ranking}/>)}
+      {measured.slice(0, 4).map((v,i) => measured.length === 1 ? <Evidence version={v}/> : <details class="fold" open={i === 0}>
+        <summary>{authorReport(v)?.name ?? v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}
+      {measured.length > 4 && <details class="fold"><summary>{measured.length - 4} more patch reports</summary>
+        {measured.slice(4).map(v => <details class="fold"><summary>{v.patch.title} · {v.label}</summary><Evidence version={v}/></details>)}</details>}
+    </section>}
+    <Combinations base={base} />
+    <section class="flow-section" id="profiles"><h2>Base files</h2>
+      {base.profiles.map(p => <details class="fold" id={`profile-${p.id}`}><summary>{p.id.toUpperCase()} · {p.source.repo_id} <code>@{p.source.revision.slice(0,7)}</code></summary>
+        <FileList files={profileFiles(p)} showRole={false} /></details>)}
+      <details class="fold" id="records"><summary>Model record and benchmark runs</summary><a href={base.baseRecord.view}>Base record</a>
+        {base.groups.map(g => <div id={g.id}><h3>{g.protocolLabel} · {g.profile.id}</h3>{g.runs.map(r => <p><a href={r.url}>{r.version ? r.version.patch.title + " " + r.version.label : "Unpatched base"} · {r.record.state}</a></p>)}</div>)}</details>
+    </section>
+  </div>
 </Page>

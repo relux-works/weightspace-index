@@ -1,13 +1,7 @@
 ---
-import { getEntry, render } from "astro:content";
-import Page from "../../../../../layouts/Page.astro";
-import Badge from "../../../../../components/Badge.astro";
-import FileList from "../../../../../components/FileList.astro";
-import Head from "../../../../../components/Head.astro";
-import Section from "../../../../../components/Section.astro";
-import { href, loadIndex, type Patch } from "../../../../../lib/index.ts";
-import { fail } from "../../../../../lib/files.ts";
-
+import PatchPage from "../../../../../components/catalog/PatchPage.astro";
+import { loadIndex, type Patch } from "../../../../../lib/index.ts";
+import { activeVersion } from "../../../../../lib/catalog.ts";
 export function getStaticPaths() {
   return loadIndex().bases.flatMap((base) =>
     base.patches.map((patch) => ({ params: { ns: base.ns, model: base.model, slug: patch.slug }, props: { patch } })),
@@ -15,86 +9,5 @@ export function getStaticPaths() {
 }
 interface Props { patch: Patch }
 const { patch } = Astro.props;
-const base = patch.base;
-const entry = patch.card ? await getEntry("cards", `${base.address}/${patch.slug}`) : undefined;
-if (patch.card && !entry) fail(`${patch.card.repoPath} was not loaded by the cards collection`);
-const Card = entry ? (await render(entry)).Content : null;
-const latest = patch.versions.find((v) => v.n === patch.latest) ?? null;
-const versions = [...patch.versions].sort((a, b) => b.n - a.n);
 ---
-<Page
-  title={`${patch.title} · ${base.address}`}
-  description={patch.summary}
-  nav="models"
->
-  <Head crumbs={[{ label: "Models", href: href() }, { label: base.address, href: base.url }, { label: patch.slug }]} eyebrow={`Patch · ${patch.kind}`}>
-    <h1>{patch.title}</h1>
-    <p class="lead">{patch.summary}</p>
-    <div class="row">
-      {latest ? (
-        <a class="btn primary" href={latest.url}>Open {latest.label}, the latest version</a>
-      ) : (
-        <span class="badge warn">No active version</span>
-      )}
-      {patch.tags.map((t) => <a class="tag" href={href(`search/?tag=${encodeURIComponent(t)}`)}>{t}</a>)}
-    </div>
-    <dl class="facts">
-      <div><dt>Base</dt><dd><a href={base.url}>{base.address}</a></dd></div>
-      <div><dt>Kind</dt><dd>{patch.kind}</dd></div>
-      <div><dt>License</dt><dd>{patch.license}</dd></div>
-      <div>
-        <dt>Authors</dt>
-        <dd>{patch.authors.map((a, i) => <>{i > 0 && ", "}{a.url ? <a href={a.url} rel="noopener noreferrer nofollow">{a.name}</a> : a.name}</>)}</dd>
-      </div>
-      <div><dt>Submitted by</dt><dd><a href={`https://github.com/${patch.submitter}`} rel="noopener noreferrer nofollow">{patch.submitter}</a></dd></div>
-      <div><dt>Versions</dt><dd>{patch.versions.length}{latest && <span class="muted"> · latest {latest.label}</span>}</dd></div>
-    </dl>
-    <nav class="toc" aria-label="On this page">
-      <a href="#versions">Versions</a>
-      <a href="#card">Patch card</a>
-      {patch.notices.length > 0 && <a href="#notices">Notices</a>}
-      <a href="#records">Records</a>
-    </nav>
-  </Head>
-
-  <Section title="Versions" id="versions">
-    <Fragment slot="intro">Results belong to one version on one profile; open a version for its files, evidence and commands.</Fragment>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Version</th><th>Status</th><th>Profile</th><th>Changes</th><th>Evidence</th></tr></thead>
-        <tbody>
-          {versions.map((v) => (
-            <tr>
-              <td class="nowrap"><a class="title" href={v.url}>{v.label}</a>{v.isLatest && <span class="sub">latest</span>}</td>
-              <td><Badge state={v.status} /></td>
-              <td><span class="tag">{v.profile.id}</span></td>
-              <td class="small">{v.changelog}</td>
-              <td><span class="row">{v.evidence.map((e) => <Badge state={e} />)}</span></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </Section>
-
-  <Section title="Patch card" id="card" subtle>
-    <Fragment slot="intro">Written by the submitter. Claims here are theirs; recorded results are on the version pages.</Fragment>
-    {Card ? (
-      <article class="prose"><Card /></article>
-    ) : (
-      <p class="empty"><strong>No card</strong>This patch has no README.md.</p>
-    )}
-  </Section>
-
-  {patch.notices.length > 0 && (
-    <Section title="Notices" id="notices">
-      <Fragment slot="intro">License and attribution files that travel with this patch.</Fragment>
-      <FileList files={patch.notices} showRole={false} />
-    </Section>
-  )}
-
-  <Section title="Records" id="records">
-    <Fragment slot="intro">The patch record and card this page is built from.</Fragment>
-    <FileList files={[patch.record, ...(patch.card ? [patch.card.file] : [])]} showRole={false} />
-  </Section>
-</Page>
+<PatchPage patch={patch} version={activeVersion(patch)} />

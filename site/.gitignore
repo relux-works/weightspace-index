@@ -4,6 +4,7 @@ node_modules/
 # Build output and Astro's caches
 dist/
 dist-example/
+dist-demo/
 .astro/
 
 # Local environment and logs

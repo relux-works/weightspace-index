@@ -27,7 +27,7 @@ const order = (a: Run, b: Run) =>
   ) : (
     index.bases.filter((b) => b.groups.length > 0).map((base) => (
       <Section title={base.address} id={`base-${base.ns}-${base.model}`}>
-        <Fragment slot="intro"><a href={base.url}>Open the base page</a> for rankings and charts per group.</Fragment>
+        <Fragment slot="intro"><a href={base.url}>Open the model</a> to browse patches and benchmark evidence.</Fragment>
         <div class="cards">
           {base.groups.map((g) => (
             <article class="card" id={g.id}>
@@ -59,7 +59,7 @@ const order = (a: Run, b: Run) =>
                   </tbody>
                 </table>
               </div>
-              <p class="small muted" style="margin-top: var(--space-3)">Index-measured and reported results stay in separate rankings on the <a href={`${base.url}#${g.id}`}>base page</a>.</p>
+              <p class="small muted" style="margin-top: var(--space-3)"><a href={`${base.url}#${g.id}`}>See this group on the model page</a>.</p>
             </article>
           ))}
         </div>

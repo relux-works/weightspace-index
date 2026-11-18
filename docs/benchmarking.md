@@ -43,3 +43,9 @@ Any GPU that stock vLLM supports: NVIDIA with compute capability 7.0 or newer (R
 - **Comparison records in the index:** the index can't host per-item comparison data yet, so `compare` prints to the terminal. Fixing that needs a change to the index tool.
 - **Running `bench check` in CI.**
 - **More benchmarks:** MMLU-Pro is prepared but not run.
+
+## Combination studies
+
+The model and patch pages can display a measured combination from one JSON file per study under `bench/combinations/<namespace>/<model>/`. Each study declares its profile, benchmark, protocol, sample count, metric, unit, preferred direction and performer. File the observed baseline and joint score plus an independent observation of each member alone under the same evaluation conditions. Identify each member by patch slug, version, artifact filename and scale. File full measurement conditions in `protocol` and keep experiment outputs with the benchmark contribution.
+
+The display shows each treatment on one axis and compares the observed joint score with the best solo score. This descriptive comparison makes no claim of statistical significance. A reader can inspect the source record and exact artifacts. The build rejects unavailable artifacts, mismatched profiles, repeated patches and missing treatment values. See the [synthetic four-treatment example](example/bench/combinations/example-org/Example-Model-1B/arithmetic.json).

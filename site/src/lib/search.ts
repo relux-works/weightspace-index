@@ -36,7 +36,7 @@ export type FacetKey = (typeof FACETS)[number][0];
 
 export function searchEntries(index: Index): SearchEntry[] {
   return allVersions(index).map((v) => ({
-    url: v.url,
+    url: v.isLatest ? v.patch.url : v.url,
     base: v.patch.base.address,
     profile: v.profile.id,
     slug: v.patch.slug,

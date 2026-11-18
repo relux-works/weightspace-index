@@ -1,11 +1,11 @@
 import { defineConfig } from "astro/config";
 import { satteri } from "@astrojs/markdown-satteri";
-import { EXAMPLE, SITE_BASE } from "./src/lib/config.ts";
+import { DEMO, EXAMPLE, SITE_BASE } from "./src/lib/config.ts";
 import { cardHast, cardMdast } from "./src/lib/card-plugin.ts";
 
 export default defineConfig({
   base: SITE_BASE,
-  outDir: EXAMPLE ? "./dist-example" : "./dist",
+  outDir: EXAMPLE ? "./dist-example" : DEMO ? "./dist-demo" : "./dist",
   trailingSlash: "always",
   devToolbar: { enabled: false },
   markdown: {

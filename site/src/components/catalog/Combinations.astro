@@ -1,0 +1,29 @@
+---
+import type { Base, Version } from "../../lib/types.ts";
+import { loadIndex } from "../../lib/index.ts";
+import { sourceLabels } from "../../lib/catalog.ts";
+import { combinationStudies, jointOutcome } from "../../lib/combinations.ts";
+interface Props { base: Base; version?: Version }
+const { base, version } = Astro.props;
+const studies = combinationStudies(base, version);
+const index = loadIndex();
+---
+<section class="flow-section" id="combinations">
+  <h2>Patch combinations</h2>
+  {!studies.length && <p class="quiet-row">{base.patches.length < 2
+    ? "A second patch for this model is needed to test a combination."
+    : "No joint benchmark has been filed for this " + (version ? "release." : "model.")}</p>}
+  {studies.map(s => {
+    const rows = [{ label: "Unpatched base", value: s.baseline }, ...s.members.map(m => ({label: m.release.patch.title + " " + m.release.label, value: m.alone})), { label: "Together", value: s.together }];
+    const lo = Math.min(0, ...rows.map(r => r.value));
+    const hi = Math.max(lo + 1, s.unit === "%" ? 100 : 0, ...rows.map(r => r.value));
+    return <article class="study-block">
+      <div class="studymeta">{sourceLabels[s.measured_by]} · {s.profile} · {s.denominator} samples</div>
+      <h3>{s.benchmark} <span class="muted">/ {s.metric}</span></h3>
+      <p class="small">{s.members.map((m,i) => <>{i > 0 && " + "}<a href={m.release.isLatest ? m.release.patch.url : m.release.url}>{m.release.patch.title} {m.release.label}</a></>)}</p>
+      <p class="joint-reading">Measured result · <strong>{jointOutcome(s.together, s.members.map(m => m.alone), s.direction)}</strong></p>
+      <div class="treatment-bars">{rows.map((r,i) => <div><span>{r.label}</span><i><b class:list={[{joint: i === rows.length-1}]} style={`left:${100*(Math.min(0,r.value)-lo)/(hi-lo)}%;width:${100*Math.abs(r.value)/(hi-lo)}%`}></b></i><strong>{r.value} {s.unit}</strong></div>)}</div>
+      <details class="fold"><summary>Measurement details</summary><p>{s.protocol}</p><ul>{s.members.map(m => <li>{m.artifact.name} · scale {m.scale}</li>)}</ul><a href={index.docsAt(s.file)}>Measurement record</a></details>
+    </article>;
+  })}
+</section>

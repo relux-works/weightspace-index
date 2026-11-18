@@ -10,7 +10,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineHastPlugin, defineMdastPlugin } from "satteri";
-import { GITHUB_REPO, PIN_PATHS, PREFIX, href, seg } from "./config.ts";
+import { DEMO, GITHUB_REPO, PIN_PATHS, PREFIX, href, seg } from "./config.ts";
 import { REPO_ROOT, exists, isDir, pinCommit, readRecord } from "./files.ts";
 
 
@@ -48,7 +48,7 @@ function splitFragment(t: string): [string, string] {
 
 /** The site page for an index path, following the fixed layout of docs/structure.md. */
 function sitePage(p: string): string | null {
-  const models = `${PREFIX}models/`;
+  const models = DEMO && p.startsWith("docs/example/") ? "docs/example/models/" : `${PREFIX}models/`;
   if (!p.startsWith(models)) return null;
   const s = p.slice(models.length).split("/");
   const page = (n: number) => href(`models/${seg(s.slice(0, n).join("/"))}/`);
@@ -67,6 +67,7 @@ function sitePage(p: string): string | null {
 function cardPathOf(fileURL: URL | undefined): string | null {
   if (!fileURL) return null;
   const rel = path.relative(REPO_ROOT, fileURLToPath(fileURL)).split(path.sep).join("/");
+  if (DEMO && CARD.test(rel.replace(/^docs\/example\//, ""))) return rel;
   const inCollection = PREFIX ? (rel.startsWith(PREFIX) ? rel.slice(PREFIX.length) : null) : rel;
   return inCollection && CARD.test(inCollection) ? rel : null;
 }

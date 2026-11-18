@@ -1,0 +1,66 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { activeVersion, discoveryText, measurementGroups, readCoverage, columnBins } from "../src/lib/catalog.ts";
+import { validateStudy } from "../src/lib/combinations.ts";
+import type { Patch, Run, Version } from "../src/lib/index.ts";
+
+test("a withdrawn release cannot become a default download", () => {
+  const versions = [{ n: 1, status: "active" }, { n: 3, status: "withdrawn" }];
+  assert.equal(activeVersion({ latest: 1, versions } as Patch), versions[0]);
+  assert.equal(activeVersion({ latest: 3, versions } as Patch), undefined);
+  assert.equal(activeVersion({ latest: null, versions } as Patch), undefined);
+});
+
+test("catalog search covers the model, authors, goals and available formats", () => {
+  const patch = { title: "Quick sums", summary: "Checks arithmetic", authors: [{ name: "Jane" }], tags: ["math"], slug: "sums" };
+  const text = discoveryText("Acme/Mini", [patch as Patch], ["LoRA"]);
+  for (const word of ["acme/mini", "jane", "arithmetic", "math", "lora"]) assert.ok(text.includes(word));
+});
+
+test("coverage accepts a filed item count without treating it as a score", () => {
+  assert.deepEqual(readCoverage("2 of 197 item-seed pairs filed"), { filed: 2, total: 197 });
+  assert.equal(readCoverage("in progress"), null);
+  assert.equal(readCoverage("3 of 2 item-seed pairs filed"), null);
+});
+
+test("author, index and contributor runs stay distinct", () => {
+  const roles = ["index", "author", "third-party", "author"];
+  const runs = roles.map(performed_by => ({ record: { performed_by } })) as Run[];
+  assert.deepEqual(measurementGroups(runs).map(g => [g.source, g.runs.length]), [
+    ["index", 1], ["third-party", 1], ["author", 2]
+  ]);
+});
+
+test("column density counts all active columns across the full tensor width", () => {
+  assert.deepEqual(columnBins([0, 2, 7], 8, 4), [1, 1, 0, 1]);
+});
+
+const versions = ["alpha", "beta"].map(slug => ({ n: 1, patch: { slug }, profile: { id: "bf16" }, files: [{role:"source",sha256:"a".repeat(64), name:"adapter_model.safetensors"}] })) as Version[];
+const study = {
+  contract_version: 1, profile: "bf16", benchmark: "Arithmetic", metric: "Accuracy", unit: "%", direction: "higher", denominator: 100,
+  measured_by: "index", protocol: "Identical 100 prompts, greedy decoding.", baseline: 40, together: 48,
+  members: ["alpha", "beta"].map(slug => ({ slug, version: 1, artifact: "adapter_model.safetensors", scale: 1, alone: 45 })),
+};
+test("a combination needs measured joint and solo results for exact versions on the same profile", () => {
+  assert.equal(validateStudy(study, versions).members.length, 2);
+  for (const invalid of [
+    { ...study, together: null }, { ...study, profile: "q4" }, { ...study, members: [study.members[0], study.members[0]] },
+    { ...study, members: [study.members[0], { ...study.members[1], artifact: "unknown" }] }
+  ]) assert.throws(() => validateStudy(invalid, versions));
+});
+
+test("a large patch list shows a short page and searches the entire catalog", async () => {
+  const { filteredPage } = await import("../src/lib/filter.ts");
+  const rows = Array.from({ length: 90 }, (_, i) => "patch number " + i);
+  assert.equal(filteredPage(rows, "", 8).visible.length, 8);
+  assert.equal(filteredPage(rows, "", 8).matched, 90);
+  assert.deepEqual(filteredPage(rows, "89 PATCH", 8), { visible: [89], matched: 1 });
+  assert.deepEqual(filteredPage(rows, "missing", 8), { visible: [], matched: 0 });
+});
+
+test("combination readings respect metric direction and ties", async () => {
+  const { jointOutcome } = await import("../src/lib/combinations.ts");
+  assert.equal(jointOutcome(40, [42, 42], "lower"), "Better than either patch alone");
+  assert.equal(jointOutcome(40, [42, 42], "higher"), "Below the best single patch");
+  assert.equal(jointOutcome(42, [42, 42], "higher"), "Matches the best single patch");
+});

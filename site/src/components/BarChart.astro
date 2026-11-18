@@ -69,7 +69,7 @@ const index = loadIndex();
           <text class="label" x={0} y={y + 16}>{b.label.length > 34 ? b.label.slice(0, 33) + "…" : b.label}<title>{b.label}</title></text>
           <text class="sub" x={0} y={y + 32}>{b.sub}</text>
           <rect class="track" x={LABEL} y={y + 8} width={plot} height={20} rx="2"></rect>
-          <rect class:list={["bar", { base: b.base }]} fill={b.base ? `url(#${hatch})` : undefined} x={Math.min(x(0), x(b.value))} y={y + 8} width={Math.max(2, Math.abs(x(b.value) - x(0)))} height={20} rx="2"></rect>
+          <rect class:list={["bar", { base: b.base }]} fill={b.base ? `url(#${hatch})` : undefined} x={Math.min(x(0), x(b.value))} y={y + 8} width={Math.abs(x(b.value) - x(0))} height={20} rx="2"></rect>
           <text class="value" x={W - 4} y={y + 23} text-anchor="end">{b.value}</text>
         </a>
       );

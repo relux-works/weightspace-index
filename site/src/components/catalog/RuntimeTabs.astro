@@ -1,0 +1,56 @@
+---
+import CopyButton from "../CopyButton.astro";
+interface Tab { name: string; note: string; command: string; docs: string; setup?: string }
+interface Props { tabs: Tab[] }
+const { tabs } = Astro.props;
+---
+{tabs.length > 0 && <div class="runtime-tabs">
+  <div class="runtime-selector" hidden role="tablist" aria-label="Runtime">
+    {tabs.map((tab, i) => <button role="tab" type="button" id={`tab-${i}`} aria-controls={`panel-${i}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}>{tab.name}</button>)}
+  </div>
+  {tabs.map((tab,i) => <div class="runtime-panel" id={`panel-${i}`}>
+    <h4>{tab.name}</h4><p>{tab.note}</p>
+    {tab.setup && <details class="fold"><summary>Prepare the base GGUF</summary><figure class="terminal"><figcaption>Shell<CopyButton from={`setup-${i}`} label="Copy" /></figcaption><pre id={`setup-${i}`}>{tab.setup}</pre></figure></details>}
+    <figure class="terminal"><figcaption>Shell<CopyButton from={`recipe-${i}`} label="Copy" /></figcaption>
+      <pre id={`recipe-${i}`}>{tab.command}</pre></figure>
+    <a class="small" href={tab.docs}>Runtime documentation ↗</a>
+  </div>)}
+</div>}
+<script>
+  for (const group of document.querySelectorAll(".runtime-tabs")) {
+    const list = group.querySelector<HTMLElement>('[role="tablist"]')!;
+    const tabs = [...list.querySelectorAll<HTMLButtonElement>("button")];
+    const panels = [...group.querySelectorAll<HTMLElement>(".runtime-panel")];
+    const select = (i: number) => {
+      tabs.forEach((tab, n) => {
+        tab.setAttribute("aria-selected", String(i === n));
+        tab.tabIndex = i === n ? 0 : -1;
+        panels[n].hidden = i !== n;
+      });
+    };
+    panels.forEach((panel, i) => {
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", tabs[i].id);
+      panel.tabIndex = 0;
+    });
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(i));
+      tab.addEventListener("keydown", e => {
+        const navigation: Record<string, number> = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i + tabs.length - 1) % tabs.length, Home: 0, End: tabs.length - 1 };
+        const next = navigation[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select(next);
+        tabs[next].focus();
+      });
+    });
+    for (const link of document.querySelectorAll<HTMLElement>("[data-recipe]")) {
+      link.addEventListener("click", () => {
+        const i = tabs.findIndex(tab => tab.textContent?.trim() === link.dataset.recipe);
+        if (i >= 0) select(i);
+      });
+    }
+    list.hidden = false;
+    select(0);
+  }
+</script>

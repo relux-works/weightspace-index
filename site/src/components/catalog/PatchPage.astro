@@ -1,0 +1,56 @@
+---
+import Page from "../../layouts/Page.astro";
+import { href, loadIndex, type Patch, type Version } from "../../lib/index.ts";
+import { authorReport } from "../../data/reports.ts";
+import { activeVersion } from "../../lib/catalog.ts";
+import { runtimeGuide } from "../../lib/runtime.ts";
+import { apply, hfDownload } from "../../lib/commands.ts";
+import Downloads from "./Downloads.astro";
+import RuntimeTabs from "./RuntimeTabs.astro";
+import Evidence from "./Evidence.astro";
+import Combinations from "./Combinations.astro";
+import ReleaseDetails from "./ReleaseDetails.astro";
+interface Props { patch: Patch; version?: Version }
+const { patch, version: v } = Astro.props;
+const base = patch.base;
+const index = loadIndex();
+const report = authorReport(v);
+const name = report?.name ?? patch.title;
+const guide = v && runtimeGuide(v);
+const plan = v && apply(v);
+const tabs = guide?.tabs.slice() ?? [];
+if (v && plan?.command) {
+  const source = v.files.find(f => f.role === "source")!;
+  const sha = `printf '%s  %s\\n' '${source.sha256}' '${source.name}' | shasum -a 256 -c -`;
+  const baseChecks = v.profile.files.map(f => `printf '%s  %s\\n' '${f.sha256}' '${base.model}-${v.profile.id}/${f.path}' | shasum -a 256 -c -`);
+  tabs.push({
+    name: "Weightspace", note: `Install weightspace and the Hugging Face CLI. From the folder containing ${source.name}, download the matching base and apply the replacement to a new copy. ${plan.notes.join(" ")} ${plan.needsDigests.join(", ")}`.trim(),
+    command: [hfDownload(base, v.profile).text, sha, ...baseChecks, plan.command.text].join(" &&\n"),
+    docs: index.docsAt("tool/README.md"),
+  });
+}
+const latest = activeVersion(patch);
+---
+<Page title={`${name}${v ? " " + v.label : ""} · ${base.address}`} description={report?.goal ?? patch.summary} nav="models">
+  <div class="wrap page-flow">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><a href={base.url}>{base.model}</a><span>/</span><span aria-current="page">{name}</span></nav>
+    <header class="release-head">
+      <div class="overview">
+        <p class="context-label">{base.address} · Patch{v && " " + v.label}</p>
+        <h1>{name}</h1><p class="summary">{report?.goal ?? patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+        <p class="credit">By {patch.authors.map((a,i) => <>{i > 0 && ", "}{a.url ? <a href={a.url}>{a.name}</a> : a.name}</>)} · <a href="#notices">{patch.license}</a></p>
+        {v && v.status !== "active" && <p class="note warn">This release is {v.status}. {latest && <a href={patch.url}>View the current release</a>}</p>}
+      </div>
+      {v && guide ? <Downloads version={v} guide={guide} /> : <div class="quiet-row">No active release. <a href="#versions">View version history</a></div>}
+    </header>
+    {v && <>
+      <nav class="local-nav" aria-label="Patch sections"><a href="#evidence">Benchmarks</a><a href="#use">Setup commands</a><a href="#combinations">Combinations</a><a href="#records">Release details</a></nav>
+      <section class="flow-section" id="evidence"><h2>Benchmark evidence</h2><Evidence version={v} /></section>
+      <section class="flow-section" id="use"><h2>Use this patch</h2>
+        {tabs.length > 0 ? <RuntimeTabs tabs={tabs} /> : <p class="quiet-row">{plan?.notes.join(" ") || "Runtime setup has not been documented for this release."}</p>}
+      </section>
+      <Combinations base={base} version={v} />
+    </>}
+    <ReleaseDetails patch={patch} version={v} guide={guide} />
+  </div>
+</Page>

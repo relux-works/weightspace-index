@@ -2,40 +2,17 @@
 
 The site uses the Relux product-family web design system. This file records how it is applied here and where it deliberately differs.
 
-## Product
+## Reader journey
 
-- **Promise:** an open index of weight patches for open models. For each patch it shows what changes, the exact base files it targets, where to download it, and what was measured.
-- **Archetype:** documentation and operational tool. The first screen is the working surface: product name, a one-line statement, search and the index counts. There is no promotional hero.
-- **Audience:** people who run open models and want to find, verify, apply or benchmark a patch.
-- **Proof:** every value comes from a record at the pinned index commit. File rows show size and SHA-256. Commands are filled in from records and link the document that defines them.
+1. **Directory.** Choose a model or filter by model, patch, author or format. Each tile lists releases by name and the available formats. A graph of actual edited input columns illustrates one downloadable patch. On phones it follows the directory.
+2. **Model.** Scan the purpose, author, available formats and evidence status of each patch. Comparable completed runs share charts only within a profile, protocol, dataset, settings, metric, unit and performer category. A joint study displays the measured base, each patch alone and the combination.
+3. **Patch.** Start with a short purpose and the active release’s downloads. Author findings and independently filed benchmarks have distinct bylines. Copy a recipe for the chosen runtime. Source cards, file hashes, notices and historical versions are in disclosures.
 
-## Family invariants
+Models with few records use the same typography and download hierarchy as dense entries. One available patch stands on its own. Missing measurements use a short status. Long patch directories show eight entries at a time and search every entry. Multiple report groups, historical runs and setup details expand in place.
 
-- **Tokens:** `src/styles/tokens.css` is the family token contract, copied unchanged except for the font stacks. It covers light, dark, increased contrast (light and dark), reduced transparency and forced colors. Components use semantic roles only, never literal colors.
-- **Type:**
-  - Inter Tight for display, Inter for UI and Roboto Mono for technical text, all self-hosted from Fontsource.
-  - `letter-spacing: 0` everywhere, on a fixed responsive scale with no viewport-tied sizes.
-- **Geometry:**
-  - Radii are 4px on controls and 8px on surfaces.
-  - Layout is full-width bands on a constrained grid (`--layout-max`, 73.75rem).
-  - Section headings use the 1.25fr / 0.75fr split.
-  - Cards are used only for repeated framed items (benchmark groups, comparisons, assessments, sessions), and cards are never nested. Blocks that contain framed commands are separated by dividers instead.
-- **Header:**
-  - Three stable zones at 4.25rem: the product name, centered navigation, and the GitHub link.
-  - The GitHub link is the 20px GitHub mark plus "View on GitHub", styled like the nav links. The label describes the action rather than standing alone as "GitHub", so it doesn't read as a GitHub-branded or endorsed item. It opens the repository tree at the pinned commit, so it says where the data lives. On phones only the mark shows. It opens in a new tab. Its accessible name is "View on GitHub at commit … (opens in a new tab)" and its tooltip gives the full commit. The commit itself is shown in the home eyebrow and in the footer of every page.
-  - At tablet width the side zones shrink to their content.
-  - On phones the navigation moves to a second row.
-- **States:**
-  - Badges use a shape as well as a color, so state is never conveyed by hue alone: circle for ok and info, triangle for warning, square for error, ring for neutral.
-  - The copy button keeps its size when it changes to "Copied".
-- **Motion:** press feedback is `scale(.98)`, and color transitions are short. Reduced-motion users get no transitions.
+## Visual system
 
-## Expression slots
-
-- **Accent:** the Relux red ramp from the baseline palette. It marks links, the active navigation item, step numbers and patched bars in charts. Base bars are hatched, so they don't depend on hue either.
-- **Neutral tint:** the baseline green-grey neutrals.
-- **Density:** operational. See the deviations below.
-- **Media:** none. The data is the content.
+Inter Tight sets headings, Inter sets UI copy and Roboto Mono sets technical labels. The catalog retains the Relux mark, red accent, theme tokens and dark footer. The footprint and shell examples use dark ink surfaces in both themes. Model cards and download choices have one link across the full hit area. Numeric labels accompany charts and coverage bars. All runtime options are visible with JavaScript disabled, and enhanced tabs support arrow keys, Home and End.
 
 ## Relux Works relationship
 
@@ -56,7 +33,7 @@ The site uses the Relux product-family web design system. This file records how 
 
 | Family default | Here | Reason |
 |---|---|---|
-| h1 3.5rem, h2 2.75rem | h1 2.75rem, h2 1.75rem (home statement 4.5rem) | Pages are dense reference material with many sections; large headings would push data below the fold. |
+| h1 3.5rem, h2 2.75rem | h1 3.2rem on catalog detail pages, h2 1.75rem, home statement 4.4rem | Pages are dense reference material with many sections; large headings would push data below the fold. |
 | Section padding 6rem (4rem mobile) | 3rem (2rem mobile) | Same reason: operational density. |
 | Mobile navigation drawer | Navigation on a second header row | There are only three links; a drawer would hide them behind an extra tap. |
 | RTL and locale coverage | English only, LTR | The index and its records are English-only. |

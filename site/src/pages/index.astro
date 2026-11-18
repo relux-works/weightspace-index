@@ -1,90 +1,33 @@
 ---
 import Page from "../layouts/Page.astro";
-import Badge from "../components/Badge.astro";
-import Section from "../components/Section.astro";
-import { allRuns, allVersions, href, loadIndex } from "../lib/index.ts";
-
+import ModelCard from "../components/catalog/ModelCard.astro";
+import Footprint from "../components/catalog/Footprint.astro";
+import Filter from "../components/catalog/Filter.astro";
+import { loadIndex } from "../lib/index.ts";
+import { activeVersion, footprint } from "../lib/catalog.ts";
+import { plural } from "../lib/format.ts";
 const index = loadIndex();
-const versions = allVersions(index);
-const runs = allRuns(index);
-const patches = index.bases.flatMap((b) => b.patches);
-const counts: [string, string, number][] = [
-  ["base model", "base models", index.bases.length],
-  ["patch", "patches", patches.length],
-  ["version", "versions", versions.length],
-  ["benchmark run", "benchmark runs", runs.length],
-];
+const models = index.bases;
+const featured = models.flatMap(b => b.patches.map(activeVersion)).find(v => v && footprint(v));
 ---
-<Page title="Weightspace Index" nav="models" description="An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.">
-  <section class="band-head">
-    <div class="wrap page-head">
-      <p class="eyebrow">Open index · commit {index.short}</p>
-      <h1 class="statement">Weight patches for open models</h1>
-      <p class="lead">
-        What each patch changes, the exact base files it was made for, where to download it, and how it measured. Every value on this site comes from a record at the pinned commit.
-      </p>
-      <form action={href("search/")} method="get" class="home-search" role="search">
-        <input type="search" name="q" placeholder="Search patches, models, authors, tags" aria-label="Search the index" />
-        <button class="btn primary" type="submit">Search</button>
-      </form>
-      <dl class="counts">
-        {counts.map(([one, many, n]) => <div><dt>{n === 1 ? one : many}</dt><dd>{n}</dd></div>)}
-      </dl>
-    </div>
-  </section>
-
-  <Section title="Models" id="models">
-    <Fragment slot="intro">Every base with patches in the index. Pick the one you run.</Fragment>
-    {index.bases.length === 0 ? (
-      <p class="empty"><strong>No bases in the index yet.</strong></p>
-    ) : (
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Base</th><th>Profiles</th><th class="num">Patches</th><th>Benchmarks</th></tr></thead>
-          <tbody>
-            {index.bases.map((b) => {
-              const states = new Set(b.runs.map((r) => r.record.state));
-              return (
-                <tr>
-                  <td><a class="title" href={b.url}>{b.address}</a></td>
-                  <td><span class="row">{b.profiles.map((p) => <span class="tag">{p.id}</span>)}</span></td>
-                  <td class="num">{b.patches.length}</td>
-                  <td>
-                    {b.runs.length === 0 ? (
-                      <span class="muted">no benchmarks submitted</span>
-                    ) : (
-                      <span class="row">
-                        <span>{b.runs.length} {b.runs.length === 1 ? "run" : "runs"}</span>
-                        {[...states].map((s) => <Badge state={s} />)}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+<Page title="Weightspace Index" nav="models" description="Find a patch for your model. Compare author reports and independent benchmarks, then download the replacement or LoRA.">
+  <div class="wrap catalog-home">
+    <div class:list={["discovery-hero", { "with-figure": featured }]}>
+      <div class="hero-copy">
+        <h1>Find a patch for <em>your model.</em></h1>
+        <p>Explore weight edits for open models. See what changed, compare the evidence, and download a replacement or LoRA.</p>
+        <a class="browse-link" href="#models">Browse models <span aria-hidden="true">↓</span></a>
       </div>
-    )}
-  </Section>
-
-  <Section title="Using a patch" id="using" subtle>
-    <Fragment slot="intro">
-      Patched models may behave unexpectedly or unsafely. Inclusion, redistribution and published results do not guarantee safety. <a href={index.docsAt("DISCLAIMER.md")}>Read the disclaimer</a>.
-    </Fragment>
-    <ol class="howto">
-      <li>
-        <h3>Pick a version</h3>
-        <p>Open your base model, then a patch. Version pages list the profile it targets, its files and every recorded result.</p>
-      </li>
-      <li>
-        <h3>Check the bytes</h3>
-        <p>Each file shows its size and SHA-256. Check every download against them and stop on any mismatch.</p>
-      </li>
-      <li>
-        <h3>Apply and measure</h3>
-        <p>Version pages give the documented commands, filled in for that version: download the pinned base, verify, apply, and benchmark with bench.</p>
-      </li>
-    </ol>
-  </Section>
+      {featured && <Footprint version={featured} />}
+    </div>
+    <section id="models" class="directory">
+      <div class="directory-head">
+        <div><h2>Model directory</h2><p>{plural(models.length, "model")} · {plural(models.reduce((n, b) => n + b.patches.length, 0), "patch", "patches")}</p></div>
+        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" />}
+      </div>
+      <p class="filter-status" role="status" id="model-list-status"></p>
+      <div class="model-grid" id="model-list">{models.map(base => <ModelCard base={base} />)}</div>
+      {models.length === 0 && <p class="quiet-row">The catalog is ready for its first model.</p>}
+    </section>
+  </div>
 </Page>

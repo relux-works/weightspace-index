@@ -7,6 +7,7 @@ if (COLLECTION !== "" && COLLECTION !== "docs/example") {
   throw new Error(`[weightspace site] WS_INDEX_ROOT must be empty (the index) or docs/example (the synthetic fixture), got ${COLLECTION}`);
 }
 export const EXAMPLE = COLLECTION === "docs/example";
+export const DEMO = !EXAMPLE && process.env.WS_SITE_DEMO === "1";
 /** Repository path prefix of the collection ("" or "docs/example/"). */
 export const PREFIX = COLLECTION ? `${COLLECTION}/` : "";
 
@@ -25,4 +26,4 @@ export function seg(p: string): string {
 }
 
 /** Paths whose uncommitted changes would make download links point at other bytes. */
-export const PIN_PATHS = EXAMPLE ? ["docs/example"] : ["models", "lookup", "bench", "schema"];
+export const PIN_PATHS = EXAMPLE ? ["docs/example"] : ["models", "lookup", "bench", "schema", ...(DEMO ? ["docs/example"] : [])];

@@ -7,6 +7,8 @@ import "@fontsource/roboto-mono/400.css";
 import "@fontsource/roboto-mono/500.css";
 import "@fontsource/roboto-mono/600.css";
 import "../styles/global.css";
+import "../styles/discovery.css";
+import { DEMO } from "../lib/config.ts";
 import reluxLight from "../assets/brand/relux-lockup-horizontal.svg?raw";
 import reluxDark from "../assets/brand/relux-lockup-horizontal-dark.svg?raw";
 import reluxMono from "../assets/brand/relux-lockup-horizontal-one-color.svg?raw";
@@ -24,6 +26,7 @@ interface Props {
 }
 const { title, description, nav } = Astro.props;
 const index = loadIndex();
+const examplePage = index.example || (DEMO && index.bases.some(b => b.dir.startsWith("docs/example/") && Astro.url.pathname.startsWith(b.url)));
 const commitUrl = `https://github.com/${index.githubRepo}/tree/${index.commit}`;
 const docTitle = title === "Weightspace Index" ? title : `${title} · Weightspace Index`;
 // The approved artwork is inlined unchanged; only presentation attributes are
@@ -36,16 +39,16 @@ const logo = (svg: string, variant: string) =>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{index.example ? `[Example] ${docTitle}` : docTitle}</title>
+    <title>{examplePage ? `[Example] ${docTitle}` : docTitle}</title>
     {description && <meta name="description" content={description} />}
-    {index.example && <meta name="robots" content="noindex, nofollow" />}
+    {(index.example || DEMO) && <meta name="robots" content="noindex, nofollow" />}
     <meta name="referrer" content="no-referrer" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" href={href("favicon-light.svg")} type="image/svg+xml" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={href("favicon-dark.svg")} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
   </head>
   <body>
-    {index.example && (
+    {examplePage && (
       <div class="banner banner-example">
         <div class="wrap"><span class="eyebrow">Example data</span><span>Synthetic records from docs/example: not real patches, files or results.</span></div>
       </div>
@@ -54,7 +57,7 @@ const logo = (svg: string, variant: string) =>
       <div class="banner banner-dirty">
         <div class="wrap">
           <span class="eyebrow">Development build</span>
-          <span>{index.dirty.length} index file(s) differ from commit {index.short}. Download links point at the commit, not these files.</span>
+          <span>{index.dirty.length} index file(s) differ from commit {index.short}. Repository links point at the pinned commit.</span>
         </div>
       </div>
     )}

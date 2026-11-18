@@ -1,12 +1,14 @@
 # Applying a patch with common runtimes
 
-**These commands were not run.** They show where the runtimes' own documented options fit once every file has been downloaded and checked against `version.json` and `base.json`. Paths are placeholders. The runtimes' documentation, linked below, is the authority; it was read on 10 November 2026, and the vLLM pages track the latest release.
+For the Qwen Thinking loops release, the [site](../site/README.md) supplies a downloadable PEFT and GGUF bundle with commands for the pinned base. The included provenance records a one-token llama.cpp server completion, a Transformers/PEFT forward pass and a vLLM CPU adapter-loader check. End-to-end vLLM serving remains unverified.
+
+The generic examples below show where the runtimes' own documented options fit once every file has been downloaded and checked against `version.json` and `base.json`. Paths are placeholders. The runtimes' documentation, linked below, is the authority; it was read on 10 November 2026, and the vLLM pages track the latest release.
 
 The original model is never modified. Several LoRAs combine the way the runtime combines them; the index adds no rule of its own. A replacement goes into a copy, at most one replacement per copy, and LoRAs can go on top of that copy.
 
 ## Replacement: bake a copy
 
-Copy the target profile's safetensors files, confirm each copied file's SHA-256 matches `base.json`, and assign the patch values into the copy: a full tensor replaces the tensor of the same name; a sparse trio first checks that the copy holds the `#old` values at the `#idx` positions, then writes `#new` there. The future client does this step; there is no runtime flag for it. The result is an ordinary model:
+Copy the target profile's safetensors files, confirm each copied file's SHA-256 matches `base.json`, and assign the patch values into the copy: a full tensor replaces the tensor of the same name; a sparse trio first checks that the copy holds the `#old` values at the `#idx` positions, then writes `#new` there. The current `weightspace apply` command does this step. there is no runtime flag for it. The result is an ordinary model:
 
 ```sh
 vllm serve ./patched-copy

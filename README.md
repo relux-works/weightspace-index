@@ -3,15 +3,17 @@
 
 # Weightspace Index
 
-**Find the change. Check the bytes. Read the evidence.**
+Find a patch for your model, compare the evidence and download the release.
 
 An open index of weight patches for open models: what each patch changes, which exact model files it was made for, where to download it, and how it measured.
 
-**Status:** the index contains a first replacement patch for Qwen3.5-0.8B. CI runs offline schema, layout, digest and generated-output checks. The entry also contains a derived experimental LoRA adapter and numerical report; runtime loading is UNQUALIFIED and study claims do not transfer. The `weightspace` command-line tool ([user guide](tool/README.md)) builds/applies replacements, derives per-tensor LoRA selectors, and runs those checks offline. Inclusion does not establish a quality improvement.
+**Status:** the index contains a first replacement patch for Qwen3.5-0.8B. CI runs offline schema, layout, digest and generated-output checks. The entry also contains experimental LoRA factors and a numerical report. The site packages these factors for PEFT and llama.cpp with loading checks documented for the Qwen release. Behavioral results belong to the treatment evaluated. The `weightspace` command-line tool ([user guide](tool/README.md)) builds/applies replacements, derives per-tensor LoRA selectors, and runs those checks offline. Inclusion does not establish a quality improvement.
 
 ## Browse
 
-Start with the generated [model catalog](models/README.md), which lists every base and its patch count. Client discovery lives under `lookup/by-digest/` and `lookup/by-repo/`; [models/index.json](models/index.json) lists the base addresses.
+The [site](site/README.md) puts model selection, benchmark comparisons, replacement and LoRA downloads, and runtime commands on three pages.
+
+For a file-based view, start with the generated [model catalog](models/README.md), which lists every base and its patch count. Client discovery lives under `lookup/by-digest/` and `lookup/by-repo/`; [models/index.json](models/index.json) lists the base addresses.
 
 Patches are filed under the model they were made for, at `models/<hf-namespace>/<hf-model>/`, with the model's exact Hugging Face spelling. That folder's `README.md` is a generated table of every patch and its results; each patch folder has a card (`README.md`) and one folder per version.
 

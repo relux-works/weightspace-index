@@ -1,0 +1,22 @@
+---
+import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
+import type { Base } from "../../lib/types.ts";
+import { plural } from "../../lib/format.ts";
+import { authorReport } from "../../data/reports.ts";
+interface Props { base: Base }
+const { base } = Astro.props;
+const versions = base.patches.map(activeVersion).filter(v => !!v);
+const forms = [...new Set(versions.flatMap(v => formats(v)))];
+const synthetic = base.dir.startsWith("docs/example/");
+const patchNames = base.patches.slice(0, 2).map(p => authorReport(activeVersion(p))?.name ?? p.title);
+const terms = discoveryText(base.address, base.patches, forms) + " " + versions.map(v => authorReport(v)?.goal ?? "").join(" ").toLowerCase();
+---
+<article class="model-tile" data-search={terms}>
+  <a class="model-link" href={base.url}>
+    <div class="model-top"><span class="model-symbol" aria-hidden="true">▱<i>▱</i></span><span>{base.ns}</span>{synthetic && <span class="demo-tag">Demo</span>}</div>
+    <h3>{base.model}</h3>
+    <p class="tile-sub">{plural(base.patches.length, "patch", "patches")}<span>·</span>{base.profiles.length > 1 ? plural(base.profiles.length, "profile") : base.profiles[0]?.id.toUpperCase()}</p>
+    {patchNames.length > 0 && <p class="tile-patches">{patchNames.join(" · ")}{base.patches.length > 2 && ` +${base.patches.length - 2} more`}</p>}
+    <div class="model-bottom"><div class="chips">{forms.length ? forms.map(f => <span>{f}</span>) : <span>Base model</span>}</div><span class="tile-arrow" aria-hidden="true">→</span></div>
+  </a>
+</article>

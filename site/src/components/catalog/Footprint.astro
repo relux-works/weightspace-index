@@ -1,0 +1,26 @@
+---
+import type { Version } from "../../lib/types.ts";
+import { footprint } from "../../lib/catalog.ts";
+import { authorReport } from "../../data/reports.ts";
+interface Props { version: Version }
+const { version } = Astro.props;
+const data = footprint(version);
+const layers = data?.layers.slice(0, 2) ?? [];
+const peak = Math.max(1, ...layers.flatMap(l => l.bins));
+---
+{data && <figure class="footprint">
+  <div class="fp-cap"><span>Weight edit footprint</span><span>{version.profile.id.toUpperCase()}</span></div>
+  <div class="fp-title"><a href={version.patch.url}>{authorReport(version)?.name ?? version.patch.title} <span aria-hidden="true">↗</span></a></div>
+  <div class="fp-model">{version.patch.base.address}</div>
+  <div class="fp-plots">
+    {layers.map(l => <div>
+      <div class="fp-label"><span>Layer {l.layer}</span><span>{l.columns} columns</span></div>
+      <svg viewBox="0 0 280 54" preserveAspectRatio="none" role="img" aria-label={`Layer ${l.layer}, ${l.columns} active input columns over a width of ${l.width}. Bars count active columns per bin.`}>
+        {[12, 27, 42, 52].map(y => <line x1="0" x2="280" y1={y} y2={y} />)}
+        {l.bins.map((n, i) => n > 0 && <rect x={i * 5} y={52 - n / peak * 50} width="3.5" height={n / peak * 50} />)}
+      </svg>
+      <div class="fp-axis"><span>0</span><span>{(l.width - 1).toLocaleString("en-US")}</span></div>
+    </div>)}
+  </div>
+  <figcaption><i></i> Edited input columns, grouped by position</figcaption>
+</figure>}

@@ -1,0 +1,38 @@
+---
+import RunSummary from "./RunSummary.astro";
+import { authorReport } from "../../data/reports.ts";
+import { measurementGroups, sourceLabels } from "../../lib/catalog.ts";
+import { rankable } from "../../lib/index.ts";
+import { scoreText } from "../../lib/format.ts";
+import type { Version } from "../../lib/types.ts";
+interface Props { version: Version }
+const { version: v } = Astro.props;
+const study = authorReport(v);
+const groups = measurementGroups(v.runs);
+
+---
+<div class="evidence-grid">
+  {study && <article class="evidence-panel">
+    <div class="studymeta">Author report</div><h3>Original weight edit</h3><p class="small muted">Reported by {v.patch.authors.map(a => a.name).join(", ")} for the edited checkpoint.</p>
+    <div class="plot-key"><span><i></i>Base</span><span><i></i>Edited</span></div>
+    <div class="metric-chart">
+      {study.measures.map(m => <div class="metric">
+        <div class="metric-heading"><strong>{m.label}</strong><span>{m.base}% → <b>{m.edited}%</b></span></div>
+        <div class="double-bar" aria-hidden="true"><i style={`width:${m.base}%`}></i><i style={`width:${m.edited}%`}></i></div>
+      </div>)}
+    </div>
+    <details class="fold"><summary>Study conditions and source</summary><p>{study.scope}</p><a href={study.url}>RikiyaT’s published results ↗</a></details>
+  </article>}
+  {groups.map(group => <article class="evidence-panel">
+    <div class="studymeta">{group.source === "author" ? "Author-reported runs" : "Independent benchmarks"}</div>
+    <h3>{sourceLabels[group.source]} measurements</h3>
+    {group.runs.slice(0,2).map(r => <RunSummary version={v} run={r} />)}
+    {group.runs.length > 2 && <details class="fold"><summary>{group.runs.length - 2} more runs</summary>
+    {group.runs.slice(2).map(r => {
+      const score = r.record.score;
+      return <details class="fold"><summary>{r.protocolLabel} · {rankable(r) ? scoreText(score) : "Score pending"}</summary><RunSummary version={v} run={r} /></details>;
+    })}</details>}
+  </article>)}
+  {!study && !groups.length && <p class="quiet-row">Benchmarks are open for this release. The files and setup instructions are available now.</p>}
+  {study && !groups.some(g => g.source !== "author") && <p class="quiet-row">Independent benchmark results are pending.</p>}
+</div>

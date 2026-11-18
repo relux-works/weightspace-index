@@ -1,56 +1,42 @@
-# Site
+# Weightspace Index site
 
-A static site over the index, built with Astro. It only reads `models/`, `lookup/`, `bench/`, `schema/` and `docs/`; it never writes them.
+The static Astro site helps readers choose a base model, compare patches and download a release. The stable patch URL contains the latest active release, its downloads, benchmark evidence and runtime commands. Version URLs remain available for reproducibility.
 
-## Build
+## Run locally
 
-Needs Node 22.23.4 or newer, and Rust (for `weightspace check`).
+Use Node 22.23.4 or newer and Rust for the offline index check.
 
-```bash
+```sh
 cd site
 npm ci
-npm run build          # real index → dist/
-npm run build:example  # docs/example fixture → dist-example/, marked as synthetic on every page
-npm run preview        # serves the last build
+npm run dev            # production catalog
+npm run dev:demo       # real catalog plus the labeled synthetic model
 npm test
+npm run build          # dist/
+npm run build:demo     # dist-demo/
+npm run build:example  # synthetic fixture alone in dist-example/
+npm run preview        # serve dist/
 ```
 
-`build` and `dev` first run `weightspace check` on a `git archive` snapshot of HEAD, then Astro. The build stops when:
+The default production build excludes the demo model, its files and its combination study. Demo and example pages carry a robots noindex directive. The demo model has a visible label and a synthetic-data banner on its pages.
 
-- the check fails;
-- a record the site reads is missing, is not valid JSON, or has a `contract_version` other than 1;
-- a recorded size or SHA-256 does not match an in-repository file;
-- an index file under the pinned paths differs from HEAD (non-dev builds only).
+## Inputs and outputs
 
-Every page, value and download link comes from the HEAD commit, shown in the header.
+- The reader checks the index contract, local digests, profiles and run references. Builds run `weightspace check` against a Git archive of HEAD. A production build stops when the index inputs differ from HEAD.
+- In-repository downloads are served from the site under their SHA-256 and filename. External artifacts use their pinned locators. Each supported canonical LoRA can produce a PEFT bundle with the original factor bytes, runtime configuration, notices and provenance. A verified architecture-specific GGUF export can travel in the same archive.
+- Each published author study in `src/data/reports.ts` names its source and applies to a specific release artifact and base revision. Independent measurements come from run records and keep their performer, profile, settings and completion state.
+- Optional joint studies are read from `bench/combinations/<namespace>/<model>/`. The synthetic example lives below `docs/example/bench/combinations/`. See the [benchmark notes](../docs/benchmarking.md#combination-studies).
+- Directory search, paging, runtime tabs and copy buttons use local JavaScript. Navigation, the complete directory, download links, evidence and every recipe work as static HTML. Fonts and visualizations are served locally.
 
-## Settings
+## Build settings
 
 | Variable | Effect |
 |---|---|
-| `WS_INDEX_ROOT` | `docs/example` builds the example fixture; empty (default) builds the index. |
-| `WS_SITE_BASE` | URL base path when the site is not served at `/`. |
-| `WS_GITHUB_REPO` | `owner/name` for download links (default `relux-works/weightspace-index`). |
-| `WS_SKIP_INDEX_CHECK=1` | Skips `weightspace check` (local iteration only). |
-| `WS_ALLOW_DIRTY=1` | Builds with uncommitted index changes; a banner says links point at the commit. |
+| `WS_SITE_BASE` | URL prefix when serving below a subdirectory. |
+| `WS_GITHUB_REPO` | Owner/repository for pinned source links. Defaults to `relux-works/weightspace-index`. |
+| `WS_INDEX_ROOT=docs/example` | Read the synthetic fixture alone. |
+| `WS_SITE_DEMO=1` | Include the fixture beside the real catalog. |
+| `WS_SKIP_INDEX_CHECK=1` | Skip the Rust check during local iteration. |
+| `WS_ALLOW_DIRTY=1` | Preview uncommitted data with a visible development banner. |
 
-## Runtime
-
-No CDNs, analytics or third-party scripts. The pages use two small inline scripts: copy buttons, and search over `search.json`, which is generated at build time.
-Fonts are self-hosted from the Fontsource packages and served with the site.
-
-## Dependencies
-
-Exact versions are pinned in `package.json` and `package-lock.json`.
-
-| Package | Why |
-|---|---|
-| `astro` | Static site generator. |
-| `@astrojs/markdown-satteri`, `satteri` | Astro's Markdown processor for patch cards. |
-| `@fontsource-variable/inter` | UI typeface (Relux family type roles), self-hosted. |
-| `@fontsource-variable/inter-tight` | Display typeface for headings, self-hosted. |
-| `@fontsource/roboto-mono` | Technical typeface for digests, commands and labels, self-hosted. |
-
-## Design
-
-The site follows the Relux product-family web design system. The design contract, token source and intentional deviations are recorded in [DESIGN.md](DESIGN.md).
+See [DESIGN.md](DESIGN.md) for the layout and evidence presentation.

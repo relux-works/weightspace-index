@@ -91,12 +91,13 @@ def test_config(tmp_path, cfg):
             b.load_config(path)
 
 
-# Proves exact numeric loopback acceptance and refusal of nonlocal, authenticated, ambiguous URL forms.
+# Proves exact numeric loopback acceptance and refusal of nonlocal, authenticated, ambiguous or zero-port URLs.
 def test_localhost():
     assert b.validate_url("http://127.0.0.1:8000/v1/chat/completions")
     for url in ("http://localhost:8000/v1/chat/completions", "https://127.0.0.1:8000/v1/chat/completions",
                 "http://example.invalid:8000/v1/chat/completions", "http://127.0.0.1.evil:8000/v1/chat/completions",
-                "http://user:pass@127.0.0.1:8000/v1/chat/completions", "http://127.0.0.1:8000/v1/chat/completions?x=1"):
+                "http://user:pass@127.0.0.1:8000/v1/chat/completions", "http://127.0.0.1:8000/v1/chat/completions?x=1",
+                "http://127.0.0.1:0/v1/chat/completions"):
         with pytest.raises(ValueError):
             b.validate_url(url)
 
@@ -114,15 +115,44 @@ def test_frozen_ids(tmp_path):
                 b.load_ids(path)
 
 
-# Proves exports reject both named credentials and token-shaped strings without overwriting existing output.
+# Proves generated separator/glued stem refusals preserve bytes, with token-component and empty-value controls.
 def test_export(tmp_path):
     path = tmp_path / "result.json"
-    b.write_json(path, {"max_tokens": 32768, "value": "normal"})
+    allowed = {"max_tokens": 32768, "tokenizer_config": {"value": "normal"},
+               "maxTokens": 32768, "tokenizerConfig": {"value": "normal"},
+               "tokens": 1, "tokenizer": "normal", "tokenization": "normal",
+               "key": "normal", "monkey": "normal", "value": "normal", "model": "normal",
+               "max-tokens": 1, "max..tokens": 1, "tokenizer.config": "normal"}
+    b.write_json(path, allowed)
+    assert b.read_json(path) == allowed
     before = path.read_bytes()
-    for forbidden in ({"api_key": "fixture"}, {"text": "hf_" + "x" * 24}, {"authorization": "fixture"}):
-        with pytest.raises(ValueError):
-            b.write_json(path, forbidden)
+    keys = ("api_key", "apiKey", "apikey", "APIKEY", "access_token", "accessToken", "accesstoken",
+            "ACCESSTOKEN", "secret", "password", "passwd", "passWord", "authorization", "Authorization",
+            "credential", "cookie", "private_key", "privateKey", "privatekey", "PRIVATEKEY", "token",
+            "clientSecret", "clientAPIKey", "client_apikey", "sessionAccessToken", "session_accesstoken",
+            "aPi_kEy", "pAsSwOrD", "pRiVaTe_KeY", "aCcEsS_tOkEn", "token_count", "eos_token_id",
+            "credentials", "credentials_file", "cookies", "secrets", "tokenCount", "eosTokenId",
+            "token-count", "eos.token.id", "token__count", "tOkEn", "my_tOkEn")
+    keys += tuple(spelling
+                  for left, right in (("api", "key"), ("master", "password"), ("refresh", "token"),
+                                      ("client", "secret"), ("private", "key"), ("session", "cookie"),
+                                      ("secret", "key"), ("access", "token"), ("pass", "wd"),
+                                      ("pass", "word"), ("user", "credential"), ("authorization", "header"))
+                  for separator in ("", "_", "-", ".", "__", "..", "-._", "/", " ")
+                  for spelling in (left + separator + right, (left + separator + right).upper(),
+                                   (left + separator + right).title(), "backup" + left + separator + right + "file"))
+    for key in keys:
+        with pytest.raises(ValueError, match="secret-named field refused"):
+            b.write_json(path, {"nested": [{key: "fixture"}]})
         assert path.read_bytes() == before
+    for prefix in ("hf_", "ghp_", "github_pat_", "sk-", "glpat-", "xoxb-"):
+        with pytest.raises(ValueError, match="token-shaped value refused"):
+            b.write_json(path, {"text": prefix + "x" * 24})
+        assert path.read_bytes() == before
+    for empty in (None, "", [], {}, 0, False):
+        allowed_empty = {key: empty for key in keys}
+        b.write_json(path, allowed_empty)
+        assert b.read_json(path) == allowed_empty
 
 
 def frozen_fixture(benchmark):

@@ -26,8 +26,10 @@ from urllib.request import ProxyHandler, build_opener
 
 HERE = Path(__file__).parent
 TASKS = {"math500": "minerva_math500", "mmlu-pro": "bench_mmlu_pro"}
+# Credential stems match glued compounds; bare token stays component-scoped.
 SECRET_KEY = re.compile(
-    r"(^|_)(api_key|secret|password|authorization|credential|private_key|access_token|token|cookie)(_|$)",
+    r"apikey|secret|pass(?:word|wd)|authorization|credential|privatekey|accesstoken|refreshtoken|cookie"
+    r"|(^|[^a-z0-9])token([^a-z0-9]|$)",
     re.I,
 )
 TOKEN = re.compile(r"(?:hf_|ghp_|github_pat_|sk-|glpat-|xox[baprs]-)[A-Za-z0-9_\-]{20,}")
@@ -54,7 +56,12 @@ def safe_export(value: Any) -> None:
     """Reject credential-like fields and values before writing artifacts."""
     if isinstance(value, dict):
         for key, item in value.items():
-            require(not (SECRET_KEY.search(key) and item), "secret-named field refused")
+            normalized = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", key)
+            normalized = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", normalized).lower()
+            normalized = re.sub(r"[^a-z0-9]+", "_", normalized)
+            compact = normalized.replace("_", "")
+            require(not item or not any(SECRET_KEY.search(form) for form in (key, normalized, compact)),
+                    "secret-named field refused")
             safe_export(item)
     elif isinstance(value, (list, tuple)):
         for item in value:
@@ -82,7 +89,7 @@ def validate_url(url: str) -> str:
     require(parsed.scheme == "http" and parsed.hostname == "127.0.0.1"
             and not parsed.username and not parsed.password and not parsed.query
             and not parsed.fragment and parsed.path == "/v1/chat/completions"
-            and parsed.port is not None, "only a 127.0.0.1 chat endpoint is allowed")
+            and parsed.port, "only a 127.0.0.1 chat endpoint is allowed")
     return url
 
 

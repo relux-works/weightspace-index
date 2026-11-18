@@ -7,18 +7,18 @@ use crate::files::{copy_range_with_progress, open_input};
 use crate::ops::{Cx, Phase};
 
 /// Slice 1 supports exactly one weights file at the model root:
-/// `model.safetensors`. An index file or several safetensors files are
-/// a sharded layout and are refused, never guessed at.
+/// `model.safetensors`, or a one-shard indexed checkpoint (Hugging
+/// Face's `model.safetensors-00001-of-00001.safetensors` layout) whose
+/// `model.safetensors.index.json` maps every tensor to that one file.
+/// Several safetensors files, or an index naming any other file, are a
+/// sharded layout and are refused, never guessed at.
 pub(crate) fn single_weights_file(model: &Path) -> Result<PathBuf, ToolError> {
     let sharded = |detail: String| ToolError::ShardedModel {
         path: model.to_path_buf(),
         detail,
     };
-    if model.join("model.safetensors.index.json").exists() {
-        return Err(sharded(
-            "model.safetensors.index.json present (sharded checkpoint)".into(),
-        ));
-    }
+    let index_path = model.join("model.safetensors.index.json");
+    let indexed = index_path.exists();
     let mut weights = Vec::new();
     for entry in read_sorted_dir(model)? {
         if entry
@@ -30,6 +30,24 @@ pub(crate) fn single_weights_file(model: &Path) -> Result<PathBuf, ToolError> {
         }
     }
     match weights.as_slice() {
+        [only] if indexed => {
+            let raw = fs::read(&index_path).map_err(|e| ToolError::io(&index_path, e))?;
+            let index: serde_json::Value = serde_json::from_slice(&raw)
+                .map_err(|e| sharded(format!("unreadable model.safetensors.index.json: {e}")))?;
+            let map = index
+                .get("weight_map")
+                .and_then(|m| m.as_object())
+                .filter(|m| !m.is_empty())
+                .ok_or_else(|| sharded("index has no weight_map".into()))?;
+            let name = only.to_string_lossy();
+            if let Some((tensor, file)) = map.iter().find(|(_, f)| f.as_str() != Some(&*name)) {
+                return Err(sharded(format!(
+                    "index maps {tensor} to {file}, not the only weights file {name} \
+                     (sharded checkpoint)"
+                )));
+            }
+            Ok(only.clone())
+        }
         [only] if only.as_os_str() == "model.safetensors" => Ok(only.clone()),
         [] => Err(sharded("no root model.safetensors".into())),
         [only] => Err(sharded(format!(

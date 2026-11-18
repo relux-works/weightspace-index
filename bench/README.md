@@ -1,107 +1,203 @@
-# Frozen base versus edited benchmark
+# Bench: base versus patched, in pairs
 
-One Python command downloads the entry's exact pinned public base, validates and
-applies its replacement tensors into a separate copy, then serves base and edited
-weights sequentially on loopback using installed vLLM. It runs stock lm-eval
-`local-chat-completions` on identical frozen rows and settings. The base is never
-edited. No API key is used. Downloads need internet on the first real run.
+Design decisions and open questions: [docs/benchmarking.md](../docs/benchmarking.md).
 
-**Mac/vLLM-metal execution UNVERIFIED; developed and stub-tested on Linux; no score is claimed until you run it.**
+Benchmarks a patch by running the base model and the patched copy on the
+same frozen items, with the same settings and **the same sampling seed**,
+using **stock lm-eval** (`lm-eval run`, its own task definitions and
+scorers). One command does everything: it prepares both models, serves
+each in turn, runs lm-eval against it, verifies the result and files it.
 
-## Install on Mac
+Anyone can run a few items and commit what they filed. Nobody has to
+coordinate. Each session picks items at random among those filed the
+fewest times, so contributors rarely overlap. When they do, the first
+filing counts and later ones act as reproducibility checks.
 
-Use Python 3.12+ in an environment with working vLLM / vLLM-metal OpenAI serving.
-For Apple Silicon, follow the upstream [vLLM-metal installation instructions](https://docs.vllm.ai/projects/vllm-metal/en/stable/installation/).
-Install this package into that same Python environment; installing the benchmark
-alone does not install a hardware-specific vLLM build. In a fresh environment:
+What this folder adds around lm-eval is small:
 
-```sh
-python3.12 -m venv .temp/bench-venv
-source .temp/bench-venv/bin/activate
-# Install the appropriate upstream vLLM-metal build into this environment first.
-python -m pip install -e bench
-python -m bench run --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --benchmark math500
+| Piece | Why lm-eval alone isn't enough |
+|---|---|
+| `protocols/*.json`: task, shot count, frozen item IDs with lm-eval's own `doc_hash` and `target_hash`, seeds | Stock tasks don't pin a dataset revision. The hashes make any dataset drift fail loudly instead of silently changing items. |
+| `settings/*.json`: the base model card's recommended sampling settings and, where the card gives one, its benchmark prompt; the card is pinned by revision and SHA-256 | Sampling goes in as plain `--gen_kwargs` and `--model_args`; a prompt goes in through a task file that includes the stock task. |
+| A loopback recorder between lm-eval and the server | lm-eval keeps only the reply text. The recorder keeps what was actually sent and returned: every sampling parameter and the seed, `finish_reason`, token counts and the full thinking trace. |
+| `run`, `status`, `merge`, `check`, `compare` (`python -m bench …`) | Pairing, filing, verifying and combining sessions. |
+
+Weights are prepared with the index's own tool (`weightspace apply`).
+This folder never edits weights.
+
+## Why pairs, and why one seed
+
+The patches indexed so far are small. A small effect is easier to see
+when both models face the same random draws. Base and patched therefore
+answer each item under the same seed, which removes much of the sampling
+noise from their difference. This is the common-random-numbers design.
+
+Sampling stays the card's sampling. The seed only fixes which random
+numbers are drawn.
+
+**Batching.** By default a server gets all of a session's items at once
+(`--concurrency`). Batched requests change the last bits of the logits,
+so a reply also depends on what else shared its batch, and a rerun of the
+same item and seed is not byte-identical. On vllm-metal 0.33, two
+same-seed replies of the same weights split at character 303 with 10
+requests in flight, and never at one at a time. On vllm-metal the random
+draws depend only on the seed and the output position, so base and
+patched still face the same draws (not yet checked on CUDA vLLM). Their replies split early anyway (after 55 and 455 characters
+on two items at one request at a time), because the weights differ.
+
+Byte-identical reruns would hold only on the same hardware and vLLM
+build, so results are checked statistically instead, as sampled
+benchmarks usually are. `--concurrency 1` is still available.
+
+**Seeds.** A protocol lists its seeds. `math500-n197` starts with one,
+`[1234]`, which is lm-eval's own default and what most published runs do:
+one fixed seed for the whole benchmark. Adding seeds later (several
+passes per item) only appends to that list. The protocol's digest leaves
+the list out, so pairs already filed stay valid. A run is complete when
+every item has a pair under every listed seed. Its score is the mean over
+items of each item's mean over seeds.
+
+## Protocol `math500-n197`
+
+- **Task:** `minerva_math500` (lm-eval task version 3.1), on HuggingFaceH4/MATH-500 at revision `6e4ed1a…`.
+  `hendrycks_math500` uses the same data with a different prompt and scorer.
+  `minerva_math500` reports `math_verify`, which is the primary metric here.
+- **Items:** the 197 items in [`data/math500-ids.json`](data/math500-ids.json) (frozen selection, seed `20261117-supplement2-v1`).
+- **Two deliberate changes to the stock task, both made through lm-eval's own options:**
+  - `--num_fewshot 0`: the worked examples would otherwise reach a thinking model as earlier chat turns.
+  - `until: []`: the stock stop string `Problem:` also shows up inside thinking traces and cut them mid-thought.
+- **Prompt:** the stock task's, unless the model's settings file carries its card's prompt for this task (see below).
+- **Score:** unweighted, over the frozen items. This describes these items; it is not a population-weighted estimate.
+
+## Settings `qwen3.5-0.8b-thinking`
+
+These come from the Qwen3.5-0.8B card, thinking mode for text tasks:
+
+| Setting | Value |
+|---|---|
+| `temperature` | 1.0 |
+| `top_p` | 0.95 |
+| `top_k` | 20 |
+| `min_p` | 0 |
+| `presence_penalty` | 1.5 |
+| `repetition_penalty` | 1.0 |
+| `enable_thinking` | true |
+| Math prompt | the problem, a newline, then "Please reason step by step, and put your final answer within \boxed{}." |
+
+The card's Best Practices give that sentence for math benchmarks but don't say where it goes. It follows the problem after one newline, as in RikiyaT's evaluation of this patch. It replaces the stock `minerva_math500` prompt (`Problem:` … `Solution:`), which was written for few-shot base models.
+
+**Prompt overrides.** By default a protocol runs the stock lm-eval prompt. A settings file can replace it for one task with its card's prompt (`task_overrides.<task>.doc_to_text`, nothing else). `run` then writes a two-line task file that `include`s the installed stock task and sets only `doc_to_text`; this is lm-eval's own mechanism. Data, scorer and frozen item hashes stay the stock task's. `run` checks that lm-eval resolved exactly this prompt. Another model whose card says nothing about prompts keeps the stock prompt. So prompts can differ between models on the same protocol, but never between a base and its patch.
+
+Output is capped at 32,768 tokens, the card's figure for most queries. For math competitions the card suggests 81,920, so the cap is still an open choice.
+
+lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`, and `compare` also reports a score that counts cut replies as wrong.
+
+A settings file applies only to the base model whose card it cites. Another model gets its own file, copied from its own card.
+
+## Running
+
+1. **Install the harness** (exact pins; `run` refuses other versions), plus vLLM for your hardware:
+
+   ```bash
+   python -m pip install -r bench/requirements.txt
+   ```
+
+2. **Run a session:**
+
+   ```bash
+   python -m bench run --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking --hardware "RTX 4090, vllm 0.33"
+   ```
+
+   This:
+   - downloads the base at the profile's pinned revision into `.temp/bench/models/`, unless `--base-dir` names a copy you already have;
+   - builds the patched copy with `weightspace apply` (needs `cargo`), unless `--patched-dir` names one;
+   - checks that the base weights are the profile's exact files and that every patched weights file differs from them;
+   - picks a seed and `--count` items (default 10) at random among the pairs filed the fewest times;
+   - for base, then patched: starts `vllm serve` on 127.0.0.1, waits for it, checks it serves that folder with enough context, runs `lm-eval run` on all the session's items through the recorder, and stops the server. Only one model is in memory at a time;
+   - verifies both halves the same way `check` does and files the session.
+
+   Useful options:
+   - `--items 0:20 --seed 1234` picks items deterministically instead (a slice of the protocol's item order). Maintainers can use this to split the work by hand.
+   - `--dry-run` prints the selection and stops.
+   - `--parallel` serves base and patched at the same time and runs both halves at once. Use it only when both models fit in memory. It saves time when a single request leaves the hardware partly idle, as on a laptop.
+   - `--server-arg=--flag` passes an extra flag to `vllm serve` (repeatable). Use it for memory flags, for example `--server-arg=--gpu-memory-utilization=0.8`, or for Qwen3.5 on vllm-metal: `--server-arg=--language-model-only`. Don't pass local paths: the flags are recorded.
+   - `--vllm PATH` points to the `vllm` executable.
+   - `--base-port` and `--patched-port` use servers you started yourself on 127.0.0.1. They must serve `--base-dir` and `--patched-dir`.
+   - `--timeout` (default 7200 s) is how long lm-eval waits for one reply. Its own default, 300 s, is too short for long thinking replies.
+
+   Each session is filed as:
+
+   ```text
+   bench/results/<namespace>/<model>/<patch>/v<N>/<protocol>.<settings>.<profile>/<UTC time>-<random>/
+     session.json            seed, items, weights and model-file digests, harness versions, servers, who ran it
+     base.samples.jsonl      lm-eval's own per-item log, unchanged
+     base.requests.jsonl     every request and response, as sent and returned
+     patched.samples.jsonl
+     patched.requests.jsonl
+   ```
+
+   A failed or interrupted session files nothing.
+
+3. **Commit the session folder** and open a pull request.
+
+## Status, merging, checking, comparing
+
+```bash
+python -m bench status --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
 ```
 
-Use `--benchmark mmlu-pro` for generative MMLU-Pro. The runner detects the Python
-vLLM OpenAI server module, otherwise the installed `vllm serve` command. It records
-exact argv and PID, checks `/v1/models` with a bounded timeout, and terminates only
-its own PID/process group, including exceptions, SIGINT and SIGTERM. An occupied
-port is refused. A workdir lock prevents overlapping runs on the same files.
-
-## Frozen data and scoring
-
-`data/math500-ids.json` and `data/mmlu-pro-ids.json` are byte-for-byte copies of
-`minerva_math500/n197.json` and `mmlu_pro/n197.json` from the reviewed final-kit
-197/R1 frozen tier inventory, seed `20261117-supplement2-v1`. No selection was
-re-derived. Each contains 197 global test-row IDs and its exact dataset revision.
-MMLU-Pro runs against the global test split, without category filtering. Evaluation
-visits selected rows in ascending ID order; the original frozen data stays intact.
-
-The task prompts, filters and scorers come from pinned `lm_eval==0.4.13`:
-`minerva_math500` and the generative MMLU-Pro default template. Both use explicit
-zero-shot prompting here. The latter is one global task, not the category group.
-The primary score is the task's `exact_match`; MATH also retains `math_verify`
-in the original per-item sample. The reported aggregate is the plain unweighted
-mean across all frozen items and repetitions, with edited minus base as delta.
-It describes these selected rows, not a population-weighted estimate. The copied
-tier's stratum metadata remains intact for provenance and is not used as weights.
-
-`config.json` explicitly sets 32768 output tokens, sampling parameters, stop/EOS
-policy, repetitions, seeds, prompt policy, timeouts and serving settings. The
-same config is used for both variants and its original text is saved verbatim.
-Repetitions are complete evaluations, each with seed `seed + repetition`, averaged
-equally. Chat formatting is performed by the server using the identical copied
-base tokenizer; model generation-config overrides are disabled with `vllm` policy.
-
-## Outputs and reruns
-
-Default workdir is `.temp/bench`; change it with `--workdir`. It contains verified
-`base/` and `edited/` caches, one server log per variant, and:
-
-- `results/<benchmark>-base.json`
-- `results/<benchmark>-edited.json`
-- `results/<benchmark>-compare.json`
-
-Run records contain frozen data, generations, documents, actual prompts, filtered
-answers, per-item scores, aggregate, model/replacement identities, lm-eval version,
-timestamps, server argv/PID and the KV cache setting (null when unset).
-Stock lm-eval local-chat drops endpoint `finish_reason`; it is recorded as
-`unknown` even if the endpoint returned it. The backend is not forked.
-
-Missing/empty generations, wrong counts/IDs, HTTP errors, changed caches and
-incompatible tensor names/shapes/dtypes fail with nonzero exit. A valid base run
-may remain if edited fails; no compare file or final table is produced then.
-Existing results are never overwritten. Archive the `results/` directory before
-rerunning with `--skip-download --skip-apply`; both caches must match their seals.
-A fresh workdir performs a new download/apply. `--port` defaults to 8000;
-`--kv-cache-memory-bytes` passes through only when set. The optional `--base-url`
-must be an HTTP chat-completions URL on numeric loopback with that same port;
-external servers are not supported.
-
-```sh
-python -m bench --rescore .temp/bench/results/math500-base.json --output .temp/bench/results/math500-base-rescored.json
+```bash
+python -m bench merge
 ```
 
-`rescore` is an alias spelling without the leading dashes. It replays saved raw
-generations through the original stock filters/scorers and recomputes the mean,
-using saved documents with no inference or dataset download. It requires the
-original lm-eval version; missing/incompatible scorer support is an error, never
-a claimed rescore. The input record is preserved.
+```bash
+python -m bench check
+```
 
-## Tools and offline checks
+```bash
+python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
+```
 
-Python runs the benchmark; pip installs its declared dependencies; vLLM serves
-weights; huggingface_hub downloads pinned snapshots; safetensors validates/applies
-replacements; lm-eval generates and scores; pytest checks fixtures. Runtime output
-lives under the selected workdir. No benchmark dataset or model is included.
+- **`status`** shows how many pairs are filed, open and repeated.
+- **`merge`** writes two runs into the index, in its existing run format (`run.json` and `outcomes.jsonl`):
+  - the patched run, in the version folder: `models/…/<patch>/v<N>/runs/<protocol>.<settings>.<profile>/`;
+  - its paired baseline, in the base folder: `models/…/runs/<protocol>.<settings>.<profile>.<patch>-v<N>/`.
 
-```sh
-python -m pip install -e 'bench[test]'
+  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score, until every item has a pair under every seed. Then regenerate the index tables with `weightspace generate`.
+- **`check`** rebuilds every run from its sessions and fails on any difference. For every item, in both halves of a session, the lm-eval sample must:
+  - be one of the session's frozen items, with the frozen hashes;
+  - match exactly one recorded request, sent with exactly the protocol's and settings' parameters and the session's seed;
+  - have scored the reply that the server actually returned.
+
+  Base and patched must also differ only in the weights files, and every session must report the same harness and the same model files.
+- **`compare`** works on whatever pairs are filed and says whether they are complete. The unit is the item: the patched-minus-base score, averaged over the item's seeds. It reports:
+  - both scores;
+  - the mean difference with its standard error across items and a 95% interval;
+  - the share of replies cut at the token limit, and scores that count those as wrong;
+  - mean reply length;
+  - how many pairs came back byte-identical, and how many repeated filings reproduced the first (expected only at `--concurrency 1` on the same setup).
+
+## Limits
+
+- **A session is the contributor's report.** `check` proves it is internally consistent: right items, right parameters and seed, scored reply equals returned reply. It cannot prove the replies came from the stated weights. Anyone can rerun the same items and seed: the scores should agree statistically. Replies come back byte-identical only at `--concurrency 1` on the same hardware and vLLM build.
+- **Same seed is reproducible only within one setup.** Different hardware or vLLM builds draw different random numbers from the same seed. Pairing still holds within each session, because base and patched run on the same machine with the same settings.
+- **No comparison file in the index yet.** The index's `comparisons/` folder can't host the per-item data, so `compare` prints to the terminal.
+- **Not run in CI yet.** `check` needs no model or network, but the CI workflow doesn't call it yet.
+
+## Tests
+
+```bash
+python -m pip install pytest
+```
+
+```bash
 python -m pytest bench/tests -q
 ```
 
-Tests use tiny synthetic tensors, saved-row fixtures and a loopback HTTP stub,
-including the real `simple_evaluate` and stock local-chat backend. These checks do
-not establish real checkpoint compatibility, Mac performance, GPU support, memory
-requirements or score quality. No real model/dataset was downloaded in development.
+The tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI-shaped stub) in a temporary repository. They cover:
+- freezing a protocol;
+- deterministic and random selection;
+- running and filing sessions, repeats, merging, comparing;
+- detection of tampered parameters, seeds, items, replies, swapped weights and extra requests.
+
+They need the MATH-500 test split, which is cached after the first download. They don't exercise the download or `weightspace apply` steps.

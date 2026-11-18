@@ -1,6 +1,22 @@
 {
   "base": "Qwen/Qwen3.5-0.8B",
-  "baseline_runs": [],
+  "baseline_runs": [
+    {
+      "id": "math500-n197.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
+      "performed_by": "index",
+      "profile": "bf16",
+      "protocol": {
+        "name": "bench/protocols/math500-n197.json",
+        "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"
+      },
+      "score": {
+        "owner": "bench contributors",
+        "reason": "2 of 197 item-seed pairs filed",
+        "state": "UNKNOWN"
+      },
+      "state": "INCOMPLETE"
+    }
+  ],
   "contract_version": 1,
   "patches": [
     {
@@ -69,7 +85,23 @@
               "size_bytes": 5850
             }
           ],
-          "runs": [],
+          "runs": [
+            {
+              "id": "math500-n197.qwen3.5-0.8b-thinking.bf16",
+              "performed_by": "third-party",
+              "profile": "bf16",
+              "protocol": {
+                "name": "bench/protocols/math500-n197.json",
+                "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"
+              },
+              "score": {
+                "owner": "bench contributors",
+                "reason": "2 of 197 item-seed pairs filed",
+                "state": "UNKNOWN"
+              },
+              "state": "INCOMPLETE"
+            }
+          ],
           "status": "active",
           "target_profile": "bf16",
           "version": 1

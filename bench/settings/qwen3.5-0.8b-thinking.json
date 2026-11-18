@@ -1,0 +1,33 @@
+{
+  "id": "qwen3.5-0.8b-thinking",
+  "source": {
+    "repo_id": "Qwen/Qwen3.5-0.8B",
+    "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+    "path": "README.md",
+    "sha256": "87a163af54f32fa608a0f8d3ac67945c53dd2b4a7c96740b3d7fdc28e8458864",
+    "section": "Using Qwen3.5 via the Chat Completions API: thinking mode for text tasks; Best Practices 2: output length 32,768 for most queries; Best Practices 3: Standardize Output Format, Math Problems"
+  },
+  "gen_kwargs": {
+    "do_sample": true,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 1.5,
+    "repetition_penalty": 1.0,
+    "max_gen_toks": 32768,
+    "chat_template_kwargs": {
+      "enable_thinking": true
+    }
+  },
+  "model_args": {
+    "think_end_token": "</think>"
+  },
+  "task_overrides": {
+    "minerva_math500": {
+      "doc_to_text": "{{problem}}\nPlease reason step by step, and put your final answer within \\boxed{}.",
+      "note": "The card gives the instruction but not where it goes; it follows the problem after one newline, as in RikiyaT's evaluation (mathqa.build_prompt)."
+    }
+  },
+  "min_max_model_len": 34816
+}

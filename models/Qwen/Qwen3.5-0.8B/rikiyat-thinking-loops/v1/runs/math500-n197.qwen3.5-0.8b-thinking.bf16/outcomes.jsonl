@@ -1,0 +1,2 @@
+{"completion_tokens":32768,"content_sha256":"24740895eb307543e35ec9e889a63dfd9c4cadb9ba6135ec2d676115034a3583","finish_reason":"length","id":1,"prompt_tokens":136,"score":0.0,"seed":1234,"session":"20261118T103745Z-671da7"}
+{"completion_tokens":13743,"content_sha256":"20700bb67646122ac5028f26ba6ddd1b398daeee8b45dd9dd446b2a05d9f88ac","finish_reason":"stop","id":2,"prompt_tokens":73,"score":1.0,"seed":1234,"session":"20261118T103745Z-671da7"}

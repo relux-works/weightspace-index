@@ -449,8 +449,9 @@ def cmd_compare(a) -> None:
     c = compare(v, p, s)
     print(json.dumps(c, indent=2))
     state = "complete" if c["complete"] else f"PARTIAL, {c['pairs']} of {c['protocol_pairs']} pairs"
-    print(f"\n{p.metric} over {c['items']} items ({state}): base {c['base']['score']:.3f}, "
-          f"patched {c['patched']['score']:.3f}, difference {c['difference']:+.3f} "
+    print(f"\n{p.metric} over {c['items']} items ({state}): base {c['base']['score']:.3f} "
+          f"(cut at limit {c['base']['cut_at_limit']:.3f}), patched {c['patched']['score']:.3f} "
+          f"(cut at limit {c['patched']['cut_at_limit']:.3f}), difference {c['difference']:+.3f} "
           f"(95% {c['interval_95'][0]:+.3f} .. {c['interval_95'][1]:+.3f})")
 
 

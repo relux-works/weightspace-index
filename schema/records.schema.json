@@ -165,6 +165,7 @@
           "properties": {
             "metric": { "$ref": "#/$defs/text" },
             "value": { "type": "number" },
+            "cut_at_limit": { "type": "number", "minimum": 0, "maximum": 1 },
             "unit": { "$ref": "#/$defs/text" },
             "denominator": { "type": "integer", "minimum": 1 }
           },

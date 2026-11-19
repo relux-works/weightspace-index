@@ -157,6 +157,18 @@ def test_end_to_end(repo, capsys):
     out = capsys.readouterr().out
     assert "seed 1234, 2 items (items 0:2): [2, 14]" in out
     assert "1/2 pairs with identical replies" in out
+
+    # Proves: an incomplete run stays UNKNOWN and carries no cut share
+    # dressed as a final headline figure (the base already has a cut
+    # reply on item 2, so a partial share would be computable).
+    assert bench("merge") == 0
+    for path in (f"{ENTRY}/runs/{RUN_ID}", f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"):
+        record = json.loads((repo["root"] / path / "run.json").read_text())
+        assert record["state"] == "INCOMPLETE"
+        assert record["score"]["state"] == "UNKNOWN"
+        assert "value" not in record["score"] and "cut_at_limit" not in record["score"]
+    capsys.readouterr()
+
     assert run(repo, "--performed-by", "index") == 0  # random: only item 17 is open
     assert "1 items (random among pairs filed 0 time(s)): [17]" in capsys.readouterr().out
 
@@ -186,6 +198,11 @@ def test_end_to_end(repo, capsys):
     assert patched["performed_by"] == base["performed_by"] == "index"
     assert patched["score"]["value"] == pytest.approx(2 / 3)
     assert base["score"]["value"] == pytest.approx(1 / 3)
+    # Proves: a completed run records the cut-at-limit share beside the
+    # headline score. The fake base is cut on items 2 and 17 of 3; the
+    # patched copy is never cut (see FAKE_VLLM).
+    assert base["score"]["cut_at_limit"] == pytest.approx(2 / 3)
+    assert patched["score"]["cut_at_limit"] == 0.0
     assert patched["settings"]["paired_with"] == f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"
 
     capsys.readouterr()
@@ -193,6 +210,10 @@ def test_end_to_end(repo, capsys):
     c = json.loads(capsys.readouterr().out.split("\n\n")[0])
     assert c["complete"] and c["items"] == 3 and c["difference"] == pytest.approx(1 / 3)
     assert c["pairs_identical_replies"] == 1 and c["pairs_only_patched_right"] == 1
+    # Proves: `compare` and the run record carry the same cut share,
+    # under the same name, beside the same headline scores.
+    assert c["base"]["cut_at_limit"] == pytest.approx(base["score"]["cut_at_limit"])
+    assert c["patched"]["cut_at_limit"] == patched["score"]["cut_at_limit"]
 
 
 def test_repeat_counts_once(repo, capsys, monkeypatch):

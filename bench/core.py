@@ -451,6 +451,19 @@ def item_means(p: Protocol, pairs: dict, side: int, value=lambda o: o["score"]) 
     return {i: sum(xs) / len(xs) for i, xs in sorted(acc.items())}
 
 
+def is_cut(outcome: dict) -> bool:
+    """A reply cut at the token limit, as the server reported it."""
+    return outcome["finish_reason"] == "length"
+
+
+def cut_at_limit(pairs: dict, side: int) -> float:
+    """Share of one side's replies cut at the token limit, over every
+    filed (item, seed) pair. The one definition: `compare` reports it
+    and a completed run records it beside its score."""
+    outs = [pair[side] for pair in pairs.values()]
+    return sum(map(is_cut, outs)) / len(outs)
+
+
 def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str]]:
     """{variant: (run.json text, outcomes.jsonl text)} from the filed sessions."""
     c = collect(v, p, s)
@@ -469,6 +482,7 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
         if complete:
             means = item_means(p, c.pairs, side)
             score = {"metric": p.metric, "value": sum(means.values()) / len(means),
+                     "cut_at_limit": cut_at_limit(c.pairs, side),
                      "unit": "mean over the protocol's frozen items of the mean over its seeds",
                      "denominator": len(means)}
         else:
@@ -548,15 +562,14 @@ def compare(v: Version, p: Protocol, s: Settings) -> dict:
     n = len(diffs)
     mean = sum(diffs) / n
     se = math.sqrt(sum((d - mean) ** 2 for d in diffs) / (n - 1) / n) if n > 1 else 0.0
-    cut = lambda o: o["finish_reason"] == "length"
 
     def stats(side: int) -> dict:
         outs = [pair[side] for pair in pairs.values()]
-        strict = item_means(p, pairs, side, lambda o: 0.0 if cut(o) else o["score"])
+        strict = item_means(p, pairs, side, lambda o: 0.0 if is_cut(o) else o["score"])
         return {
             "score": sum(item_means(p, pairs, side).values()) / n,
             "score_cut_counted_wrong": sum(strict.values()) / n,
-            "cut_at_limit": sum(map(cut, outs)) / len(outs),
+            "cut_at_limit": cut_at_limit(pairs, side),
             "mean_completion_tokens": sum(o["completion_tokens"] for o in outs) / len(outs),
         }
 

@@ -29,6 +29,7 @@ const KEYWORDS: &[&str] = &[
     "minItems",
     "maxItems",
     "minimum",
+    "maximum",
     "pattern",
     "minLength",
 ];
@@ -219,6 +220,12 @@ fn bad_record_controls() {
             |r| r["score"]["denominator"] = json!(0),
         ),
         (
+            "run-cut-share-over-one",
+            "run",
+            "runs/baseline-bf16/run.json",
+            |r| r["score"]["cut_at_limit"] = json!(1.5),
+        ),
+        (
             "run-unknown-performer",
             "run",
             "runs/baseline-bf16/run.json",
@@ -309,7 +316,7 @@ fn generated_shapes() {
     file["format"] = json!("safetensors");
     let run = json!({"id": "baseline-bf16", "profile": "bf16", "performed_by": "index",
         "protocol": {"name": "example-protocol", "sha256": "d".repeat(64)}, "state": "COMPLETE",
-        "score": {"metric": "accuracy", "value": 0.5, "unit": "fraction", "denominator": 200}});
+        "score": {"metric": "accuracy", "value": 0.5, "cut_at_limit": 0.25, "unit": "fraction", "denominator": 200}});
     let index = json!({
         "contract_version": 1, "base": "example-org/Example-Model-1B",
         "profiles": example("base.json")["profiles"], "baseline_runs": [run],

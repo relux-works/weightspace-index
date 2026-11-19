@@ -90,7 +90,7 @@ The card's Best Practices give that sentence for math benchmarks but don't say w
 
 Output is capped at 32,768 tokens, the card's figure for most queries. For math competitions the card suggests 81,920, so the cap is still an open choice.
 
-lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`, and `compare` also reports a score that counts cut replies as wrong.
+lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`. A completed run's score carries the share of cut replies as `cut_at_limit`, beside the headline value; `compare` reports the same share and, as its secondary number, a score that counts cut replies as wrong.
 
 A settings file applies only to the base model whose card it cites. Another model gets its own file, copied from its own card.
 
@@ -163,7 +163,7 @@ python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/
   - the patched run, in the version folder: `models/…/<patch>/v<N>/runs/<protocol>.<settings>.<profile>/`;
   - its paired baseline, in the base folder: `models/…/runs/<protocol>.<settings>.<profile>.<patch>-v<N>/`.
 
-  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score, until every item has a pair under every seed. Then regenerate the index tables with `weightspace generate`.
+  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score and no cut share, until every item has a pair under every seed; then its score is lm-eval's score with `cut_at_limit` beside it. Then regenerate the index tables with `weightspace generate`.
 - **`check`** rebuilds every run from its sessions and fails on any difference. For every item, in both halves of a session, the lm-eval sample must:
   - be one of the session's frozen items, with the frozen hashes;
   - match exactly one recorded request, sent with exactly the protocol's and settings' parameters and the session's seed;

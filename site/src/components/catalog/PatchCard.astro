@@ -21,3 +21,18 @@ const terms = [discoveryText(patch.base.address, [patch], formats(v)), name, pat
   </div>
   {v && <PatchResults version={v} compact />}
 </article>
+<script>
+  // The title link stretches over the card, but the chart rows sit above it to
+  // keep their score tips on hover; a click there opens the patch too. Inner
+  // links, buttons and text selections keep their own behaviour.
+  document.addEventListener("click", e => {
+    const t = e.target as Element;
+    const card = t.closest?.(".patch-entry");
+    if (!card || t.closest("a, button, summary, input, select, textarea, label")) return;
+    if (String(getSelection()) !== "") return;
+    const link = card.querySelector<HTMLAnchorElement>("h3 a");
+    if (!link) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) window.open(link.href, "_blank");
+    else link.click();
+  });
+</script>

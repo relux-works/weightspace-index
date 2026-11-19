@@ -32,7 +32,7 @@
 .model-entry { color: var(--color-text); padding: .85rem .15rem; text-decoration: none; border-bottom: 1px solid var(--color-divider); }
 .model-entry strong { font: 620 1.28rem/1.3 var(--font-display); overflow-wrap: anywhere; }
 .model-entry small, .release-files small { display: block; color: var(--color-text-muted); font-size: .81rem; }
-.model-entry:hover strong, .patch-entry h3 a:hover { color: var(--color-link); text-decoration: underline; }
+.model-entry:hover strong { color: var(--color-link); text-decoration: underline; }
 .entry-arrow { display: grid; place-items: center; width: 2rem; height: 2rem; flex-shrink: 0; border: 1px solid var(--color-border); border-radius: 50%; }
 
 .patch-preview { position: relative; isolation: isolate; color: var(--ink-text); background: var(--color-brand-ink); border: 1px solid var(--ink-line); border-radius: .65rem; padding: clamp(var(--space-4), 2.15vw, 1.75rem); --color-focus: var(--ink-hot); }
@@ -67,7 +67,18 @@
 .patch-directory { border-top: 1px solid var(--color-border-strong); }
 .patch-entry { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem 4rem; padding: 1.5rem 0; border-bottom: 1px solid var(--color-divider); }
 .patch-entry h3 { font-size: clamp(1.55rem, 3vw, 2rem); overflow-wrap: anywhere; }
-.patch-entry h3 a { color: var(--color-text); text-decoration: none; }
+.patch-entry h3 a, .patch-entry h3 a:hover { color: var(--color-text); text-decoration: none; }
+/* The whole card opens the patch: the title link stretches over it, while the
+   card's own links (View patch, downloads, run records) stay on top. Hover
+   only tints a surface behind the card, bleeding past the text so nothing
+   moves; the evidence inside stays still. */
+.patch-entry { position: relative; isolation: isolate; cursor: pointer; }
+.patch-entry::before { content: ""; position: absolute; inset: -1px -1rem; z-index: -1; border-radius: var(--radius-surface); background: var(--color-surface-hover); opacity: 0; transition: opacity 160ms cubic-bezier(.16, 1, .3, 1); pointer-events: none; }
+.patch-entry:hover::before, .patch-entry:has(h3 a:focus-visible)::before { opacity: .3; transition-duration: 220ms; }
+.patch-entry h3 a::after { content: ""; position: absolute; inset: -1px -1rem; border-radius: var(--radius-surface); }
+.patch-entry h3 a:focus-visible { outline: none; }
+.patch-entry h3 a:focus-visible::after { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.patch-entry :is(a, button, summary, progress):not(h3 a) { position: relative; z-index: 1; }
 .entry-credit, .release-target { color: var(--color-text-muted); font-size: .86rem; margin-top: .3rem; }
 .entry-goal { max-width: 48ch; margin: .7rem 0 1.1rem; }
 .entry-actions, .file-choices.compact { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem 1rem; }

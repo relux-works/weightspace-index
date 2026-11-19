@@ -106,7 +106,7 @@ export function facetOptions(entries: SearchEntry[]) {
   return FACETS.flatMap(([key, label]) => {
     const counts = new Map<string, number>();
     for (const e of entries) for (const v of new Set(facetValues(e, key))) counts.set(v, (counts.get(v) ?? 0) + 1);
-    const options: FacetOption[] = [...counts].map(([value, count]) => ({ value, label: facetLabel(key, value), count })).sort((a, b) => a.value.localeCompare(b.value));
+    const options: FacetOption[] = [...counts].map(([value, count]) => ({ value, label: facetLabel(key, value), count })).sort((a, b) => a.label.localeCompare(b.label, "en", { sensitivity: "base" }));
     const narrows = options.some((o) => o.count < entries.length);
     return options.length < 2 || !narrows ? [] : [{ key, label, options, primary: PRIMARY_FACETS.includes(key) }];
   });

@@ -1348,7 +1348,7 @@ a.title:hover {
 }
 .facet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   gap: var(--space-2);
 }
 .more-filters > summary {
@@ -1415,10 +1415,11 @@ a.title:hover {
 .text-button:hover {
   text-decoration: underline;
 }
-.result-count {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
+/* The count beside the page title: "4", or "1 of 4" while filtering. */
+.title-count {
+  font-weight: 400;
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
 }
 .results {
   list-style: none;
@@ -1509,6 +1510,7 @@ a.title:hover {
 }
 .results > li.empty-row {
   display: block;
+  border-bottom: 0;
 }
 .result-facts {
   margin-top: var(--space-2);

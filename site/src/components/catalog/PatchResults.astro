@@ -11,7 +11,8 @@ const { version: v, compact = false } = Astro.props;
 const groups = groupEvidence(results(v), pending(v), v.runs);
 const report = authorReport(v);
 const Heading = compact ? "h4" : "h3";
-const authors = v.patch.authors.map(a => a.name).join(", ");
+const names = report?.by ?? v.patch.authors.map(a => a.name);
+const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
 const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.length);
 ---
 <div class:list={["evidence", { compact }]}>
@@ -19,8 +20,8 @@ const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.lengt
     const self = source === "author";
     if (!self && !scores.length && !runs.length) return null;
     return <section class="evidence-group">
-      <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Author report" : sourceLabels[source] + " benchmark"}</Heading>
-      {!compact && report && self && <p class="study-scope">{report.scope} <a href={report.url}>{authors}’s study <Arrow dir="out" /></a></p>}
+      <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</Heading>
+      {!compact && report && self && <p class="study-scope">Reported by {byline}{report.affiliation && ` (${report.affiliation})`} in <a href={report.studyUrl ?? report.url}>{report.studyTitle ?? "their study"} <Arrow dir="out" /></a>. {report.scope}</p>}
       {compact ? scores.slice(0, 1).map(r => <p class="score-line">{r.benchmark} {r.metric} <b>{fmt(r.base, r.unit)} → {fmt(r.patched, r.unit)}</b></p>)
         : scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: r.benchmark, sub: r.n ? `${r.metric} · n = ${r.n}` : r.metric, href: report && r.href === report.url ? undefined : r.href }))} />}
       {progress.map(w => <div class="coverage">

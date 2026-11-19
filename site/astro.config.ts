@@ -6,7 +6,10 @@ import { cardHast, cardMdast } from "./src/lib/card-plugin.ts";
 export default defineConfig({
   base: SITE_BASE,
   outDir: EXAMPLE ? "./dist-example" : DEMO ? "./dist-demo" : "./dist",
-  trailingSlash: "always",
+  // Pages build to dir/index.html and every internal link ends in "/". "ignore"
+  // keeps that output while dev and preview also serve /page without the slash,
+  // as static hosts do by redirecting, instead of answering 404.
+  trailingSlash: "ignore",
   devToolbar: { enabled: false },
   markdown: {
     // Cards are shown as authored: no typographic rewriting, no highlighter markup.

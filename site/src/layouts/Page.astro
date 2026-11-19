@@ -28,7 +28,9 @@ interface Props {
 }
 const { title, description, nav } = Astro.props;
 const index = loadIndex();
-const examplePage = index.example || (DEMO && index.bases.some(b => b.dir.startsWith("docs/example/") && Astro.url.pathname.startsWith(b.url)));
+// Dev and preview also serve a page without its trailing slash; base URLs end in "/".
+const pagePath = Astro.url.pathname.replace(/\/?$/, "/");
+const examplePage = index.example || (DEMO && index.bases.some(b => b.dir.startsWith("docs/example/") && pagePath.startsWith(b.url)));
 const commitUrl = `https://github.com/${index.githubRepo}/tree/${index.commit}`;
 const docTitle = title === "Weightspace Index" ? title : `${title} · Weightspace Index`;
 // The approved artwork is inlined unchanged; only presentation attributes are

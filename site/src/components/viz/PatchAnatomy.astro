@@ -44,7 +44,7 @@ const equations = [
 const describe = ({ name, symbol, cells }: typeof W) => `${name} ${symbol}, ${cells.length} by ${cells[0].length}`;
 ---
 <article class="patch-article" aria-labelledby="patch-anatomy-title">
-  <h2 id="patch-anatomy-title">What a patch actually changes</h2>
+  <h1 id="patch-anatomy-title">What a patch actually changes</h1>
   <p>Model weights are stored in matrices. This example changes values in two columns. Each square is a matrix entry. Gray shades show weight magnitude, and brighter red marks larger changes.</p>
 
   <figure class="weight-figure" style={`--equation-columns:${cols * 3}`}>
@@ -82,7 +82,7 @@ const describe = ({ name, symbol, cells }: typeof W) => `${name} ${symbol}, ${ce
 
 <style>
   .patch-article { max-width: 52rem; }
-  h2 { font-size: clamp(1.55rem, 2.6vw, 2rem); margin-bottom: .7rem; }
+  h1 { font-size: clamp(1.85rem, 3.5vw, 2.65rem); margin-bottom: .7rem; }
   .patch-article > p { max-width: 67ch; color: var(--color-text-muted); }
   .patch-article > p + p { margin-top: .85rem; }
   .patch-article > p strong { color: var(--color-text); }

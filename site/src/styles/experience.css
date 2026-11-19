@@ -210,9 +210,6 @@ button.cell:hover { filter: brightness(.96); }
 }
 
 /* ── Explainer ────────────────────────────────────────────────────── */
-.learn-hero { padding: 3.5rem 0 2.8rem; background: radial-gradient(50rem 24rem at 90% 0, var(--color-accent-soft), transparent 70%); }
-.learn-hero h1 { font-size: clamp(2.4rem, 5.5vw, 4.4rem); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 1rem; text-wrap: balance; }
-.learn-hero h1 span { color: var(--color-accent); }
 
 
 /* Sliding marker (scripts/slide.ts): a thumb behind the pressed button of a

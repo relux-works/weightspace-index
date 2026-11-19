@@ -1,3 +1,4 @@
 /tool/target/
 .temp/
 .DS_Store
+.venv/

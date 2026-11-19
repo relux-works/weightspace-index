@@ -81,3 +81,13 @@ test("search terms cover every field a result shows and both formats", async () 
   }
   assert.ok(!matchesAll(terms, queryWords("gguf")));
 });
+
+test("search shows only facets that can narrow the list", async () => {
+  const { facetOptions } = await import("../src/lib/search.ts");
+  const entry = (base: string, formats: string[]) => ({ base, profile: "bf16", formats, tags: [], license: "MIT", status: "active", benchmarks: [], evidence: [] });
+  const one = facetOptions([entry("A/a", ["LoRA", "Replacement"])] as never);
+  assert.deepEqual(one, []);
+  const two = facetOptions([entry("A/a", ["LoRA", "Replacement"]), entry("B/b", ["LoRA"])] as never);
+  assert.deepEqual(two.map(f => f.key), ["base", "format"]);
+  assert.deepEqual(two.find(f => f.key === "format")!.options, [{ value: "LoRA", count: 2 }, { value: "Replacement", count: 1 }]);
+});

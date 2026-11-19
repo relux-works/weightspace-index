@@ -2,41 +2,57 @@
 import Page from "../layouts/Page.astro";
 import Head from "../components/Head.astro";
 import { href, loadIndex } from "../lib/index.ts";
-import { FACETS, facetValues, searchEntries } from "../lib/search.ts";
+import { facetOptions, searchEntries } from "../lib/search.ts";
 
 const index = loadIndex();
-const entries = searchEntries(index);
-const options = Object.fromEntries(
-  FACETS.map(([k]) => [k, [...new Set(entries.flatMap((e) => facetValues(e, k)))].sort((a, b) => a.localeCompare(b))]),
-);
+const facets = facetOptions(searchEntries(index));
+const primary = facets.filter((f) => f.primary);
+const more = facets.filter((f) => !f.primary);
 ---
 <Page title="Search" nav="search" description="Search every patch version by model, patch, author, format, profile or benchmark, and filter by license, status and evidence.">
   <Head>
     <h1>Patch versions</h1>
-    <p class="lead">Every patch version in the index. Filters combine, and the address bar keeps them, so a search can be shared.</p>
     <form id="search" class="search-form" role="search" data-src={href("search.json")}>
-      <div class="search-box">
-        <input type="search" name="q" placeholder="Model, patch, author, format or benchmark" aria-label="Search text" autocomplete="off" maxlength="200" />
-      </div>
-      <div class="filters">
-        {FACETS.map(([k, label]) => (
-          <label class="field">
-            <span>{label}</span>
-            <select name={k}>
-              <option value="">Any</option>
-              {options[k].map((o) => <option value={o}>{o}</option>)}
-            </select>
+      <div class="search-bar">
+        <input type="search" name="q" placeholder="Model, patch or author" aria-label="Search text" autocomplete="off" maxlength="200" />
+        {primary.map((f) => (
+          <label class="facet">
+            <span class="visually-hidden">{f.label}</span>
+            <span class="select">
+              <select name={f.key}>
+                <option value="">Any {f.label.toLowerCase()}</option>
+                {f.options.map((o) => <option value={o.value}>{o.value} ({o.count})</option>)}
+              </select>
+            </span>
           </label>
         ))}
       </div>
-      <div class="row">
-        <span id="count" class="result-count grow" aria-live="polite"></span>
-        <button type="reset" class="btn quiet">Clear all</button>
+      {more.length > 0 && (
+        <details class="more-filters">
+          <summary>More filters</summary>
+          <div class="facet-grid">
+            {more.map((f) => (
+              <label class="facet">
+                <span class="visually-hidden">{f.label}</span>
+                <span class="select">
+                  <select name={f.key}>
+                    <option value="">Any {f.label.toLowerCase()}</option>
+                    {f.options.map((o) => <option value={o.value}>{o.value} ({o.count})</option>)}
+                  </select>
+                </span>
+              </label>
+            ))}
+          </div>
+        </details>
+      )}
+      <div class="search-status">
+        <span id="count" class="result-count" aria-live="polite"></span>
+        <button type="reset" class="text-button">Clear all</button>
       </div>
     </form>
   </Head>
 
-  <section class="band">
+  <section class="band results-band">
     <div class="wrap">
       <h2 id="results-heading" class="visually-hidden">Results</h2>
       <noscript><p class="empty"><strong>Search needs JavaScript</strong> Browse from <a href={href()}>Models</a> instead.</p></noscript>
@@ -55,8 +71,12 @@ const options = Object.fromEntries(
     const list = document.getElementById("results") as HTMLUListElement;
     const count = document.getElementById("count") as HTMLElement;
     const modelsHref = (document.querySelector(".product") as HTMLAnchorElement | null)?.href ?? "/";
-    const keys = ["base", "profile", "format", "tag", "license", "status", "benchmark", "evidence"] as const;
-    const values = (e: Entry, k: (typeof keys)[number]): string[] =>
+    type Key = "base" | "profile" | "format" | "tag" | "license" | "status" | "benchmark" | "evidence";
+    /** Only the facets the build rendered; a facet with one value has no select. */
+    const selects = [...form.querySelectorAll("select")];
+    const keys = selects.map((s) => s.name as Key);
+    const moreFilters = form.querySelector("details.more-filters") as HTMLDetailsElement | null;
+    const values = (e: Entry, k: Key): string[] =>
       k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : k === "format" ? e.formats : [e[k] as string];
     const tones: Record<string, string> = {
       active: "ok", "complete run": "ok", deprecated: "neutral", withdrawn: "bad",
@@ -110,6 +130,7 @@ const options = Object.fromEntries(
         const v = p.get(k) ?? "";
         s.value = [...s.options].some((o) => o.value === v) ? v : "";
       }
+      if (moreFilters && [...moreFilters.querySelectorAll("select")].some((s) => s.value)) moreFilters.open = true;
     }
     function writeUrl() {
       const p = new URLSearchParams();

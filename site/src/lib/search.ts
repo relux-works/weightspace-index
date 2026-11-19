@@ -40,6 +40,26 @@ export const FACETS = [
 
 export type FacetKey = (typeof FACETS)[number][0];
 
+/** Facets shown beside the search box; the rest sit behind "More filters". */
+export const PRIMARY_FACETS: readonly FacetKey[] = ["base", "format"];
+
+export interface FacetOption { value: string; count: number }
+
+/**
+ * Options per facet with how many versions carry each. A facet is left out when
+ * no option could narrow the list: fewer than two values, or every value on
+ * every version.
+ */
+export function facetOptions(entries: SearchEntry[]) {
+  return FACETS.flatMap(([key, label]) => {
+    const counts = new Map<string, number>();
+    for (const e of entries) for (const v of new Set(facetValues(e, key))) counts.set(v, (counts.get(v) ?? 0) + 1);
+    const options: FacetOption[] = [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value));
+    const narrows = options.some((o) => o.count < entries.length);
+    return options.length < 2 || !narrows ? [] : [{ key, label, options, primary: PRIMARY_FACETS.includes(key) }];
+  });
+}
+
 /** Everything a result shows about one version, plus its short name and goal. */
 export function versionTerms(v: Version): string {
   const report = authorReport(v);

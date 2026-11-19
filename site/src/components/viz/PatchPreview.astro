@@ -1,44 +1,51 @@
 ---
-import { scoreAxis } from "../../lib/score-axis.ts";
 import Arrow from "../Arrow.astro";
+import MatrixPreview from "./MatrixPreview.astro";
 import { authorReport } from "../../data/reports.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
-import { editStats, fmt, previewResult, results } from "../../lib/insight.ts";
+import { editDeltas, fmt, previewResult, results } from "../../lib/insight.ts";
+import { scoreAxis } from "../../lib/score-axis.ts";
+import { weightWindow } from "../../lib/weight-window.ts";
 import type { Version } from "../../lib/types.ts";
+
 interface Props { version: Version }
 const { version } = Astro.props;
 const patch = version.patch;
 const report = authorReport(version);
 const result = previewResult(results(version));
-const stats = editStats(version);
-const layers = stats?.tensors.slice(0, 2) ?? [];
+const sample = editDeltas(version, 6).map(tensor => ({ tensor, rows: weightWindow(tensor, 16) })).find(view => view.rows);
+const treatments = result ? [{ label: "Base", score: result.base }, { label: "Patched", score: result.patched }] : [];
+const axis = result && scoreAxis(treatments.map(({ score }) => score), result.unit);
 const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : result && sourceLabels[result.source];
-const bars = result ? [{ label: "Base", value: result.base }, { label: "Patched", value: result.patched }] : [];
-const axis = result && scoreAxis([result.base, result.patched], result.unit);
 ---
 <aside class="patch-preview" aria-label="Featured patch">
   <header>
-    <h2>{report?.name ?? patch.title}</h2>
-    <p>{patch.base.model} · {version.label}{patch.base.dir.startsWith("docs/example/") && " · Synthetic example"}</p>
+    <div>
+      <h2>{report?.name ?? patch.title}</h2>
+      <p>{patch.base.model} · {version.label}{patch.base.dir.startsWith("docs/example/") && " · Synthetic example"}</p>
+    </div>
+    <a class="preview-link" href={patch.url}>View patch <Arrow /></a>
   </header>
-  {layers.length > 0 && <figure class="column-map">
-    <figcaption>Edited input columns</figcaption>
-    {layers.map(t => <div class="column-line">
-      <span>Layer {t.layer}</span>
-      <svg viewBox="0 0 400 24" preserveAspectRatio="none" role="img" aria-label={`${t.active} of ${t.cols} columns edited in ${t.short}`}>
-        {t.columns.map(c => <line x1={(c + .5) / t.cols * 400} x2={(c + .5) / t.cols * 400} y1="0" y2="24" />)}
-      </svg>
-    </div>)}
-  </figure>}
-  {result ? <figure class="sample-score">
-    <figcaption><strong>{result.benchmark} {result.metric}</strong>
+  {sample?.rows ? <MatrixPreview tensor={sample.tensor} rows={sample.rows} /> : !result && <p class="preview-summary">{report?.goal ?? patch.summary}</p>}
+  {result && <figure class="sample-score">
+    <figcaption>
+      <strong>{result.benchmark} {result.metric}</strong>
       <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>
     </figcaption>
-    {bars.map(({label, value}) =>
-      <div class="sample-row"><span>{label}</span>
-        <i aria-hidden="true"><b style={axis!.bar(value)}></b></i>
-        <strong>{fmt(value, result.unit)}</strong>
-      </div>)}
-  </figure> : <p>{report?.goal ?? patch.summary}</p>}
-  <a class="preview-link" href={patch.url}>Explore this patch <Arrow /></a>
+    <dl class="score-bars">
+      {treatments.map(({ label, score }) => {
+        const position = axis!.position(score);
+        const zero = axis!.zero;
+        return <div class="score-column">
+          <dt>{label}</dt>
+          <dd>
+            <strong>{fmt(score, result.unit)}</strong>
+            <span class="score-track" style={`--zero:${zero}%`} aria-hidden="true">
+              <i style={`bottom:${Math.min(zero, position)}%;height:${Math.abs(zero - position)}%`}></i>
+            </span>
+          </dd>
+        </div>;
+      })}
+    </dl>
+  </figure>}
 </aside>

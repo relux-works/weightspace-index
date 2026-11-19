@@ -1,7 +1,7 @@
 /* The directory and featured release share the first viewport on desktop.
    On a phone the reader reaches the model rows before the worked example. */
 .landing { display: grid; align-items: start; gap: 2rem; padding-block: clamp(2rem, 5vw, 4.8rem); }
-.landing.with-preview { grid-template-columns: minmax(0, 1.26fr) minmax(0, .9fr); column-gap: clamp(2rem, 7vw, 7rem); }
+.landing.with-preview { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(2rem, 5.25vw, 5.5rem); }
 .find-intro h1, .release-header h1 { font-size: clamp(3rem, 5.7vw, 5.1rem); line-height: .99; font-weight: 680; letter-spacing: -.035em; }
 .find-intro p, .release-goal { margin-top: 1.1rem; max-width: 46ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
 .find-intro a { white-space: nowrap; }
@@ -18,24 +18,27 @@
 .model-entry:hover strong, .patch-entry h3 a:hover { color: var(--color-link); text-decoration: underline; }
 .entry-arrow { display: grid; place-items: center; width: 2rem; height: 2rem; flex-shrink: 0; border: 1px solid var(--color-border); border-radius: 50%; }
 
-.patch-preview { color: var(--ink-text); background: var(--color-brand-ink); border: 1px solid var(--ink-line); border-radius: .65rem; padding: clamp(1.3rem, 3vw, 2.2rem); --color-focus: var(--ink-hot); }
-.patch-preview h2 { font-size: clamp(1.7rem, 2.5vw, 2.3rem); line-height: 1.15; }
+.patch-preview { color: var(--ink-text); background: var(--color-brand-ink); border: 1px solid var(--ink-line); border-radius: .65rem; padding: clamp(1rem, 2.35vw, 1.85rem); --color-focus: var(--ink-hot); }
+.patch-preview header, .sample-score { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; }
+.patch-preview h2 { font-size: clamp(1.65rem, 2.65vw, 2.3rem); line-height: 1.15; overflow-wrap: anywhere; }
 .patch-preview header p, .sample-score figcaption span { color: var(--ink-muted); font-size: .83rem; }
-.patch-preview header p { margin-top: .3rem; }
-.column-map, .sample-score { margin: 1.4rem 0 0; padding-top: 1.1rem; border-top: 1px solid var(--ink-line); }
-.column-map figcaption, .sample-score figcaption strong { display: block; font-weight: 600; font-size: .95rem; }
-.column-line, .sample-row { display: grid; align-items: center; gap: .75rem; margin-top: .65rem; font: 400 .78rem var(--font-mono); }
-.column-line { grid-template-columns: 4.7rem minmax(0, 1fr); color: var(--ink-muted); }
-.column-line svg { width: 100%; height: 1.8rem; background: repeating-linear-gradient(90deg, var(--ink-line) 0 1px, transparent 1px 5%); }
-.column-line line { stroke: var(--ink-hot); stroke-width: 1.1; }
-.sample-score figcaption { margin-bottom: .8rem; }
-.sample-row { grid-template-columns: 4.7rem minmax(0, 1fr) auto; }
-.sample-row i { position: relative; height: .48rem; background: var(--ink-line); }
-.sample-row b { position: absolute; height: 100%; background: var(--ink-faint); }
-.sample-row:last-child b { background: var(--ink-text); }
-.sample-row strong { font: 600 .87rem var(--font-mono); grid-column: 3; }
-.preview-link { display: inline-flex; align-items: center; gap: .6rem; margin-top: 1.6rem; color: var(--ink-text); font-weight: 600; font-size: .9rem; }
+.patch-preview header p { margin-top: .25rem; }
+.preview-link { display: inline-flex; align-items: center; gap: .35rem; padding-block: .35rem; color: var(--ink-text); font-weight: 600; font-size: .88rem; white-space: nowrap; }
 .preview-link:hover { color: var(--ink-hot); }
+.preview-summary { margin-top: .9rem; }
+.sample-score { margin: .95rem 0 0; padding-top: .8rem; border-top: 1px solid var(--ink-line); }
+.sample-score figcaption strong, .sample-score figcaption span { display: block; }
+.sample-score figcaption strong { font-weight: 600; font-size: .93rem; }
+.score-bars { display: grid; grid-template-columns: repeat(2, minmax(3.25rem, 1fr)); gap: .45rem; margin: 0; text-align: center; }
+.score-column { display: flex; flex-direction: column-reverse; min-width: 0; }
+.score-column dt { border-top: 1px solid var(--ink-line); padding-top: .15rem; color: var(--ink-muted); font-size: .72rem; }
+.score-column dd { margin: 0; }
+.score-column strong { display: block; font: 500 .84rem var(--font-mono); }
+.score-track { position: relative; display: block; height: 2.55rem; }
+.score-track::before { content: ""; position: absolute; inset: auto 0 var(--zero); border-top: 1px solid var(--ink-line); }
+.score-track i { position: absolute; inset-inline: 23%; background: var(--ink-faint); border-radius: .12rem .12rem 0 0; }
+.score-column:last-child .score-track i { background: var(--ink-text); }
+@media (forced-colors: active) { .score-track i { forced-color-adjust: none; background: Highlight; } }
 
 .patch-directory { border-top: 1px solid var(--color-border-strong); }
 .patch-entry { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem 4rem; padding: 1.5rem 0; border-bottom: 1px solid var(--color-divider); }
@@ -101,8 +104,4 @@
   .release-layout { gap: 0; }
   .release-nav { display: flex; flex-wrap: wrap; gap: .1rem 1rem; padding: .5rem 0; border-bottom: 1px solid var(--color-divider); }
   .release-nav a { font-size: .85rem; }
-}
-@media (forced-colors: active) {
-  .sample-row b { forced-color-adjust: none; background: Highlight; }
-  .column-line line { stroke: Highlight; }
 }

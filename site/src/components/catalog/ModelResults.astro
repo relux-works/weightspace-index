@@ -1,34 +1,86 @@
 ---
-// Every patch's results for one model in a plain table per measuring source,
-// so patches can be compared without mixing self-reported and independent
-// numbers (rule 9).
+// Every patch of one model, benchmark by benchmark: for each measuring source
+// (never mixed, rule 9), one block per benchmark listing every patch — a full
+// outer join, so a patch without that benchmark shows "Not measured" instead of
+// disappearing. A block draws one "Unpatched base" bar only when every patch in
+// it was compared against the same baseline measurement; otherwise each patch
+// keeps its own base bar beside its patched bar.
 import type { Base } from "../../lib/types.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
 import { authorReport } from "../../data/reports.ts";
-import { results, pending, groupEvidence, fmt, signed, gain, type Result } from "../../lib/insight.ts";
+import { scoreAxis } from "../../lib/score-axis.ts";
+import { results, pending, groupEvidence, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
-const all = releases.flatMap(v => results(v));
-const waiting = releases.flatMap(v => pending(v));
-const nameOf = (r: { version: Result["version"] }) => authorReport(r.version)?.name ?? r.version.patch.title;
-const groups = groupEvidence(all, waiting, []).filter(g => g.scores.length || g.progress.length);
+const nameOf = (v: Result["version"]) => authorReport(v)?.name ?? v.patch.title;
+const groups = groupEvidence(releases.flatMap(v => results(v)), releases.flatMap(v => pending(v)), [])
+  .filter(g => g.scores.length || g.progress.length);
+const trend = (g: number) => g > 0 ? "up" : g < 0 ? "down" : "flat";
+
+interface Block { benchmark: string; metric: string; unit: string; higherIsBetter: boolean; scores: Result[]; progress: Pending[] }
+function blocks(scores: Result[], progress: Pending[]) {
+  const out = new Map<string, Block>();
+  for (const r of scores) {
+    const key = `${r.benchmark}|${r.metric}|${r.unit}`;
+    if (!out.has(key)) out.set(key, { benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
+    out.get(key)!.scores.push(r);
+  }
+  for (const w of progress) {
+    const b = [...out.values()].find(b => b.benchmark === w.benchmark)
+      ?? out.set(w.benchmark, { benchmark: w.benchmark, metric: "", unit: "", higherIsBetter: true, scores: [], progress: [] }).get(w.benchmark)!;
+    b.progress.push(w);
+  }
+  return [...out.values()];
+}
 ---
-{groups.map(g => <div class="rtable-wrap">
-  <p class="rgroup-head"><span class:list={["src-chip", g.source === "author" ? "self" : "indep"]}>{sourceLabels[g.source]}</span></p>
-  {g.scores.length > 0 && <table class="rtable">
-    <thead><tr><th>Benchmark</th><th>Patch</th><th class="num">Base</th><th class="num">Patched</th><th class="num">Change</th></tr></thead>
-    <tbody>{g.scores.map(r => {
-      const d = gain(r);
-      return <tr>
-        <td>{r.benchmark}{r.metric && <small> {r.metric}</small>}</td>
-        <td><a href={r.version.patch.url}>{nameOf(r)}</a></td>
-        <td class="num muted">{fmt(r.base, r.unit)}</td>
-        <td class="num"><strong>{fmt(r.patched, r.unit)}</strong></td>
-        <td class="num"><span class:list={["delta", d > 0 ? "up" : d < 0 ? "down" : "flat"]}>{signed(r.patched - r.base, r.unit)}</span></td>
-      </tr>;
-    })}</tbody>
-  </table>}
-  {g.progress.length > 0 && <p class="rnote">Measurement in progress · {g.progress.map((w, i) => <>{i > 0 && ", "}<a href={w.href}>{nameOf(w)} · {w.benchmark}</a> ({w.filed}/{w.total} item–seed pairs)</>)}</p>}
-</div>)}
-{!groups.length && <p class="quiet-row">No scored results yet.</p>}
+<p class="cmp-intro">Each benchmark lists every patch. Where patches were measured against the same unpatched run, they share one base bar; otherwise each shows its own.</p>
+<div class="evidence">
+  {groups.map(g => {
+    const list = blocks(g.scores, g.progress);
+    const anyDown = g.scores.some(r => gain(r) < 0);
+    return <section class="evidence-group">
+      <h3 class:list={["src-chip", g.source === "author" ? "self" : "indep"]}>{g.source === "author" ? "Self-reported" : sourceLabels[g.source] + " benchmark"}</h3>
+      <p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>
+      {list.map(b => {
+        const axis = scoreAxis(b.scores.flatMap(r => [r.base, r.patched]), b.unit);
+        const shared = b.scores.length > 0 && b.scores.every(r => r.baseKey === b.scores[0].baseKey);
+        const sub = [b.metric, b.scores[0]?.n && `n = ${b.scores[0].n}`, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
+        return <div class="cmp-block">
+          <h4 class="cmp-bench">{b.benchmark}{sub && <small>{sub}</small>}</h4>
+          <ul class="rlist cmp">
+            {shared && <li class="rrow cmp-base">
+              <span class="rname">Unpatched base</span>
+              <span class="rplot"><span class="rbars" aria-hidden="true"><span class="rbar base"><i style={axis.bar(b.scores[0].base)}></i></span></span>
+                <span class="rvals"><strong>{fmt(b.scores[0].base, b.unit)}</strong></span></span>
+              <span></span>
+            </li>}
+            {releases.map(v => {
+              const r = b.scores.find(r => r.version === v);
+              const w = b.progress.find(w => w.version === v);
+              const name = <a href={v.patch.url}>{nameOf(v)}</a>;
+              if (!r) return <li class="rrow cmp-missing">
+                <span class="rname">{name}</span>
+                <span class="rmiss">{w ? <a href={w.href}>Score pending · {w.filed} of {w.total} item–seed pairs filed</a> : "Not measured"}</span>
+                <span></span>
+              </li>;
+              const t = trend(gain(r));
+              return <li class:list={["rrow", t]}>
+                <span class="rname">{name}</span>
+                <span class="rplot">
+                  <span class="rbars" aria-hidden="true">
+                    {!shared && <span class="rbar base"><i style={axis.bar(r.base)}></i></span>}
+                    <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
+                  </span>
+                  <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
+                </span>
+                <span class:list={["delta", t]}>{signed(r.patched - r.base, r.unit)}<small>{t === "up" ? "better" : t === "down" ? "worse" : "no change"}</small></span>
+              </li>;
+            })}
+          </ul>
+        </div>;
+      })}
+    </section>;
+  })}
+  {!groups.length && <p class="quiet-row">No scored results yet.</p>}
+</div>

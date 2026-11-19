@@ -2,8 +2,8 @@
 import type { Version } from "../lib/types.ts";
 
 interface AuthorReport {
-  name: string;
-  goal: string;
+  name?: string;
+  goal?: string;
   /** What the reporters measured, in one or two plain sentences. */
   scope: string;
   affiliation?: string;
@@ -31,7 +31,35 @@ const reports: Record<string, AuthorReport> = {
   },
 };
 
+// Synthetic self-reports for the demo model in docs/example, keyed by patch slug,
+// so the demo shows how patches compare benchmark by benchmark. Each patch
+// measures a different subset; the two share one study and so one baseline.
+const exampleStudy = "https://example.org/synthetic-example-study";
+const exampleReports: Record<string, AuthorReport> = {
+  "better-math": {
+    scope: "Synthetic example numbers for the demo site. Not a real measurement.",
+    url: exampleStudy,
+    studyTitle: "Synthetic example study",
+    measures: [
+      { label: "MATH-500 accuracy", base: 31.4, edited: 44.2 },
+      { label: "GSM8K accuracy", base: 52.6, edited: 63.9 },
+      { label: "Hit token limit", base: 18, edited: 21.5 },
+    ],
+  },
+  "shorter-answers": {
+    scope: "Synthetic example numbers for the demo site. Not a real measurement.",
+    url: exampleStudy,
+    studyTitle: "Synthetic example study",
+    measures: [
+      { label: "GSM8K accuracy", base: 52.6, edited: 50.8 },
+      { label: "IFEval score", base: 47, edited: 55.4 },
+      { label: "Hit token limit", base: 18, edited: 4.2 },
+    ],
+  },
+};
+
 export function authorReport(version?: Version) {
+  if (version?.patch.base.dir.startsWith("docs/example/")) return exampleReports[version.patch.slug];
   if (version?.profile.source.repo_id !== "Qwen/Qwen3.5-0.8B" ||
       version.profile.source.revision !== "2fc06364715b967f1860aea9cf38778875588b17") return;
   const source = version.files.find(f => f.role === "source");

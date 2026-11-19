@@ -21,6 +21,8 @@ export interface Result {
   /** Higher is better unless the measure says otherwise (e.g. hitting the token limit). */
   higherIsBetter: boolean;
   n?: number;
+  /** Identifies the baseline measurement; equal keys mean one shared unpatched result. */
+  baseKey: string;
   version: Version;
   href: string;
 }
@@ -70,7 +72,7 @@ export function results(v: Version | undefined): Result[] {
     const { benchmark, metric } = splitLabel(m.label);
     out.push({
       source: "author", benchmark, metric, unit: "%", base: m.base, patched: m.edited,
-      higherIsBetter: !/token limit|error|loop/i.test(m.label), version: v, href: report!.url,
+      higherIsBetter: !/token limit|error|loop/i.test(m.label), baseKey: `${report!.url}#${m.label}@${m.base}`, version: v, href: report!.url,
     });
   }
   for (const run of v.runs) {
@@ -80,7 +82,7 @@ export function results(v: Version | undefined): Result[] {
     const a = scale(s.unit!, base.record.score.value!), b = scale(s.unit!, s.value!);
     out.push({
       source: run.record.performed_by, benchmark: benchmarkName(run), metric: s.metric!, unit: b.unit,
-      base: a.value, patched: b.value, higherIsBetter: true, n: s.denominator, version: v, href: run.url,
+      base: a.value, patched: b.value, higherIsBetter: true, n: s.denominator, baseKey: base.url, version: v, href: run.url,
     });
   }
   return out;

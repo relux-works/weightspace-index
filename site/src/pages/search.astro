@@ -21,7 +21,7 @@ const more = facets.filter((f) => !f.primary);
             <span class="select">
               <select name={f.key}>
                 <option value="">Any {f.label.toLowerCase()}</option>
-                {f.options.map((o) => <option value={o.value}>{o.label} ({o.count})</option>)}
+                {f.options.map((o) => <option value={o.value} data-label={o.label}>{o.label} ({o.count})</option>)}
               </select>
             </span>
           </label>
@@ -37,7 +37,7 @@ const more = facets.filter((f) => !f.primary);
                 <span class="select">
                   <select name={f.key}>
                     <option value="">Any {f.label.toLowerCase()}</option>
-                    {f.options.map((o) => <option value={o.value}>{o.label} ({o.count})</option>)}
+                    {f.options.map((o) => <option value={o.value} data-label={o.label}>{o.label} ({o.count})</option>)}
                   </select>
                 </span>
               </label>
@@ -46,7 +46,9 @@ const more = facets.filter((f) => !f.primary);
         </details>
       )}
       <div class="search-status">
-        <span id="count" class="result-count" aria-live="polite"></span>
+        <span id="count" class="result-count" aria-hidden="true"></span>
+        <span id="count-live" class="visually-hidden" aria-live="polite"></span>
+        <ul id="active-filters" class="active-filters" aria-label="Active filters"></ul>
         <button type="reset" class="text-button" hidden>Clear all</button>
       </div>
     </form>
@@ -72,7 +74,9 @@ const more = facets.filter((f) => !f.primary);
     const form = document.getElementById("search") as HTMLFormElement;
     const list = document.getElementById("results") as HTMLUListElement;
     const count = document.getElementById("count") as HTMLElement;
+    const countLive = document.getElementById("count-live") as HTMLElement;
     const clear = form.querySelector('button[type="reset"]') as HTMLButtonElement;
+    const active = document.getElementById("active-filters") as HTMLUListElement;
     const modelsHref = (document.querySelector(".product") as HTMLAnchorElement | null)?.href ?? "/";
     type Key = "base" | "profile" | "format" | "tag" | "license" | "status" | "benchmark" | "evidence";
     /** Only the facets the build rendered; a facet with one value has no select. */
@@ -135,6 +139,49 @@ const more = facets.filter((f) => !f.primary);
       return p;
     }
 
+    /**
+     * Each option's count is the versions it would leave, given the query and
+     * the other filters. An option that would leave none is disabled, unless it
+     * is the one chosen, so a combination never silently empties the list.
+     */
+    function recount(pool: Entry[], chosen: (readonly [Key, string])[]) {
+      for (const s of selects) {
+        const k = s.name as Key;
+        const others = pool.filter((e) => chosen.every(([ck, v]) => ck === k || values(e, ck).includes(v)));
+        for (const o of s.options) {
+          if (!o.value) continue;
+          const n = others.filter((e) => values(e, k).includes(o.value)).length;
+          o.textContent = `${o.dataset.label} (${n})`;
+          o.disabled = n === 0 && o.value !== s.value;
+        }
+      }
+    }
+    /** Active filters as chips, so one can be removed without clearing the rest. */
+    function showActive(chosen: (readonly [Key, string])[]) {
+      active.replaceChildren(...chosen.map(([k]) => {
+        const s = form.elements.namedItem(k) as HTMLSelectElement;
+        const label = s.labels?.[0]?.querySelector("span")?.textContent ?? k;
+        const text = `${label}: ${s.selectedOptions[0].dataset.label}`;
+        const li = el("li");
+        const b = el("button", "filter-chip");
+        b.type = "button";
+        b.setAttribute("aria-label", `Remove filter ${text}`);
+        b.append(el("span", undefined, text), el("span", "filter-chip-x", "×"));
+        b.querySelector(".filter-chip-x")!.setAttribute("aria-hidden", "true");
+        b.addEventListener("click", () => {
+          const i = chosen.findIndex(([ck]) => ck === k);
+          s.value = "";
+          writeUrl();
+          render();
+          // Focus the chip that took this one's place, else the cleared select.
+          const chips = active.querySelectorAll("button");
+          (chips[Math.min(i, chips.length - 1)] ?? s).focus();
+        });
+        li.append(b);
+        return li;
+      }));
+    }
+
     /** A dashed box with a heading, a sentence and optional actions, as the only row. */
     function notice(title: string, text: string, ...actions: HTMLElement[]) {
       const li = el("li", "empty-row");
@@ -154,10 +201,12 @@ const more = facets.filter((f) => !f.primary);
       b.addEventListener("click", onClick);
       return b;
     }
-    /** The live count is announced once typing pauses, not on every keystroke. */
-    function setCount(text: string) {
+    /** The count shows at once; screen readers hear it once typing pauses. */
+    function setCount(text: string, now = false) {
+      count.textContent = text;
       clearTimeout(announce);
-      announce = window.setTimeout(() => { count.textContent = text; }, 350);
+      if (now) countLive.textContent = text;
+      else announce = window.setTimeout(() => { countLive.textContent = text; }, 350);
     }
 
     function readUrl() {
@@ -188,7 +237,10 @@ const more = facets.filter((f) => !f.primary);
       const words = queryWords(q);
       const chosen = keys.map((k) => [k, (form.elements.namedItem(k) as HTMLSelectElement).value] as const).filter(([, v]) => v);
       clear.hidden = !q && !chosen.length;
-      const hits = entries.filter((e) => chosen.every(([k, v]) => values(e, k).includes(v)) && matchesAll(e.terms, words));
+      const matchesQuery = entries.filter((e) => matchesAll(e.terms, words));
+      const hits = matchesQuery.filter((e) => chosen.every(([k, v]) => values(e, k).includes(v)));
+      recount(matchesQuery, chosen);
+      showActive(chosen);
       list.replaceChildren(
         ...hits.map((e) => {
           const li = el("li");
@@ -219,7 +271,7 @@ const more = facets.filter((f) => !f.primary);
         const filters = chosen.map(([k]) => {
           const select = form.elements.namedItem(k) as HTMLSelectElement;
           const label = select.labels?.[0]?.querySelector("span")?.textContent ?? k;
-          return `${label}: ${select.selectedOptions[0].text.replace(/ \(\d+\)$/, "")}`;
+          return `${label}: ${select.selectedOptions[0].dataset.label}`;
         });
         const what = q ? `“${q}”${filters.length ? ` with ${filters.join(", ")}` : ""}` : filters.join(", ");
         list.append(notice("No versions match", `Nothing matches ${what}.`, button("Clear all", () => form.reset())));
@@ -229,13 +281,13 @@ const more = facets.filter((f) => !f.primary);
     function load() {
       list.setAttribute("aria-busy", "true");
       list.replaceChildren();
-      count.textContent = "Loading versions…";
+      setCount("Loading versions…", true);
       fetch(form.dataset.src!)
         .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
         .then((d: { entries: Entry[] }) => { entries = d.entries; loaded = true; list.removeAttribute("aria-busy"); render(); })
         .catch(() => {
           list.removeAttribute("aria-busy");
-          count.textContent = "Search didn’t load.";
+          setCount("Search didn’t load.", true);
           const models = el("a", "btn quiet", "Browse models");
           (models as HTMLAnchorElement).href = modelsHref;
           list.replaceChildren(notice("Search didn’t load", "The list of versions could not be fetched. Try again, or browse from Models.", button("Try again", load), models));

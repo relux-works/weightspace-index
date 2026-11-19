@@ -30,7 +30,7 @@ export function readCoverage(reason?: string) {
 }
 
 export const sourceLabels = {
-  index: "Index team",
+  index: "Weightspace Index",
   "third-party": "Contributor",
   author: "Patch author",
 };

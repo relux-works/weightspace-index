@@ -7,7 +7,7 @@ import { apply, hfDownload } from "../../lib/commands.ts";
 import { editStats } from "../../lib/insight.ts";
 import GetButtons from "./GetButtons.astro";
 import RuntimeTabs from "./RuntimeTabs.astro";
-import PatchResults from "./PatchResults.astro";
+import PatchEvidence from "./PatchEvidence.astro";
 import CombinationMatrix from "./CombinationMatrix.astro";
 import ReleaseDetails from "./ReleaseDetails.astro";
 import EditMap from "../viz/EditMap.astro";
@@ -70,7 +70,7 @@ const replacement = source && patch.kind === "replacement" ? { href: downloadUrl
           </section>
           <section class="flow-section" id="results">
             <h2>Benchmark results</h2>
-            <PatchResults version={v} />
+            <PatchEvidence version={v} full />
           </section>
           <section class="flow-section" id="combinations">
             <h2>Patch combinations</h2>

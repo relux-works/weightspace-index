@@ -47,7 +47,7 @@ const more = facets.filter((f) => !f.primary);
       )}
       <div class="search-status">
         <span id="count" class="result-count" aria-live="polite"></span>
-        <button type="reset" class="text-button">Clear all</button>
+        <button type="reset" class="text-button" hidden>Clear all</button>
       </div>
     </form>
   </Head>
@@ -71,6 +71,7 @@ const more = facets.filter((f) => !f.primary);
     const form = document.getElementById("search") as HTMLFormElement;
     const list = document.getElementById("results") as HTMLUListElement;
     const count = document.getElementById("count") as HTMLElement;
+    const clear = form.querySelector('button[type="reset"]') as HTMLButtonElement;
     const modelsHref = (document.querySelector(".product") as HTMLAnchorElement | null)?.href ?? "/";
     type Key = "base" | "profile" | "format" | "tag" | "license" | "status" | "benchmark" | "evidence";
     /** Only the facets the build rendered; a facet with one value has no select. */
@@ -157,6 +158,7 @@ const more = facets.filter((f) => !f.primary);
       const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim();
       const words = queryWords(q);
       const chosen = keys.map((k) => [k, (form.elements.namedItem(k) as HTMLSelectElement).value] as const).filter(([, v]) => v);
+      clear.hidden = !q && !chosen.length;
       const hits = entries.filter((e) => chosen.every(([k, v]) => values(e, k).includes(v)) && matchesAll(e.terms, words));
       list.replaceChildren(
         ...hits.map((e) => {
@@ -167,7 +169,7 @@ const more = facets.filter((f) => !f.primary);
           a.href = e.url;
           a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
           h.append(a);
-          const sub = el("div", "row small muted facts");
+          const sub = el("div", "row small muted result-facts");
           sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
           main.append(h, el("p", undefined, e.summary), sub);
           const meta = el("div", "meta");

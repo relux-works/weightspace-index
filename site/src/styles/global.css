@@ -1392,6 +1392,7 @@ a.title:hover {
   padding-top: var(--space-4);
 }
 .results > li {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
   gap: var(--space-2) var(--space-8);
@@ -1405,7 +1406,20 @@ a.title:hover {
   color: var(--color-text);
   text-decoration: none;
 }
-.results h3 a:hover {
+/* The title link covers the whole result, so the row is one target. */
+.results h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.results h3 a:focus-visible {
+  outline: none;
+}
+.results > li:has(h3 a:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.results > li:has(h3 a:hover) h3 a {
   color: var(--color-link);
   text-decoration: underline;
 }
@@ -1458,7 +1472,7 @@ a.title:hover {
 .results > li.empty-row {
   display: block;
 }
-.results .facts {
+.result-facts {
   margin-top: var(--space-2);
 }
 .empty-actions {

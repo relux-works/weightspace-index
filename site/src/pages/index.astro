@@ -19,7 +19,7 @@ const featured = mostBenchmarked(models);
       </header>
       <section class="directory" id="models" aria-labelledby="directory-heading">
         <div class="directory-label"><h2 id="directory-heading">Choose a base model</h2><span>{plural(models.length, "model")}</span></div>
-        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" searchHref={href("search/")} />}
+        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" one="model" searchHref={href("search/")} />}
         <p class="filter-status" role="status" id="model-list-status"></p>
         <ul class="model-list" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
         {!models.length && <p class="quiet-row">No models have been published yet.</p>}

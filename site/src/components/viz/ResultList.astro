@@ -8,14 +8,15 @@
 import { scoreAxis } from "../../lib/score-axis.ts";
 import { fmt, signed, gain, type Result } from "../../lib/insight.ts";
 interface Row extends Pick<Result, "base" | "patched" | "unit" | "higherIsBetter"> { label: string; sub?: string; href?: string }
-interface Props { rows: Row[] }
-const { rows } = Astro.props;
+// keyBelow puts the legend after the rows instead of before them (patch cards).
+interface Props { rows: Row[]; keyBelow?: boolean }
+const { rows, keyBelow = false } = Astro.props;
 const axes = new Map([...new Set(rows.map(r => r.unit))].map(unit =>
   [unit, scoreAxis(rows.filter(r => r.unit === unit).flatMap(r => [r.base, r.patched]), unit)] as const));
 const trend = (g: number) => g > 0 ? "up" : g < 0 ? "down" : "flat";
 const anyDown = rows.some(r => gain(r) < 0);
 ---
-<p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>
+{!keyBelow && <p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>}
 <ul class="rlist">
   {rows.map(r => {
     const axis = axes.get(r.unit)!;
@@ -33,3 +34,4 @@ const anyDown = rows.some(r => gain(r) < 0);
     </li>;
   })}
 </ul>
+{keyBelow && <p class="plot-key below"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>}

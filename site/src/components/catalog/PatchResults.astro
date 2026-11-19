@@ -21,7 +21,7 @@ const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.lengt
     return <section class="evidence-group">
       <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</Heading>
       {!compact && self && v.claims.map(c => <p class="study-scope">Reported by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
-      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: resultTitle(r), sub: resultNote(r), href: claimUrls.has(r.href) ? undefined : r.href }))} />}
+      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: resultTitle(r), sub: resultNote(r), href: claimUrls.has(r.href) ? undefined : r.href }))} keyBelow={compact} />}
       {progress.map(w => <div class="coverage">
         <p>{w.benchmark} · <strong>Score pending</strong></p>
         <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />

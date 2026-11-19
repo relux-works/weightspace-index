@@ -85,11 +85,16 @@
 .rrow .delta.down small { color: var(--color-text); font-weight: 600; }
 /* Compare patches: one block per benchmark, one row per patch. */
 .cmp-intro { margin: 0 0 1.2rem; color: var(--color-text-muted); font-size: .9rem; max-width: 62ch; }
-.cmp-block + .cmp-block { margin-top: 1.1rem; }
+/* Benchmark lanes alternate a faint tint so each block reads as one band; the
+   tint bleeds past the text so the columns stay aligned with the page. */
+.cmp-block { margin-inline: -1rem; padding: .1rem 1rem .5rem; border-radius: var(--radius-surface); }
+.cmp-block + .cmp-block { margin-top: .4rem; }
+.cmp-block:nth-of-type(odd) { background: color-mix(in srgb, var(--color-surface-hover) 45%, transparent); }
 .cmp-bench { margin: .9rem 0 .1rem; font: 650 1rem var(--font-display); display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .6rem; }
 .cmp-bench small { font: 400 .76rem var(--font-ui); color: var(--color-text-muted); }
-.rlist.cmp .rrow { padding: .45rem 0; }
+.rlist.cmp .rrow { padding: .35rem 0; border-bottom: 0; }
 .rlist.cmp .rname { font-weight: 500; font-size: .9rem; }
+.rlist.cmp .rname a:not(:hover, :focus-visible) { text-decoration-line: none; }
 .cmp-base .rname { color: var(--color-text-muted); }
 .rmiss { font-size: .8rem; color: var(--color-text-muted); font-style: italic; }
 .rmiss a { color: inherit; }

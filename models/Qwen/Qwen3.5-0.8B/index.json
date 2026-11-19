@@ -3,7 +3,7 @@
   "baseline_runs": [
     {
       "id": "math500-n197.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
-      "performed_by": "index",
+      "performed_by": "third-party",
       "profile": "bf16",
       "protocol": {
         "name": "bench/protocols/math500-n197.json",
@@ -11,7 +11,7 @@
       },
       "score": {
         "owner": "bench contributors",
-        "reason": "12 of 197 item-seed pairs filed",
+        "reason": "22 of 197 item-seed pairs filed",
         "state": "UNKNOWN"
       },
       "state": "INCOMPLETE"
@@ -88,7 +88,7 @@
           "runs": [
             {
               "id": "math500-n197.qwen3.5-0.8b-thinking.bf16",
-              "performed_by": "index",
+              "performed_by": "third-party",
               "profile": "bf16",
               "protocol": {
                 "name": "bench/protocols/math500-n197.json",
@@ -96,7 +96,7 @@
               },
               "score": {
                 "owner": "bench contributors",
-                "reason": "12 of 197 item-seed pairs filed",
+                "reason": "22 of 197 item-seed pairs filed",
                 "state": "UNKNOWN"
               },
               "state": "INCOMPLETE"

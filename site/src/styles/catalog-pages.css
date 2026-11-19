@@ -93,7 +93,10 @@
    author's claim is a ghost of that bar, a faint fill inside a red outline
    (the hollow self-reported dot), so the two differ in shape as well as
    lightness. A score that got worse is hatched. */
-.triad { --tri-indep: var(--color-accent); --tri-ghost: color-mix(in oklch, var(--color-accent) 22%, var(--color-surface)); --tri-ghost-line: color-mix(in oklch, var(--color-accent) 60%, var(--color-surface)); gap: 1.1rem; }
+/* The chart red sits halfway between the link red and the Relux identity red
+   (in OKLCH): #ce090c light, #fc5850 dark. Both clear 4.5:1, so the bar, the
+   outline and the printed change share it. */
+.triad { --tri-indep: color-mix(in oklch, var(--color-link), var(--color-brand-red)); --tri-ghost: color-mix(in oklch, var(--tri-indep) 22%, var(--color-surface)); --tri-ghost-line: color-mix(in oklch, var(--tri-indep) 60%, var(--color-surface)); gap: 1.1rem; }
 .tri-head { margin: 0 0 .3rem; font: 650 .9rem var(--font-ui); display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; }
 .tri-head small { font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
 .tri-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }

@@ -22,8 +22,17 @@
     {
       "authors": [
         {
-          "name": "RikiyaT",
+          "name": "Rikiya Takehi",
           "url": "https://huggingface.co/RikiyaT"
+        },
+        {
+          "name": "Jayden Teoh"
+        },
+        {
+          "name": "Alex Zhang"
+        },
+        {
+          "name": "Omar Khattab"
         }
       ],
       "kind": "replacement",
@@ -31,7 +40,7 @@
       "license": "Apache-2.0 AND CC-BY-4.0",
       "slug": "rikiyat-thinking-loops",
       "submitter": "reluxzion",
-      "summary": "Maintainer-produced canonical replacement representation of RikiyaT’s published edit to the language-model MLP down-projection tensors in layers 15 and 19 of Qwen3.5-0.8B, built from the pinned base and edited checkpoints without changing tensor dtype or replacement values.",
+      "summary": "Maintainer-produced canonical replacement representation of the published edit by Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab to the language-model MLP down-projection tensors in layers 15 and 19 of Qwen3.5-0.8B, built from the pinned base and edited checkpoints without changing tensor dtype or replacement values.",
       "tags": [],
       "title": "Qwen3.5-0.8B, edited by an LLM with no training (Weight-Space Programming)",
       "versions": [

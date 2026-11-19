@@ -6,16 +6,9 @@ import { strength, type DeltaCell, type DeltaTensor } from "../../lib/insight.ts
 interface Props { tensor: DeltaTensor; rows: (DeltaCell | null)[][] }
 const { tensor, rows } = Astro.props;
 const width = rows[0].length;
-const example = rows.flat().find(cell => cell !== null)!;
-const layer = /^layers\.(\d+)\./.exec(tensor.short)?.[1];
-const value = (n: number) => Number(n.toPrecision(4)).toString().replace(/^-/, "−");
 const views = [{ label: "Base weights", patched: false }, { label: "Patched weights", patched: true }];
 ---
-<figure class="matrix-preview">
-  <figcaption>
-    <strong>Weight matrix</strong>
-    <span>{layer !== undefined ? `Layer ${layer} sample` : "Sampled rows"} · Illustrative grays</span>
-  </figcaption>
+<figure class="matrix-preview" aria-label="Base and patched weight matrices. Gray shades are illustrative. Red intensity shows how much each recorded weight changed.">
   <div class="matrix-pair" aria-hidden="true">
     {views.map(({ label, patched }, index) => <>
       {index > 0 && <span class="matrix-arrow"><Arrow /></span>}
@@ -26,23 +19,17 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
             const edited = patched && cell !== null;
             const tint = edited ? .42 + .58 * strength(cell, tensor.scale) : .32 + .66 * weight(y, x, 3);
             return <rect x={x * 10 + 1} y={y * 10 + 1} width="8" height="8" rx="1"
-              class:list={[{ edited, outlined: cell === example }]} style={`--tint:${(tint * 100).toFixed(1)}%`} />;
+              class:list={{ edited }} style={`--tint:${(tint * 100).toFixed(1)}%`} />;
           }))}
         </svg>
       </div>
     </>)}
   </div>
-  <p class="matrix-key"><span><i aria-hidden="true"></i> Red cells changed</span>
-    <span>Outlined weight <b>{value(example.old)}</b> <Arrow /> <b>{value(example.new)}</b></span>
-  </p>
 </figure>
 
 <style>
   .matrix-preview { margin: 1rem 0 0; padding-top: .95rem; border-top: 1px solid var(--ink-line); }
-  figcaption, .matrix-key { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .15rem .7rem; }
-  figcaption strong { font-weight: 600; }
-  figcaption span, .matrix-key { color: var(--ink-muted); font-size: .78rem; }
-  .matrix-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(.3rem, 1.6vw, .9rem); margin: .6rem 0; }
+  .matrix-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(.3rem, 1.6vw, .9rem); }
   .matrix-pair div > span { display: block; margin-bottom: .3rem; color: var(--ink-text); font-size: .77rem; }
   .matrix-arrow { color: var(--ink-muted); padding-top: 1.45rem; }
   .matrix-cells { display: block; width: 100%; height: auto; max-height: 7rem; }
@@ -51,14 +38,8 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
     fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--color-brand-ink));
   }
   .matrix-cells .edited { --cell-ink: var(--ink-hot); }
-  .matrix-cells .outlined { stroke: var(--ink-text); stroke-width: 1; }
-  .matrix-key > span { display: inline-flex; align-items: center; gap: .25rem; }
-  .matrix-key i { width: .5rem; height: .5rem; border-radius: .12rem; background: var(--ink-hot); margin-right: .15rem; }
-  .matrix-key b { color: var(--ink-text); font: 500 .75rem var(--font-mono); }
   @media (forced-colors: active) {
-    .matrix-cells rect, .matrix-key i { forced-color-adjust: none; fill: GrayText; }
+    .matrix-cells rect { forced-color-adjust: none; fill: GrayText; }
     .matrix-cells .edited { fill: Highlight; }
-    .matrix-cells .outlined { stroke: CanvasText; }
-    .matrix-key i { background: Highlight; }
   }
 </style>

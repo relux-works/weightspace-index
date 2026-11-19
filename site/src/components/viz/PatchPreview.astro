@@ -33,19 +33,17 @@ const performer = result?.source === "author" ? patch.authors.map(a => a.name).j
       <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>
     </figcaption>
     <dl class="score-bars">
-      {treatments.map(({ label, score }) => {
-        const position = axis!.position(score);
-        const zero = axis!.zero;
-        return <div class="score-column">
+      {treatments.map(({ label, score }) => (
+        <div class="score-row" data-treatment={label.toLowerCase()}>
           <dt>{label}</dt>
           <dd>
-            <strong>{fmt(score, result.unit)}</strong>
-            <span class="score-track" style={`--zero:${zero}%`} aria-hidden="true">
-              <i style={`bottom:${Math.min(zero, position)}%;height:${Math.abs(zero - position)}%`}></i>
+            <span class="score-track" style={`--zero:${axis!.zero}%`} aria-hidden="true">
+              <i style={axis!.bar(score)}></i>
             </span>
+            <strong>{fmt(score, result.unit)}</strong>
           </dd>
-        </div>;
-      })}
+        </div>
+      ))}
     </dl>
   </figure>}
 </aside>

@@ -3,10 +3,11 @@
 // records unchanged; differences are shown next to the two values they come
 // from and are never ranked across sources (rule 9).
 import { activeVersion, footprint, readCoverage } from "./catalog.ts";
+import { firstAdded } from "./files.ts";
 import { combinationStudies, readStudy, stackKey } from "./combinations.ts";
 import { exists, readBytes, readJson } from "./files.ts";
 import { rankable } from "./queries.ts";
-import type { Base, Run, Version } from "./types.ts";
+import type { Base, Patch, Run, Version } from "./types.ts";
 
 export type Source = "author" | "index" | "third-party";
 
@@ -282,4 +283,18 @@ export function editDeltas(v: Version | undefined, sample = 24): DeltaTensor[] {
 /** 0–1 colour strength for a change, linear in its size against the 95th percentile. */
 export function strength(c: DeltaCell | null, scale: number) {
   return c ? Math.min(1, Math.abs(c.new - c.old) / scale) : 0;
+}
+
+/**
+ * The model page's patch order: patches with any measurement (a score or a
+ * run still being scored) keep their index order at the top; the rest follow,
+ * newest first by the commit that added each patch.
+ */
+export function orderPatches(patches: Patch[]) {
+  const measured = (p: Patch) => { const v = activeVersion(p); return !!v && (results(v).length > 0 || pending(v).length > 0); };
+  const unmeasured = patches.filter(p => !measured(p))
+    .map(p => ({ p, at: firstAdded(`${p.dir}/patch.json`) }))
+    .sort((a, b) => b.at - a.at || a.p.slug.localeCompare(b.p.slug))
+    .map(x => x.p);
+  return [...patches.filter(measured), ...unmeasured];
 }

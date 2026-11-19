@@ -8,7 +8,7 @@ import ModelResults from "../../../../components/catalog/ModelResults.astro";
 import CombinationMatrix from "../../../../components/catalog/CombinationMatrix.astro";
 import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
 import { activeVersion, formats } from "../../../../lib/catalog.ts";
-import { combos } from "../../../../lib/insight.ts";
+import { combos, orderPatches } from "../../../../lib/insight.ts";
 import { plural } from "../../../../lib/format.ts";
 export function getStaticPaths() {
   return loadIndex().bases.map(base => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
@@ -36,7 +36,7 @@ const profile = base.profiles[0];
     <section class="flow-section" id="patches">
       <div class="directory-head"><h2>Available patches</h2>{base.patches.length > 3 && <Filter target="patch-list" label="Filter patches" noun="patches" one="patch"/>}</div>
       <p class="filter-status" id="patch-list-status" role="status"></p>
-      <div id="patch-list" class="patch-directory">{base.patches.map(patch => <PatchCard patch={patch} />)}</div>
+      <div id="patch-list" class="patch-directory">{orderPatches(base.patches).map(patch => <PatchCard patch={patch} />)}</div>
       {!base.patches.length && <p class="quiet-row">This model has no published patches yet. Its supported base files are listed below.</p>}
     </section>
 

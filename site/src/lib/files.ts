@@ -110,6 +110,17 @@ function git(args: string[]): string {
   return execFileSync("git", args, { cwd: REPO_ROOT, encoding: "utf8" }).trim();
 }
 
+/**
+ * When a record first appeared in the index: the author time, in seconds, of
+ * the commit that added it. A record not committed yet counts as the newest.
+ */
+export function firstAdded(repoPath: string): number {
+  let out = "";
+  try { out = git(["log", "--diff-filter=A", "--format=%at", "--", repoPath]); } catch { /* not a checkout */ }
+  const oldest = out.split("\n").filter(Boolean).at(-1);
+  return oldest ? Number(oldest) : Number.POSITIVE_INFINITY;
+}
+
 export interface Pin {
   commit: string;
   dirty: string[];

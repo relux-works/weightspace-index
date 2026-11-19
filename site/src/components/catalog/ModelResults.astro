@@ -7,28 +7,27 @@
 // keeps its own base bar beside its patched bar.
 import type { Base } from "../../lib/types.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
-import { authorReport } from "../../data/reports.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
-import { results, pending, groupEvidence, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
+import { results, pending, groupEvidence, resultNote, resultTitle, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
-const nameOf = (v: Result["version"]) => authorReport(v)?.name ?? v.patch.title;
+const nameOf = (v: Result["version"]) => v.patch.title;
 const groups = groupEvidence(releases.flatMap(v => results(v)), releases.flatMap(v => pending(v)), [])
   .filter(g => g.scores.length || g.progress.length);
 const trend = (g: number) => g > 0 ? "up" : g < 0 ? "down" : "flat";
 
-interface Block { benchmark: string; metric: string; unit: string; higherIsBetter: boolean; scores: Result[]; progress: Pending[] }
+interface Block { title: string; benchmark: string; metric: string; unit: string; higherIsBetter: boolean; scores: Result[]; progress: Pending[] }
 function blocks(scores: Result[], progress: Pending[]) {
   const out = new Map<string, Block>();
   for (const r of scores) {
-    const key = `${r.benchmark}|${r.metric}|${r.unit}`;
-    if (!out.has(key)) out.set(key, { benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
+    const key = `${r.benchmark}|${r.name ?? ""}|${r.metric}|${r.unit}`;
+    if (!out.has(key)) out.set(key, { title: resultTitle(r), benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
     out.get(key)!.scores.push(r);
   }
   for (const w of progress) {
-    const b = [...out.values()].find(b => b.benchmark === w.benchmark)
-      ?? out.set(w.benchmark, { benchmark: w.benchmark, metric: "", unit: "", higherIsBetter: true, scores: [], progress: [] }).get(w.benchmark)!;
+    const b = [...out.values()].find(b => b.benchmark === w.benchmark && b.title === w.benchmark)
+      ?? out.set(w.benchmark, { title: w.benchmark, benchmark: w.benchmark, metric: "", unit: "", higherIsBetter: true, scores: [], progress: [] }).get(w.benchmark)!;
     b.progress.push(w);
   }
   return [...out.values()];
@@ -45,9 +44,9 @@ function blocks(scores: Result[], progress: Pending[]) {
       {list.map(b => {
         const axis = scoreAxis(b.scores.flatMap(r => [r.base, r.patched]), b.unit);
         const shared = b.scores.length > 0 && b.scores.every(r => r.baseKey === b.scores[0].baseKey);
-        const sub = [b.metric, b.scores[0]?.n && `n = ${b.scores[0].n}`, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
+        const sub = [b.scores[0] ? resultNote(b.scores[0]) : b.metric, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
         return <div class="cmp-block">
-          <h4 class="cmp-bench">{b.benchmark}{sub && <small>{sub}</small>}</h4>
+          <h4 class="cmp-bench">{b.title}{sub && <small>{sub}</small>}</h4>
           <ul class="rlist cmp">
             {shared && <li class="rrow cmp-base">
               <span class="rname">Unpatched base</span>

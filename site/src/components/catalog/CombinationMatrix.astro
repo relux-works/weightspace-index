@@ -7,13 +7,12 @@ import { loadIndex } from "../../lib/index.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
 import { pairKey, pairStudies } from "../../lib/combinations.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
-import { authorReport } from "../../data/reports.ts";
 import { combos, signed, fmt, VERDICT_LABEL } from "../../lib/insight.ts";
 interface Props { base: Base; version?: Version }
 const { base, version } = Astro.props;
 const index = loadIndex();
 const studies = combos(base, version);
-const nameOf = (v: Version) => authorReport(v)?.name ?? v.patch.title;
+const nameOf = (v: Version) => v.patch.title;
 const patches = base.patches.filter(p => activeVersion(p));
 const byPair = pairStudies(studies);
 const showMatrix = !version && patches.length > 2 && byPair.size > 0;

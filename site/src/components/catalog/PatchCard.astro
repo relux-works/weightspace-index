@@ -2,21 +2,19 @@
 import Arrow from "../Arrow.astro";
 import type { Patch } from "../../lib/types.ts";
 import { activeVersion, discoveryText, formats } from "../../lib/catalog.ts";
-import { authorReport } from "../../data/reports.ts";
 import GetButtons from "./GetButtons.astro";
 import PatchResults from "./PatchResults.astro";
 interface Props { patch: Patch }
 const { patch } = Astro.props;
 const v = activeVersion(patch);
-const report = authorReport(v);
-const name = report?.name ?? patch.title;
-const terms = [discoveryText(patch.base.address, [patch], formats(v)), name, report?.goal ?? ""].join(" ").toLowerCase();
+const name = patch.title;
+const terms = [discoveryText(patch.base.address, [patch], formats(v)), name, patch.summary].join(" ").toLowerCase();
 ---
 <article class="patch-entry" data-search={terms}>
   <div class="patch-entry-main">
     <h3><a href={patch.url}>{name}</a></h3>
     <p class="entry-credit">{patch.authors.map(a => a.name).join(", ")}{v && <> · {v.label} · {v.profile.id.toUpperCase()}</>}</p>
-    <p class="entry-goal">{report?.goal ?? patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+    <p class="entry-goal">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
     <div class="entry-actions"><a class="btn primary" href={patch.url}>{v ? "View patch" : "Version history"} <Arrow /></a>
       {v && <GetButtons version={v} compact />}
     </div>

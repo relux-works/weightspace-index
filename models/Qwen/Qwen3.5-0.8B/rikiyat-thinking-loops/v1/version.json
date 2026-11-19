@@ -1,6 +1,6 @@
 {
   "contract_version": 1,
-  "changelog": "Initial maintainer canonical replacement representation of the two pinned published checkpoints.",
+  "changelog": "Initial maintainer canonical replacement representation of the published edit by Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab to the language-model MLP down-projection tensors in layers 15 and 19, built from the two pinned published checkpoints without changing tensor dtype or replacement values.",
   "target_profile": "bf16",
   "files": [
     {

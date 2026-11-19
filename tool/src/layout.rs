@@ -350,19 +350,20 @@ impl Layout<'_> {
         let mut runs = Runs::new();
         let mut comparison_ids = Vec::new();
         let mut assessment_ids = Vec::new();
+        let mut claim_ids = Vec::new();
         for e in self.read_dir(dir) {
             match (e.name.as_str(), e.is_dir) {
                 ("version.json", false) => version = self.record(&e.path, "version"),
                 ("files", true) => {}
                 ("runs", true) => runs = self.runs(&e.path),
-                (folder @ ("comparisons" | "assessments"), true) => {
+                (folder @ ("comparisons" | "assessments" | "claims"), true) => {
                     for f in self.read_dir(&e.path) {
                         match f.name.strip_suffix(".json") {
                             Some(id) if !f.is_dir && ID.is_match(id) => {
-                                let ids = if folder == "comparisons" {
-                                    &mut comparison_ids
-                                } else {
-                                    &mut assessment_ids
+                                let ids = match folder {
+                                    "comparisons" => &mut comparison_ids,
+                                    "assessments" => &mut assessment_ids,
+                                    _ => &mut claim_ids,
                                 };
                                 ids.push(id.to_owned());
                             }
@@ -484,6 +485,9 @@ impl Layout<'_> {
                 }
             }
             self.hosted(&dir.join("comparisons"), &cmp, "", false);
+        }
+        for id in &claim_ids {
+            self.record(&dir.join("claims").join(format!("{id}.json")), "claim");
         }
         for id in &assessment_ids {
             let Some(a) = self.record(

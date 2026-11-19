@@ -1,7 +1,6 @@
 ---
 import Arrow from "../Arrow.astro";
 import MatrixPreview from "./MatrixPreview.astro";
-import { authorReport } from "../../data/reports.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
 import { editDeltas, fmt, previewResult, results } from "../../lib/insight.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
@@ -11,23 +10,22 @@ import type { Version } from "../../lib/types.ts";
 interface Props { version: Version }
 const { version } = Astro.props;
 const patch = version.patch;
-const report = authorReport(version);
 const result = previewResult(results(version));
 const sample = editDeltas(version, 6).map(tensor => ({ tensor, rows: weightWindow(tensor, 16) })).find(view => view.rows);
 const treatments = result ? [{ label: "Base", score: result.base }, { label: "Patched", score: result.patched }] : [];
 const axis = result && scoreAxis(treatments.map(({ score }) => score), result.unit);
-const studyUrl = result?.source === "author" && result.href === report?.url ? report?.studyUrl : undefined;
+const studyUrl = result?.source === "author" ? version.claims.find(c => c.record.source.url === result.href)?.record.source.url : undefined;
 const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : result && sourceLabels[result.source];
 ---
 <aside class="patch-preview" aria-label="Featured patch">
   <header>
     <div>
-      <h2>{report?.name ?? patch.title}</h2>
+      <h2>{patch.title}</h2>
       <p>{patch.base.model} · {version.label}{patch.base.dir.startsWith("docs/example/") && " · Synthetic example"}</p>
     </div>
     <a class="preview-link" href={patch.url}>View patch <Arrow /></a>
   </header>
-  {sample?.rows ? <MatrixPreview tensor={sample.tensor} rows={sample.rows} /> : !result && <p class="preview-summary">{report?.goal ?? patch.summary}</p>}
+  {sample?.rows ? <MatrixPreview tensor={sample.tensor} rows={sample.rows} /> : !result && <p class="preview-summary">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>}
   {result && <figure class="sample-score">
     <figcaption>
       <strong>{result.benchmark} {result.metric}</strong>

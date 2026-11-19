@@ -1,15 +1,14 @@
 ---
 import Arrow from "../Arrow.astro";
-import { authorReport } from "../../data/reports.ts";
 import type { Version } from "../../lib/types.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
-import { groupEvidence, pending, results } from "../../lib/insight.ts";
+import { groupEvidence, resultNote, resultTitle, pending, results } from "../../lib/insight.ts";
 import ResultList from "../viz/ResultList.astro";
 import RunSummary from "./RunSummary.astro";
 interface Props { version: Version; compact?: boolean }
 const { version: v, compact = false } = Astro.props;
 const groups = groupEvidence(results(v), pending(v), v.runs);
-const report = authorReport(v);
+const claimUrls = new Set(v.claims.map(c => c.record.source.url));
 const Heading = compact ? "h4" : "h3";
 const names = v.patch.authors.map(a => a.name);
 const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
@@ -21,8 +20,8 @@ const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.lengt
     if (!self && !scores.length && !runs.length) return null;
     return <section class="evidence-group">
       <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</Heading>
-      {!compact && report && self && <p class="study-scope">Reported by {byline}{report.affiliation && ` (${report.affiliation})`} in <a href={report.studyUrl ?? report.url}>{report.studyTitle ?? "their study"} <Arrow dir="out" /></a>. {report.scope}</p>}
-      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: r.benchmark, sub: r.n ? `${r.metric} · n = ${r.n}` : r.metric, href: report && r.href === report.url ? undefined : r.href }))} />}
+      {!compact && self && v.claims.map(c => <p class="study-scope">Reported by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
+      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: resultTitle(r), sub: resultNote(r), href: claimUrls.has(r.href) ? undefined : r.href }))} />}
       {progress.map(w => <div class="coverage">
         <p>{w.benchmark} · <strong>Score pending</strong></p>
         <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />

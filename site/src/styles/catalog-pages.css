@@ -80,7 +80,7 @@
 /* Patch card: the same chart, tighter — smaller type, thinner bars, less air. */
 .evidence.compact .plot-key { margin: .2rem 0 .1rem; }
 .evidence.compact .rrow { grid-template-columns: minmax(0, 7.5rem) minmax(3rem, 1fr) 4.6rem; gap: .9rem; padding: .45rem 0; }
-.evidence.compact .rname { font-size: .86rem; line-height: 1.25; }
+.evidence.compact .rname { font-size: .86rem; line-height: 1.35; }
 .evidence.compact .rname small { font-size: .7rem; }
 .evidence.compact .rplot { grid-column: auto; grid-row: auto; }
 .evidence.compact .rbars { gap: .2rem; }

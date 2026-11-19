@@ -1,0 +1,15 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://rikiyat.github.io/blog/weight-space-programming/",
+    "title": "Sparks of Weight-Space Programming"
+  },
+  "affiliation": "MIT CSAIL",
+  "conditions": "Experiment 8, the edit found with 50 forward passes. They sampled with thinking on, a 32,768-token limit and temperature 0.6; the number of problems is not stated.",
+  "measures": [
+    { "benchmark": "MATH-500", "metric": "accuracy", "unit": "%", "baseline": 7.9, "patched": 48.1, "better": "higher", "samples_per_item": 4 },
+    { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 13.8, "patched": 67.1, "better": "higher", "samples_per_item": 2 },
+    { "benchmark": "IFEval", "metric": "score", "unit": "%", "baseline": 21.0, "patched": 62.3, "better": "higher", "samples_per_item": 2 },
+    { "benchmark": "MATH-500", "name": "Hit token limit", "unit": "%", "baseline": 93.0, "patched": 33.1, "better": "lower", "samples_per_item": 4 }
+  ]
+}

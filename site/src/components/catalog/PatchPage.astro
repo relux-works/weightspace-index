@@ -1,7 +1,6 @@
 ---
 import Page from "../../layouts/Page.astro";
 import { href, loadIndex, type Patch, type Version } from "../../lib/index.ts";
-import { authorReport } from "../../data/reports.ts";
 import { activeVersion, downloadUrl } from "../../lib/catalog.ts";
 import { runtimeGuide } from "../../lib/runtime.ts";
 import { apply, hfDownload } from "../../lib/commands.ts";
@@ -16,8 +15,7 @@ interface Props { patch: Patch; version?: Version }
 const { patch, version: v } = Astro.props;
 const base = patch.base;
 const index = loadIndex();
-const report = authorReport(v);
-const name = report?.name ?? patch.title;
+const name = patch.title;
 const guide = v && runtimeGuide(v);
 const plan = v && apply(v);
 const tabs = guide?.tabs.slice() ?? [];
@@ -44,13 +42,13 @@ const stats = editStats(v);
 const lora = guide?.download;
 const replacement = source && patch.kind === "replacement" ? { href: downloadUrl(source), name: source.name, sha256: source.sha256 } : null;
 ---
-<Page title={`${name}${v ? " " + v.label : ""} · ${base.address}`} description={report?.goal ?? patch.summary} nav="models">
+<Page title={`${name}${v ? " " + v.label : ""} · ${base.address}`} description={patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")} nav="models">
   <div class="wrap page-flow">
     <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><a href={base.url}>{base.model}</a><span>/</span><span aria-current="page">{name}</span></nav>
     <header class="release-header">
       <div>
         <h1>{name}</h1>
-        <p class="release-goal">{report?.goal ?? patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+        <p class="release-goal">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
         <p class="credit">By {patch.authors.map((a,i) => <>{i > 0 && ", "}{a.url ? <a href={a.url}>{a.name}</a> : a.name}</>)} · {patch.license}{v && <> · {v.label}</>}</p>
         {v && <p class="release-target">Base <a href={base.url}>{base.address}</a> · {v.profile.id.toUpperCase()} <a href={`https://huggingface.co/${v.profile.source.repo_id}/tree/${v.profile.source.revision}`}><code>@{v.profile.source.revision.slice(0,7)}</code></a></p>}
         {v && v.status !== "active" && <p class="note warn">This release is {v.status}. {latest && <a href={patch.url}>View the current release</a>}</p>}

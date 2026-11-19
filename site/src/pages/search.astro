@@ -255,14 +255,12 @@ const more = facets.filter((f) => !f.primary);
           const h = el("h3");
           const a = el("a");
           a.href = e.url;
-          a.append(document.createTextNode(`${e.name ?? e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
+          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
           h.append(a);
-          // The homepage calls a patch by its short name; the full title follows it.
-          const lead = e.name ? [el("p", "result-title", e.title)] : [];
           const sub = el("div", "row small muted result-facts");
           sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
           const note = matchNote(e, words);
-          main.append(h, ...lead, el("p", undefined, e.summary), sub, ...(note ? [note] : []));
+          main.append(h, el("p", undefined, e.summary), sub, ...(note ? [note] : []));
           const meta = el("div", "meta");
           const status = statusNotes[e.status];
           if (status) meta.append(el("span", `status-note ${e.status}`, status));

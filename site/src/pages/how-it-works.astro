@@ -12,11 +12,10 @@ import { humanBytes } from "../lib/format.ts";
 import { loadIndex, href } from "../lib/index.ts";
 import { mostBenchmarked, editStats } from "../lib/insight.ts";
 import { runtimeGuide } from "../lib/runtime.ts";
-import { authorReport } from "../data/reports.ts";
 
 const benchmarked = mostBenchmarked(loadIndex().bases);
 const stats = editStats(benchmarked);
-const featuredName = benchmarked ? authorReport(benchmarked)?.name ?? benchmarked.patch.title : undefined;
+const featuredName = benchmarked?.patch.title;
 const shipped = benchmarked && stats ? {
   name: featuredName!,
   href: benchmarked.patch.url,

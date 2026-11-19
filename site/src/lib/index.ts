@@ -255,6 +255,7 @@ function build(prefix: string): Index {
           runs: [],
           comparisons: [],
           assessments: [],
+          claims: [],
           tensors: null,
           evidence: [],
         };
@@ -287,7 +288,7 @@ function build(prefix: string): Index {
       if (run.paired.group !== run.group) fail(`${run.dir} and its paired run ${pw} differ in profile, protocol, dataset or settings`);
     }
 
-    // Comparisons and assessments: files under the version folder (not listed in index.json).
+    // Comparisons, assessments and claims: files under the version folder (not listed in index.json).
     for (const patch of base.patches) {
       for (const version of patch.versions) {
         const runId = (id: string, list: Run[], where: string) =>
@@ -320,6 +321,11 @@ function build(prefix: string): Index {
             ),
             policy: record.policy ? recorded("policy", record.policy, `${version.dir}/assessments`, fpath) : null,
           });
+        }
+        for (const f of listDir(`${version.dir}/claims`)) {
+          const fpath = `${version.dir}/claims/${f}`;
+          if (!f.endsWith(".json")) fail(`unexpected file ${fpath}`);
+          version.claims.push({ id: f.replace(/\.json$/, ""), version, record: readRecord<any>(fpath, "claim record"), file: computed(fpath) });
         }
         version.evidence = evidenceOf(version);
       }

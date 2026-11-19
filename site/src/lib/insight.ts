@@ -2,7 +2,6 @@
 // what a release edits, and how combinations behaved. Values come from the
 // records unchanged; differences are shown next to the two values they come
 // from and are never ranked across sources (rule 9).
-import { authorReport } from "../data/reports.ts";
 import { activeVersion, footprint, readCoverage } from "./catalog.ts";
 import { bestSingle, combinationStudies, jointOutcome } from "./combinations.ts";
 import { exists, readBytes, readJson } from "./files.ts";
@@ -14,6 +13,8 @@ export type Source = "author" | "index" | "third-party";
 export interface Result {
   source: Source;
   benchmark: string;
+  /** What the row measures when it is not the benchmark's own score (e.g. "Hit token limit"). */
+  name?: string;
   metric: string;
   unit: string;
   base: number;
@@ -21,6 +22,8 @@ export interface Result {
   /** Higher is better unless the measure says otherwise (e.g. hitting the token limit). */
   higherIsBetter: boolean;
   n?: number;
+  /** Answers drawn per problem, when the source states it. */
+  samples?: number;
   /** Identifies the baseline measurement; equal keys mean one shared unpatched result. */
   baseKey: string;
   version: Version;
@@ -34,13 +37,6 @@ export interface Pending {
   total: number;
   version: Version;
   href: string;
-}
-
-/** Splits an author-report label such as "MATH-500 accuracy" into benchmark and metric. */
-function splitLabel(label: string) {
-  const m = /^(\S+)\s+(.+)$/.exec(label);
-  // A benchmark name is an acronym-like token: MATH-500, GSM8K, IFEval.
-  return m && (/\d/.test(m[1]) || (m[1].match(/[A-Z]/g)?.length ?? 0) >= 2) ? { benchmark: m[1], metric: m[2] } : { benchmark: label, metric: "" };
 }
 
 /** The matched unpatched baseline for a patched run, when the two are comparable. */
@@ -63,17 +59,27 @@ function benchmarkName(run: Run) {
   return readJson<{ dataset?: { repo_id?: string } }>(file).dataset?.repo_id?.split("/").pop() || run.protocolLabel;
 }
 
+/** The small print under a result's name: metric, item count and samples per problem. */
+/** A result's row title: what it measures, or the benchmark when it is the benchmark's own score. */
+export const resultTitle = (r: Pick<Result, "name" | "benchmark">) => r.name ?? r.benchmark;
+
+/** The small print under a result's title: benchmark (when the title is not it), metric, item count, samples per problem. */
+export const resultNote = (r: Pick<Result, "name" | "benchmark" | "metric" | "n" | "samples">) =>
+  [r.name && r.benchmark, r.metric, r.n && `n = ${r.n}`, r.samples && `${r.samples} samples per problem`].filter(Boolean).join(" · ");
+
 /** Every before/after pair for one release, author reports first. */
 export function results(v: Version | undefined): Result[] {
   if (!v) return [];
   const out: Result[] = [];
-  const report = authorReport(v);
-  for (const m of report?.measures ?? []) {
-    const { benchmark, metric } = splitLabel(m.label);
-    out.push({
-      source: "author", benchmark, metric, unit: "%", base: m.base, patched: m.edited,
-      higherIsBetter: !/token limit|error|loop/i.test(m.label), baseKey: `${report!.url}#${m.label}@${m.base}`, version: v, href: report!.url,
-    });
+  for (const c of v.claims) {
+    const url = c.record.source.url;
+    for (const m of c.record.measures) {
+      out.push({
+        source: "author", benchmark: m.benchmark, name: m.name, metric: m.metric ?? "", unit: m.unit, base: m.baseline, patched: m.patched,
+        samples: m.samples_per_item, higherIsBetter: m.better === "higher",
+        baseKey: `${url}#${m.benchmark}|${m.name ?? ""}|${m.metric ?? ""}@${m.baseline}`, version: v, href: url,
+      });
+    }
   }
   for (const run of v.runs) {
     const base = pairedBaseline(v, run);

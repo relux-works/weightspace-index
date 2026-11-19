@@ -49,6 +49,7 @@ models/
           runs/<run-id>/              runs of this version
           comparisons/<id>.json       patched run against baseline run
           assessments/<id>.json       decision for a stated use, citing comparisons
+          claims/<id>.json            results the patch authors published themselves
 ```
 
 `<aa>` is the first two hex characters of the digest, which keeps every directory small enough for GitHub's file browser.
@@ -73,6 +74,7 @@ Addresses are the identities. Records refer to each other by address; a pinned i
 | `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score, who performed it, and the outcome and resource files beside it. |
 | `comparisons/<id>.json` | The baseline and patched runs compared, estimand, matched outcomes, uncertainty, or the reason the comparison is refused. |
 | `assessments/<id>.json` | Intended use, decision policy, supporting comparisons, decision and reason. |
+| `claims/<id>.json` | Aggregate results the patch authors published, copied from one cited source (`https` URL and title): the conditions they state, and per measure the benchmark, an optional name and metric, unit, baseline and patched values, which direction is better, and samples per item when stated. A claim has no per-item outcomes, so it is shown as self-reported and never compared or assessed like a run. |
 | Patch `README.md` | The card. Prose for people, linking to machine facts instead of restating them. |
 | `notices/` | The patch's license and attribution, plus the obligations the base model's license passes on to derivatives. |
 
@@ -154,7 +156,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
    within its base, and never renamed. After adoption, improved bytes for the same
    patch are a new version under the same slug; a new slug is only
    for a genuinely different patch.
-5. **Version policy follows adoption.** Versions are numbered `v1`, `v2`, … with no gaps. The index is currently pre-adoption: merged files under `v<N>/` may be edited in place, including `version.json`, rather than creating a new version. Deletions and file-type changes remain forbidden. When adoption begins, maintainers must set `PRE_ADOPTION` to `'false'` in `.github/workflows/checks.yml`; thereafter merged files may not be modified or deleted, while runs, comparisons and assessments may be added. The legal-takedown exception remains: an admin removes affected files, marks the version `withdrawn`, and retains `version.json`. The card, `notices/` and `patch.json` stay editable, including version statuses.
+5. **Version policy follows adoption.** Versions are numbered `v1`, `v2`, … with no gaps. The index is currently pre-adoption: merged files under `v<N>/` may be edited in place, including `version.json`, rather than creating a new version. Deletions and file-type changes remain forbidden. When adoption begins, maintainers must set `PRE_ADOPTION` to `'false'` in `.github/workflows/checks.yml`; thereafter merged files may not be modified or deleted, while runs, comparisons, assessments and claims may be added. The legal-takedown exception remains: an admin removes affected files, marks the version `withdrawn`, and retains `version.json`. The card, `notices/` and `patch.json` stay editable, including version statuses.
 
    Owner decision, 2026-11-17: "no one have seen this index or used it yet - we may just edit what we have instead of adding a v2"
 6. **Existing patches change under human review.** A new version, a status change or a card edit for an existing patch is always reviewed by a human maintainer. Authors and submitter are recorded separately and may differ.

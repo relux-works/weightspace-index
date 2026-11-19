@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
-  "title": "Qwen3.5-0.8B, edited by an LLM with no training (Weight-Space Programming)",
-  "summary": "Maintainer-produced canonical replacement representation of the published edit by Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab to the language-model MLP down-projection tensors in layers 15 and 19 of Qwen3.5-0.8B, built from the pinned base and edited checkpoints without changing tensor dtype or replacement values.",
+  "title": "Thinking loops",
+  "summary": "Targets repetitive reasoning on math problems by editing two MLP layers.",
   "kind": "replacement",
   "authors": [
     {

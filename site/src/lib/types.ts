@@ -101,6 +101,26 @@ export interface Assessment {
   policy: FileEntry | null;
 }
 
+/** One measure the patch authors published, as recorded in a claim. */
+export interface ClaimMeasure {
+  benchmark: string;
+  name?: string;
+  metric?: string;
+  unit: string;
+  baseline: number;
+  patched: number;
+  better: "higher" | "lower";
+  samples_per_item?: number;
+}
+
+/** `v<N>/claims/<id>.json`: aggregate results the patch authors published themselves. */
+export interface Claim {
+  id: string;
+  version: Version;
+  record: { source: { url: string; title: string }; affiliation?: string; conditions: string; measures: ClaimMeasure[] };
+  file: FileEntry;
+}
+
 export interface TensorForms {
   /** Tensors stored as `#idx/#new/#old` trios: apply checks the saved old values. */
   sparse: string[];
@@ -123,6 +143,7 @@ export interface Version {
   runs: Run[];
   comparisons: Comparison[];
   assessments: Assessment[];
+  claims: Claim[];
   /** Read from the safetensors headers of in-repository replacement sources; null when any source is hosted elsewhere. */
   tensors: TensorForms | null;
   evidence: string[];

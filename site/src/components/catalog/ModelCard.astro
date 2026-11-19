@@ -1,6 +1,5 @@
 ---
 import Arrow from "../Arrow.astro";
-import { authorReport } from "../../data/reports.ts";
 import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
 import { plural } from "../../lib/format.ts";
 import { versionTerms } from "../../lib/search.ts";
@@ -8,9 +7,9 @@ import type { Base } from "../../lib/types.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
-const names = releases.map(v => authorReport(v)?.name ?? v.patch.title);
+const names = releases.map(v => v.patch.title);
 const terms = [discoveryText(base.address, base.patches, releases.flatMap(formats)),
-  ...names, ...releases.map(v => authorReport(v)?.goal ?? ""), ...releases.map(versionTerms)].join(" ").toLowerCase();
+  ...names, ...releases.map(versionTerms)].join(" ").toLowerCase();
 ---
 <li data-search={terms}>
   <a class="model-entry" href={base.url}>

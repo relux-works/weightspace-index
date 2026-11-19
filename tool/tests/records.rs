@@ -260,6 +260,30 @@ fn bad_record_controls() {
             },
         ),
         (
+            "claim-without-source",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| remove(r, "source"),
+        ),
+        (
+            "claim-plain-http-source",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| r["source"]["url"] = json!("http://example.org/study"),
+        ),
+        (
+            "claim-measure-without-direction",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| remove(&mut r["measures"][0], "better"),
+        ),
+        (
+            "claim-with-outcomes",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| r["outcomes"] = json!("outcomes.jsonl"),
+        ),
+        (
             "unknown-without-owner",
             "assessment",
             "better-math/v1/assessments/arithmetic-help.json",

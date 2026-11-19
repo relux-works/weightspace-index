@@ -1,7 +1,6 @@
 // Search entries, one per patch version, built from the records. The search
 // page fetches them as search.json and filters in the browser. The homepage
 // directory matches the same terms, so both searches agree.
-import { authorReport } from "../data/reports.ts";
 import { formats, sourceLabels } from "./catalog.ts";
 import { fmt, groupEvidence, pending, results } from "./insight.ts";
 import { allVersions, type Index } from "./index.ts";
@@ -28,8 +27,6 @@ export interface SearchEntry {
   versionCount: number;
   /** One representative line per performer, as on the model page. */
   results: { source: string; text: string; value?: string }[];
-  /** The short name the homepage uses, when the author report gives one. */
-  name?: string;
   /** Lowercased text a result shows, so the page can tell when a hit came from elsewhere. */
   shown: string;
   /** Searchable fields a result does not show, named for the "Matched" line. */
@@ -112,22 +109,18 @@ export function facetOptions(entries: SearchEntry[]) {
   });
 }
 
-/** Everything a result shows about one version, plus its short name and goal. */
+/** Everything a result shows about one version. */
 export function versionTerms(v: Version): string {
-  const report = authorReport(v);
   return [
     v.patch.base.address, v.profile.id, v.patch.kind, ...formats(v), v.patch.title, v.patch.summary, v.patch.slug,
     ...v.patch.tags, v.patch.license, ...v.patch.authors.map((a) => a.name), v.patch.submitter, v.label, v.status,
     ...v.runs.map((r) => r.protocolLabel), ...v.evidence, ...v.evidence.map((e) => facetLabel("evidence", e)),
-    report?.name ?? "", report?.goal ?? "",
   ].join(" ").toLowerCase();
 }
 
 /** Fields that are searched but not shown on a result, with a reader-facing label. */
 export function hiddenFields(v: Version): SearchEntry["hidden"] {
-  const report = authorReport(v);
   return [
-    { label: "Goal", text: report?.goal ?? "" },
     { label: "Authors", text: v.patch.authors.map((a) => a.name).join(", ") },
     { label: "Submitted by", text: v.patch.submitter },
     { label: "Evidence", text: v.evidence.map((e) => facetLabel("evidence", e)).join(", ") },
@@ -139,10 +132,9 @@ export function hiddenFields(v: Version): SearchEntry["hidden"] {
 
 export function searchEntries(index: Index): SearchEntry[] {
   return allVersions(index).map((v) => {
-    const name = authorReport(v)?.name;
     const results = resultLines(v);
     const shown = [
-      name ?? "", v.patch.title, v.patch.summary, v.label, v.status === "active" ? "" : v.status, v.patch.base.address, v.profile.id, ...formats(v), v.patch.license,
+      v.patch.title, v.patch.summary, v.label, v.status === "active" ? "" : v.status, v.patch.base.address, v.profile.id, ...formats(v), v.patch.license,
       ...v.patch.tags, ...results.flatMap((r) => [r.source, r.text, r.value ?? ""]),
     ].join(" ").toLowerCase();
     return {
@@ -164,7 +156,6 @@ export function searchEntries(index: Index): SearchEntry[] {
       evidence: v.evidence,
       versionCount: v.patch.versions.length,
       results,
-      name,
       shown,
       hidden: hiddenFields(v),
       terms: versionTerms(v),

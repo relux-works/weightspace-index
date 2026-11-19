@@ -120,7 +120,7 @@ A settings file applies only to the base model whose card it cites. Another mode
    - `--items 0:20 --seed 1234` picks items deterministically instead (a slice of the protocol's item order). Maintainers can use this to split the work by hand.
    - `--dry-run` prints the selection and stops.
    - `--parallel` serves base and patched at the same time and runs both halves at once. Use it only when both models fit in memory. It saves time when a single request leaves the hardware partly idle, as on a laptop.
-   - `--server-arg=--flag` passes an extra flag to `vllm serve` (repeatable). Use it for memory flags, for example `--server-arg=--gpu-memory-utilization=0.8`, or for Qwen3.5 on vllm-metal: `--server-arg=--language-model-only`. Don't pass local paths: the flags are recorded.
+   - `--server-arg=--flag` passes an extra flag to `vllm serve` (repeatable). Use it for memory flags, for example `--server-arg=--gpu-memory-utilization=0.8`, or for Qwen3.5 on vllm-metal: `--server-arg=--language-model-only`. Don't pass local paths: the flags are recorded. `--api-key` is refused in any spelling, because a key here would be filed publicly. The servers listen only on 127.0.0.1; if you want a key anyway, set `VLLM_API_KEY`: vLLM reads it, and the recorder forwards it without recording it.
    - `--vllm PATH` points to the `vllm` executable.
    - `--base-port` and `--patched-port` use servers you started yourself on 127.0.0.1. They must serve `--base-dir` and `--patched-dir`.
    - `--timeout` (default 7200 s) is how long lm-eval waits for one reply. Its own default, 300 s, is too short for long thinking replies.

@@ -25,10 +25,11 @@ RESULTS = f"bench/results/Qwen/Qwen3.5-0.8B/p-x/v1/{RUN_ID}"
 # Both answer item 14 identically and right. Elsewhere the base is cut in a
 # thinking loop and the patched copy answers pi (right for item 17 only).
 FAKE_VLLM = '''#!{python}
-import json, sys
+import json, os, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 args = sys.argv[1:]
 assert args[0] == "serve", args
+key = os.environ.get("VLLM_API_KEY")
 root = args[1]
 port = int(args[args.index("--port") + 1])
 max_len = int(args[args.index("--max-model-len") + 1])
@@ -45,11 +46,22 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
         self.wfile.write(raw)
+    def authorized(self):
+        if key and self.headers.get("Authorization") != "Bearer " + key:
+            self.send_response(401)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return False
+        return True
     def do_GET(self):
+        if not self.authorized():
+            return
         if self.path == "/version":
             return self.reply({{"version": "fake"}})
         self.reply({{"data": [{{"id": name, "root": root, "max_model_len": max_len}}]}})
     def do_POST(self):
+        if not self.authorized():
+            return
         req = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         prompt = req["messages"][-1]["content"].replace("$", "").replace("\\\\", "")
         item14 = "sin D = 0.7" in prompt
@@ -183,9 +195,12 @@ def test_end_to_end(repo, capsys):
     assert c["pairs_identical_replies"] == 1 and c["pairs_only_patched_right"] == 1
 
 
-def test_repeat_counts_once(repo, capsys):
-    # Item 2 again, both servers at once: same seed, same replies.
+def test_repeat_counts_once(repo, capsys, monkeypatch):
+    # Item 2 again, both servers at once: same seed, same replies. The fake
+    # servers demand the key from the environment; it must not be filed.
+    monkeypatch.setenv("VLLM_API_KEY", "key-c0ffee-not-real")
     assert run(repo, "--items", "0:1", "--parallel") == 0
+    assert not any("c0ffee" in f.read_text() for f in sessions(repo)[-1].iterdir())
     assert '"parallel": true' in (sessions(repo)[-1] / "session.json").read_text()
     assert bench("check") == 1                       # merged runs are stale
     assert bench("merge") == 0 and bench("check") == 0
@@ -199,6 +214,18 @@ def test_repeat_counts_once(repo, capsys):
     capsys.readouterr()
     assert bench("status", *ARGS) == 0
     assert "seed 1234: 3 filed, 0 open, 1 repeated" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("args", [("--server-arg=--api-key=dummy",),
+                                  ("--server-arg=--api_key", "--server-arg=dummy"),
+                                  ("--server-arg=--api-k=dummy",)])
+def test_api_key_refused(repo, capsys, args):
+    assert bench("run", *ARGS, *args, "--dry-run") == 1
+    assert "set VLLM_API_KEY instead" in capsys.readouterr().err
+
+
+def test_similar_flags_allowed():
+    cli.check_server_args(["--api-server-count=1", "--kv-cache-memory-bytes=1", "--language-model-only"])
 
 
 def edit_lines(path: Path, fn) -> str:

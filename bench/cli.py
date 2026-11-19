@@ -216,6 +216,16 @@ def free_port() -> int:
         return sock.getsockname()[1]
 
 
+def check_server_args(args: list[str]) -> None:
+    """Refuse vllm serve's --api-key in any spelling it accepts (underscores,
+    abbreviations). Server flags are filed in public session records; a key
+    goes in VLLM_API_KEY instead, which the recorder forwards unrecorded."""
+    for arg in args:
+        name = arg.split("=", 1)[0].lstrip("-").lower().replace("_", "-")
+        require(not (arg.startswith("-") and len(name) >= len("api-k") and "api-key".startswith(name)),
+                f"--server-arg {arg.split('=', 1)[0]}: flags are filed publicly; set VLLM_API_KEY instead")
+
+
 @contextmanager
 def server(a, model_dir: Path, s: Settings, log: Path, external_port: int | None):
     """A vLLM server on 127.0.0.1 for one model, stopped afterwards; or
@@ -299,6 +309,7 @@ def cmd_status(a) -> None:
 
 
 def cmd_run(a) -> None:
+    check_server_args(a.server_arg)
     v, p, s = load(a)
     seed, ids, how = select(p, coverage(v, p, s), a.seed, a.items, a.count, random.Random())
     a.concurrency = a.concurrency or len(ids)

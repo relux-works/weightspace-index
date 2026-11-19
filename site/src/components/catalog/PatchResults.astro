@@ -11,7 +11,7 @@ const { version: v, compact = false } = Astro.props;
 const groups = groupEvidence(results(v), pending(v), v.runs);
 const report = authorReport(v);
 const Heading = compact ? "h4" : "h3";
-const names = report?.by ?? v.patch.authors.map(a => a.name);
+const names = v.patch.authors.map(a => a.name);
 const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
 const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.length);
 ---

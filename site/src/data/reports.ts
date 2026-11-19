@@ -6,8 +6,6 @@ interface AuthorReport {
   goal: string;
   /** What the reporters measured, in one or two plain sentences. */
   scope: string;
-  /** Everyone the study credits, in its byline order; the patch authors when absent. */
-  by?: string[];
   affiliation?: string;
   url: string;
   studyUrl?: string;
@@ -20,7 +18,6 @@ const reports: Record<string, AuthorReport> = {
     name: "Thinking loops",
     goal: "Targets repetitive reasoning on math problems by editing two MLP layers.",
     scope: "They measured their own edited checkpoint as a text-only export, with thinking on and a 32,768-token limit.",
-    by: ["Rikiya Takehi", "Jayden Teoh", "Alex Zhang", "Omar Khattab"],
     affiliation: "MIT CSAIL",
     url: "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/README.md",
     studyUrl: "https://rikiyat.github.io/blog/weight-space-programming/",

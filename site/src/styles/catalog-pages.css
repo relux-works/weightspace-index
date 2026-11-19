@@ -28,10 +28,10 @@
 .preview-link { display: inline-flex; align-items: center; gap: .35rem; min-block-size: 2.75rem; color: var(--ink-text); font-weight: 600; font-size: .88rem; white-space: nowrap; }
 .preview-link:hover { color: var(--ink-hot); }
 .preview-summary { margin-top: .9rem; }
-.sample-score { margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top: 1px solid var(--ink-line); }
+.sample-score { margin: var(--space-4) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
 .sample-score figcaption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .15rem .75rem; }
 .sample-score figcaption strong { font-weight: 600; font-size: .93rem; }
-.score-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: .35rem .65rem; margin: var(--space-2) 0 0; }
+.score-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: var(--space-2) .65rem; margin: var(--space-3) 0 0; }
 .score-row, .score-row dd { display: grid; grid-template-columns: subgrid; align-items: center; }
 .score-row { grid-column: 1 / -1; }
 .score-row dt { color: var(--ink-muted); font-size: .77rem; }

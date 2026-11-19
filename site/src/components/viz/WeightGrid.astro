@@ -13,9 +13,9 @@ const cols = cells[0].length;
 
 <style>
   .weight-grid { display: block; width: calc(var(--cols) * var(--matrix-pitch)); height: auto; }
-  rect { --cell-ink: var(--ink-text); fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--color-brand-ink)); }
-  .edited { --cell-ink: var(--ink-hot); }
-  .marked { stroke: var(--ink-text); stroke-width: 1; }
+  rect { --cell-ink: var(--matrix-ink, var(--ink-text)); fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--matrix-paper, var(--color-brand-ink))); }
+  .edited { --cell-ink: var(--matrix-edit, var(--ink-hot)); }
+  .marked { stroke: var(--matrix-outline, var(--ink-text)); stroke-width: 1; }
   @media (forced-colors: active) {
     rect { forced-color-adjust: none; fill: GrayText; }
     rect.edited { fill: Highlight; }

@@ -1,125 +1,144 @@
 ---
+import Arrow from "../Arrow.astro";
 import WeightGrid from "./WeightGrid.astro";
 import { weight } from "../../lib/heat.ts";
 
 const rows = 8, cols = 12;
-const editedColumns = [3, 8]; // Zero-based.
-const base = Array.from({ length: rows }, (_, y) => Array.from({ length: cols }, (_, x) =>
-  Math.round(weight(y, x, 3) * 22) * ((x + y) % 3 === 0 ? -1 : 1)
-));
-// Store the example in hundredths so every displayed sum is exact.
-const left = [[4, -2], [2, 5], [-7, 3], [-3, 0], [6, -4], [3, 7], [0, -3], [5, 2]];
-const right = editedColumns.map(col => Array.from({ length: cols }, (_, x) => Number(x === col)));
-const delta = left.map(row => Array.from({ length: cols }, (_, x) =>
-  row.reduce((sum, value, k) => sum + value * right[k][x], 0)
-));
-const [y, x] = [2, editedColumns[0]];
-const changed = (value: number, marked = false) => ({
-  tint: value ? .42 + .58 * Math.abs(value) / 7 : .08,
+const y = 2, x = 3;
+// The left factor and weights are in hundredths. The right factor scales one column.
+const left = [8, 4, -14, -6, 12, 6, 0, 10];
+const right = Array.from({ length: cols }, (_, column) => column === x ? .5 : 0);
+const before = Math.round(weight(y, x, 3) * 22);
+const change = left[y] * right[x];
+const after = before + change;
+const fmt = (hundredths: number) => (hundredths / 100).toFixed(2).replace("-", "−");
+
+const changedCell = (value: number, marked: boolean, max: number) => ({
+  tint: value ? .35 + .65 * Math.abs(value) / max : .08,
   edited: value !== 0,
   marked,
 });
-const baseCells = base.map((row, i) => row.map((value, j) => ({
-  tint: .32 + .66 * Math.abs(value) / 22,
+const base = Array.from({ length: rows }, (_, i) => Array.from({ length: cols }, (_, j) => ({
+  tint: .22 + .67 * weight(i, j, 3),
   marked: i === y && j === x,
 })));
-const deltaCells = delta.map((row, i) => row.map((value, j) => changed(value, i === y && j === x)));
-const patchedCells = baseCells.map((row, i) => row.map((cell, j) => delta[i][j] ? deltaCells[i][j] : cell));
-
-const W = { name: "Base weights", symbol: "W", cells: baseCells };
-const D = { name: "Weight change", symbol: "ΔW", cells: deltaCells };
-const P = { name: "Edited weights", symbol: "W′", cells: patchedCells };
-const B = { name: "Left factor", symbol: "B", cells: left.map((row, i) => row.map((value, k) => changed(value, i === y && k === 0))) };
-const A = { name: "Right factor", symbol: "A", cells: right.map((row, k) => row.map((value, j) => ({
-  tint: value ? .88 : .08,
-  marked: k === 0 && j === x,
-}))) };
-const fmt = (value: number) => (value / 100).toFixed(2).replace("-", "−");
-const before = base[y][x], change = delta[y][x], after = before + change;
-const products = left[y].map((value, k) => `(${fmt(value)} × ${right[k][x]})`).join(" + ");
-const equations = [
-  { terms: [W, D, P], op: "+", spokenOp: "plus" },
-  { terms: [B, A, D], op: "×", spokenOp: "times" },
+const patched = base.map((row, i) => row.map((cell, j) => {
+  const delta = left[i] * right[j];
+  return delta ? changedCell(delta, cell.marked, 7) : cell;
+}));
+const weights = [
+  { label: "Base weights", symbol: "W", cells: base, value: fmt(before) },
+  { label: "Patched weights", symbol: "W′", cells: patched, value: fmt(after) },
 ];
-const describe = ({ name, symbol, cells }: typeof W) => `${name} ${symbol}, ${cells.length} by ${cells[0].length}`;
+const factors = [
+  {
+    label: "Left factor", symbol: "B", value: fmt(left[y]),
+    cells: left.map((value, row) => [changedCell(value, row === y, 14)]),
+  },
+  {
+    label: "Right factor", symbol: "A", value: String(right[x]),
+    cells: [right.map((value, column) => changedCell(value, column === x, .5))],
+  },
+];
 ---
-<article class="patch-article" aria-labelledby="patch-anatomy-title">
+<article class="patch-article" aria-labelledby="patch-anatomy-title" style={`--equation-columns:${cols * 2}`}>
   <h1 id="patch-anatomy-title">What a patch actually changes</h1>
-  <p>Model weights are stored in matrices. This example changes values in two columns. Each square is a matrix entry. Gray shades show weight magnitude, and brighter red marks larger changes.</p>
+  <p>A patch changes selected weights in a model. Follow the outlined weight at row {y + 1}, column {x + 1} as it goes from the base model to the patched one.</p>
 
-  <figure class="weight-figure" style={`--equation-columns:${cols * 3}`}>
-    {equations.map(({ terms, op, spokenOp }, equation) => <>
-      {equation === 1 && <div class="figure-divider"></div>}
-      <div class="weight-equation" role="img" aria-label={`${describe(terms[0])}, ${spokenOp} ${describe(terms[1])}, equals ${describe(terms[2])}.`}>
-        {terms.map(({ name, symbol, cells }, i) => <>
-          {i > 0 && <span class="matrix-operator" aria-hidden="true">{i === 1 ? op : "="}</span>}
-          <div class="weight-term" aria-hidden="true">
-            <div class="term-label"><strong>{symbol}</strong><span>{name}</span></div>
+  <figure class="matrix-figure">
+    <div class="matrix-pair">
+      {weights.map(({ label, symbol, cells, value }, i) => <>
+        {i === 1 && <span class="matrix-operator" aria-hidden="true"><Arrow /></span>}
+        <div class="matrix-term">
+          <p>{label} <code>{symbol}</code></p>
+          <WeightGrid {cells} />
+          <p class="matrix-value"><code>{value}</code></p>
+        </div>
+      </>)}
+    </div>
+    <figcaption>Each square is a weight in this example. Red marks the edited weights.</figcaption>
+  </figure>
+
+  <section class="format-guide" aria-labelledby="format-guide-title">
+    <h2 id="format-guide-title">Choose a patch format</h2>
+    <dl>
+      <div class="format-row">
+        <dt>Direct replacement</dt>
+        <dd>
+          <p><strong>Use it for a standalone checkpoint.</strong> The file says to write <code>{fmt(after)}</code> at row {y + 1}, column {x + 1}. Apply it once with <code>weightspace</code>, then run the copy as usual.</p>
+        </dd>
+      </div>
+      <div class="format-row">
+        <dt>LoRA adapter</dt>
+        <dd>
+          <p><strong>Use it to load the edit alongside your base model.</strong> Pick an adapter for your runtime, such as GGUF for llama.cpp or PEFT for Transformers.</p>
+          <p>The adapter stores two smaller matrices, <code>B</code> and <code>A</code>. Here <code>B</code> gives one number per row and <code>A</code> one per column. To find the change for the outlined weight, multiply the values at row {y + 1} of <code>B</code> and column {x + 1} of <code>A</code>.</p>
+        </dd>
+      </div>
+    </dl>
+    <figure class="matrix-figure factor-figure">
+      <div class="matrix-pair">
+        {factors.map(({ label, symbol, cells, value }, i) => <>
+          {i === 1 && <span class="matrix-operator" aria-hidden="true">×</span>}
+          <div class="matrix-term">
+            <p>{label} <code>{symbol}</code> <small>{cells.length} × {cells[0].length}</small></p>
             <WeightGrid {cells} />
-            <small>{cells.length} × {cells[0].length}</small>
+            <p class="matrix-value"><code>{value}</code></p>
           </div>
         </>)}
       </div>
-    </>)}
-    <figcaption>Illustrative matrices. Outlines mark the weight at row {y + 1}, column {x + 1} and the factor entries that produce its change.</figcaption>
-  </figure>
-
-  <div class="weight-example">
-    <p><strong>One changed weight</strong> <span>Row {y + 1}, column {x + 1}</span></p>
-    <dl>
-      <div><dt>Base <code>W</code></dt><dd>{fmt(before)}</dd></div>
-      <div><dt>Change <code>ΔW</code></dt><dd>{fmt(change)}</dd></div>
-      <div><dt>Edited <code>W′</code></dt><dd>{fmt(after)}</dd></div>
-    </dl>
-    <p class="factor-example">Row {y + 1} of <code>B</code> × column {x + 1} of <code>A</code><br />
-      <code>{products} = {fmt(change)}</code>
-    </p>
-  </div>
-
-  <p><strong>Direct replacement.</strong> A sparse replacement stores the positions and new values of the edited weights. Apply it once to write those values into a copy of the model.</p>
-  <p><strong>LoRA adapter.</strong> The same edit can be expressed as two smaller matrices, <code>B</code> and <code>A</code>. Their product gives the change <code>ΔW</code>. A compatible runtime applies the adapter alongside the base model. Runtime precision can affect the result.</p>
+      <figcaption class="factor-steps">
+        <span>Multiply to get the change <code>{fmt(left[y])} × {right[x]} = {fmt(change)}</code></span>
+        <span>Add the change to the base weight <code>{fmt(before)} − {fmt(-change)} = {fmt(after)}</code></span>
+      </figcaption>
+    </figure>
+  </section>
 </article>
 
 <style>
-  .patch-article { max-width: 52rem; }
-  h1 { font-size: clamp(1.85rem, 3.5vw, 2.65rem); margin-bottom: .7rem; }
-  .patch-article > p { max-width: 67ch; color: var(--color-text-muted); }
-  .patch-article > p + p { margin-top: .85rem; }
-  .patch-article > p strong { color: var(--color-text); }
-  .weight-figure {
+  .patch-article { max-width: 52rem; font-size: 1.0625rem; line-height: 1.6; }
+  h1 { font-size: clamp(1.875rem, 3.5vw, 2.625rem); line-height: 1.12; margin-bottom: .8rem; }
+  .patch-article > p, dd p { max-width: 66ch; color: var(--color-text-muted); }
+  dd p strong { color: var(--color-text); }
+  dd p + p { margin-top: .7rem; }
+  .matrix-figure {
+    --matrix-ink: var(--color-text-muted);
+    --matrix-edit: var(--heat-d);
+    --matrix-paper: var(--color-surface-subtle);
+    --matrix-outline: var(--color-text);
     container-type: inline-size;
-    margin: 1.5rem 0 0;
-    padding: clamp(1rem, 3vw, 2rem);
-    border: 1px solid var(--ink-line);
+    margin: 1.4rem 0 0;
+    padding: clamp(.75rem, 3vw, 1.5rem);
+    border: 1px solid var(--color-border);
     border-radius: .65rem;
-    background: var(--color-brand-ink);
-    color: var(--ink-text);
+    background: var(--matrix-paper);
   }
-  .weight-equation {
-    --matrix-pitch: min(var(--matrix-pitch-max), calc((100cqi - 3rem) / var(--equation-columns)));
+  .matrix-pair {
+    --matrix-pitch: min(var(--matrix-pitch-max), calc((100cqi - 2.25rem) / var(--equation-columns)));
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     grid-template-rows: auto auto auto;
-    align-items: center;
-    gap: .35rem clamp(.2rem, 1.5vi, 1.25rem);
+    gap: .35rem clamp(.3rem, 1vw, 1rem);
+    max-width: 32rem;
+    margin-inline: auto;
   }
-  .weight-term { grid-row: 1 / 4; display: grid; grid-template-rows: subgrid; place-items: center; min-width: 0; }
-  .term-label { align-self: end; display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: .1rem .45rem; text-align: center; }
-  .term-label strong { font: 600 .87rem var(--font-mono); }
-  .term-label span, figcaption { font-size: .82rem; }
-  .matrix-operator { grid-row: 2; color: var(--ink-muted); }
-  .weight-term small { color: var(--ink-muted); font: .72rem var(--font-mono); }
-  .figure-divider { border-top: 1px solid var(--ink-line); margin: 1rem 0; }
-  figcaption { color: var(--ink-muted); margin-top: 1rem; }
-  .weight-example { border-bottom: 1px solid var(--color-divider); padding: .9rem 0; margin-bottom: 1.5rem; max-width: 34rem; }
-  .weight-example p:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: .15rem .6rem; }
-  .weight-example p span, .weight-example dt, .factor-example { font-size: .8rem; color: var(--color-text-muted); }
-  .weight-example dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: .35rem; margin: .55rem 0 0; }
-  .weight-example dd { margin: .15rem 0 0; font: 550 .95rem var(--font-mono); }
-  .factor-example { margin-top: .7rem; }
-  .factor-example code { font-size: inherit; color: var(--color-text); }
-  @media (max-width: 36rem) {
-    .term-label { display: grid; gap: .15rem; }
-    .term-label span { font-size: .72rem; text-wrap: balance; }
+  .matrix-term { grid-row: 1 / 4; display: grid; grid-template-rows: subgrid; place-items: center; min-width: 0; }
+  .matrix-term > p:first-child { align-self: end; font-size: .9375rem; text-align: center; line-height: 1.35; }
+  .matrix-term small { display: block; color: var(--color-text-muted); font: .8125rem var(--font-mono); margin-top: .15rem; }
+  .matrix-value { color: var(--color-text); font-weight: 650; }
+  .matrix-operator { grid-row: 2; align-self: center; color: var(--color-text-muted); }
+  figcaption { margin-top: .85rem; color: var(--color-text-muted); font-size: .875rem; }
+  .format-guide { margin-top: clamp(1.75rem, 4vw, 2.5rem); }
+  .format-guide h2 { font-size: clamp(1.375rem, 2.1vw, 1.75rem); line-height: 1.2; margin-bottom: .6rem; }
+  .format-guide dl { margin: 0; }
+  .format-row { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: .25rem 1rem; border-top: 1px solid var(--color-divider); padding-block: .85rem; }
+  dt { font-weight: 650; }
+  dd { margin: 0; }
+  .factor-figure { margin-top: .35rem; }
+  .factor-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem 1rem; border-top: 1px solid var(--color-divider); padding-top: .65rem; }
+  .factor-steps code { display: block; font-size: 1rem; color: var(--color-text); overflow-wrap: anywhere; }
+  @media (max-width: 38rem) {
+    .patch-article { font-size: 1rem; }
+    .format-row, .factor-steps { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

@@ -10,12 +10,10 @@ The catalog serves someone who has a base model and wants to find, evaluate and 
 2. **Model.** Each patch row shows its goal, author, release, profile, download shortcuts and a link to the patch card. One representative result per performer keeps the list scannable. Larger catalogs can compare the full results by source. The combinations section shows which current pairs have been tested. With three or more active patches, a matrix lets the reader select a measured pair. A two-patch model opens directly on its studies. Each study identifies its exact releases, individual scores and joint score. Historical studies and studies of three or more patches remain available below the matrix. Base files and run records are expandable.
 3. **Patch.** The goal, credit and exact base revision sit beside the available downloads. The runtime tabs show launch commands, with one button to copy the entire recipe and a disclosure to inspect download and preparation steps. The LoRA button preserves the reader’s selected adapter runtime. Section links jump to measurements, combinations and release details. Detailed tensor maps, provenance, reproduction commands and version history live in disclosures.
 4. **How it works** (`/how-it-works/`). An optional explainer that is not tied to any one model:
-   - A short illustrated article that keeps W + ΔW = W′ and B × A = ΔW visible together, with named matrices, dimensions and one worked value.
-   - A “which file do I need” picker that cycles until the reader makes a choice.
+   - A short illustrated article that follows one outlined weight from its base value to its patched value and shows how the two LoRA factors produce the change.
+   - Two visible format choices in the article, for writing a standalone checkpoint or loading an adapter in a compatible runtime.
    - A file-size calculator for any matrix shape.
    - A link to the most-benchmarked patch's results.
-
-   The picker pauses on hover, on focus and off screen, stops on the first click, and never starts under reduced motion. Its answers share one grid cell, so the height stays stable.
 
 Header navigation is Models, How it works, Search. The full benchmark run list (`/compare/`) is linked from the footer.
 
@@ -29,15 +27,15 @@ Inter Tight sets headings, Inter sets UI copy and Roboto Mono sets code, numbers
 - **Evidence.** Label each result with its performer. Author reports, index team measurements and contributor measurements each have their own group. A progress count names its unit, such as item–seed pairs. Every chart prints the values. The score plots use a shared axis within each unit and show both treatments at once.
 - **Claims match the files.** The replacement is pitched as exact and free at run time, not as the smaller file. The size calculator compares sizes before compression and names one real release's download sizes next to the model.
 - **Icons are drawn.** Arrows come from `components/Arrow.astro` (right, out, down), never from typed glyphs.
-- **Matrix illustrations.** The featured patch, Patch vs LoRA slides and explainer article share a cell-size ceiling and square-to-gap ratio. The article uses the featured patch’s gray weights, red edits and dark figure surface.
-- **Dark ink surfaces** (featured patch, explainer figures, picker answer, terminals) carry their own light focus ring and dark scrollbars.
+- **Matrix illustrations.** The featured patch, Patch vs LoRA slides and explainer article share a cell-size ceiling and square-to-gap ratio. The article uses the homepage comparison’s neutral surface, gray weights and red edits.
+- **Dark ink surfaces** (featured patch and terminals) carry their own light focus ring and dark scrollbars.
 - **Charts.** These are our own Astro components; there are no third-party chart or highlighting libraries. Shell highlighting is `lib/shell.ts`.
 - **Numbers.** Every chart also prints its values as text.
 - **Motion.** Directory evidence stays still while the reader compares it. The optional explainer and runtime tabs respect reduced motion.
 - **Separate sources.** Self-reported and independently measured results are never ranked together or placed in one chart. Each block names its source.
 - **Copy is a label, not a paragraph.** Readers skip prose. A drawing, a number or a two-word label carries the point; a sentence appears only where nothing else can say it, and never repeats what a drawing above it already shows.
 - **Switches glide, timers stay hidden.** Auto-advancing steps carry no countdown bar. The chosen tab, step or switch is marked by one indicator (a thumb or a 2px line, `scripts/slide.ts`) that glides to the new choice, and the content fades in with a short rise. Reduced motion turns both off.
-- **Without JavaScript.** All content stays readable: every runtime tab, every combination study, both article equations and every picker answer are visible.
+- **Without JavaScript.** All content stays readable: every runtime tab, every combination study and the illustrated format guide are visible.
 - **Illustrations.** The explainer's matrices and example values are illustrative. The patch page's heatmaps read the release's own replacement file.
 
 - The footer carries the trademark notice: GitHub and the GitHub logo are trademarks of GitHub, Inc.; model names belong to their respective owners; their use implies no endorsement.

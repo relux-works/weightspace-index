@@ -9,7 +9,7 @@ const facets = facetOptions(searchEntries(index));
 const primary = facets.filter((f) => f.primary);
 const more = facets.filter((f) => !f.primary);
 ---
-<Page title="Search" nav="search" description="Search every patch version by model, patch, author, format, profile or benchmark, and filter by license, status and evidence.">
+<Page title="Search" nav="search" description="Find a patch version by model, patch or author, and see who measured it and what they found.">
   <Head>
     <h1>Patch versions</h1>
     <form id="search" class="search-form" role="search" data-src={href("search.json")}>
@@ -21,7 +21,7 @@ const more = facets.filter((f) => !f.primary);
             <span class="select">
               <select name={f.key}>
                 <option value="">Any {f.label.toLowerCase()}</option>
-                {f.options.map((o) => <option value={o.value}>{o.value} ({o.count})</option>)}
+                {f.options.map((o) => <option value={o.value}>{o.label} ({o.count})</option>)}
               </select>
             </span>
           </label>
@@ -37,7 +37,7 @@ const more = facets.filter((f) => !f.primary);
                 <span class="select">
                   <select name={f.key}>
                     <option value="">Any {f.label.toLowerCase()}</option>
-                    {f.options.map((o) => <option value={o.value}>{o.value} ({o.count})</option>)}
+                    {f.options.map((o) => <option value={o.value}>{o.label} ({o.count})</option>)}
                   </select>
                 </span>
               </label>
@@ -65,7 +65,8 @@ const more = facets.filter((f) => !f.primary);
     type Entry = {
       url: string; base: string; profile: string; slug: string; title: string; summary: string; formats: string[];
       tags: string[]; license: string; authors: string[]; submitter: string; version: string; status: string;
-      latest: boolean; benchmarks: string[]; evidence: string[]; terms: string;
+      latest: boolean; benchmarks: string[]; evidence: string[]; terms: string; versionCount: number;
+      results: { source: string; text: string; value?: string }[];
     };
     const form = document.getElementById("search") as HTMLFormElement;
     const list = document.getElementById("results") as HTMLUListElement;
@@ -78,10 +79,8 @@ const more = facets.filter((f) => !f.primary);
     const moreFilters = form.querySelector("details.more-filters") as HTMLDetailsElement | null;
     const values = (e: Entry, k: Key): string[] =>
       k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : k === "format" ? e.formats : [e[k] as string];
-    const tones: Record<string, string> = {
-      active: "ok", "complete run": "ok", deprecated: "neutral", withdrawn: "bad",
-      "INCOMPLETE run": "warn", "UNKNOWN score": "warn", "MATCHED comparison": "info", "REFUSED comparison": "bad",
-    };
+    /** Only a version that is no longer active carries a status note. */
+    const statusNotes: Record<string, string> = { deprecated: "Deprecated", withdrawn: "Withdrawn" };
     let entries: Entry[] = [];
     let loaded = false;
     let announce = 0;
@@ -92,9 +91,18 @@ const more = facets.filter((f) => !f.primary);
       if (text !== undefined) n.textContent = text;
       return n;
     }
-    function badge(text: string) {
-      const tone = tones[text] ?? (text.endsWith(" assessment") ? (text.startsWith("SUPPORTED") ? "ok" : text.startsWith("REJECT") ? "bad" : "warn") : "neutral");
-      return el("span", `badge ${tone}`, text);
+    /** One line per performer: who measured, what, and the result. */
+    function evidence(e: Entry) {
+      if (!e.results.length) return el("p", "result-none", "No benchmarks submitted");
+      const dl = el("dl", "result-evidence");
+      for (const r of e.results) {
+        const row = el("div");
+        const dd = el("dd", undefined, r.text);
+        if (r.value) dd.append(document.createTextNode(" "), el("span", "result-value", r.value));
+        row.append(el("dt", undefined, r.source), dd);
+        dl.append(row);
+      }
+      return dl;
     }
 
     /** A dashed box with a heading, a sentence and optional actions, as the only row. */
@@ -157,15 +165,15 @@ const more = facets.filter((f) => !f.primary);
           const h = el("h3");
           const a = el("a");
           a.href = e.url;
-          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.version));
+          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
           h.append(a);
           const sub = el("div", "row small muted facts");
           sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
           main.append(h, el("p", undefined, e.summary), sub);
           const meta = el("div", "meta");
-          meta.append(badge(e.status));
-          if (e.latest) meta.append(el("span", "badge accent", "latest"));
-          meta.append(...e.evidence.map(badge), ...e.benchmarks.map((b) => el("span", "tag", b)));
+          const note = statusNotes[e.status];
+          if (note) meta.append(el("span", `status-note ${e.status}`, note));
+          meta.append(evidence(e));
           li.append(main, meta);
           return li;
         }),
@@ -174,7 +182,11 @@ const more = facets.filter((f) => !f.primary);
       if (!entries.length) {
         list.append(notice("No patch versions yet", "Nothing has been published to the index."));
       } else if (!hits.length) {
-        const filters = chosen.map(([k, v]) => `${(form.elements.namedItem(k) as HTMLSelectElement).labels?.[0]?.querySelector("span")?.textContent ?? k}: ${v}`);
+        const filters = chosen.map(([k]) => {
+          const select = form.elements.namedItem(k) as HTMLSelectElement;
+          const label = select.labels?.[0]?.querySelector("span")?.textContent ?? k;
+          return `${label}: ${select.selectedOptions[0].text.replace(/ \(\d+\)$/, "")}`;
+        });
         const what = q ? `“${q}”${filters.length ? ` with ${filters.join(", ")}` : ""}` : filters.join(", ");
         list.append(notice("No versions match", `Nothing matches ${what}.`, button("Clear all", () => form.reset())));
       }

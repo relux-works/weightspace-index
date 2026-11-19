@@ -2,7 +2,8 @@
 // page fetches them as search.json and filters in the browser. The homepage
 // directory matches the same terms, so both searches agree.
 import { authorReport } from "../data/reports.ts";
-import { formats } from "./catalog.ts";
+import { formats, sourceLabels } from "./catalog.ts";
+import { fmt, groupEvidence, pending, results } from "./insight.ts";
 import { allVersions, type Index } from "./index.ts";
 import type { Version } from "./types.ts";
 
@@ -23,6 +24,10 @@ export interface SearchEntry {
   latest: boolean;
   benchmarks: string[];
   evidence: string[];
+  /** How many versions the patch has, so "Latest" shows only where it tells something. */
+  versionCount: number;
+  /** One representative line per performer, as on the model page. */
+  results: { source: string; text: string; value?: string }[];
   /** Lowercased text the query words are matched against. */
   terms: string;
 }
@@ -43,7 +48,48 @@ export type FacetKey = (typeof FACETS)[number][0];
 /** Facets shown beside the search box; the rest sit behind "More filters". */
 export const PRIMARY_FACETS: readonly FacetKey[] = ["base", "format"];
 
-export interface FacetOption { value: string; count: number }
+export interface FacetOption { value: string; label: string; count: number }
+
+/**
+ * Reader-facing wording for evidence states. The values stay as recorded
+ * (docs/structure.md "Evidence states") so filters and shared URLs keep working.
+ */
+const EVIDENCE_LABELS: Record<string, string> = {
+  "complete run": "Run complete",
+  "INCOMPLETE run": "Run incomplete",
+  "UNKNOWN score": "Score not established",
+  "MATCHED comparison": "Matched comparison",
+  "REFUSED comparison": "Comparison refused",
+  "no benchmarks submitted": "No benchmarks submitted",
+};
+const ASSESSMENT_LABELS: Record<string, string> = {
+  SUPPORTED: "Assessed: supported",
+  REJECT: "Assessed: rejected",
+  INCONCLUSIVE: "Assessed: inconclusive",
+  UNSUPPORTED: "Assessed: unsupported",
+  UNKNOWN: "Assessment not settled",
+};
+
+export function facetLabel(key: FacetKey, value: string): string {
+  if (key === "evidence") {
+    const assessment = /^(\w+) assessment$/.exec(value);
+    return EVIDENCE_LABELS[value] ?? (assessment ? ASSESSMENT_LABELS[assessment[1]] : undefined) ?? value;
+  }
+  if (key === "status") return value.charAt(0).toUpperCase() + value.slice(1);
+  return value;
+}
+
+/** The first score, else partial coverage, else a filed run, for each performer. */
+export function resultLines(v: Version): SearchEntry["results"] {
+  const label = { author: "Author report", index: sourceLabels.index, "third-party": sourceLabels["third-party"] };
+  return groupEvidence(results(v), pending(v), v.runs).flatMap(({ source, scores, progress, runs }) => {
+    const [s] = scores;
+    if (s) return [{ source: label[source], text: `${s.benchmark} ${s.metric}`, value: `${fmt(s.base, s.unit)} → ${fmt(s.patched, s.unit)}` }];
+    const [p] = progress;
+    if (p) return [{ source: label[source], text: `${p.benchmark} score pending`, value: `${p.filed} of ${p.total} item–seed pairs` }];
+    return runs.length ? [{ source: label[source], text: "Run filed, no matched score yet" }] : [];
+  });
+}
 
 /**
  * Options per facet with how many versions carry each. A facet is left out when
@@ -54,7 +100,7 @@ export function facetOptions(entries: SearchEntry[]) {
   return FACETS.flatMap(([key, label]) => {
     const counts = new Map<string, number>();
     for (const e of entries) for (const v of new Set(facetValues(e, key))) counts.set(v, (counts.get(v) ?? 0) + 1);
-    const options: FacetOption[] = [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value));
+    const options: FacetOption[] = [...counts].map(([value, count]) => ({ value, label: facetLabel(key, value), count })).sort((a, b) => a.value.localeCompare(b.value));
     const narrows = options.some((o) => o.count < entries.length);
     return options.length < 2 || !narrows ? [] : [{ key, label, options, primary: PRIMARY_FACETS.includes(key) }];
   });
@@ -66,7 +112,8 @@ export function versionTerms(v: Version): string {
   return [
     v.patch.base.address, v.profile.id, v.patch.kind, ...formats(v), v.patch.title, v.patch.summary, v.patch.slug,
     ...v.patch.tags, v.patch.license, ...v.patch.authors.map((a) => a.name), v.patch.submitter, v.label, v.status,
-    ...v.runs.map((r) => r.protocolLabel), ...v.evidence, report?.name ?? "", report?.goal ?? "",
+    ...v.runs.map((r) => r.protocolLabel), ...v.evidence, ...v.evidence.map((e) => facetLabel("evidence", e)),
+    report?.name ?? "", report?.goal ?? "",
   ].join(" ").toLowerCase();
 }
 
@@ -88,6 +135,8 @@ export function searchEntries(index: Index): SearchEntry[] {
     latest: v.isLatest,
     benchmarks: [...new Set(v.runs.map((r) => r.protocolLabel))],
     evidence: v.evidence,
+    versionCount: v.patch.versions.length,
+    results: resultLines(v),
     terms: versionTerms(v),
   }));
 }

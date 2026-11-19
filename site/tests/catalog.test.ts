@@ -89,5 +89,5 @@ test("search shows only facets that can narrow the list", async () => {
   assert.deepEqual(one, []);
   const two = facetOptions([entry("A/a", ["LoRA", "Replacement"]), entry("B/b", ["LoRA"])] as never);
   assert.deepEqual(two.map(f => f.key), ["base", "format"]);
-  assert.deepEqual(two.find(f => f.key === "format")!.options, [{ value: "LoRA", count: 2 }, { value: "Replacement", count: 1 }]);
+  assert.deepEqual(two.find(f => f.key === "format")!.options, [{ value: "LoRA", label: "LoRA", count: 2 }, { value: "Replacement", label: "Replacement", count: 1 }]);
 });

@@ -2,6 +2,7 @@
 import Page from "../layouts/Page.astro";
 import ModelCard from "../components/catalog/ModelCard.astro";
 import Filter from "../components/catalog/Filter.astro";
+import FormatComparison from "../components/viz/FormatComparison.astro";
 import PatchPreview from "../components/viz/PatchPreview.astro";
 import { loadIndex } from "../lib/index.ts";
 import { mostBenchmarked } from "../lib/insight.ts";
@@ -14,7 +15,7 @@ const featured = mostBenchmarked(models);
     <div class="find-model">
       <header class="find-intro">
         <h1>Find a patch for<br />your model.</h1>
-        <p>Compare weight edits for open models. Download a LoRA for your runtime or apply a direct replacement.</p>
+        <p>Compare weight edits for open models and download a compatible patch. <a href="#patch-vs-lora">Patch vs LoRA</a></p>
       </header>
       <section class="directory" id="models" aria-labelledby="directory-heading">
         <div class="directory-label"><h2 id="directory-heading">Choose a base model</h2><span>{plural(models.length, "model")}</span></div>
@@ -26,4 +27,5 @@ const featured = mostBenchmarked(models);
     </div>
     {featured && <PatchPreview version={featured} />}
   </div>
+  <FormatComparison />
 </Page>

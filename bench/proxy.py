@@ -7,12 +7,15 @@ every sampling parameter actually sent and everything the server returned
 (finish reason, token usage, the full text including thinking).
 
 Both ends are 127.0.0.1. Request headers are not forwarded (apart from the
-content type) and nothing about them is recorded.
+content type) and nothing about them is recorded. If VLLM_API_KEY is set,
+the key is sent to the server as a bearer token, as vLLM expects; it is
+never written anywhere.
 """
 from __future__ import annotations
 
 import http.client
 import json
+import os
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -30,6 +33,8 @@ def call(port: int, method: str, path: str, body: bytes | None = None,
         headers = {"Accept": "application/json"}
         if body is not None:
             headers["Content-Type"] = "application/json"
+        if key := os.environ.get("VLLM_API_KEY"):
+            headers["Authorization"] = f"Bearer {key}"
         conn.request(method, path, body=body, headers=headers)
         resp = conn.getresponse()
         return resp.status, resp.getheader("Content-Type", "application/json"), resp.read()

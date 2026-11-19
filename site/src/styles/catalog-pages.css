@@ -24,7 +24,7 @@
 .patch-preview:has(.preview-link:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 3px; }
 .patch-preview header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; }
 .patch-preview h2 { font-size: clamp(1.65rem, 2.65vw, 2.3rem); line-height: 1.15; overflow-wrap: anywhere; }
-.patch-preview header p, .sample-score figcaption span, .study-link, .study-independence { color: var(--ink-muted); font-size: .83rem; }
+.patch-preview header p, .sample-score figcaption span, .study-link { color: var(--ink-muted); font-size: .83rem; }
 .patch-preview header p { margin-top: .25rem; }
 .preview-link { display: inline-flex; align-items: center; gap: .35rem; min-block-size: 2.75rem; color: var(--ink-text); font-weight: 600; font-size: .88rem; white-space: nowrap; }
 .preview-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
@@ -36,7 +36,7 @@
 .sample-score figcaption strong { font-weight: 600; font-size: .93rem; }
 .study-link { position: relative; z-index: 2; }
 .study-link:hover, .study-link:focus-visible { color: var(--ink-text); }
-.study-independence { margin-top: var(--space-3); }
+.study-independence { margin-top: var(--space-3); color: var(--ink-faint); font-size: .72rem; text-align: right; }
 .score-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: var(--space-2) .65rem; margin: var(--space-3) 0 0; }
 .score-row, .score-row dd { display: grid; grid-template-columns: subgrid; align-items: center; }
 .score-row { grid-column: 1 / -1; }

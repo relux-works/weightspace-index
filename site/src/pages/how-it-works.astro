@@ -1,36 +1,344 @@
 ---
-// Patch vs LoRA explainer. Not tied to any one model: the drawings are
-// illustrations and the calculator works for any matrix shape.
+// How a weight patch changes a model, for a reader who has never seen one: one
+// weight traced through both patch forms, the trade-offs between them, and what a
+// patch is not. Matrices are illustrative; the size calculator and the featured
+// result read the index.
 import Arrow from "../components/Arrow.astro";
 import Page from "../layouts/Page.astro";
-import PatchAnatomy from "../components/viz/PatchAnatomy.astro";
 import StorageCalc from "../components/viz/StorageCalc.astro";
-import { loadIndex } from "../lib/index.ts";
+import WeightGrid from "../components/viz/WeightGrid.astro";
+import { weight } from "../lib/heat.ts";
+import { humanBytes } from "../lib/format.ts";
+import { loadIndex, href } from "../lib/index.ts";
 import { mostBenchmarked, editStats } from "../lib/insight.ts";
 import { runtimeGuide } from "../lib/runtime.ts";
 import { authorReport } from "../data/reports.ts";
+
 const benchmarked = mostBenchmarked(loadIndex().bases);
 const stats = editStats(benchmarked);
+const featuredName = benchmarked ? authorReport(benchmarked)?.name ?? benchmarked.patch.title : undefined;
 const shipped = benchmarked && stats ? {
-  name: authorReport(benchmarked)?.name ?? benchmarked.patch.title,
+  name: featuredName!,
   href: benchmarked.patch.url,
   loraDownload: runtimeGuide(benchmarked).download?.sizeBytes ?? null,
   loraUnpacked: stats.loraBytes,
   replacement: stats.replacementBytes,
 } : undefined;
+
+// The example matrix. Values are in hundredths so the arithmetic reads exactly.
+const rows = 8, cols = 12;
+const y = 2, x = 3;
+const left = [8, 4, -14, -6, 12, 6, 0, 10];
+const right = Array.from({ length: cols }, (_, column) => column === x ? .5 : 0);
+const before = Math.round(weight(y, x, 3) * 22);
+const change = left[y] * right[x];
+const after = before + change;
+const fmt = (hundredths: number) => (hundredths / 100).toFixed(2).replace("-", "−");
+
+const changedCell = (value: number, marked: boolean, max: number) => ({
+  tint: value ? .35 + .65 * Math.abs(value) / max : .08,
+  edited: value !== 0,
+  marked,
+});
+const base = Array.from({ length: rows }, (_, i) => Array.from({ length: cols }, (_, j) => ({
+  tint: .22 + .67 * weight(i, j, 3),
+  marked: i === y && j === x,
+})));
+const patched = base.map((row, i) => row.map((cell, j) => {
+  const delta = left[i] * right[j];
+  return delta ? changedCell(delta, cell.marked, 7) : cell;
+}));
+const weights = [
+  { label: "Base weights", symbol: "W", cells: base, value: fmt(before) },
+  { label: "Patched weights", symbol: "W′", cells: patched, value: fmt(after) },
+];
+const factors = [
+  {
+    label: "Left factor", symbol: "B", value: fmt(left[y]),
+    cells: left.map((value, row) => [changedCell(value, row === y, 14)]),
+  },
+  {
+    label: "Right factor", symbol: "A", value: String(right[x]),
+    cells: [right.map((value, column) => changedCell(value, column === x, .5))],
+  },
+];
+const position = `row ${y + 1}, column ${x + 1}`;
+// Size bars for the two shapes the reader sees first: 64 columns, every value
+// changed, before compression. LoRA is rank 64 with F32 factors (4 bytes each);
+// the replacement stores 12 bytes per changed value. Same formulas as the calculator.
+const sizeRows = [
+  { name: "Square", dims: "2,048 × 2,048", lora: 4 * 64 * (2048 + 2048), replacement: 12 * 64 * 2048 },
+  { name: "Wide", dims: "1,024 × 3,584", lora: 4 * 64 * (1024 + 3584), replacement: 12 * 64 * 1024 },
+];
+// One scale for every bar, so bars compare across the two shapes too.
+const sizeMax = Math.max(...sizeRows.flatMap(row => [row.lora, row.replacement]));
+const sizeBars = sizeRows.map(row => {
+  const max = sizeMax;
+  return {
+    ...row,
+    bars: [
+      { label: "LoRA", bytes: row.lora, text: humanBytes(row.lora), pct: (row.lora / max) * 100, smaller: row.lora < row.replacement },
+      { label: "Replacement", bytes: row.replacement, text: humanBytes(row.replacement), pct: (row.replacement / max) * 100, smaller: row.replacement < row.lora },
+    ],
+  };
+});
+// The replacement card shows the patched values the file writes, as a window of
+// the same height as the LoRA factor, so both cards line up.
+const windowCells = patched.map(row => row.slice(0, 8));
 ---
-<Page title="How it works" nav="learn" description="What a weight patch is, and why the index ships every patch both as a direct replacement and as a LoRA adapter.">
-  <section class="home-band"><div class="wrap">
-    <PatchAnatomy />
-  </div></section>
+<Page title="How it works" nav="learn" description="How a weight patch changes a model's weights, and why the index ships each patch both as a direct replacement and as a LoRA adapter.">
+  <article class="article wrap" aria-labelledby="article-title">
+    <header class="intro">
+      <h1 id="article-title">How a weight patch works</h1>
+      <p class="lede">A patch gives some of a model's weights new values. Here is one weight, followed from the base model to the patched one.</p>
+    </header>
 
-  <section class="home-band subtle"><div class="wrap">
-    <div class="band-title"><h2>Which file is smaller depends on the matrix</h2></div>
-    <StorageCalc shipped={shipped} />
-  </div></section>
+    <figure class="matrix-figure" style={`--equation-columns:${cols * 2}`}>
+      <div class="matrix-pair">
+        {weights.map(({ label, symbol, cells, value }, i) => <>
+          {i === 1 && <span class="matrix-operator" aria-hidden="true"><Arrow /></span>}
+          <div class="matrix-term">
+            <p>{label} <code>{symbol}</code></p>
+            <WeightGrid {cells} />
+            <p class="matrix-value"><code>{value}</code></p>
+          </div>
+        </>)}
+      </div>
+      <figcaption>The outlined weight, {position}, in an example matrix. Red marks the weights this patch edits.</figcaption>
+    </figure>
 
-  <section class="home-band"><div class="wrap bench-cta">
-    <h2>We benchmark every patch</h2>
-    {benchmarked && <a class="btn primary" href={`${benchmarked.patch.url}#results`}>See the benchmarks <Arrow /></a>}
-  </div></section>
+    <p class="bridge">The index ships that same edit in two forms. Each one stores the change differently.</p>
+
+    <section class="form" aria-labelledby="replacement-heading">
+      <h2 id="replacement-heading">Direct replacement: store the new value</h2>
+      <p>For each changed weight, the file records its position, the value it replaces, and the new value. Written into a copy of the model, it sets <code>W′[{y + 1},{x + 1}]</code> to <code>{fmt(after)}</code> exactly.</p>
+      <figure class="window">
+        <WeightGrid cells={windowCells} />
+        <figcaption>Patched weights, rows 1–8, columns 1–8</figcaption>
+      </figure>
+    </section>
+
+    <p class="bridge">A LoRA stores the same change in a different form.</p>
+
+    <section class="form" aria-labelledby="lora-heading">
+      <h2 id="lora-heading">LoRA adapter: store the change as two factors</h2>
+      <p>The file stores two thin matrices, B and A. Multiply them to get the change for each weight, then add the change to the base weight.</p>
+      <div class="factor-pair" style={`--equation-columns:${cols + 4}`}>
+        {factors.map(({ label, symbol, cells }, i) => <>
+          {i === 1 && <span class="factor-operator" aria-hidden="true">×</span>}
+          <div class="matrix-term">
+            <p>{label} <code>{symbol}</code> <small>{cells.length} × {cells[0].length}</small></p>
+            <WeightGrid {cells} />
+          </div>
+        </>)}
+      </div>
+      <ol class="steps">
+        <li><code>ΔW[{y + 1},{x + 1}] = B[{y + 1},1] × A[1,{x + 1}]</code> <span class="step-math"><code>{fmt(left[y])} × {right[x]} = {fmt(change)}</code></span></li>
+        <li><code>W′[{y + 1},{x + 1}] = W[{y + 1},{x + 1}] + ΔW[{y + 1},{x + 1}]</code> <span class="step-math"><code>{fmt(before)} + ({fmt(change)}) = {fmt(after)}</code></span></li>
+      </ol>
+    </section>
+
+    <p class="bridge">Both forms describe the same edit. The next section explains why we publish both.</p>
+  </article>
+
+  <section class="home-band" id="why-both" aria-labelledby="why-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="why-heading">Why we ship both</h2></div>
+
+      <div class="choice">
+        <div class="option">
+          <h3>LoRA adapter</h3>
+          <p>Load it in your runtime. No bake step, no extra tools.</p>
+          <ul class="runtimes" aria-label="Runtimes with LoRA support">
+            <li><a href="https://docs.vllm.ai/en/latest/features/lora/" target="_blank" rel="noopener noreferrer">vLLM</a></li>
+            <li><a href="https://github.com/ggml-org/llama.cpp" target="_blank" rel="noopener noreferrer">llama.cpp</a></li>
+            <li><a href="https://docs.sglang.ai/advanced_features/lora.html" target="_blank" rel="noopener noreferrer">SGLang</a></li>
+            <li><a href="https://huggingface.co/docs/peft/developer_guides/lora" target="_blank" rel="noopener noreferrer">Transformers (PEFT)</a></li>
+          </ul>
+          <p class="works-on"><b>Works on</b> Any model its runtime can attach it to, including GGUF quants.</p>
+          <p class="option-note">Our derived adapters aren't verified in these runtimes yet.</p>
+        </div>
+        <div class="option">
+          <h3>Direct replacement</h3>
+          <p>Bake it into an unquantized copy with <code>weightspace</code>. The file itself changes, so nothing runs extra, and each value is written exactly.</p>
+          <p class="works-on"><b>Works on</b> The unquantized target model only.</p>
+        </div>
+      </div>
+
+      <div class="proof">
+        <div class="proof-row">
+          <h3>Speed</h3>
+          <div class="lanes">
+            <div class="lane">
+              <span class="lane-name">Attached LoRA</span>
+              <div class="steps-row" aria-hidden="true"><i>matmul</i><i class="extra">+ B·A</i><i>output</i></div>
+              <span class="visually-hidden">Attached LoRA: the base matmul, then one extra low-rank product, on every token.</span>
+            </div>
+            <div class="lane">
+              <span class="lane-name">Baked replacement</span>
+              <div class="steps-row" aria-hidden="true"><i>matmul</i><i>output</i></div>
+              <span class="visually-hidden">Baked replacement: the base matmul only. The extra step is gone.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="proof-row">
+          <h3>Precision</h3>
+          <div class="eqns">
+            <div class="eqn">
+              <span class="eqn-label">Replacement</span>
+              <code class="eqn-value">{fmt(after)}</code>
+              <span class="eqn-note">written as stored</span>
+            </div>
+            <div class="eqn">
+              <span class="eqn-label">LoRA</span>
+              <code class="eqn-value">{fmt(before)} + ({fmt(change)})</code>
+              <span class="eqn-note">computed, then rounded. May differ.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="proof-row">
+          <h3>Size</h3>
+          <div class="sizes">
+            {sizeBars.map(row => <div class="size-row">
+              <p class="size-name">{row.name} <small>{row.dims}</small></p>
+              {row.bars.map(bar => <div class:list={["bar", { smaller: bar.smaller }]}>
+                <span class="bar-label">{bar.label}</span>
+                <span class="bar-track"><i style={`width:${bar.pct.toFixed(1)}%`}></i></span>
+                <span class="bar-value">{bar.text}</span>
+              </div>)}
+            </div>)}
+            <p class="size-caption">64 columns, every value changed, before compression. LoRA is rank 64, equal to its 64 edited columns, with F32 factors.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-band subtle" id="size" aria-labelledby="size-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="size-heading">Which file is smaller depends on the matrix</h2></div>
+      <p class="band-note">Here the LoRA's rank equals its edited columns, as in the index's derived adapters. With that rank, the replacement is smaller when fewer than about two-thirds of the values change in a square matrix. For the wide shape it is smaller at any fraction. For the tall shape, below about 43%.</p>
+      <StorageCalc shipped={shipped} />
+    </div>
+  </section>
+
+  <section class="home-band" aria-labelledby="closing-heading">
+    <div class="wrap closing">
+      <div>
+        <h2 id="closing-heading">Find a patch for your model</h2>
+        <p>Patched models may behave in ways their description does not cover. Read a patch's evidence before you run it.</p>
+      </div>
+      <div class="closing-actions">
+        <a class="btn primary" href={href()}>Browse models <Arrow /></a>
+      </div>
+    </div>
+  </section>
 </Page>
+
+<style>
+  /* One reading column: the intro, both forms and the bridges read as one article. */
+  .article { padding-block: clamp(2rem, 5vw, 4.8rem); --matrix-ink: var(--color-text-muted); --matrix-edit: var(--heat-d); --matrix-paper: var(--color-bg); --matrix-outline: var(--color-text); }
+  .intro h1 { font-size: clamp(2.1rem, 3.8vw, 3.1rem); line-height: .99; font-weight: 680; letter-spacing: -.035em; }
+  .intro .lede { margin-top: 1.1rem; max-width: 46ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
+  .article > .matrix-figure { margin-top: clamp(2rem, 4vw, 2.75rem); max-width: 40rem; }
+  .bridge { margin-top: clamp(2rem, 4vw, 2.75rem); max-width: 60ch; color: var(--color-text-muted); font-size: 1.05rem; }
+  .form { container-type: inline-size; --matrix-pitch-max: 1.1rem; margin-top: clamp(2.5rem, 5vw, 3.5rem); padding-top: clamp(2rem, 4vw, 2.5rem); border-top: 1px solid var(--color-divider); }
+  .form h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); letter-spacing: -.02em; }
+  .form > p { margin-top: .6rem; max-width: 62ch; color: var(--color-text-muted); }
+  .form .factor-pair { justify-content: start; margin-inline: 0; }
+  .band-note { max-width: 62ch; margin: -.4rem 0 1.75rem; color: var(--color-text-muted); }
+
+  .matrix-figure {
+    --matrix-ink: var(--color-text-muted);
+    --matrix-edit: var(--heat-d);
+    --matrix-paper: var(--color-surface-subtle);
+    --matrix-outline: var(--color-text);
+    container-type: inline-size;
+    margin: 0;
+    padding: clamp(.75rem, 3vw, 1.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-surface);
+    background: var(--matrix-paper);
+  }
+  .matrix-pair, .factor-pair {
+    --matrix-pitch: min(var(--matrix-pitch-max), calc((100cqi - 2.25rem) / var(--equation-columns)));
+    display: grid;
+    align-items: center;
+    gap: .35rem clamp(.3rem, 1vw, 1rem);
+    margin-inline: auto;
+  }
+  .matrix-pair { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: auto auto auto; max-width: 32rem; }
+  .factor-pair { grid-template-columns: auto auto auto; justify-content: center; margin-block: 1rem; }
+  .matrix-term { grid-row: 1 / 4; display: grid; grid-template-rows: subgrid; place-items: center; min-width: 0; }
+  .factor-pair .matrix-term { grid-row: auto; grid-template-rows: auto auto; }
+  .matrix-term > p:first-child { align-self: end; font-size: .9375rem; text-align: center; line-height: 1.35; }
+  .matrix-term small { display: block; color: var(--color-text-muted); font: .8125rem var(--font-mono); margin-top: .15rem; }
+  .matrix-value { color: var(--color-text); font-weight: 650; }
+  .matrix-operator, .factor-operator { color: var(--color-text-muted); }
+  .matrix-operator { grid-row: 2; align-self: center; }
+  .factor-operator { font-size: 1.25rem; }
+  figcaption { margin-top: .85rem; color: var(--color-text-muted); font-size: .875rem; }
+
+  .window { --matrix-pitch: min(var(--matrix-pitch-max), calc(100cqi / 8)); margin: 1.25rem 0 0; }
+  .window figcaption { margin-top: .6rem; color: var(--color-text-muted); font-size: .875rem; }
+  .steps { list-style: none; margin: 1rem 0 0; padding: .9rem 0 0; display: grid; gap: .5rem; border-top: 1px solid var(--color-divider); color: var(--color-text-muted); font-size: .95rem; }
+  .steps code { color: var(--color-text); font-size: .95rem; overflow-wrap: anywhere; }
+  .steps li { display: grid; gap: .25rem; }
+  .step-math code { color: var(--color-text-muted); }
+
+  /* Why we ship both: the choice first, then three drawn comparisons. No cards,
+     no kickers; each row's drawing carries its point. */
+  .choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3.5rem); margin-top: 1.5rem; }
+  .option { border-top: 2px solid var(--color-text); padding-top: 1rem; }
+  .option h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); letter-spacing: -.02em; }
+  .option > p { margin-top: .5rem; max-width: 40ch; color: var(--color-text-muted); }
+  .option > .option-note { margin-top: .9rem; font-size: .88rem; }
+  .works-on { margin-top: .9rem; font-size: .92rem; }
+  .works-on b { color: var(--color-text); font-weight: 650; margin-right: .35rem; }
+
+  .runtimes { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .45rem; }
+  .runtimes a { display: inline-block; padding: .3rem .6rem; border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); font: 600 .86rem/1.3 var(--font-ui); color: var(--color-text); text-decoration: none; }
+  .runtimes a:hover { border-color: var(--color-text); }
+
+  .proof { margin-top: clamp(2.5rem, 5vw, 3.5rem); border-top: 1px solid var(--color-divider); }
+  .proof-row { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: 1rem 3rem; align-items: start; padding-block: 1.6rem; border-bottom: 1px solid var(--color-divider); }
+  .proof-row > h3 { font-size: 1.2rem; padding-top: .35rem; }
+
+  .lanes { display: grid; gap: 1rem; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .lane-name { display: block; margin-bottom: .45rem; font-size: .9rem; color: var(--color-text-muted); }
+  .steps-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+  .steps-row i { font: 600 .9rem/1 var(--font-mono); font-style: normal; padding: .55rem .75rem; border-radius: var(--radius-control); background: var(--color-surface-subtle); color: var(--color-text); }
+  .steps-row i.extra { color: var(--color-accent); box-shadow: inset 0 0 0 1.5px var(--color-accent); background: transparent; }
+
+  .eqns { display: grid; gap: .9rem; }
+  .eqn { display: flex; flex-wrap: wrap; align-items: baseline; gap: .35rem 1rem; }
+  .eqn-label { min-width: 6.5rem; font-size: .95rem; font-weight: 600; }
+  .eqn-value { font: 650 1.05rem/1 var(--font-mono); padding: .5rem .7rem; border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); color: var(--color-text); font-variant-numeric: tabular-nums; }
+  .eqn-note { color: var(--color-text-muted); font-size: .9rem; }
+
+  .sizes { display: grid; gap: 1.25rem; }
+  .size-name { font-weight: 600; font-size: .95rem; }
+  .size-name small { font: 400 .8rem/1 var(--font-mono); color: var(--color-text-muted); margin-left: .35rem; }
+  .size-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: .45rem; }
+  .bar { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 5.5rem; align-items: center; gap: .75rem; font-size: .9rem; color: var(--color-text-muted); }
+  .bar-track { height: .75rem; background: var(--color-surface-subtle); border-radius: 2px; overflow: hidden; }
+  .bar-track i { display: block; height: 100%; background: var(--color-border-strong); }
+  .bar.smaller .bar-track i { background: var(--color-text); }
+  .bar.smaller .bar-label, .bar.smaller .bar-value { color: var(--color-text); font-weight: 650; }
+  .bar-value { font: 600 .88rem var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .size-caption { margin-top: .25rem; font-size: .85rem; color: var(--color-text-muted); }
+
+
+  .closing { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem 3rem; flex-wrap: wrap; }
+  .closing h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0; }
+  .closing p { margin-top: .6rem; max-width: 52ch; color: var(--color-text-muted); font-size: .95rem; }
+  .closing-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; }
+
+  @media (max-width: 52rem) {
+    .choice, .proof-row { grid-template-columns: minmax(0, 1fr); }
+    .bar { grid-template-columns: 6.5rem minmax(0, 1fr) 4.75rem; gap: .5rem; }
+  }
+</style>

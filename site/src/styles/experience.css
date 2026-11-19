@@ -248,9 +248,6 @@ button.cell:hover { filter: brightness(.96); }
 .calc-val { text-align: right; font: 600 .9rem var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .calc-read { grid-column: 1 / -1; font-size: .9rem; color: var(--color-text-muted); padding-top: 1rem; border-top: 1px solid var(--color-border); max-width: 75ch; }
 
-.bench-cta { display: flex; justify-content: space-between; align-items: center; gap: 1.2rem 3rem; flex-wrap: wrap; }
-.bench-cta h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0; }
-
 /* ── Responsive, motion, forced colors ───────────────────────────── */
 @media (max-width: 62rem) {
   .calc { grid-template-columns: 1fr; }

@@ -34,7 +34,7 @@ const matrix = { rows: side, cols: side, seed: 3, edited };
         <span class="operator">=</span>
         <div class="term"><Heat {...matrix} kind="patched" /><span>Edited weights</span></div>
       </div>
-      <label class="pause-motion"><input type="checkbox" /> Pause animation</label>
+      <div class="slide-dots" aria-hidden="true"><span></span><span></span></div>
     </div>
   </div>
 </section>
@@ -55,29 +55,45 @@ const matrix = { rows: side, cols: side, seed: 3, edited };
   .operator { font-size: clamp(1rem, 5cqi, 1.65rem); }
   .factors { display: flex; align-items: center; gap: .3rem; }
   .equation :global(.heat) { width: calc(var(--cols) * min(1.95cqi, 9px)); height: auto; outline: 1px solid var(--color-border-strong); }
-  .pause-motion { display: none; }
+  .slide-dots { display: none; }
 
   @media (prefers-reduced-motion: no-preference) {
     .forms > .or { display: none; }
     .forms > .term {
       grid-area: 1 / 1;
-      animation: format-crossfade 7s ease-in-out infinite;
     }
-    .forms > .term:last-child { animation-delay: -3.5s; }
     .operator { margin-bottom: 1.3rem; }
-    .pause-motion {
+    .slide-dots {
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: .4rem;
-      min-height: 2.5rem;
-      margin-top: .4rem;
+      gap: .45rem;
+      margin-top: .85rem;
       color: var(--color-text-muted);
-      font-size: .8rem;
-      cursor: pointer;
     }
-    .pause-motion input { accent-color: var(--color-accent); }
-    .format-diagram:has(input:checked) .forms > .term { animation-play-state: paused; }
+    .slide-dots span {
+      width: .45rem;
+      height: .45rem;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+    }
+    .slide-dots span::before {
+      content: "";
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: currentColor;
+    }
+    .forms > .term, .slide-dots span::before {
+      animation: format-crossfade 7s ease-in-out infinite;
+    }
+    .forms > .term:last-child, .slide-dots span:last-child::before {
+      animation-delay: -3.5s;
+    }
+  }
+
+  @media (hover: hover) {
+    .format-diagram:hover .forms > .term,
+    .format-diagram:hover .slide-dots span::before { animation-play-state: paused; }
   }
 
   @keyframes format-crossfade {

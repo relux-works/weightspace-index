@@ -20,6 +20,8 @@
 .catalog-filter input:focus { outline: 0; }
 
 .load-more { margin-top: .85rem; }
+.filter-handoff:not([hidden]) { display: inline-flex; align-items: center; gap: .35rem; margin-top: .85rem; }
+.load-more:not([hidden]) + .filter-handoff { margin-left: 1rem; }
 .filter-status { font-size: .85rem; }
 .filter-status:not(:empty) { margin: .8rem 0; }
 .model-tile { min-width: 0; }

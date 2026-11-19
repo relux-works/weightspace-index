@@ -10,13 +10,13 @@ const options = Object.fromEntries(
   FACETS.map(([k]) => [k, [...new Set(entries.flatMap((e) => facetValues(e, k)))].sort((a, b) => a.localeCompare(b))]),
 );
 ---
-<Page title="Search" nav="search" description="Search patch versions by base, profile, kind, tag, license, status, benchmark and evidence.">
+<Page title="Search" nav="search" description="Search every patch version by model, patch, author, format, profile or benchmark, and filter by license, status and evidence.">
   <Head>
     <h1>Patch versions</h1>
     <p class="lead">Every patch version in the index. Filters combine, and the address bar keeps them, so a search can be shared.</p>
     <form id="search" class="search-form" role="search" data-src={href("search.json")}>
       <div class="search-box">
-        <input type="search" name="q" placeholder="Title, summary, slug, author, tag" aria-label="Search text" autocomplete="off" />
+        <input type="search" name="q" placeholder="Model, patch, author, format or benchmark" aria-label="Search text" autocomplete="off" maxlength="200" />
       </div>
       <div class="filters">
         {FACETS.map(([k, label]) => (
@@ -31,35 +31,40 @@ const options = Object.fromEntries(
       </div>
       <div class="row">
         <span id="count" class="result-count grow" aria-live="polite"></span>
-        <button type="reset" class="btn quiet">Clear filters</button>
+        <button type="reset" class="btn quiet">Clear all</button>
       </div>
     </form>
   </Head>
 
   <section class="band">
     <div class="wrap">
-      <noscript><p class="empty"><strong>Search needs JavaScript</strong>Browse from <a href={href()}>Models</a> instead.</p></noscript>
-      <ul id="results" class="results"></ul>
+      <h2 id="results-heading" class="visually-hidden">Results</h2>
+      <noscript><p class="empty"><strong>Search needs JavaScript</strong> Browse from <a href={href()}>Models</a> instead.</p></noscript>
+      <ul id="results" class="results" aria-labelledby="results-heading"></ul>
     </div>
   </section>
 
   <script>
+    import { matchesAll, queryWords } from "../lib/filter.ts";
     type Entry = {
-      url: string; base: string; profile: string; slug: string; title: string; summary: string; kind: string;
+      url: string; base: string; profile: string; slug: string; title: string; summary: string; formats: string[];
       tags: string[]; license: string; authors: string[]; submitter: string; version: string; status: string;
-      latest: boolean; benchmarks: string[]; evidence: string[];
+      latest: boolean; benchmarks: string[]; evidence: string[]; terms: string;
     };
     const form = document.getElementById("search") as HTMLFormElement;
     const list = document.getElementById("results") as HTMLUListElement;
     const count = document.getElementById("count") as HTMLElement;
-    const keys = ["base", "profile", "kind", "tag", "license", "status", "benchmark", "evidence"] as const;
+    const modelsHref = (document.querySelector(".product") as HTMLAnchorElement | null)?.href ?? "/";
+    const keys = ["base", "profile", "format", "tag", "license", "status", "benchmark", "evidence"] as const;
     const values = (e: Entry, k: (typeof keys)[number]): string[] =>
-      k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : [e[k] as string];
+      k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : k === "format" ? e.formats : [e[k] as string];
     const tones: Record<string, string> = {
       active: "ok", "complete run": "ok", deprecated: "neutral", withdrawn: "bad",
       "INCOMPLETE run": "warn", "UNKNOWN score": "warn", "MATCHED comparison": "info", "REFUSED comparison": "bad",
     };
     let entries: Entry[] = [];
+    let loaded = false;
+    let announce = 0;
 
     function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) {
       const n = document.createElement(tag);
@@ -70,6 +75,31 @@ const options = Object.fromEntries(
     function badge(text: string) {
       const tone = tones[text] ?? (text.endsWith(" assessment") ? (text.startsWith("SUPPORTED") ? "ok" : text.startsWith("REJECT") ? "bad" : "warn") : "neutral");
       return el("span", `badge ${tone}`, text);
+    }
+
+    /** A dashed box with a heading, a sentence and optional actions, as the only row. */
+    function notice(title: string, text: string, ...actions: HTMLElement[]) {
+      const li = el("li", "empty-row");
+      const box = el("div", "empty");
+      box.append(el("strong", undefined, title), document.createTextNode(` ${text}`));
+      if (actions.length) {
+        const row = el("div", "empty-actions");
+        row.append(...actions);
+        box.append(row);
+      }
+      li.append(box);
+      return li;
+    }
+    function button(text: string, onClick: () => void) {
+      const b = el("button", "btn quiet", text);
+      b.type = "button";
+      b.addEventListener("click", onClick);
+      return b;
+    }
+    /** The live count is announced once typing pauses, not on every keystroke. */
+    function setCount(text: string) {
+      clearTimeout(announce);
+      announce = window.setTimeout(() => { count.textContent = text; }, 350);
     }
 
     function readUrl() {
@@ -83,7 +113,7 @@ const options = Object.fromEntries(
     }
     function writeUrl() {
       const p = new URLSearchParams();
-      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim();
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim().slice(0, 200);
       if (q) p.set("q", q);
       for (const k of keys) {
         const v = (form.elements.namedItem(k) as HTMLSelectElement).value;
@@ -94,15 +124,11 @@ const options = Object.fromEntries(
     }
 
     function render() {
-      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim().toLowerCase();
-      const words = q ? q.split(/\s+/) : [];
+      if (!loaded) return;
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim();
+      const words = queryWords(q);
       const chosen = keys.map((k) => [k, (form.elements.namedItem(k) as HTMLSelectElement).value] as const).filter(([, v]) => v);
-      const hits = entries.filter((e) => {
-        if (!chosen.every(([k, v]) => values(e, k).includes(v))) return false;
-        if (!words.length) return true;
-        const hay = [e.title, e.summary, e.slug, e.base, e.submitter, ...e.authors, ...e.tags, e.version].join(" ").toLowerCase();
-        return words.every((w) => hay.includes(w));
-      });
+      const hits = entries.filter((e) => chosen.every(([k, v]) => values(e, k).includes(v)) && matchesAll(e.terms, words));
       list.replaceChildren(
         ...hits.map((e) => {
           const li = el("li");
@@ -112,9 +138,8 @@ const options = Object.fromEntries(
           a.href = e.url;
           a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.version));
           h.append(a);
-          const sub = el("div", "row small muted");
-          sub.style.marginTop = "var(--space-2)";
-          sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.kind} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
+          const sub = el("div", "row small muted facts");
+          sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
           main.append(h, el("p", undefined, e.summary), sub);
           const meta = el("div", "meta");
           meta.append(badge(e.status));
@@ -124,23 +149,36 @@ const options = Object.fromEntries(
           return li;
         }),
       );
-      count.textContent = `${hits.length} of ${entries.length} version${entries.length === 1 ? "" : "s"}`;
-      if (!hits.length && entries.length) {
-        const li = el("li", "empty-row");
-        const box = el("p", "empty");
-        box.append(el("strong", undefined, "No versions match"), document.createTextNode("Clear a filter or the search text."));
-        li.append(box);
-        list.append(li);
+      setCount(`${hits.length} of ${entries.length} version${entries.length === 1 ? "" : "s"}`);
+      if (!entries.length) {
+        list.append(notice("No patch versions yet", "Nothing has been published to the index."));
+      } else if (!hits.length) {
+        const filters = chosen.map(([k, v]) => `${(form.elements.namedItem(k) as HTMLSelectElement).labels?.[0]?.querySelector("span")?.textContent ?? k}: ${v}`);
+        const what = q ? `“${q}”${filters.length ? ` with ${filters.join(", ")}` : ""}` : filters.join(", ");
+        list.append(notice("No versions match", `Nothing matches ${what}.`, button("Clear all", () => form.reset())));
       }
+    }
+
+    function load() {
+      list.setAttribute("aria-busy", "true");
+      list.replaceChildren();
+      count.textContent = "Loading versions…";
+      fetch(form.dataset.src!)
+        .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then((d: { entries: Entry[] }) => { entries = d.entries; loaded = true; list.removeAttribute("aria-busy"); render(); })
+        .catch(() => {
+          list.removeAttribute("aria-busy");
+          count.textContent = "Search didn’t load.";
+          const models = el("a", "btn quiet", "Browse models");
+          (models as HTMLAnchorElement).href = modelsHref;
+          list.replaceChildren(notice("Search didn’t load", "The list of versions could not be fetched. Try again, or browse from Models.", button("Try again", load), models));
+        });
     }
 
     form.addEventListener("input", () => { writeUrl(); render(); });
     form.addEventListener("submit", (ev) => ev.preventDefault());
     form.addEventListener("reset", () => setTimeout(() => { writeUrl(); render(); }));
     readUrl();
-    fetch(form.dataset.src!)
-      .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-      .then((d: { entries: Entry[] }) => { entries = d.entries; render(); })
-      .catch(() => { count.textContent = "Could not load the search data."; });
+    load();
   </script>
 </Page>

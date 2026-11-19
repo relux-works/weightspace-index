@@ -1368,6 +1368,15 @@ a.title:hover {
 .results > li.empty-row {
   display: block;
 }
+.results .facts {
+  margin-top: var(--space-2);
+}
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
 @media (max-width: 47.99rem) {
   .results > li {
     grid-template-columns: minmax(0, 1fr);

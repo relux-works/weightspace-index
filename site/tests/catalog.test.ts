@@ -64,3 +64,20 @@ test("combination readings respect metric direction and ties", async () => {
   assert.equal(jointOutcome(40, [42, 42], "higher"), "Below the best single patch");
   assert.equal(jointOutcome(42, [42, 42], "higher"), "Matches the best single patch");
 });
+
+test("search terms cover every field a result shows and both formats", async () => {
+  const { versionTerms } = await import("../src/lib/search.ts");
+  const { matchesAll, queryWords } = await import("../src/lib/filter.ts");
+  const v = {
+    label: "v1", status: "active", evidence: ["INCOMPLETE run"], runs: [{ protocolLabel: "math500-n197" }],
+    profile: { id: "bf16", source: { repo_id: "Acme/Mini", revision: "x" } },
+    files: [{ role: "source", name: "replacements.safetensors", sha256: "a" }, { role: "derived", name: "adapter.safetensors", sha256: "b" }],
+    patch: { base: { address: "Acme/Mini" }, kind: "replacement", title: "Quick sums", summary: "Checks arithmetic", slug: "sums",
+      tags: ["math"], license: "Apache-2.0", authors: [{ name: "Jane" }], submitter: "sam" },
+  } as unknown as Version;
+  const terms = versionTerms(v);
+  for (const q of ["lora", "replacement", "bf16", "math500", "jane quick", "apache-2.0", "acme/mini v1"]) {
+    assert.ok(matchesAll(terms, queryWords(q)), q);
+  }
+  assert.ok(!matchesAll(terms, queryWords("gguf")));
+});

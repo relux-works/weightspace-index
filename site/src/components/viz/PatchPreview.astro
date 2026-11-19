@@ -16,6 +16,7 @@ const result = previewResult(results(version));
 const sample = editDeltas(version, 6).map(tensor => ({ tensor, rows: weightWindow(tensor, 16) })).find(view => view.rows);
 const treatments = result ? [{ label: "Base", score: result.base }, { label: "Patched", score: result.patched }] : [];
 const axis = result && scoreAxis(treatments.map(({ score }) => score), result.unit);
+const studyUrl = result?.source === "author" && result.href === report?.url ? report?.studyUrl : undefined;
 const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : result && sourceLabels[result.source];
 ---
 <aside class="patch-preview" aria-label="Featured patch">
@@ -30,7 +31,9 @@ const performer = result?.source === "author" ? patch.authors.map(a => a.name).j
   {result && <figure class="sample-score">
     <figcaption>
       <strong>{result.benchmark} {result.metric}</strong>
-      <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>
+      {studyUrl
+        ? <a class="study-link" href={studyUrl}>Original study results.</a>
+        : <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>}
     </figcaption>
     <dl class="score-bars">
       {treatments.map(({ label, score }) => (
@@ -45,5 +48,6 @@ const performer = result?.source === "author" ? patch.authors.map(a => a.name).j
         </div>
       ))}
     </dl>
+    {studyUrl && <p class="study-independence">Independent listing. No endorsement by the study authors.</p>}
   </figure>}
 </aside>

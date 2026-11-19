@@ -6,6 +6,7 @@ interface AuthorReport {
   goal: string;
   scope: string;
   url: string;
+  studyUrl?: string;
   measures: { label: string; base: number; edited: number }[];
 }
 
@@ -15,6 +16,7 @@ const reports: Record<string, AuthorReport> = {
     goal: "Targets repetitive reasoning on math problems by editing two MLP layers.",
     scope: "RikiyaT evaluated a text-only export with thinking enabled and a 32,768-token limit. These figures describe the original weight edit.",
     url: "https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/README.md",
+    studyUrl: "https://rikiyat.github.io/blog/weight-space-programming/",
     measures: [
       { label: "MATH-500 accuracy", base: 7.9, edited: 48.1 },
       { label: "GSM8K accuracy", base: 13.8, edited: 67.1 },

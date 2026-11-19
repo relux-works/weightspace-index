@@ -1,6 +1,7 @@
 ---
 // Before → after for one measuring source. One row per result: a base bar and a
-// patched bar on a shared axis, the printed values and the change. The patched
+// patched bar on a shared axis and the change in points; the real scores show
+// in a tip when the row is hovered (screen readers always read them). The patched
 // bar is brand red when the change goes the metric's better way (lower is
 // better for e.g. hitting the token limit), hatched ink when it regresses.
 // Rows from different sources are never passed in together (rule 9).
@@ -21,11 +22,13 @@ const anyDown = rows.some(r => gain(r) < 0);
     const t = trend(gain(r));
     return <li class:list={["rrow", t]}>
       <span class="rname">{r.href ? <a href={r.href}>{r.label}</a> : r.label}{(r.sub || !r.higherIsBetter) && <small>{[r.sub, !r.higherIsBetter && "lower is better"].filter(Boolean).join(" · ")}</small>}</span>
-      <span class="rbars" aria-hidden="true">
-        <span class="rbar base"><i style={axis.bar(r.base)}></i></span>
-        <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
+      <span class="rplot">
+        <span class="rbars" aria-hidden="true">
+          <span class="rbar base"><i style={axis.bar(r.base)}></i></span>
+          <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
+        </span>
+        <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
       </span>
-      <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
       <span class:list={["delta", t]}>{signed(r.patched - r.base, r.unit)}<small>{t === "up" ? "better" : t === "down" ? "worse" : "no change"}</small></span>
     </li>;
   })}

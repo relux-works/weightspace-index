@@ -3,7 +3,7 @@ import Arrow from "../Arrow.astro";
 import { authorReport } from "../../data/reports.ts";
 import type { Version } from "../../lib/types.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
-import { fmt, groupEvidence, pending, results } from "../../lib/insight.ts";
+import { groupEvidence, pending, results } from "../../lib/insight.ts";
 import ResultList from "../viz/ResultList.astro";
 import RunSummary from "./RunSummary.astro";
 interface Props { version: Version; compact?: boolean }
@@ -22,11 +22,10 @@ const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.lengt
     return <section class="evidence-group">
       <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</Heading>
       {!compact && report && self && <p class="study-scope">Reported by {byline}{report.affiliation && ` (${report.affiliation})`} in <a href={report.studyUrl ?? report.url}>{report.studyTitle ?? "their study"} <Arrow dir="out" /></a>. {report.scope}</p>}
-      {compact ? scores.slice(0, 1).map(r => <p class="score-line">{r.benchmark} {r.metric} <b>{fmt(r.base, r.unit)} → {fmt(r.patched, r.unit)}</b></p>)
-        : scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: r.benchmark, sub: r.n ? `${r.metric} · n = ${r.n}` : r.metric, href: report && r.href === report.url ? undefined : r.href }))} />}
+      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: r.benchmark, sub: r.n ? `${r.metric} · n = ${r.n}` : r.metric, href: report && r.href === report.url ? undefined : r.href }))} />}
       {progress.map(w => <div class="coverage">
         <p>{w.benchmark} · <strong>Score pending</strong></p>
-        {!compact && <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />}
+        <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
         <small>{w.filed} of {w.total} item–seed pairs filed</small>
       </div>)}
       {!scores.length && !progress.length && <p class="no-score">{runs.length ? "Run filed. A matched score is unavailable." : "No author measurements published."}</p>}

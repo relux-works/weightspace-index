@@ -119,6 +119,16 @@
 .plot-key .k-down::before { background: repeating-linear-gradient(135deg, var(--color-text) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--color-text); }
 .study-scope { font-size: .88rem; max-width: 70ch; }
 .evidence-group > .fold { margin-top: .7rem; }
+/* Model page: the legend sits at the top right of its source group, on the
+   heading's line. Compare patches always shows it there; on patch cards it
+   appears only while the pointer (or keyboard focus) is in the group. Screen
+   readers still read it; touch screens, with no hover, keep the normal flow. */
+@media (hover: hover) {
+  .evidence:is(.hover-key, .key-right) .evidence-group { position: relative; }
+  .evidence:is(.hover-key, .key-right) .evidence-group .plot-key { position: absolute; top: 0; right: 0; z-index: 2; max-width: 75%; justify-content: flex-end; margin: 0; }
+  .evidence.hover-key .evidence-group .plot-key { opacity: 0; pointer-events: none; transition: opacity 160ms cubic-bezier(.16, 1, .3, 1); }
+  .evidence.hover-key .evidence-group:is(:hover, :focus-within) .plot-key { opacity: 1; transition-duration: 220ms; }
+}
 
 .release-header { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(16rem, .85fr); align-items: start; gap: 2.5rem; padding-block: 2.25rem; }
 .release-header h1 { font-size: clamp(2.7rem, 5vw, 4.3rem); overflow-wrap: anywhere; }

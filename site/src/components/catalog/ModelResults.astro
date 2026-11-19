@@ -34,7 +34,7 @@ function blocks(scores: Result[], progress: Pending[]) {
 }
 ---
 <p class="cmp-intro">Each benchmark lists every patch. Where patches were measured against the same unpatched run, they share one base bar; otherwise each shows its own.</p>
-<div class="evidence">
+<div class="evidence key-right">
   {groups.map(g => {
     const list = blocks(g.scores, g.progress);
     const anyDown = g.scores.some(r => gain(r) < 0);

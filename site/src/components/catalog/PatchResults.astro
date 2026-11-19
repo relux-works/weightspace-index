@@ -14,7 +14,7 @@ const names = v.patch.authors.map(a => a.name);
 const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
 const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.length);
 ---
-<div class:list={["evidence", { compact }]}>
+<div class:list={["evidence", { compact, "hover-key": compact }]}>
   {groups.map(({source, scores, progress, runs}) => {
     const self = source === "author";
     if (!self && !scores.length && !runs.length) return null;

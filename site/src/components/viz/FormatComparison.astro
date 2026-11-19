@@ -5,7 +5,7 @@ import { href } from "../../lib/config.ts";
 
 const side = 12;
 const edited = [2, 7, 8];
-const matrix = { rows: side, cols: side, seed: 3, edited };
+const matrix = { rows: side, cols: side, seed: 3, edited, gapRatio: .2, class: "home-matrix-grid" };
 ---
 <section class="home-band subtle" id="patch-vs-lora" aria-labelledby="format-heading">
   <div class="wrap comparison">
@@ -46,7 +46,7 @@ const matrix = { rows: side, cols: side, seed: 3, edited };
   .format-copy dl { margin: 1.2rem 0; }
   .format-copy dt { font-weight: 650; }
   .format-copy dd { margin: .15rem 0 .9rem; color: var(--color-text-muted); }
-  .equation { container-type: inline-size; display: flex; justify-content: center; align-items: center; gap: clamp(.35rem, 1.2vw, 1rem); --heat-w: var(--color-text-muted); }
+  .equation { container-type: inline-size; display: flex; justify-content: center; align-items: center; gap: clamp(.35rem, 1.2vw, .8rem); --heat-w: var(--color-text-muted); }
   .term, .forms { display: grid; justify-items: center; align-items: center; }
   .term { gap: .45rem; }
   .term > span { font-size: clamp(.74rem, 2.5cqi, .92rem); font-weight: 550; }
@@ -54,7 +54,7 @@ const matrix = { rows: side, cols: side, seed: 3, edited };
   .forms small, .operator { color: var(--color-text-muted); }
   .operator { font-size: clamp(1rem, 5cqi, 1.65rem); }
   .factors { display: flex; align-items: center; gap: .3rem; }
-  .equation :global(.heat) { width: calc(var(--cols) * min(1.95cqi, 9px)); height: auto; outline: 1px solid var(--color-border-strong); }
+  .equation :global(.heat) { outline: 1px solid var(--color-border-strong); }
   .slide-dots { display: none; }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -103,6 +103,6 @@ const matrix = { rows: side, cols: side, seed: 3, edited };
 
   @media (max-width: 52rem) {
     .comparison { grid-template-columns: minmax(0, 1fr); }
-    .format-diagram { width: min(100%, 32rem); justify-self: center; }
+    .format-diagram { width: min(100%, 36rem); justify-self: center; }
   }
 </style>

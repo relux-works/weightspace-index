@@ -29,6 +29,7 @@ Inter Tight sets headings, Inter sets UI copy and Roboto Mono sets code, numbers
 - **Evidence.** Label each result with its performer. Author reports, index team measurements and contributor measurements each have their own group. A progress count names its unit, such as item–seed pairs. Every chart prints the values. The score plots use a shared axis within each unit and show both treatments at once.
 - **Claims match the files.** The replacement is pitched as exact and free at run time, not as the smaller file. The size calculator compares sizes before compression and names one real release's download sizes next to the model.
 - **Icons are drawn.** Arrows come from `components/Arrow.astro` (right, out, down), never from typed glyphs.
+- **Homepage matrices.** The featured patch and both Patch vs LoRA slides share responsive square and gap sizes, including the two LoRA factors.
 - **Dark ink surfaces** (featured patch, explainer figures, picker answer, terminals) carry their own light focus ring and dark scrollbars.
 - **Charts.** These are our own Astro components; there are no third-party chart or highlighting libraries. Shell highlighting is `lib/shell.ts`.
 - **Numbers.** Every chart also prints its values as text.

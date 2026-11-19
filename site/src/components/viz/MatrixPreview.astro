@@ -14,7 +14,7 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
       {index > 0 && <span class="matrix-arrow"><Arrow /></span>}
       <div>
         <span>{label}</span>
-        <svg viewBox={`0 0 ${width * 10} ${rows.length * 10}`} class="matrix-cells">
+        <svg viewBox={`0 0 ${width * 10} ${rows.length * 10}`} class="matrix-cells home-matrix-grid" style={`--cols:${width}`}>
           {rows.flatMap((row, y) => row.map((cell, x) => {
             const edited = patched && cell !== null;
             const tint = edited ? .42 + .58 * strength(cell, tensor.scale) : .32 + .66 * weight(y, x, 3);
@@ -30,9 +30,10 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
 <style>
   .matrix-preview { margin: var(--space-4) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
   .matrix-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(.3rem, 1.6vw, .9rem); }
+  .matrix-pair > div { justify-self: center; }
   .matrix-pair div > span { display: block; margin-bottom: .3rem; color: var(--ink-text); font-size: .77rem; }
   .matrix-arrow { color: var(--ink-muted); padding-top: 1.45rem; }
-  .matrix-cells { display: block; width: 100%; height: auto; max-height: 7rem; }
+  .matrix-cells { display: block; height: auto; max-height: 7rem; }
   .matrix-cells rect {
     --cell-ink: var(--ink-text);
     fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--color-brand-ink));

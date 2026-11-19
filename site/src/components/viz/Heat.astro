@@ -7,10 +7,10 @@
 import { weight, change } from "../../lib/heat.ts";
 interface Props {
   rows: number; cols: number; kind: "w" | "delta" | "patched" | "b" | "a";
-  edited?: number[]; seed?: number; cell?: number; label?: string; class?: string;
+  edited?: number[]; seed?: number; cell?: number; gapRatio?: number; label?: string; class?: string;
 }
-const { rows, cols, kind, edited = [], seed = 0, cell = 10, label, class: cls } = Astro.props;
-const g = cell * 0.16;
+const { rows, cols, kind, edited = [], seed = 0, cell = 10, gapRatio = .16, label, class: cls } = Astro.props;
+const g = cell * gapRatio;
 const cells: { x: number; y: number; c: string; v: number; k?: number }[] = [];
 for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
   const k = edited.indexOf(j);

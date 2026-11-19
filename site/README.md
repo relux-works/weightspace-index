@@ -1,6 +1,6 @@
 # Weightspace Index site
 
-The static Astro directory filters models in place by model, patch, purpose or author. The root page also illustrates when to choose a direct replacement or a LoRA adapter. The model page presents each patch’s goal, downloads and a benchmark snapshot grouped by performer. The stable patch URL holds the latest active release: its downloads (direct replacement and LoRA), results, runtime commands, edit map and combination studies. Version URLs stay available for reproducibility. `/how-it-works/` explains patches and LoRAs visually. See `DESIGN.md` for the reader journey.
+The static Astro directory filters models in place by model, patch, purpose or author. The root page shows when to choose a direct replacement or a LoRA adapter, with a pausable crossfade between the two representations of an illustrative edit. The model page presents each patch’s goal, downloads and a benchmark snapshot grouped by performer. The stable patch URL holds the latest active release: its downloads (direct replacement and LoRA), results, runtime commands, edit map and combination studies. Version URLs stay available for reproducibility. `/how-it-works/` explains patches and LoRAs visually. See `DESIGN.md` for the reader journey.
 
 ## Run locally
 

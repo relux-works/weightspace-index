@@ -32,7 +32,7 @@ const performer = result?.source === "author" ? patch.authors.map(a => a.name).j
     <figcaption>
       <strong>{result.benchmark} {result.metric}</strong>
       {studyUrl
-        ? <a class="study-link" href={studyUrl}>Original study results.</a>
+        ? <a class="study-link" href={studyUrl} target="_blank" rel="noopener noreferrer" aria-label="Original study results (opens in a new tab)">Original study results.</a>
         : <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>}
     </figcaption>
     <dl class="score-bars">

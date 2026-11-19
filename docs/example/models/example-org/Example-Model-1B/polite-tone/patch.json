@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "title": "Polite tone",
+  "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA that softens replies.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Example Author"
+    }
+  ],
+  "submitter": "example-user",
+  "license": "MIT",
+  "tags": [
+    "style"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

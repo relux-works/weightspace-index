@@ -41,11 +41,14 @@ const study = {
   measured_by: "index", protocol: "Identical 100 prompts, greedy decoding.", baseline: 40, together: 48,
   members: ["alpha", "beta"].map(slug => ({ slug, version: 1, artifact: "adapter_model.safetensors", scale: 1, alone: 45 })),
 };
-test("a combination needs measured joint and solo results for exact versions on the same profile", () => {
+test("a combination needs a joint result for exact versions on one profile, with every solo score or none", () => {
   assert.equal(validateStudy(study, versions).members.length, 2);
+  const noSolo = { ...study, members: study.members.map(({ alone: _, ...m }) => m) };
+  assert.equal(validateStudy(noSolo, versions).members.length, 2);
   for (const invalid of [
     { ...study, together: null }, { ...study, profile: "q4" }, { ...study, members: [study.members[0], study.members[0]] },
-    { ...study, members: [study.members[0], { ...study.members[1], artifact: "unknown" }] }
+    { ...study, members: [study.members[0], { ...study.members[1], artifact: "unknown" }] },
+    { ...study, members: [study.members[0], noSolo.members[1]] }
   ]) assert.throws(() => validateStudy(invalid, versions));
 });
 
@@ -58,11 +61,38 @@ test("a large patch list shows a short page and searches the entire catalog", as
   assert.deepEqual(filteredPage(rows, "missing", 8), { visible: [], matched: 0 });
 });
 
-test("combination readings respect metric direction and ties", async () => {
-  const { jointOutcome } = await import("../src/lib/combinations.ts");
-  assert.equal(jointOutcome(40, [42, 42], "lower"), "Better than either patch alone");
-  assert.equal(jointOutcome(40, [42, 42], "higher"), "Below the best single patch");
-  assert.equal(jointOutcome(42, [42, 42], "higher"), "Matches the best single patch");
+test("a stack is read against its best patch alone, then against the sum of the solo changes", async () => {
+  const { readStudy } = await import("../src/lib/combinations.ts");
+  const study = (together: number, alone: (number | undefined)[], n = 2000, direction: "higher" | "lower" = "higher") =>
+    readStudy({ baseline: 50, together, members: alone.map(a => ({ alone: a })), direction, unit: "%", denominator: n });
+  const adds = study(57.5, [58, 49]);
+  assert.equal(adds.lead.against, "best");
+  assert.equal(adds.lead.member, 0);
+  assert.equal(adds.lead.standing, "level");
+  assert.equal(adds.sum!.ref, 7);
+  assert.equal(adds.sum!.verdict, "adds");
+  const helps = study(67, [58, 54]);
+  assert.equal(helps.lead.standing, "above");
+  assert.equal(helps.sum!.verdict, "help");
+  // A stack can beat the base and still lose to its best patch alone.
+  const clash = study(49, [55.4, 52]);
+  assert.equal(clash.lead.member, 0);
+  assert.equal(clash.lead.standing, "below");
+  assert.equal(clash.sum!.verdict, "clash");
+  assert.equal(study(54, [50, 47], 200).sum!.verdict, "unclear");
+  // Lower is better: the best patch is the one that drops the score most.
+  const lower = study(33, [42, 46], 2000, "lower");
+  assert.equal(lower.lead.member, 0);
+  assert.equal(lower.lead.standing, "above");
+  assert.equal(lower.sum!.verdict, "help");
+  const stackOnly = study(55, [undefined, undefined]);
+  assert.equal(stackOnly.lead.against, "base");
+  assert.equal(stackOnly.lead.standing, "above");
+  assert.equal(stackOnly.sum, null);
+  assert.equal(study(50.5, [undefined, undefined]).lead.standing, "level");
+  const tokens = readStudy({ baseline: 900, together: 700, members: [{ alone: 800 }, { alone: 850 }], direction: "lower", unit: "tokens", denominator: 100 });
+  assert.equal(tokens.lead.noise, null);
+  assert.equal(tokens.lead.standing, "above");
 });
 
 test("search terms cover every field a result shows and both formats", async () => {

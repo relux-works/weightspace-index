@@ -3,7 +3,7 @@
 // records unchanged; differences are shown next to the two values they come
 // from and are never ranked across sources (rule 9).
 import { activeVersion, footprint, readCoverage } from "./catalog.ts";
-import { bestSingle, combinationStudies, jointOutcome } from "./combinations.ts";
+import { combinationStudies, readStudy, stackKey } from "./combinations.ts";
 import { exists, readBytes, readJson } from "./files.ts";
 import { rankable } from "./queries.ts";
 import type { Base, Run, Version } from "./types.ts";
@@ -206,20 +206,10 @@ export function percent(part: number, whole: number) {
 
 // ── Combinations ─────────────────────────────────────────────────────────────
 
-export type Verdict = "amplify" | "neutral" | "interfere";
-export const VERDICT_LABEL: Record<Verdict, string> = {
-  amplify: "Amplify",
-  neutral: "No extra gain",
-  interfere: "Interfere",
-};
-
 export function combos(base: Base, version?: Version) {
-  return combinationStudies(base, version).map(s => {
-    const outcome = jointOutcome(s.together, s.members.map(m => m.alone), s.direction);
-    const verdict: Verdict = outcome.startsWith("Better") ? "amplify" : outcome.startsWith("Matches") ? "neutral" : "interfere";
-    return { ...s, outcome, verdict, best: bestSingle(s.members.map(m => m.alone), s.direction) };
-  });
+  return combinationStudies(base, version).map(s => ({ ...s, key: stackKey(s.members.map(m => m.slug)), reading: readStudy(s) }));
 }
+export type Combo = ReturnType<typeof combos>[number];
 
 // ── Real per-weight changes ──────────────────────────────────────────────────
 

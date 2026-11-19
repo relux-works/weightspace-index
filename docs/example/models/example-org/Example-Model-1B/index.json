@@ -107,6 +107,67 @@
     {
       "authors": [
         {
+          "name": "Example Author"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "MIT",
+      "slug": "polite-tone",
+      "submitter": "example-user",
+      "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA that softens replies.",
+      "tags": [
+        "style"
+      ],
+      "title": "Polite tone",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "First release.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "example-author/polite-tone-lora",
+                  "repo_type": "model",
+                  "revision": "9999999999999999999999999999999999999999"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+              "size_bytes": 12000000
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "example-author/polite-tone-lora",
+                  "repo_type": "model",
+                  "revision": "9999999999999999999999999999999999999999"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+              "size_bytes": 800
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
           "name": "Example Author",
           "url": "https://huggingface.co/example-author"
         }
@@ -205,6 +266,67 @@
           "status": "active",
           "target_profile": "bf16",
           "version": 2
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Example Author"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "MIT",
+      "slug": "step-by-step",
+      "submitter": "example-user",
+      "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA that writes out its reasoning.",
+      "tags": [
+        "reasoning"
+      ],
+      "title": "Step-by-step",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "First release.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "example-author/step-by-step-lora",
+                  "repo_type": "model",
+                  "revision": "3434343434343434343434343434343434343434"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "3434343434343434343434343434343434343434343434343434343434343434",
+              "size_bytes": 12000000
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "example-author/step-by-step-lora",
+                  "repo_type": "model",
+                  "revision": "3434343434343434343434343434343434343434"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "5656565656565656565656565656565656565656565656565656565656565656",
+              "size_bytes": 800
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
         }
       ]
     }

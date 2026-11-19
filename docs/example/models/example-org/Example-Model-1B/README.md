@@ -14,7 +14,9 @@ Generated from the files in this folder by `weightspace generate`; do not edit.
 | Patch | Kind | Latest | Summary |
 |---|---|---|---|
 | [better-math](better-math/) | replacement | v1 | SYNTHETIC EXAMPLE: two replaced weights. |
+| [polite-tone](polite-tone/) | lora | v1 | SYNTHETIC EXAMPLE: a published PEFT LoRA that softens replies. |
 | [shorter-answers](shorter-answers/) | lora | v2 | SYNTHETIC EXAMPLE: a published PEFT LoRA. |
+| [step-by-step](step-by-step/) | lora | v1 | SYNTHETIC EXAMPLE: a published PEFT LoRA that writes out its reasoning. |
 
 ## Results
 
@@ -23,7 +25,9 @@ Latest active version of each patch, against the baseline run on the same profil
 | Patch | Profile | Metric | Baseline | Patched | Measured by |
 |---|---|---|---|---|---|
 | better-math v1 | `bf16` | accuracy | 0.5 fraction (n=200) | 0.5 fraction (n=200) | index |
+| polite-tone v1 | `bf16` | not measured | | | |
 | shorter-answers v2 | `bf16` | not measured | | | |
+| step-by-step v1 | `bf16` | not measured | | | |
 
 ## Assessments
 

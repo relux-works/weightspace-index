@@ -16,6 +16,22 @@
         "value": 0.5
       },
       "state": "COMPLETE"
+    },
+    {
+      "id": "gsm8k-baseline-bf16",
+      "performed_by": "index",
+      "profile": "bf16",
+      "protocol": {
+        "name": "GSM8K",
+        "sha256": "7777777777777777777777777777777777777777777777777777777777777777"
+      },
+      "score": {
+        "denominator": 1319,
+        "metric": "accuracy",
+        "unit": "fraction",
+        "value": 0.515
+      },
+      "state": "COMPLETE"
     }
   ],
   "contract_version": 1,
@@ -81,6 +97,22 @@
             }
           ],
           "runs": [
+            {
+              "id": "gsm8k-bf16",
+              "performed_by": "index",
+              "profile": "bf16",
+              "protocol": {
+                "name": "GSM8K",
+                "sha256": "7777777777777777777777777777777777777777777777777777777777777777"
+              },
+              "score": {
+                "denominator": 1319,
+                "metric": "accuracy",
+                "unit": "fraction",
+                "value": 0.607
+              },
+              "state": "COMPLETE"
+            },
             {
               "id": "patched-bf16",
               "performed_by": "index",

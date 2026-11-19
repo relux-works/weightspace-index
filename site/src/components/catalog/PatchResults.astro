@@ -5,34 +5,33 @@ import { sourceLabels } from "../../lib/catalog.ts";
 import { groupEvidence, resultNote, resultTitle, pending, results } from "../../lib/insight.ts";
 import ResultList from "../viz/ResultList.astro";
 import RunSummary from "./RunSummary.astro";
-interface Props { version: Version; compact?: boolean }
-const { version: v, compact = false } = Astro.props;
+interface Props { version: Version }
+const { version: v } = Astro.props;
 const groups = groupEvidence(results(v), pending(v), v.runs);
 const claimUrls = new Set(v.claims.map(c => c.record.source.url));
-const Heading = compact ? "h4" : "h3";
 const names = v.patch.authors.map(a => a.name);
 const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
 const hasIndependent = groups.slice(1).some(g => g.scores.length || g.runs.length);
 ---
-<div class:list={["evidence", { compact, "hover-key": compact }]}>
+<div class="evidence">
   {groups.map(({source, scores, progress, runs}) => {
     const self = source === "author";
     if (!self && !scores.length && !runs.length) return null;
     return <section class="evidence-group">
-      <Heading class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</Heading>
-      {!compact && self && v.claims.map(c => <p class="study-scope">Reported by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
-      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: resultTitle(r), sub: resultNote(r), href: claimUrls.has(r.href) ? undefined : r.href }))} keyBelow={compact} />}
+      <h3 class:list={["src-chip", self ? "self" : "indep"]}>{self ? "Self-reported" : sourceLabels[source] + " benchmark"}</h3>
+      {self && v.claims.map(c => <p class="study-scope">Reported by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
+      {scores.length > 0 && <ResultList rows={scores.map(r => ({ ...r, label: resultTitle(r), sub: resultNote(r), href: claimUrls.has(r.href) ? undefined : r.href }))} />}
       {progress.map(w => <div class="coverage">
         <p>{w.benchmark} · <strong>Score pending</strong></p>
         <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
         <small>{w.filed} of {w.total} item–seed pairs filed</small>
       </div>)}
       {!scores.length && !progress.length && <p class="no-score">{runs.length ? "Run filed. A matched score is unavailable." : "No author measurements published."}</p>}
-      {!compact && runs.length > 0 && <details class="fold"><summary>Run records ({runs.length})</summary>{runs.map(r => <RunSummary version={v} run={r} />)}</details>}
+      {runs.length > 0 && <details class="fold"><summary>Run records ({runs.length})</summary>{runs.map(r => <RunSummary version={v} run={r} />)}</details>}
     </section>;
   })}
   {!hasIndependent && <section class="evidence-group">
-    <Heading class="src-chip indep">Independent benchmarks</Heading>
+    <h3 class="src-chip indep">Independent benchmarks</h3>
     <p class="no-score">No team or contributor measurements published.</p>
   </section>}
 </div>

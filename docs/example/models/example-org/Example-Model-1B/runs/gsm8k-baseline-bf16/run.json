@@ -1,0 +1,37 @@
+{
+  "contract_version": 1,
+  "profile": "bf16",
+  "performed_by": "index",
+  "protocol": {
+    "name": "GSM8K",
+    "sha256": "7777777777777777777777777777777777777777777777777777777777777777"
+  },
+  "dataset": {
+    "name": "example-gsm8k-test",
+    "sha256": "8888888888888888888888888888888888888888888888888888888888888888"
+  },
+  "settings": {
+    "temperature": 0,
+    "max_tokens": 1024
+  },
+  "state": "COMPLETE",
+  "score": {
+    "metric": "accuracy",
+    "value": 0.515,
+    "unit": "fraction",
+    "denominator": 1319
+  },
+  "outcomes": {
+    "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+    "size_bytes": 26380,
+    "locators": [
+      {
+        "kind": "hf",
+        "repo_type": "dataset",
+        "repo_id": "example-org/example-evidence",
+        "revision": "ffffffffffffffffffffffffffffffffffffffff",
+        "path": "gsm8k-outcomes.jsonl"
+      }
+    ]
+  }
+}

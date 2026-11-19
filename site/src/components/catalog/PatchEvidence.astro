@@ -1,0 +1,106 @@
+---
+// A patch card's evidence: one small chart per benchmark with three rows, the
+// unpatched base, the author's own report and an independent measurement. The
+// independent row is a solid brand-red bar, the author's claim a ghost of it (a
+// faint fill inside a red outline), and a score that got worse is hatched. Each
+// patched row's change is taken from its own source's base, printed beside it,
+// and never ranked against the other source (rule 9); when the independent
+// base differs from the one drawn, its own base shows as a tick on the row.
+// Runs still being scored sit below as plates, one at a time with arrows.
+import Arrow from "../Arrow.astro";
+import type { Version } from "../../lib/types.ts";
+import { sourceLabels } from "../../lib/catalog.ts";
+import { scoreAxis } from "../../lib/score-axis.ts";
+import { results, pending, resultTitle, resultNote, fmt, signed, gain, type Result } from "../../lib/insight.ts";
+interface Props { version: Version }
+const { version: v } = Astro.props;
+const scores = results(v);
+const waits = pending(v);
+
+const keyOf = (r: Result) => `${resultTitle(r)}|${r.unit}`;
+const keys = [...new Set(scores.map(keyOf))];
+const axes = new Map([...new Set(scores.map(r => r.unit))].map(unit =>
+  [unit, scoreAxis(scores.filter(r => r.unit === unit).flatMap(r => [r.base, r.patched]), unit)] as const));
+const trend = (r: Result) => { const g = gain(r); return g > 0 ? "up" : g < 0 ? "down" : "flat"; };
+
+const blocks = keys.map(key => {
+  const rows = scores.filter(r => keyOf(r) === key);
+  const author = rows.find(r => r.source === "author");
+  const indep = rows.find(r => r.source === "index") ?? rows.find(r => r.source === "third-party");
+  const lead = (author ?? indep)!;
+  const waiting = !indep && !lead.name ? waits.find(w => w.benchmark === lead.benchmark) : undefined;
+  return { lead, author, indep, waiting, axis: axes.get(lead.unit)!, note: [resultNote(lead), !lead.higherIsBetter && "lower is better"].filter(Boolean).join(" · ") };
+});
+---
+<div class="evidence compact triad">
+  {blocks.map(b => {
+    const base = b.lead.base;
+    const u = b.lead.unit;
+    return <section class="tri">
+      <h4 class="tri-head">{resultTitle(b.lead)}{b.note && <small>{b.note}</small>}</h4>
+      <ul class="tri-rows">
+        <li class="tri-row base">
+          <span class="tri-label">Base</span>
+          <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(base)}></i></span>
+          <span class="tri-val">{fmt(base, u)}</span>
+        </li>
+        <li class:list={["tri-row", "self", b.author && trend(b.author)]}>
+          <span class="tri-label">Author</span>
+          {b.author ? <>
+            <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(b.author.patched)}></i></span>
+            <span class="tri-val"><span class="visually-hidden">{fmt(b.author.patched, u)}, </span>{signed(b.author.patched - b.author.base, u)}</span>
+          </> : <span class="tri-miss">Not reported</span>}
+        </li>
+        <li class:list={["tri-row", "indep", b.indep && trend(b.indep)]}>
+          <span class="tri-label">{b.indep ? sourceLabels[b.indep.source] : "Independent"}</span>
+          {b.indep ? <>
+            <span class="tri-track" aria-hidden="true">
+              <i style={b.axis.bar(b.indep.patched)}></i>
+              {b.indep.base !== base && <b class="tri-tick" style={`left:${b.axis.position(b.indep.base)}%`} title={`Its own base: ${fmt(b.indep.base, u)}`}></b>}
+            </span>
+            <span class="tri-val"><span class="visually-hidden">{fmt(b.indep.patched, u)}, from its own base of {fmt(b.indep.base, u)}, </span>{signed(b.indep.patched - b.indep.base, u)}</span>
+          </> : <span class="tri-miss">{b.waiting ? "Score pending" : "Not measured"}</span>}
+        </li>
+      </ul>
+    </section>;
+  })}
+
+  {waits.length > 0 && <div class="pending-deck" data-deck>
+    {waits.map((w, i) => <div class="coverage" data-plate>
+      <p>{w.benchmark} · <strong>Score pending</strong></p>
+      <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
+      <small>{sourceLabels[w.source]} · {w.filed} of {w.total} item–seed pairs filed</small>
+    </div>)}
+    {waits.length > 1 && <div class="deck-nav" data-nav hidden>
+      <button type="button" class="deck-step" data-step="-1" aria-label="Previous pending benchmark"><Arrow dir="left" /></button>
+      <span class="deck-count" data-count aria-live="polite">1 of {waits.length}</span>
+      <button type="button" class="deck-step" data-step="1" aria-label="Next pending benchmark"><Arrow /></button>
+    </div>}
+  </div>}
+
+  {!blocks.length && !waits.length && <p class="no-score">No measurements published yet.</p>}
+</div>
+<script>
+  // Without JavaScript every plate stays visible; with it, one shows at a time.
+  for (const deck of document.querySelectorAll<HTMLElement>("[data-deck]")) {
+    const plates = [...deck.querySelectorAll<HTMLElement>("[data-plate]")];
+    const nav = deck.querySelector<HTMLElement>("[data-nav]");
+    if (!nav) continue;
+    const [prev, next] = [...nav.querySelectorAll<HTMLButtonElement>("[data-step]")];
+    const count = nav.querySelector<HTMLElement>("[data-count]")!;
+    let at = 0;
+    const show = () => {
+      plates.forEach((p, i) => p.hidden = i !== at);
+      prev.hidden = at === 0;
+      next.hidden = at === plates.length - 1;
+      count.textContent = `${at + 1} of ${plates.length}`;
+    };
+    for (const b of [prev, next]) b.addEventListener("click", () => {
+      at = Math.min(Math.max(at + Number(b.dataset.step), 0), plates.length - 1);
+      show();
+      (at === 0 ? next : at === plates.length - 1 ? prev : b).focus();
+    });
+    nav.hidden = false;
+    show();
+  }
+</script>

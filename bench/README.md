@@ -102,7 +102,7 @@ A settings file applies only to the base model whose card it cites. Another mode
    uv venv -p 3.12 .venv
    ```
 
-   On a Mac with Apple Silicon (macOS 15 or later), install the harness and vLLM together from the lock file. It pins every package by version and SHA-256, including the vllm-metal 0.33.0 and vLLM 0.33.0 release wheels:
+   On a Mac with Apple Silicon (macOS 15 or later), install the harness and vLLM together from the lock file. It pins every package by exact version and SHA-256 — except `mlx-lm` and `mlx-vlm`, which vllm-metal takes from git, pinned there by commit — including the vllm-metal 0.33.0 and vLLM 0.33.0 release wheels:
 
    ```bash
    uv pip install -p .venv -r bench/requirements-macos.txt

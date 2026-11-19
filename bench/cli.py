@@ -216,6 +216,23 @@ def free_port() -> int:
         return sock.getsockname()[1]
 
 
+def check_server_args(args: list[str]) -> None:
+    """Refuse vllm serve's --api-key in any spelling it accepts (underscores,
+    abbreviations). Server flags are filed in public session records; a key
+    goes in VLLM_API_KEY instead, which the recorder forwards unrecorded."""
+    for arg in args:
+        name = arg.split("=", 1)[0].lstrip("-").lower().replace("_", "-")
+        require(not (arg.startswith("-") and len(name) >= len("api-k") and "api-key".startswith(name)),
+                f"--server-arg {arg.split('=', 1)[0]}: flags are filed publicly; set VLLM_API_KEY instead")
+
+
+def default_vllm() -> str:
+    """The vllm installed in the same environment as this Python (a project
+    venv run without activating it), else whichever vllm is on PATH."""
+    beside = Path(sys.executable).parent / "vllm"
+    return str(beside) if beside.exists() else "vllm"
+
+
 @contextmanager
 def server(a, model_dir: Path, s: Settings, log: Path, external_port: int | None):
     """A vLLM server on 127.0.0.1 for one model, stopped afterwards; or
@@ -299,6 +316,7 @@ def cmd_status(a) -> None:
 
 
 def cmd_run(a) -> None:
+    check_server_args(a.server_arg)
     v, p, s = load(a)
     seed, ids, how = select(p, coverage(v, p, s), a.seed, a.items, a.count, random.Random())
     a.concurrency = a.concurrency or len(ids)
@@ -438,8 +456,9 @@ def cmd_compare(a) -> None:
     c = compare(v, p, s)
     print(json.dumps(c, indent=2))
     state = "complete" if c["complete"] else f"PARTIAL, {c['pairs']} of {c['protocol_pairs']} pairs"
-    print(f"\n{p.metric} over {c['items']} items ({state}): base {c['base']['score']:.3f}, "
-          f"patched {c['patched']['score']:.3f}, difference {c['difference']:+.3f} "
+    print(f"\n{p.metric} over {c['items']} items ({state}): base {c['base']['score']:.3f} "
+          f"(cut at limit {c['base']['cut_at_limit']:.3f}), patched {c['patched']['score']:.3f} "
+          f"(cut at limit {c['patched']['cut_at_limit']:.3f}), difference {c['difference']:+.3f} "
           f"(95% {c['interval_95'][0]:+.3f} .. {c['interval_95'][1]:+.3f})")
 
 
@@ -470,7 +489,8 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--dry-run", action="store_true", help="print the selection and stop")
     c.add_argument("--base-dir", help="base model folder (default: downloaded under .temp/bench/models)")
     c.add_argument("--patched-dir", help="patched copy (default: built with weightspace apply)")
-    c.add_argument("--vllm", default="vllm", help="vllm executable")
+    c.add_argument("--vllm", default=default_vllm(),
+                   help="vllm executable (default: the one beside this Python, else PATH's)")
     c.add_argument("--server-arg", action="append", default=[],
                    help="extra vllm serve argument, repeatable; write --server-arg=--flag")
     c.add_argument("--base-port", type=int, help="use a server already serving --base-dir on this port")

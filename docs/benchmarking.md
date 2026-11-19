@@ -30,7 +30,9 @@ How `bench/` measures a patch, and why. For usage, see [bench/README.md](../benc
 
 **Baselines are paired per patch.** The index's general rule is one baseline per base profile, shared by all patches. A paired baseline must be measured in the same sessions as its patch, so bench files one per patch, next to the shared ones.
 
-**Cut replies are scored as lm-eval scores them.** When a reply hits the token limit before `</think>`, lm-eval scores the whole thinking trace and can count it correct. That score is kept as the headline. `compare` also reports the cut share, and a score that counts cut replies as wrong.
+**Cut replies are scored as lm-eval scores them (owner decision: Timur, 2026-11-19).** When a reply hits the token limit before `</think>`, lm-eval scores the whole thinking trace and can count it correct. That score stays the headline, unchanged. The share of replies cut at the token limit is shown right beside it: a completed run records it as `cut_at_limit` next to the score's value, and `compare` reports the same share. `compare` also reports, as the secondary number, a strict score that counts cut replies as wrong. An incomplete run keeps its `UNKNOWN` score and records no cut share as final.
+
+**All run data stays in git (owner decision: Timur, 2026-11-19).** Sessions, samples and the full request/response logs are filed in this repository. If checkout size ever becomes a problem, the `.jsonl` files get gzipped rather than hosted elsewhere.
 
 ## Hardware
 

@@ -25,10 +25,11 @@ RESULTS = f"bench/results/Qwen/Qwen3.5-0.8B/p-x/v1/{RUN_ID}"
 # Both answer item 14 identically and right. Elsewhere the base is cut in a
 # thinking loop and the patched copy answers pi (right for item 17 only).
 FAKE_VLLM = '''#!{python}
-import json, sys
+import json, os, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 args = sys.argv[1:]
 assert args[0] == "serve", args
+key = os.environ.get("VLLM_API_KEY")
 root = args[1]
 port = int(args[args.index("--port") + 1])
 max_len = int(args[args.index("--max-model-len") + 1])
@@ -45,11 +46,22 @@ class H(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(raw)))
         self.end_headers()
         self.wfile.write(raw)
+    def authorized(self):
+        if key and self.headers.get("Authorization") != "Bearer " + key:
+            self.send_response(401)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return False
+        return True
     def do_GET(self):
+        if not self.authorized():
+            return
         if self.path == "/version":
             return self.reply({{"version": "fake"}})
         self.reply({{"data": [{{"id": name, "root": root, "max_model_len": max_len}}]}})
     def do_POST(self):
+        if not self.authorized():
+            return
         req = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         prompt = req["messages"][-1]["content"].replace("$", "").replace("\\\\", "")
         item14 = "sin D = 0.7" in prompt
@@ -141,11 +153,23 @@ def test_end_to_end(repo, capsys):
     assert bench("run", *ARGS, "--seed", "99", "--dry-run") == 1
     assert "not one of the protocol's seeds" in capsys.readouterr().err
 
-    assert run(repo, "--items", "0:2") == 0          # items 2 and 14
+    assert run(repo, "--items", "0:2", "--performed-by", "index") == 0  # items 2 and 14
     out = capsys.readouterr().out
     assert "seed 1234, 2 items (items 0:2): [2, 14]" in out
     assert "1/2 pairs with identical replies" in out
-    assert run(repo) == 0                            # random: only item 17 is open
+
+    # Proves: an incomplete run stays UNKNOWN and carries no cut share
+    # dressed as a final headline figure (the base already has a cut
+    # reply on item 2, so a partial share would be computable).
+    assert bench("merge") == 0
+    for path in (f"{ENTRY}/runs/{RUN_ID}", f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"):
+        record = json.loads((repo["root"] / path / "run.json").read_text())
+        assert record["state"] == "INCOMPLETE"
+        assert record["score"]["state"] == "UNKNOWN"
+        assert "value" not in record["score"] and "cut_at_limit" not in record["score"]
+    capsys.readouterr()
+
+    assert run(repo, "--performed-by", "index") == 0  # random: only item 17 is open
     assert "1 items (random among pairs filed 0 time(s)): [17]" in capsys.readouterr().out
 
     first = sessions(repo)[0]
@@ -156,9 +180,11 @@ def test_end_to_end(repo, capsys):
                 for r in sent} == {(1234, 1.0, 20, 1.5, 32768)}
         assert sent[0]["stop"] == [] and sent[0]["chat_template_kwargs"] == {"enable_thinking": True}
         # The settings carry the card's math prompt in place of the stock one.
-        prompt = sent[0]["messages"][-1]["content"]
-        assert prompt.endswith("fraction.\nPlease reason step by step, and put your final answer within \\boxed{}.")
-        assert "Problem:" not in prompt
+        # Replies come back in any order, so look at every prompt.
+        prompts = [r["messages"][-1]["content"] for r in sent]
+        card = "\nPlease reason step by step, and put your final answer within \\boxed{}."
+        assert all(q.endswith(card) and "Problem:" not in q for q in prompts)
+        assert any(q.endswith("fraction." + card) for q in prompts)  # item 2
     assert str(repo["root"]) not in (first / "session.json").read_text()
 
     capsys.readouterr()
@@ -169,8 +195,14 @@ def test_end_to_end(repo, capsys):
     patched = json.loads((root / f"{ENTRY}/runs/{RUN_ID}/run.json").read_text())
     base = json.loads((root / f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1/run.json").read_text())
     assert patched["state"] == base["state"] == "COMPLETE"
+    assert patched["performed_by"] == base["performed_by"] == "index"
     assert patched["score"]["value"] == pytest.approx(2 / 3)
     assert base["score"]["value"] == pytest.approx(1 / 3)
+    # Proves: a completed run records the cut-at-limit share beside the
+    # headline score. The fake base is cut on items 2 and 17 of 3; the
+    # patched copy is never cut (see FAKE_VLLM).
+    assert base["score"]["cut_at_limit"] == pytest.approx(2 / 3)
+    assert patched["score"]["cut_at_limit"] == 0.0
     assert patched["settings"]["paired_with"] == f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"
 
     capsys.readouterr()
@@ -178,14 +210,24 @@ def test_end_to_end(repo, capsys):
     c = json.loads(capsys.readouterr().out.split("\n\n")[0])
     assert c["complete"] and c["items"] == 3 and c["difference"] == pytest.approx(1 / 3)
     assert c["pairs_identical_replies"] == 1 and c["pairs_only_patched_right"] == 1
+    # Proves: `compare` and the run record carry the same cut share,
+    # under the same name, beside the same headline scores.
+    assert c["base"]["cut_at_limit"] == pytest.approx(base["score"]["cut_at_limit"])
+    assert c["patched"]["cut_at_limit"] == patched["score"]["cut_at_limit"]
 
 
-def test_repeat_counts_once(repo, capsys):
-    # Item 2 again, both servers at once: same seed, same replies.
+def test_repeat_counts_once(repo, capsys, monkeypatch):
+    # Item 2 again, both servers at once: same seed, same replies. The fake
+    # servers demand the key from the environment; it must not be filed.
+    monkeypatch.setenv("VLLM_API_KEY", "key-c0ffee-not-real")
     assert run(repo, "--items", "0:1", "--parallel") == 0
+    assert not any("c0ffee" in f.read_text() for f in sessions(repo)[-1].iterdir())
     assert '"parallel": true' in (sessions(repo)[-1] / "session.json").read_text()
     assert bench("check") == 1                       # merged runs are stale
     assert bench("merge") == 0 and bench("check") == 0
+    root = repo["root"]  # sessions by index and by a third party
+    for path in (f"{ENTRY}/runs/{RUN_ID}", f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"):
+        assert json.loads((root / path / "run.json").read_text())["performed_by"] == "third-party"
     capsys.readouterr()
     assert bench("compare", *ARGS) == 0
     c = json.loads(capsys.readouterr().out.split("\n\n")[0])
@@ -193,6 +235,18 @@ def test_repeat_counts_once(repo, capsys):
     capsys.readouterr()
     assert bench("status", *ARGS) == 0
     assert "seed 1234: 3 filed, 0 open, 1 repeated" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("args", [("--server-arg=--api-key=dummy",),
+                                  ("--server-arg=--api_key", "--server-arg=dummy"),
+                                  ("--server-arg=--api-k=dummy",)])
+def test_api_key_refused(repo, capsys, args):
+    assert bench("run", *ARGS, *args, "--dry-run") == 1
+    assert "set VLLM_API_KEY instead" in capsys.readouterr().err
+
+
+def test_similar_flags_allowed():
+    cli.check_server_args(["--api-server-count=1", "--kv-cache-memory-bytes=1", "--language-model-only"])
 
 
 def edit_lines(path: Path, fn) -> str:

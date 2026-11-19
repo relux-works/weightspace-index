@@ -90,23 +90,45 @@ The card's Best Practices give that sentence for math benchmarks but don't say w
 
 Output is capped at 32,768 tokens, the card's figure for most queries. For math competitions the card suggests 81,920, so the cap is still an open choice.
 
-lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`, and `compare` also reports a score that counts cut replies as wrong.
+lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`. A completed run's score carries the share of cut replies as `cut_at_limit`, beside the headline value; `compare` reports the same share and, as its secondary number, a score that counts cut replies as wrong.
 
 A settings file applies only to the base model whose card it cites. Another model gets its own file, copied from its own card.
 
 ## Running
 
-1. **Install the harness** (exact pins; `run` refuses other versions), plus vLLM for your hardware:
+1. **Set up a project venv** at `.venv` in the repository root (git-ignored), with Python 3.12 and [uv](https://docs.astral.sh/uv/):
 
    ```bash
-   python -m pip install -r bench/requirements.txt
+   uv venv -p 3.12 .venv
    ```
 
-2. **Run a session:**
+   On a Mac with Apple Silicon (macOS 15 or later), install the harness and vLLM together from the lock file. It pins every package by exact version and SHA-256 — except `mlx-lm` and `mlx-vlm`, which vllm-metal takes from git, pinned there by commit — including the vllm-metal 0.33.0 and vLLM 0.33.0 release wheels:
 
    ```bash
-   python -m bench run --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking --hardware "RTX 4090, vllm 0.33"
+   uv pip install -p .venv -r bench/requirements-macos.txt
    ```
+
+   Elsewhere, install the harness (exact pins; `run` refuses other versions) and the vLLM build for your hardware into the same venv:
+
+   ```bash
+   uv pip install -p .venv -r bench/requirements.txt
+   ```
+
+   Nothing needs activating. Every command below runs `.venv/bin/python`, and `run` starts the `vllm` installed beside it.
+
+2. **Run a session.** On a Mac:
+
+   ```bash
+   .venv/bin/python -m bench run --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking --server-arg=--language-model-only --server-arg=--kv-cache-memory-bytes=4294967296 --hardware "M1 Pro 32 GB, vllm-metal 0.33.0"
+   ```
+
+   On an NVIDIA GPU:
+
+   ```bash
+   .venv/bin/python -m bench run --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking --hardware "RTX 4090, vllm 0.33"
+   ```
+
+   `--hardware` is free text filed with the session; give your real chip, memory and vLLM build.
 
    This:
    - downloads the base at the profile's pinned revision into `.temp/bench/models/`, unless `--base-dir` names a copy you already have;
@@ -120,8 +142,8 @@ A settings file applies only to the base model whose card it cites. Another mode
    - `--items 0:20 --seed 1234` picks items deterministically instead (a slice of the protocol's item order). Maintainers can use this to split the work by hand.
    - `--dry-run` prints the selection and stops.
    - `--parallel` serves base and patched at the same time and runs both halves at once. Use it only when both models fit in memory. It saves time when a single request leaves the hardware partly idle, as on a laptop.
-   - `--server-arg=--flag` passes an extra flag to `vllm serve` (repeatable). Use it for memory flags, for example `--server-arg=--gpu-memory-utilization=0.8`, or for Qwen3.5 on vllm-metal: `--server-arg=--language-model-only`. Don't pass local paths: the flags are recorded.
-   - `--vllm PATH` points to the `vllm` executable.
+   - `--server-arg=--flag` passes an extra flag to `vllm serve` (repeatable). Use it for memory flags, for example `--server-arg=--gpu-memory-utilization=0.8`, or for Qwen3.5 on vllm-metal: `--server-arg=--language-model-only`. Don't pass local paths: the flags are recorded. `--api-key` is refused in any spelling, because a key here would be filed publicly. The servers listen only on 127.0.0.1; if you want a key anyway, set `VLLM_API_KEY`: vLLM reads it, and the recorder forwards it without recording it.
+   - `--vllm PATH` points to another `vllm` executable. By default `run` uses the one in its own venv, else the one on `PATH`.
    - `--base-port` and `--patched-port` use servers you started yourself on 127.0.0.1. They must serve `--base-dir` and `--patched-dir`.
    - `--timeout` (default 7200 s) is how long lm-eval waits for one reply. Its own default, 300 s, is too short for long thinking replies.
 
@@ -143,19 +165,19 @@ A settings file applies only to the base model whose card it cites. Another mode
 ## Status, merging, checking, comparing
 
 ```bash
-python -m bench status --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
+.venv/bin/python -m bench status --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
 ```
 
 ```bash
-python -m bench merge
+.venv/bin/python -m bench merge
 ```
 
 ```bash
-python -m bench check
+.venv/bin/python -m bench check
 ```
 
 ```bash
-python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
+.venv/bin/python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1 --protocol math500-n197 --settings qwen3.5-0.8b-thinking
 ```
 
 - **`status`** shows how many pairs are filed, open and repeated.
@@ -163,7 +185,7 @@ python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/
   - the patched run, in the version folder: `models/…/<patch>/v<N>/runs/<protocol>.<settings>.<profile>/`;
   - its paired baseline, in the base folder: `models/…/runs/<protocol>.<settings>.<profile>.<patch>-v<N>/`.
 
-  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score, until every item has a pair under every seed. Then regenerate the index tables with `weightspace generate`.
+  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score and no cut share, until every item has a pair under every seed; then its score is lm-eval's score with `cut_at_limit` beside it. Then regenerate the index tables with `weightspace generate`.
 - **`check`** rebuilds every run from its sessions and fails on any difference. For every item, in both halves of a session, the lm-eval sample must:
   - be one of the session's frozen items, with the frozen hashes;
   - match exactly one recorded request, sent with exactly the protocol's and settings' parameters and the session's seed;
@@ -184,14 +206,22 @@ python -m bench compare --entry models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/
 - **No comparison file in the index yet.** The index's `comparisons/` folder can't host the per-item data, so `compare` prints to the terminal.
 - **Not run in CI yet.** `check` needs no model or network, but the CI workflow doesn't call it yet.
 
+## Updating the macOS lock
+
+`requirements-macos.txt` is generated from `requirements-macos.in`, which names the harness pins and the two vLLM release wheels. After changing either file, regenerate it from the `bench/` folder:
+
+```bash
+MACOSX_DEPLOYMENT_TARGET=15.0 uv pip compile -p 3.12 --python-platform aarch64-apple-darwin --generate-hashes --no-header requirements-macos.in -o requirements-macos.txt
+```
+
 ## Tests
 
 ```bash
-python -m pip install pytest
+uv pip install -p .venv pytest
 ```
 
 ```bash
-python -m pytest bench/tests -q
+.venv/bin/python -m pytest bench/tests -q
 ```
 
 The tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI-shaped stub) in a temporary repository. They cover:

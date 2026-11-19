@@ -1,7 +1,9 @@
 ---
-// Before → after for one measuring source. One row per result: the number that
-// matters, the change, and a thin bar with the base marked. Rows from different
-// sources are never passed in together (rule 9).
+// Before → after for one measuring source. One row per result: a base bar and a
+// patched bar on a shared axis, the printed values and the change. The patched
+// bar is brand red when the change goes the metric's better way (lower is
+// better for e.g. hitting the token limit), hatched ink when it regresses.
+// Rows from different sources are never passed in together (rule 9).
 import { scoreAxis } from "../../lib/score-axis.ts";
 import { fmt, signed, gain, type Result } from "../../lib/insight.ts";
 interface Row extends Pick<Result, "base" | "patched" | "unit" | "higherIsBetter"> { label: string; sub?: string; href?: string }
@@ -9,17 +11,22 @@ interface Props { rows: Row[] }
 const { rows } = Astro.props;
 const axes = new Map([...new Set(rows.map(r => r.unit))].map(unit =>
   [unit, scoreAxis(rows.filter(r => r.unit === unit).flatMap(r => [r.base, r.patched]), unit)] as const));
+const trend = (g: number) => g > 0 ? "up" : g < 0 ? "down" : "flat";
+const anyDown = rows.some(r => gain(r) < 0);
 ---
-<p class="plot-key"><span>Base</span><span>Patched</span></p>
+<p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>
 <ul class="rlist">
   {rows.map(r => {
     const axis = axes.get(r.unit)!;
-    const g = gain(r);
-    return <li class:list={["rrow", g > 0 ? "up" : g < 0 ? "down" : "flat"]} style={`--b:${axis.position(r.base)}%`}>
+    const t = trend(gain(r));
+    return <li class:list={["rrow", t]}>
       <span class="rname">{r.href ? <a href={r.href}>{r.label}</a> : r.label}{(r.sub || !r.higherIsBetter) && <small>{[r.sub, !r.higherIsBetter && "lower is better"].filter(Boolean).join(" · ")}</small>}</span>
-      <span class="rbar" aria-hidden="true"><i style={axis.bar(r.patched)}></i><b></b></span>
+      <span class="rbars" aria-hidden="true">
+        <span class="rbar base"><i style={axis.bar(r.base)}></i></span>
+        <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
+      </span>
       <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
-      <span class:list={["delta", g > 0 ? "up" : g < 0 ? "down" : "flat"]}>{signed(r.patched - r.base, r.unit)}</span>
+      <span class:list={["delta", t]}>{signed(r.patched - r.base, r.unit)}<small>{t === "up" ? "better" : t === "down" ? "worse" : "no change"}</small></span>
     </li>;
   })}
 </ul>

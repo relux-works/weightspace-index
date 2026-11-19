@@ -1475,6 +1475,28 @@ a.title:hover {
 .result-facts {
   margin-top: var(--space-2);
 }
+/* The full patch title under the short name the homepage uses. */
+.results .result-title {
+  margin-top: 0;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+/* Why a result matched when the words are not in what it shows. */
+.results .result-match {
+  margin-top: var(--space-2);
+  font-size: 0.8125rem;
+}
+.result-match-label {
+  font-weight: 600;
+}
+.result-match mark {
+  padding: 0 0.125rem;
+  border-radius: 2px;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
 .empty-actions {
   display: flex;
   flex-wrap: wrap;

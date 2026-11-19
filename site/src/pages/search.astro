@@ -67,6 +67,7 @@ const more = facets.filter((f) => !f.primary);
       tags: string[]; license: string; authors: string[]; submitter: string; version: string; status: string;
       latest: boolean; benchmarks: string[]; evidence: string[]; terms: string; versionCount: number;
       results: { source: string; text: string; value?: string }[];
+      name?: string; shown: string; hidden: { label: string; text: string }[];
     };
     const form = document.getElementById("search") as HTMLFormElement;
     const list = document.getElementById("results") as HTMLUListElement;
@@ -104,6 +105,34 @@ const more = facets.filter((f) => !f.primary);
         dl.append(row);
       }
       return dl;
+    }
+
+    /**
+     * When a query word is not in anything the result shows, name the field it
+     * came from and quote it, so every hit has a visible reason.
+     */
+    function matchNote(e: Entry, words: string[]) {
+      const unseen = words.filter((w) => !e.shown.includes(w));
+      const fields = e.hidden.filter((f) => unseen.some((w) => f.text.toLowerCase().includes(w)));
+      if (!unseen.length || !fields.length) return null;
+      const p = el("p", "result-match");
+      fields.slice(0, 2).forEach((f, i) => {
+        if (i) p.append(document.createTextNode(" · "));
+        p.append(el("span", "result-match-label", `Matched in ${f.label.toLowerCase()}: `));
+        const lower = f.text.toLowerCase();
+        const hits = unseen.filter((w) => lower.includes(w));
+        const first = Math.min(...hits.map((w) => lower.indexOf(w)));
+        const start = f.text.length > 120 && first > 40 ? first - 30 : 0;
+        const text = f.text.slice(start, start + 120);
+        const shown = (start ? "…" : "") + text + (start + 120 < f.text.length ? "…" : "");
+        // Mark each matched word inside the quoted text.
+        const re = new RegExp(`(${hits.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+        for (const part of shown.split(re)) {
+          if (!part) continue;
+          p.append(hits.includes(part.toLowerCase()) ? el("mark", undefined, part) : document.createTextNode(part));
+        }
+      });
+      return p;
     }
 
     /** A dashed box with a heading, a sentence and optional actions, as the only row. */
@@ -167,14 +196,17 @@ const more = facets.filter((f) => !f.primary);
           const h = el("h3");
           const a = el("a");
           a.href = e.url;
-          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
+          a.append(document.createTextNode(`${e.name ?? e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
           h.append(a);
+          // The homepage calls a patch by its short name; the full title follows it.
+          const lead = e.name ? [el("p", "result-title", e.title)] : [];
           const sub = el("div", "row small muted result-facts");
           sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
-          main.append(h, el("p", undefined, e.summary), sub);
+          const note = matchNote(e, words);
+          main.append(h, ...lead, el("p", undefined, e.summary), sub, ...(note ? [note] : []));
           const meta = el("div", "meta");
-          const note = statusNotes[e.status];
-          if (note) meta.append(el("span", `status-note ${e.status}`, note));
+          const status = statusNotes[e.status];
+          if (status) meta.append(el("span", `status-note ${e.status}`, status));
           meta.append(evidence(e));
           li.append(main, meta);
           return li;

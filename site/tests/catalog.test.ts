@@ -80,6 +80,11 @@ test("search terms cover every field a result shows and both formats", async () 
     assert.ok(matchesAll(terms, queryWords(q)), q);
   }
   assert.ok(!matchesAll(terms, queryWords("gguf")));
+  // Every searched field a result does not show is named, so a hit can say where it matched.
+  const { hiddenFields } = await import("../src/lib/search.ts");
+  const hidden = hiddenFields(v);
+  assert.deepEqual(hidden.map(f => f.label), ["Authors", "Submitted by", "Evidence", "Benchmark protocol", "Patch kind", "Slug"]);
+  assert.equal(hidden.find(f => f.label === "Evidence")!.text, "Run incomplete");
 });
 
 test("search shows only facets that can narrow the list", async () => {

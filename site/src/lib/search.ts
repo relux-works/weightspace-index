@@ -28,6 +28,12 @@ export interface SearchEntry {
   versionCount: number;
   /** One representative line per performer, as on the model page. */
   results: { source: string; text: string; value?: string }[];
+  /** The short name the homepage uses, when the author report gives one. */
+  name?: string;
+  /** Lowercased text a result shows, so the page can tell when a hit came from elsewhere. */
+  shown: string;
+  /** Searchable fields a result does not show, named for the "Matched" line. */
+  hidden: { label: string; text: string }[];
   /** Lowercased text the query words are matched against. */
   terms: string;
 }
@@ -117,28 +123,53 @@ export function versionTerms(v: Version): string {
   ].join(" ").toLowerCase();
 }
 
+/** Fields that are searched but not shown on a result, with a reader-facing label. */
+export function hiddenFields(v: Version): SearchEntry["hidden"] {
+  const report = authorReport(v);
+  return [
+    { label: "Goal", text: report?.goal ?? "" },
+    { label: "Authors", text: v.patch.authors.map((a) => a.name).join(", ") },
+    { label: "Submitted by", text: v.patch.submitter },
+    { label: "Evidence", text: v.evidence.map((e) => facetLabel("evidence", e)).join(", ") },
+    { label: "Benchmark protocol", text: [...new Set(v.runs.map((r) => r.protocolLabel))].join(", ") },
+    { label: "Patch kind", text: v.patch.kind },
+    { label: "Slug", text: v.patch.slug },
+  ].filter((f) => f.text);
+}
+
 export function searchEntries(index: Index): SearchEntry[] {
-  return allVersions(index).map((v) => ({
-    url: v.isLatest ? v.patch.url : v.url,
-    base: v.patch.base.address,
-    profile: v.profile.id,
-    slug: v.patch.slug,
-    title: v.patch.title,
-    summary: v.patch.summary,
-    formats: formats(v),
-    tags: v.patch.tags,
-    license: v.patch.license,
-    authors: v.patch.authors.map((a) => a.name),
-    submitter: v.patch.submitter,
-    version: v.label,
-    status: v.status,
-    latest: v.isLatest,
-    benchmarks: [...new Set(v.runs.map((r) => r.protocolLabel))],
-    evidence: v.evidence,
-    versionCount: v.patch.versions.length,
-    results: resultLines(v),
-    terms: versionTerms(v),
-  }));
+  return allVersions(index).map((v) => {
+    const name = authorReport(v)?.name;
+    const results = resultLines(v);
+    const shown = [
+      name ?? "", v.patch.title, v.patch.summary, v.label, v.status === "active" ? "" : v.status, v.patch.base.address, v.profile.id, ...formats(v), v.patch.license,
+      ...v.patch.tags, ...results.flatMap((r) => [r.source, r.text, r.value ?? ""]),
+    ].join(" ").toLowerCase();
+    return {
+      url: v.isLatest ? v.patch.url : v.url,
+      base: v.patch.base.address,
+      profile: v.profile.id,
+      slug: v.patch.slug,
+      title: v.patch.title,
+      summary: v.patch.summary,
+      formats: formats(v),
+      tags: v.patch.tags,
+      license: v.patch.license,
+      authors: v.patch.authors.map((a) => a.name),
+      submitter: v.patch.submitter,
+      version: v.label,
+      status: v.status,
+      latest: v.isLatest,
+      benchmarks: [...new Set(v.runs.map((r) => r.protocolLabel))],
+      evidence: v.evidence,
+      versionCount: v.patch.versions.length,
+      results,
+      name,
+      shown,
+      hidden: hiddenFields(v),
+      terms: versionTerms(v),
+    };
+  });
 }
 
 /** Values of one facet for one entry. */

@@ -13,9 +13,9 @@ const matrix = { rows: side, cols: side, seed: 3, edited, gapRatio: .2, class: "
       <h2 id="format-heading">Patch vs LoRA</h2>
       <dl>
         <dt>Direct replacement</dt>
-        <dd>Apply the patch once with <code>weightspace</code>. Run the resulting model copy in your usual runtime.</dd>
+        <dd>Patch once with <code>weightspace</code>, then run the copy as usual.</dd>
         <dt>LoRA adapter</dt>
-        <dd>Keep your base model and load the adapter alongside it in a compatible runtime.</dd>
+        <dd>Load the adapter in a compatible runtime.</dd>
       </dl>
       <a class="text-link" href={href("how-it-works/")}>Explore how the formats work <Arrow /></a>
     </div>

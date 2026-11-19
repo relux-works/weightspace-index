@@ -1,11 +1,11 @@
 ---
 import Arrow from "../Arrow.astro";
+import WeightGrid from "./WeightGrid.astro";
 import { weight } from "../../lib/heat.ts";
 import { strength, type DeltaCell, type DeltaTensor } from "../../lib/insight.ts";
 
 interface Props { tensor: DeltaTensor; rows: (DeltaCell | null)[][] }
 const { tensor, rows } = Astro.props;
-const width = rows[0].length;
 const views = [{ label: "Base weights", patched: false }, { label: "Patched weights", patched: true }];
 ---
 <figure class="matrix-preview" aria-label="Base and patched weight matrices. Gray shades are illustrative. Red intensity shows how much each recorded weight changed.">
@@ -14,14 +14,13 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
       {index > 0 && <span class="matrix-arrow"><Arrow /></span>}
       <div>
         <span>{label}</span>
-        <svg viewBox={`0 0 ${width * 10} ${rows.length * 10}`} class="matrix-cells home-matrix-grid" style={`--cols:${width}`}>
-          {rows.flatMap((row, y) => row.map((cell, x) => {
-            const edited = patched && cell !== null;
-            const tint = edited ? .42 + .58 * strength(cell, tensor.scale) : .32 + .66 * weight(y, x, 3);
-            return <rect x={x * 10 + 1} y={y * 10 + 1} width="8" height="8" rx="1"
-              class:list={{ edited }} style={`--tint:${(tint * 100).toFixed(1)}%`} />;
-          }))}
-        </svg>
+        <WeightGrid cells={rows.map((row, y) => row.map((cell, x) => {
+          const edited = patched && cell !== null;
+          return {
+            edited,
+            tint: edited ? .42 + .58 * strength(cell, tensor.scale) : .32 + .66 * weight(y, x, 3),
+          };
+        }))} />
       </div>
     </>)}
   </div>
@@ -33,14 +32,4 @@ const views = [{ label: "Base weights", patched: false }, { label: "Patched weig
   .matrix-pair > div { justify-self: center; }
   .matrix-pair div > span { display: block; margin-bottom: .3rem; color: var(--ink-text); font-size: .77rem; }
   .matrix-arrow { color: var(--ink-muted); padding-top: 1.45rem; }
-  .matrix-cells { display: block; height: auto; max-height: 7rem; }
-  .matrix-cells rect {
-    --cell-ink: var(--ink-text);
-    fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--color-brand-ink));
-  }
-  .matrix-cells .edited { --cell-ink: var(--ink-hot); }
-  @media (forced-colors: active) {
-    .matrix-cells rect { forced-color-adjust: none; fill: GrayText; }
-    .matrix-cells .edited { fill: Highlight; }
-  }
 </style>

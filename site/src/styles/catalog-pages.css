@@ -7,10 +7,10 @@
   /* The widest equation uses 39 columns, including both LoRA factors. */
   --home-matrix-columns: 39;
   --home-matrix-space: calc(100vi - 7rem);
-  --home-matrix-pitch: min(.8rem, calc(var(--home-matrix-space) / var(--home-matrix-columns)));
+  --matrix-pitch: min(var(--matrix-pitch-max), calc(var(--home-matrix-space) / var(--home-matrix-columns)));
 }
-.landing .home-matrix-grid, #patch-vs-lora .home-matrix-grid {
-  width: calc(var(--cols) * var(--home-matrix-pitch));
+#patch-vs-lora .home-matrix-grid {
+  width: calc(var(--cols) * var(--matrix-pitch));
 }
 @media (width > 52rem) {
   .landing, #patch-vs-lora {

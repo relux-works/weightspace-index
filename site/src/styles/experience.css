@@ -7,6 +7,7 @@
   --viz-patched: var(--color-text);
   --viz-up: var(--color-success);
   --viz-down: var(--color-error);
+  --matrix-pitch-max: .8rem;
   --heat-w: #2f62c4;
   --heat-d: #e0302b;
   --ink-text: #eef3ef;
@@ -40,7 +41,6 @@
 .heat .hd { fill: var(--heat-d); opacity: calc(.18 + .82 * var(--v)); }
 .heat .h0 { fill: var(--color-text); opacity: .045; }
 .heat .ha { fill: var(--color-text-muted); }
-.heat .lit { stroke: var(--color-text); stroke-width: 1.4; opacity: 1; }
 
 .home-band { padding: 3.2rem 0; border-top: 1px solid var(--color-border); }
 .home-band.subtle { background: var(--color-surface-subtle); }
@@ -55,7 +55,7 @@
 .model-meta > * + *::before { content: "·"; margin: 0 .6rem; color: var(--color-text-faint); }
 .model-meta a { text-decoration: none; }
 .model-meta a:hover { text-decoration: underline; }
-.terminal, .anatomy-fig, .picker-answer { --color-focus: #ff9a92; scrollbar-color: #4b554e transparent; }
+.terminal, .weight-figure, .picker-answer { --color-focus: #ff9a92; scrollbar-color: #4b554e transparent; }
 
 /* Results */
 .rgroup + .rgroup { margin-top: 2rem; }
@@ -228,42 +228,6 @@ button.cell:hover { filter: brightness(.96); }
 .setup-tabs > .slide-mark { background: var(--color-accent); }
 .has-mark.setup-tabs > button[aria-selected="true"] { border-bottom-color: transparent; }
 
-.anatomy { display: grid; gap: 1.4rem; }
-.anatomy-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--color-border); }
-.anatomy-steps button { position: relative; display: flex; align-items: baseline; gap: .6rem; border: 0; background: none; padding: .7rem 0; font: 600 .95rem var(--font-ui); color: var(--color-text-muted); cursor: pointer; text-align: left; }
-.anatomy-steps .n { font: 600 .8rem var(--font-mono); color: var(--color-text-faint); font-variant-numeric: tabular-nums; }
-.anatomy-steps button:hover, .anatomy-steps button[aria-pressed="true"] { color: var(--color-text); }
-.anatomy-steps button[aria-pressed="true"] .n { color: var(--color-accent); }
-.anatomy-steps button:focus-visible { outline: 2px solid var(--color-focus, var(--color-accent)); outline-offset: 2px; }
-.anatomy:not(.js) .anatomy-steps { display: none; }
-.anatomy-stage { display: grid; gap: 2.5rem; }
-.anatomy.js .anatomy-stage { gap: 0; }
-.anatomy.js .anatomy-step { grid-area: 1 / 1; visibility: hidden; opacity: 0; transform: translateY(.6rem); transition: opacity .35s var(--motion-ease), transform .35s var(--motion-ease), visibility 0s .35s; }
-.anatomy.js[data-step="1"] [data-cap="1"], .anatomy.js[data-step="2"] [data-cap="2"], .anatomy.js[data-step="3"] [data-cap="3"] { visibility: visible; opacity: 1; transform: none; transition: opacity .45s var(--motion-ease) .1s, transform .55s var(--motion-ease) .1s; }
-.anatomy-step { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(16rem, 1fr); gap: 2.5rem; align-items: center; }
-.anatomy-fig { --heat-w: #7fa6ff; --heat-d: #ff6961; margin: 0; padding: 1.8rem; border-radius: .7rem; background: var(--color-brand-ink); border: 1px solid #2c332e; color: var(--ink-text); min-height: 18rem; display: grid; align-content: center; min-width: 0; }
-.anatomy-fig .heat .h0, .anatomy-fig .heat .ha { fill: var(--ink-text); }
-.anatomy-fig .heat .h0 { opacity: .07; }
-.anatomy-fig .heat .lit { stroke: var(--ink-text); }
-.mat-row { display: flex; align-items: center; justify-content: center; gap: .8rem; }
-.mat { display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: .45rem; min-width: 0; }
-[data-cap="1"] .mat { width: min(100%, 26rem); }
-[data-cap="2"] .mat { flex: 1 1 0; }
-/* Flex weights follow column counts, so every matrix shares one cell size. */
-.lora-fig .mat { flex: 20 1 0; }
-.lora-fig .mat:nth-child(3) { flex: 4 1 0; }
-.lora-fig .mat:nth-child(5) { align-self: start; }
-.mat-cap { font: 600 .9rem var(--font-mono); white-space: nowrap; }
-.mat-cap small { font-weight: 400; color: var(--ink-muted); font-size: .72rem; }
-.mat-op { font: 300 1.6rem var(--font-display); color: var(--ink-faint); padding-bottom: 1.6rem; }
-.lora-fig .heat rect { cursor: default; }
-.anatomy-text h3 { font-size: 1.35rem; margin-bottom: .5rem; }
-.anatomy-text p { color: var(--color-text-muted); font-size: .95rem; max-width: 46ch; }
-.anatomy-text p + p { margin-top: .6rem; }
-.triples { width: 100%; max-width: 20rem; font: .8rem var(--font-mono); margin: 1rem 0 0; font-variant-numeric: tabular-nums; }
-.triples th { font: 600 .78rem var(--font-ui); text-transform: none; letter-spacing: 0; color: var(--color-text-muted); text-align: left; border-bottom: 1px solid var(--color-border); }
-.triples td, .triples th { padding: .3rem .5rem .3rem 0; }
-
 .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; border-radius: .45rem; background: var(--color-surface-subtle); border: 1px solid var(--color-border); }
 .seg button { border: 0; background: transparent; border-radius: .3rem; padding: .45rem .6rem; text-align: left; font: 600 .82rem var(--font-ui); color: var(--color-text-muted); cursor: pointer; }
 .seg button small { display: block; font: 400 .72rem var(--font-mono); color: var(--color-text-muted); white-space: nowrap; }
@@ -308,20 +272,17 @@ button.cell:hover { filter: brightness(.96); }
 
 /* ── Responsive, motion, forced colors ───────────────────────────── */
 @media (max-width: 62rem) {
-  .anatomy-step, .picker, .calc { grid-template-columns: 1fr; }
+  .picker, .calc { grid-template-columns: 1fr; }
 }
 @media (max-width: 40rem) {
   .size-row, .calc-row { grid-template-columns: 1fr auto; }
   .calc-track { grid-column: 1 / -1; grid-row: 2; }
-  .anatomy-fig { padding: 1rem; min-height: 0; }
-  .mat-row { gap: .4rem; }
-  .mat-op { font-size: 1.1rem; }
   .model-meta > * + *::before { margin: 0 .4rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .calc-track i { transition: none; }
-  .anatomy.js .anatomy-step, .picker.js .picker-answer, .calc-track i, .slide-mark, .has-mark > button { transition: none !important; }
-  .anatomy.js .anatomy-step, .picker.js .picker-answer { transform: none; }
+  .picker.js .picker-answer, .calc-track i, .slide-mark, .has-mark > button { transition: none !important; }
+  .picker.js .picker-answer { transform: none; }
 }
 @media (forced-colors: active) {
   .rbar i, .calc-track i, .heat-key .ramp { forced-color-adjust: none; background: Highlight; }

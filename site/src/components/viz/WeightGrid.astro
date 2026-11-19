@@ -1,0 +1,24 @@
+---
+interface Cell { tint: number; edited?: boolean; marked?: boolean }
+interface Props { cells: Cell[][] }
+const { cells } = Astro.props;
+const cols = cells[0].length;
+---
+<svg viewBox={`0 0 ${cols * 10} ${cells.length * 10}`} class="weight-grid" style={`--cols:${cols}`} aria-hidden="true">
+  {cells.flatMap((row, y) => row.map(({ tint, edited, marked }, x) =>
+    <rect x={x * 10 + 1} y={y * 10 + 1} width="8" height="8" rx="1"
+      class:list={{ edited, marked }} style={`--tint:${(tint * 100).toFixed(1)}%`} />
+  ))}
+</svg>
+
+<style>
+  .weight-grid { display: block; width: calc(var(--cols) * var(--matrix-pitch)); height: auto; }
+  rect { --cell-ink: var(--ink-text); fill: color-mix(in srgb, var(--cell-ink) var(--tint), var(--color-brand-ink)); }
+  .edited { --cell-ink: var(--ink-hot); }
+  .marked { stroke: var(--ink-text); stroke-width: 1; }
+  @media (forced-colors: active) {
+    rect { forced-color-adjust: none; fill: GrayText; }
+    rect.edited { fill: Highlight; }
+    rect.marked { stroke: CanvasText; }
+  }
+</style>

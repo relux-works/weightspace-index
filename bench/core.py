@@ -23,7 +23,6 @@ BENCH = REPO / "bench"
 MODELS = REPO / "models"
 RESULTS = BENCH / "results"
 HARNESS_MODEL = "local-chat-completions"
-PERFORMED_BY = ("index", "author", "third-party")
 VARIANTS = ("base", "patched")
 SESSION_FILES = sorted(["session.json"] + [f"{v}.{kind}.jsonl" for v in VARIANTS
                                            for kind in ("samples", "requests")])
@@ -631,8 +630,6 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
     dirs = v.run_dirs(p, s)
     complete = c.complete(p)
     first = c.sessions[0].record
-    by = {sess.record["performed_by"] for sess in c.sessions}
-    performed_by = next(iter(by)) if len(by) == 1 else "third-party"
     out = {}
     for side, variant in enumerate(VARIANTS, start=1):
         other = VARIANTS[2 - side]
@@ -654,7 +651,6 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
         run = {
             "contract_version": 1,
             "profile": v.profile["id"],
-            "performed_by": performed_by,
             "protocol": p.named(),
             "dataset": p.dataset_named(),
             "settings": {
@@ -669,7 +665,7 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
                 "model_files": first[variant]["model_files"],
                 "paired_with": rel(dirs[other]),
                 "sessions": {sess.name: {k: sess.record[k] for k in
-                                         ("seed", "performed_by", "hardware", "concurrency")}
+                                         ("seed", "hardware", "concurrency")}
                              | {"items": len(sess.record["items"]),
                                 "parallel": sess.record.get("parallel", False),
                                 "server": sess.record[variant]["server"]}

@@ -1,0 +1,13 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://example.org/synthetic-example-study",
+    "title": "Synthetic example study"
+  },
+  "conditions": "SYNTHETIC EXAMPLE: invented numbers for the demo site, not a real measurement.",
+  "measures": [
+    { "benchmark": "MATH-500", "metric": "accuracy", "unit": "%", "baseline": 31.4, "patched": 44.2, "better": "higher" },
+    { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 52.6, "patched": 63.9, "better": "higher" },
+    { "benchmark": "MATH-500", "name": "Cut at the token limit", "unit": "%", "baseline": 18, "patched": 21.5, "better": "lower" }
+  ]
+}

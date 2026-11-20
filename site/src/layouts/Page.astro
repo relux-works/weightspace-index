@@ -1,0 +1,153 @@
+---
+// Page shell: three-zone header (product, navigation, pinned commit), bands in
+// main, and a footer that carries the Relux Works lockup. See site/DESIGN.md.
+import "@fontsource-variable/inter/opsz.css";
+import "@fontsource-variable/inter-tight/index.css";
+import "@fontsource/roboto-mono/400.css";
+import "@fontsource/roboto-mono/500.css";
+import "@fontsource/roboto-mono/600.css";
+import "../styles/global.css";
+import "../styles/discovery.css";
+import "../styles/experience.css";
+import "../styles/catalog-pages.css";
+import { DEMO } from "../lib/config.ts";
+import reluxLight from "../assets/brand/relux-lockup-horizontal.svg?raw";
+import reluxDark from "../assets/brand/relux-lockup-horizontal-dark.svg?raw";
+import reluxMono from "../assets/brand/relux-lockup-horizontal-one-color.svg?raw";
+import symbolLight from "../assets/brand/relux-symbol.svg?raw";
+import symbolDark from "../assets/brand/relux-symbol-dark.svg?raw";
+import symbolMono from "../assets/brand/relux-symbol-one-color.svg?raw";
+// GitHub mark from Primer Octicons (MIT, see ../assets/octicons/LICENSE), unchanged.
+import githubMark from "../assets/octicons/mark-github-16.svg?raw";
+import { loadIndex, href } from "../lib/index.ts";
+
+interface Props {
+  title: string;
+  description?: string;
+  nav?: "models" | "search" | "compare" | "learn";
+}
+const { title, description, nav } = Astro.props;
+const index = loadIndex();
+// Dev and preview also serve a page without its trailing slash; base URLs end in "/".
+const pagePath = Astro.url.pathname.replace(/\/?$/, "/");
+const examplePage = index.example || (DEMO && index.bases.some(b => b.dir.startsWith("docs/example/") && pagePath.startsWith(b.url)));
+const commitUrl = `https://github.com/${index.githubRepo}/tree/${index.commit}`;
+const docTitle = title === "Weightspace Index" ? title : `${title} · Weightspace Index`;
+// The approved artwork is inlined unchanged; only presentation attributes are
+// added to the root element so theme and forced-colors rules can pick a variant.
+const logo = (svg: string, variant: string) =>
+  svg.replace("<svg ", `<svg class="relux-logo ${variant}" aria-hidden="true" focusable="false" `);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{examplePage ? `[Example] ${docTitle}` : docTitle}</title>
+    {description && <meta name="description" content={description} />}
+    {(index.example || DEMO) && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={href("favicon-light.svg")} type="image/svg+xml" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href={href("favicon-dark.svg")} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {examplePage && (
+      <div class="banner banner-example">
+        <div class="wrap"><strong>Example data.</strong><span>Synthetic records from docs/example: not real patches, files or results.</span></div>
+      </div>
+    )}
+    {index.dirty.length > 0 && (
+      <div class="banner banner-dirty">
+        <div class="wrap">
+          <strong>Development build.</strong>
+          <span>{index.dirty.length} index file(s) differ from commit {index.short}. Repository links point at the pinned commit.</span>
+        </div>
+      </div>
+    )}
+    <header class="site-header">
+      <div class="wrap site-header__inner">
+        <a class="product" href={href()}>
+          <Fragment set:html={logo(symbolLight, "light")} />
+          <Fragment set:html={logo(symbolDark, "dark")} />
+          <Fragment set:html={logo(symbolMono, "mono")} />
+          <span>Weightspace Index</span>
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href={href()} aria-current={nav === "models" ? "page" : undefined}>Models</a>
+          <a href={href("how-it-works/")} aria-current={nav === "learn" ? "page" : undefined}>How it works</a>
+          <a href={href("search/")} aria-current={nav === "search" ? "page" : undefined}>Search</a>
+        </nav>
+        <div class="site-header__actions">
+          <a class="gh-link" href={commitUrl} target="_blank" rel="noopener noreferrer" aria-label={`View on GitHub at commit ${index.short} (opens in a new tab)`} title={`Every value and download on this site is from index commit ${index.commit}`}>
+            <Fragment set:html={githubMark.replace("<svg ", `<svg class="gh-mark" aria-hidden="true" focusable="false" `)} /><span class="gh-label">View on GitHub</span>
+          </a>
+        </div>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap site-footer__inner">
+        <div>
+          <p class="product-line">Weightspace Index</p>
+          <p>
+            Built from <a href={commitUrl}><span class="mono">{index.githubRepo}@{index.short}</span></a>, record contract version 1.
+          </p>
+          <nav aria-label="Index documents">
+            <a href={href("#patch-vs-lora")}>Patch vs LoRA</a>
+            <a href={href("compare/")}>All benchmark runs</a>
+            <a href={index.docsAt("docs/structure.md")}>How the index works</a>
+            <a href={index.docsAt("DISCLAIMER.md")}>Disclaimer</a>
+            <a href={`https://github.com/${index.githubRepo}`}>Source</a>
+          </nav>
+          <p class="safety">
+            Patched models may behave unexpectedly or unsafely. Inclusion, redistribution and published results do not guarantee safety.
+          </p>
+          <p class="trademarks">
+            GitHub and the GitHub logo are trademarks of GitHub, Inc. Model names belong to their respective owners. Their use here implies no endorsement.
+          </p>
+        </div>
+        <div class="operator">
+          <span class="operator-label">A project of</span>
+          <a class="relux" href="https://github.com/relux-works" aria-label="Relux Works">
+            <Fragment set:html={logo(reluxLight, "light")} />
+            <Fragment set:html={logo(reluxDark, "dark")} />
+            <Fragment set:html={logo(reluxMono, "mono")} />
+          </a>
+        </div>
+      </div>
+    </footer>
+    <script>
+      import "../scripts/slide.ts";
+      // Copy buttons: data-copy holds the text, or data-copy-from names an element
+      // whose text is copied. Only an attribute changes; .swap keeps the width.
+      for (const control of document.querySelectorAll<HTMLButtonElement>("button[data-copy],button[data-copy-from]")) {
+        control.hidden = false;
+      }
+      document.addEventListener("click", async (event) => {
+        const button = (event.target as Element | null)?.closest<HTMLElement>("[data-copy],[data-copy-from]");
+        if (!button) return;
+        const from = button.dataset.copyFrom ? document.getElementById(button.dataset.copyFrom) : null;
+        const text = from ? (from.textContent ?? "") : (button.dataset.copy ?? "");
+        try {
+          await navigator.clipboard.writeText(text);
+          button.setAttribute("data-copied", "");
+          setTimeout(() => button.removeAttribute("data-copied"), 1400);
+        } catch {
+          // No clipboard access: select the text so the keyboard shortcut copies it.
+          if (from) {
+            const disclosure = from.closest("details");
+            if (disclosure) disclosure.open = true;
+            getSelection()?.selectAllChildren(from);
+          }
+          const message = from ? "Copy blocked. The text is selected; copy it with your keyboard." : "Copy blocked. Select the text and copy it with your keyboard.";
+          button.setAttribute("title", message);
+          button.setAttribute("aria-label", message);
+        }
+      });
+    </script>
+  </body>
+</html>

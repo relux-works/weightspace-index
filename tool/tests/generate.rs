@@ -110,22 +110,32 @@ fn index_resolves_hosted_paths_from_its_own_folder() {
     assert!(derived.get("tool").is_none());
 }
 
+fn shorter_answers(index: &serde_json::Value) -> serde_json::Value {
+    index["patches"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["slug"] == "shorter-answers")
+        .unwrap()
+        .clone()
+}
+
 #[test]
 fn latest_is_the_highest_active_version() {
     let (_dir, tree) = example_copy();
-    assert_eq!(index_of(&tree)["patches"][1]["latest"], 2);
+    assert_eq!(shorter_answers(&index_of(&tree))["latest"], 2);
 
     let patch = base_dir(&tree).join("shorter-answers/patch.json");
     edit(&patch, |v| v["versions"][1]["status"] = json!("withdrawn"));
     let index = index_of(&tree);
-    assert!(index["patches"][1].get("latest").is_none());
+    assert!(shorter_answers(&index).get("latest").is_none());
     assert!(readme_of(&tree).contains("| lora | none active |"));
 
     edit(&patch, |v| {
         v["versions"][0]["status"] = json!("active");
         v["versions"][1]["status"] = json!("deprecated");
     });
-    assert_eq!(index_of(&tree)["patches"][1]["latest"], 1);
+    assert_eq!(shorter_answers(&index_of(&tree))["latest"], 1);
 }
 
 #[test]
@@ -221,7 +231,7 @@ fn catalog_covers_all_bases_and_patch_statuses() {
     assert!(
         readme.contains("| [another-org/Empty-Model](another-org/Empty-Model/README.md) | 0 |")
     );
-    assert!(readme.contains(&format!("| [{BASE}]({BASE}/README.md) | 2 |")));
+    assert!(readme.contains(&format!("| [{BASE}]({BASE}/README.md) | 4 |")));
     write(&tree, &out).unwrap();
     for address in catalog["bases"].as_array().unwrap() {
         assert!(

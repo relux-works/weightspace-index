@@ -1,0 +1,41 @@
+---
+import Arrow from "../Arrow.astro";
+import CopyButton from "../CopyButton.astro";
+import { highlight } from "../../lib/shell.ts";
+import { localRecipe, type RecipeFile } from "../../lib/recipe.ts";
+import type { RuntimeTab } from "../../lib/runtime.ts";
+interface Props { tabs: RuntimeTab[]; lora?: RecipeFile | null; replacement?: RecipeFile | null }
+const { tabs, lora, replacement } = Astro.props;
+const isBake = (t: RuntimeTab) => t.name === "Weightspace";
+---
+<div class="setup" data-tabs id="runtime">
+  <div class="setup-tabs" data-slide="line" role="tablist" hidden aria-label="Runtime">
+    {tabs.map((tab, i) => <button role="tab" type="button" data-label={isBake(tab) ? "weightspace" : tab.name} data-format={isBake(tab) ? "replacement" : "lora"} aria-selected={String(i === 0)}>
+      {isBake(tab) ? "weightspace" : tab.name}</button>)}
+  </div>
+  {tabs.map((tab, i) => {
+    const file = isBake(tab) ? replacement : lora;
+    const [start, strict, ...body] = localRecipe(tab, file).split("\n");
+    return <div class="setup-panel" data-panel>
+      <h3 class="panel-title">{tab.name}</h3>
+      <p class="setup-note">{tab.note} <a href={tab.docs}>Runtime guide <Arrow dir="out" /></a></p>
+      <figure class="terminal sh">
+        <figcaption><span>{isBake(tab) ? "Apply to the prepared base" : "Launch after setup"}</span><CopyButton from={`recipe-${i}`} label="Copy full recipe" /></figcaption>
+        <pre tabindex="0"><code set:html={highlight(tab.command)} /></pre>
+      </figure>
+      <details class="recipe-steps">
+        <summary>Full download and setup recipe</summary>
+        {file && <noscript><p>Download {file.name} above and start in the folder containing it.</p></noscript>}
+        <div class="terminal sh"><pre id={`recipe-${i}`} tabindex="0"><code>{start}{"\n"}{strict}{"\n"}{file && <span data-fetch-href={file.href} data-filename={file.name}></span>}<Fragment set:html={highlight(body.join("\n"))} /></code></pre></div>
+      </details>
+    </div>;
+  })}
+</div>
+<script>
+  import "../../scripts/tabs.ts";
+  import { downloadCommand } from "../../lib/recipe.ts";
+  for (const step of document.querySelectorAll<HTMLElement>("[data-fetch-href]")) {
+    const file = { href: step.dataset.fetchHref!, name: step.dataset.filename! };
+    step.textContent = "# Download the file\n" + downloadCommand(file, location.origin) + "\n\n";
+  }
+</script>

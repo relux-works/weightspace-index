@@ -1,0 +1,23 @@
+---
+// Copy to clipboard. With `label` the button shows text; without it, an icon
+// only (the accessible name comes from `title`). The idle and copied states
+// share one grid cell, so the button keeps its size.
+interface Props { text?: string; from?: string; label?: string; title?: string; quiet?: boolean }
+const { text, from, label, title = "Copy to clipboard", quiet } = Astro.props;
+const copyIcon = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
+const doneIcon = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8.5 3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+---
+<button
+  hidden
+  type="button"
+  class:list={["btn", { icon: !label, quiet: quiet || !label }]}
+  data-copy={from ? undefined : text}
+  data-copy-from={from}
+  title={title}
+  aria-label={label ? undefined : title}
+>
+  <span class="swap">
+    <span data-idle><Fragment set:html={copyIcon} />{label}</span>
+    <span data-done><Fragment set:html={doneIcon} />{label && "Copied"}</span>
+  </span>
+</button>

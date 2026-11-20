@@ -1,0 +1,8 @@
+---
+// A SHA-256 (or other digest) shown short, with the full value on hover and a copy button.
+import { shortHash } from "../lib/format.ts";
+import CopyButton from "./CopyButton.astro";
+interface Props { value: string; n?: number; label?: string }
+const { value, n = 16, label = "SHA-256" } = Astro.props;
+---
+<span class="hash"><code title={`${label} ${value}`}>{shortHash(value, n)}</code><CopyButton text={value} title={`Copy full ${label}`} /></span>

@@ -1,0 +1,19 @@
+---
+// A full-width band with a section heading (title left, explanation right).
+interface Props {
+  title: string;
+  id?: string;
+  subtle?: boolean;
+}
+const { title, id, subtle } = Astro.props;
+const hasIntro = Astro.slots.has("intro");
+---
+<section class:list={["band", { "band-subtle": subtle }]} id={id}>
+  <div class="wrap">
+    <div class="section-heading">
+      <h2>{title}</h2>
+      {hasIntro && <p><slot name="intro" /></p>}
+    </div>
+    <slot />
+  </div>
+</section>

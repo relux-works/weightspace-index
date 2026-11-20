@@ -1,0 +1,52 @@
+---
+// Files as structured rows: name and notes | size | SHA-256 | downloads.
+// "computed" digests are for files no record describes; they are computed
+// from the bytes at the pinned commit.
+import type { FileEntry } from "../lib/index.ts";
+import { exactBytes, humanBytes } from "../lib/format.ts";
+import Badge from "./Badge.astro";
+import Hash from "./Hash.astro";
+interface Props { files: FileEntry[]; showRole?: boolean }
+const { files, showRole = true } = Astro.props;
+// derived_from holds SHA-256 digests; name the sibling file when one has that digest.
+const nameOf = (d: string) => files.find((f) => f.sha256 === d)?.name ?? `${d.slice(0, 12)}…`;
+const down = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0-3-3m3 3 3-3M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+---
+<div class="files">
+  {files.map((f) => (
+    <div class="file">
+      <div>
+        <div class="file-head">
+          <span class="file-name">{f.name}</span>
+          {showRole && f.role && <Badge state={f.role === "source" ? "info" : "neutral"} label={f.role} />}
+          {f.format && <span class="tag">{f.format}</span>}
+        </div>
+        {f.derived_from && (
+          <p class="file-note">
+            Derived from <span class="mono" title={f.derived_from.join(", ")}>{f.derived_from.map(nameOf).join(", ")}</span>{f.tool && <> by {f.tool.name} {f.tool.version}</>}.
+          </p>
+        )}
+        {f.digest === "computed" && (
+          <p class="file-note" title="No record states a digest for this file.">Digest computed at build from the bytes at the pinned commit.</p>
+        )}
+      </div>
+      <div class="file-size">
+        <span class="file-label">Size</span>
+        <span title={exactBytes(f.size_bytes)}>{humanBytes(f.size_bytes)}</span>
+        <span class="faint">{exactBytes(f.size_bytes)}</span>
+      </div>
+      <div>
+        <span class="file-label">SHA-256</span>
+        <Hash value={f.sha256} />
+      </div>
+      <div class="file-actions">
+        {f.links.map((l, i) => (
+          <a class:list={["btn", { primary: i === 0 }]} href={l.href} download={l.host === "GitHub" ? f.name : undefined} rel="noopener noreferrer">
+            <Fragment set:html={down} />{l.host}
+          </a>
+        ))}
+        {f.view && <a class="btn quiet" href={f.view} rel="noopener noreferrer">View</a>}
+      </div>
+    </div>
+  ))}
+</div>

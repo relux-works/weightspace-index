@@ -1,7 +1,6 @@
 {
   "contract_version": 1,
   "profile": "bf16",
-  "performed_by": "index",
   "protocol": {
     "name": "example-protocol",
     "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"

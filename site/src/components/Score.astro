@@ -1,0 +1,15 @@
+---
+// A run's score exactly as recorded, or UNKNOWN with its reason and owner.
+import type { Score } from "../lib/index.ts";
+import Badge from "./Badge.astro";
+interface Props { score: Score; compact?: boolean }
+const { score, compact } = Astro.props;
+---
+{score.state === "UNKNOWN" ? (
+  <span class="row">
+    <Badge state="UNKNOWN" title={`${score.reason} (owner: ${score.owner})`} />
+    {!compact && <span class="muted small">{score.reason} · owner: {score.owner}</span>}
+  </span>
+) : (
+  <span><strong class="mono">{score.value}</strong> <span class="muted small">{score.metric} ({score.unit}, n = {score.denominator})</span></span>
+)}

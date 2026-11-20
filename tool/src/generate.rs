@@ -356,9 +356,8 @@ impl Base {
                 }
                 let score = |r: Option<&Value>| r.map_or("unknown".into(), |r| score(&r["score"]));
                 let metric = patched.map_or("", |r| text(&r["score"], "metric"));
-                let by = patched.map_or("", |r| text(r, "performed_by"));
                 results += &format!(
-                    "| {label} | `{profile}` | {} | {} | {} | {by} |\n",
+                    "| {label} | `{profile}` | {} | {} | {} |\n",
                     cell(metric),
                     score(baseline),
                     score(patched)
@@ -373,7 +372,7 @@ impl Base {
             }
         }
         if !results.is_empty() {
-            md += "\n## Results\n\nLatest active version of each patch, against the baseline run on the same profile.\n\n| Patch | Profile | Metric | Baseline | Patched | Measured by |\n|---|---|---|---|---|---|\n";
+            md += "\n## Results\n\nLatest active version of each patch, against the baseline run on the same profile.\n\n| Patch | Profile | Metric | Baseline | Patched |\n|---|---|---|---|---|\n";
             md += &results;
         }
         if !decisions.is_empty() {
@@ -458,7 +457,7 @@ impl Version {
 
 fn index_run(id: &str, run: &Value) -> Value {
     let mut out = json!({ "id": id });
-    for key in ["profile", "performed_by", "protocol", "state", "score"] {
+    for key in ["profile", "protocol", "state", "score"] {
         out[key] = run[key].clone();
     }
     out

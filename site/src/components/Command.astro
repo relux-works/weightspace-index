@@ -1,0 +1,23 @@
+---
+// A copyable command. Commands come only from src/lib/commands.ts, which fills
+// documented command forms from the records; the caption links the document.
+import { createHash } from "node:crypto";
+import type { Command } from "../lib/commands.ts";
+import { loadIndex } from "../lib/index.ts";
+import CopyButton from "./CopyButton.astro";
+interface Props { command: Command; title?: string }
+const { command, title } = Astro.props;
+const index = loadIndex();
+// Deterministic id: the same command copies the same text wherever it appears.
+const id = `cmd-${createHash("sha256").update(command.text).digest("hex").slice(0, 12)}`;
+const src = index.docsAt(command.source.path) + (command.source.anchor ? `#${command.source.anchor}` : "");
+---
+<figure class="cmd">
+  <figcaption>
+    <span class="grow">
+      {title && <><strong>{title}</strong> · </>}<a href={src} title="Where this command form is documented">{command.source.label}</a>
+    </span>
+    <CopyButton from={id} label="Copy" title="Copy command" quiet />
+  </figcaption>
+  <pre id={id}>{command.text}</pre>
+</figure>

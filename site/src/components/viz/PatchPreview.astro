@@ -1,0 +1,51 @@
+---
+import Arrow from "../Arrow.astro";
+import MatrixPreview from "./MatrixPreview.astro";
+import { sourceLabels } from "../../lib/catalog.ts";
+import { editDeltas, fmt, previewResult, results } from "../../lib/insight.ts";
+import { scoreAxis } from "../../lib/score-axis.ts";
+import { weightWindow } from "../../lib/weight-window.ts";
+import type { Version } from "../../lib/types.ts";
+
+interface Props { version: Version }
+const { version } = Astro.props;
+const patch = version.patch;
+const result = previewResult(results(version));
+const sample = editDeltas(version, 6).map(tensor => ({ tensor, rows: weightWindow(tensor, 16) })).find(view => view.rows);
+const treatments = result ? [{ label: "Base", score: result.base }, { label: "Patched", score: result.patched }] : [];
+const axis = result && scoreAxis(treatments.map(({ score }) => score), result.unit);
+const studyUrl = result?.source === "author" ? version.claims.find(c => c.record.source.url === result.href)?.record.source.url : undefined;
+const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : undefined;
+---
+<aside class="patch-preview" aria-label="Featured patch">
+  <header>
+    <div>
+      <h2>{patch.title}</h2>
+      <p>{patch.base.model} · {version.label}{patch.base.dir.startsWith("docs/example/") && " · Synthetic example"}</p>
+    </div>
+    <a class="preview-link" href={patch.url}>View patch <Arrow /></a>
+  </header>
+  {sample?.rows ? <MatrixPreview tensor={sample.tensor} rows={sample.rows} /> : !result && <p class="preview-summary">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>}
+  {result && <figure class="sample-score">
+    <figcaption>
+      <strong>{result.benchmark} {result.metric}</strong>
+      {studyUrl
+        ? <a class="study-link" href={studyUrl} target="_blank" rel="noopener noreferrer" aria-label="Original study results (opens in a new tab)">Original study results.</a>
+        : <span>{performer ? `${sourceLabels.author} by ${performer}` : `${sourceLabels.index} on the index benchmark`}</span>}
+    </figcaption>
+    <dl class="score-bars">
+      {treatments.map(({ label, score }) => (
+        <div class="score-row" data-treatment={label.toLowerCase()}>
+          <dt>{label}</dt>
+          <dd>
+            <span class="score-track" style={`--zero:${axis!.zero}%`} aria-hidden="true">
+              <i style={axis!.bar(score)}></i>
+            </span>
+            <strong>{fmt(score, result.unit)}</strong>
+          </dd>
+        </div>
+      ))}
+    </dl>
+    {studyUrl && <p class="study-independence">This independent listing doesn’t imply endorsement by the study authors.</p>}
+  </figure>}
+</aside>

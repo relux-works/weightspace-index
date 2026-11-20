@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "profile": "bf16",
+  "benchmark": "Arithmetic",
+  "metric": "Accuracy",
+  "unit": "%",
+  "direction": "higher",
+  "denominator": 2000,
+  "protocol": "Synthetic demonstration. A contributor ran the unpatched base and the three-patch stack on the same 2,000 example prompts with greedy decoding; no solo runs were filed.",
+  "baseline": 50,
+  "members": [
+    {
+      "slug": "better-math",
+      "version": 1,
+      "artifact": "replacements.safetensors",
+      "scale": 1
+    },
+    {
+      "slug": "shorter-answers",
+      "version": 2,
+      "artifact": "adapter_model.safetensors",
+      "scale": 1
+    },
+    {
+      "slug": "polite-tone",
+      "version": 1,
+      "artifact": "adapter_model.safetensors",
+      "scale": 1
+    }
+  ],
+  "together": 55
+}

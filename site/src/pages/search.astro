@@ -1,0 +1,315 @@
+---
+import Page from "../layouts/Page.astro";
+import Head from "../components/Head.astro";
+import { href, loadIndex } from "../lib/index.ts";
+import { facetOptions, searchEntries } from "../lib/search.ts";
+
+const index = loadIndex();
+const facets = facetOptions(searchEntries(index));
+const primary = facets.filter((f) => f.primary);
+const more = facets.filter((f) => !f.primary);
+---
+<Page title="Search" nav="search" description="Find a patch version by model, patch or author, and see who measured it and what they found.">
+  <Head>
+    <h1>Patch versions <span id="count" class="title-count" aria-hidden="true"></span></h1>
+    <form id="search" class="search-form" role="search" data-src={href("search.json")}>
+      <div class="search-bar">
+        <input type="search" name="q" placeholder="Model, patch or author" aria-label="Search text" autocomplete="off" maxlength="200" />
+        {primary.map((f) => (
+          <label class="facet">
+            <span class="visually-hidden">{f.label}</span>
+            <span class="select">
+              <select name={f.key}>
+                <option value="">Any {f.label.toLowerCase()}</option>
+                {f.options.map((o) => <option value={o.value} data-label={o.label}>{o.label} ({o.count})</option>)}
+              </select>
+            </span>
+          </label>
+        ))}
+      </div>
+      {more.length > 0 && (
+        <details class="more-filters">
+          <summary>More filters</summary>
+          <div class="facet-grid">
+            {more.map((f) => (
+              <label class="facet">
+                <span class="visually-hidden">{f.label}</span>
+                <span class="select">
+                  <select name={f.key}>
+                    <option value="">Any {f.label.toLowerCase()}</option>
+                    {f.options.map((o) => <option value={o.value} data-label={o.label}>{o.label} ({o.count})</option>)}
+                  </select>
+                </span>
+              </label>
+            ))}
+          </div>
+        </details>
+      )}
+      <div class="search-status" hidden>
+        <ul id="active-filters" class="active-filters" aria-label="Active filters"></ul>
+        <button type="reset" class="text-button" hidden>Clear all</button>
+      </div>
+    </form>
+  </Head>
+
+  <section class="band results-band">
+    <div class="wrap">
+      <h2 id="results-heading" class="visually-hidden">Results</h2>
+      <span id="count-live" class="visually-hidden" aria-live="polite"></span>
+      <noscript><p class="empty"><strong>Search needs JavaScript</strong> Browse from <a href={href()}>Models</a> instead.</p></noscript>
+      <ul id="results" class="results" aria-labelledby="results-heading"></ul>
+    </div>
+  </section>
+
+  <script>
+    import { matchesAll, queryWords } from "../lib/filter.ts";
+    type Entry = {
+      url: string; base: string; profile: string; slug: string; title: string; summary: string; formats: string[];
+      tags: string[]; license: string; authors: string[]; submitter: string; version: string; status: string;
+      latest: boolean; benchmarks: string[]; evidence: string[]; terms: string; versionCount: number;
+      results: { source: string; text: string; value?: string }[];
+      name?: string; shown: string; hidden: { label: string; text: string }[];
+    };
+    const form = document.getElementById("search") as HTMLFormElement;
+    const list = document.getElementById("results") as HTMLUListElement;
+    const count = document.getElementById("count") as HTMLElement;
+    const countLive = document.getElementById("count-live") as HTMLElement;
+    const clear = form.querySelector('button[type="reset"]') as HTMLButtonElement;
+    const statusRow = form.querySelector(".search-status") as HTMLElement;
+    const active = document.getElementById("active-filters") as HTMLUListElement;
+    const modelsHref = (document.querySelector(".product") as HTMLAnchorElement | null)?.href ?? "/";
+    type Key = "base" | "profile" | "format" | "tag" | "license" | "status" | "benchmark" | "evidence";
+    /** Only the facets the build rendered; a facet with one value has no select. */
+    const selects = [...form.querySelectorAll("select")];
+    const keys = selects.map((s) => s.name as Key);
+    const moreFilters = form.querySelector("details.more-filters") as HTMLDetailsElement | null;
+    const values = (e: Entry, k: Key): string[] =>
+      k === "tag" ? e.tags : k === "benchmark" ? e.benchmarks : k === "evidence" ? e.evidence : k === "format" ? e.formats : [e[k] as string];
+    /** Only a version that is no longer active carries a status note. */
+    const statusNotes: Record<string, string> = { deprecated: "Deprecated", withdrawn: "Withdrawn" };
+    let entries: Entry[] = [];
+    let loaded = false;
+    let announce = 0;
+
+    function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    }
+    /** One line per performer: who measured, what, and the result. */
+    function evidence(e: Entry) {
+      if (!e.results.length) return el("p", "result-none", "No benchmarks submitted");
+      const dl = el("dl", "result-evidence");
+      for (const r of e.results) {
+        const row = el("div");
+        const dd = el("dd", undefined, r.text);
+        if (r.value) dd.append(document.createTextNode(" "), el("span", "result-value", r.value));
+        row.append(el("dt", undefined, r.source), dd);
+        dl.append(row);
+      }
+      return dl;
+    }
+
+    /**
+     * When a query word is not in anything the result shows, name the field it
+     * came from and quote it, so every hit has a visible reason.
+     */
+    function matchNote(e: Entry, words: string[]) {
+      const unseen = words.filter((w) => !e.shown.includes(w));
+      const fields = e.hidden.filter((f) => unseen.some((w) => f.text.toLowerCase().includes(w)));
+      if (!unseen.length || !fields.length) return null;
+      const p = el("p", "result-match");
+      fields.slice(0, 2).forEach((f, i) => {
+        if (i) p.append(document.createTextNode(" · "));
+        p.append(el("span", "result-match-label", `Matched in ${f.label.toLowerCase()}: `));
+        const lower = f.text.toLowerCase();
+        const hits = unseen.filter((w) => lower.includes(w));
+        const first = Math.min(...hits.map((w) => lower.indexOf(w)));
+        const start = f.text.length > 120 && first > 40 ? first - 30 : 0;
+        const text = f.text.slice(start, start + 120);
+        const shown = (start ? "…" : "") + text + (start + 120 < f.text.length ? "…" : "");
+        // Mark each matched word inside the quoted text.
+        const re = new RegExp(`(${hits.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+        for (const part of shown.split(re)) {
+          if (!part) continue;
+          p.append(hits.includes(part.toLowerCase()) ? el("mark", undefined, part) : document.createTextNode(part));
+        }
+      });
+      return p;
+    }
+
+    /**
+     * Each option's count is the versions it would leave, given the query and
+     * the other filters. An option that would leave none is disabled, unless it
+     * is the one chosen, so a combination never silently empties the list.
+     */
+    function recount(pool: Entry[], chosen: (readonly [Key, string])[]) {
+      for (const s of selects) {
+        const k = s.name as Key;
+        const others = pool.filter((e) => chosen.every(([ck, v]) => ck === k || values(e, ck).includes(v)));
+        for (const o of s.options) {
+          if (!o.value) continue;
+          const n = others.filter((e) => values(e, k).includes(o.value)).length;
+          // The chosen option shows its name alone, so a long one fits the select.
+          o.textContent = o.value === s.value ? o.dataset.label! : `${o.dataset.label} (${n})`;
+          o.disabled = n === 0 && o.value !== s.value;
+        }
+        // A long choice can be cut off in a narrow select; the tooltip has it whole.
+        s.title = s.value ? (s.selectedOptions[0].dataset.label ?? "") : "";
+      }
+    }
+    /** Active filters as chips, so one can be removed without clearing the rest. */
+    function showActive(chosen: (readonly [Key, string])[]) {
+      active.replaceChildren(...chosen.map(([k]) => {
+        const s = form.elements.namedItem(k) as HTMLSelectElement;
+        const label = s.labels?.[0]?.querySelector("span")?.textContent ?? k;
+        const text = `${label}: ${s.selectedOptions[0].dataset.label}`;
+        const li = el("li");
+        const b = el("button", "filter-chip");
+        b.type = "button";
+        b.setAttribute("aria-label", `Remove filter ${text}`);
+        b.append(el("span", undefined, text), el("span", "filter-chip-x", "×"));
+        b.querySelector(".filter-chip-x")!.setAttribute("aria-hidden", "true");
+        b.addEventListener("click", () => {
+          const i = chosen.findIndex(([ck]) => ck === k);
+          s.value = "";
+          writeUrl();
+          render();
+          // Focus the chip that took this one's place, else the cleared select.
+          const chips = active.querySelectorAll("button");
+          (chips[Math.min(i, chips.length - 1)] ?? s).focus();
+        });
+        li.append(b);
+        return li;
+      }));
+    }
+
+    /** A dashed box with a heading, a sentence and optional actions, as the only row. */
+    function notice(title: string, text: string, ...actions: HTMLElement[]) {
+      const li = el("li", "empty-row");
+      const box = el("div", "empty");
+      box.append(el("strong", undefined, title), document.createTextNode(` ${text}`));
+      if (actions.length) {
+        const row = el("div", "empty-actions");
+        row.append(...actions);
+        box.append(row);
+      }
+      li.append(box);
+      return li;
+    }
+    function button(text: string, onClick: () => void) {
+      const b = el("button", "btn", text);
+      b.type = "button";
+      b.addEventListener("click", onClick);
+      return b;
+    }
+    /**
+     * The title carries the bare count ("4", "1 of 4") at once; screen readers
+     * hear the full sentence once typing pauses.
+     */
+    function setCount(shown: string, spoken: string, now = false) {
+      count.textContent = shown;
+      clearTimeout(announce);
+      if (now) countLive.textContent = spoken;
+      else announce = window.setTimeout(() => { countLive.textContent = spoken; }, 350);
+    }
+
+    function readUrl() {
+      const p = new URLSearchParams(location.search);
+      (form.elements.namedItem("q") as HTMLInputElement).value = p.get("q") ?? "";
+      for (const k of keys) {
+        const s = form.elements.namedItem(k) as HTMLSelectElement;
+        const v = p.get(k) ?? "";
+        s.value = [...s.options].some((o) => o.value === v) ? v : "";
+      }
+      if (moreFilters && [...moreFilters.querySelectorAll("select")].some((s) => s.value)) moreFilters.open = true;
+    }
+    function writeUrl() {
+      const p = new URLSearchParams();
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim().slice(0, 200);
+      if (q) p.set("q", q);
+      for (const k of keys) {
+        const v = (form.elements.namedItem(k) as HTMLSelectElement).value;
+        if (v) p.set(k, v);
+      }
+      const s = p.toString();
+      history.replaceState(null, "", s ? `?${s}` : location.pathname);
+    }
+
+    function render() {
+      if (!loaded) return;
+      const q = (form.elements.namedItem("q") as HTMLInputElement).value.trim();
+      const words = queryWords(q);
+      const chosen = keys.map((k) => [k, (form.elements.namedItem(k) as HTMLSelectElement).value] as const).filter(([, v]) => v);
+      // Chips and Clear all show only when there is something to clear.
+      clear.hidden = statusRow.hidden = !q && !chosen.length;
+      const matchesQuery = entries.filter((e) => matchesAll(e.terms, words));
+      const hits = matchesQuery.filter((e) => chosen.every(([k, v]) => values(e, k).includes(v)));
+      recount(matchesQuery, chosen);
+      showActive(chosen);
+      list.replaceChildren(
+        ...hits.map((e) => {
+          const li = el("li");
+          const main = el("div");
+          const h = el("h3");
+          const a = el("a");
+          a.href = e.url;
+          a.append(document.createTextNode(`${e.title} `), el("span", "muted", e.latest && e.versionCount > 1 ? `${e.version} · latest` : e.version));
+          h.append(a);
+          const sub = el("div", "row small muted result-facts");
+          sub.append(el("span", undefined, e.base), el("span", "tag", e.profile), el("span", undefined, `${e.formats.join(" + ")} · ${e.license}`), ...e.tags.map((t) => el("span", "tag", t)));
+          const note = matchNote(e, words);
+          main.append(h, el("p", undefined, e.summary), sub, ...(note ? [note] : []));
+          const meta = el("div", "meta");
+          const status = statusNotes[e.status];
+          if (status) meta.append(el("span", `status-note ${e.status}`, status));
+          meta.append(evidence(e));
+          li.append(main, meta);
+          return li;
+        }),
+      );
+      const total = `${entries.length} version${entries.length === 1 ? "" : "s"}`;
+      const shown = hits.length === entries.length ? `${entries.length}` : `${hits.length} of ${entries.length}`;
+      setCount(shown, hits.length === entries.length ? total : `${hits.length} of ${total}`);
+      if (!entries.length) {
+        list.append(notice("No patch versions yet", "Nothing has been published to the index."));
+      } else if (!hits.length) {
+        const filters = chosen.map(([k]) => {
+          const select = form.elements.namedItem(k) as HTMLSelectElement;
+          const label = select.labels?.[0]?.querySelector("span")?.textContent ?? k;
+          return `${label}: ${select.selectedOptions[0].dataset.label}`;
+        });
+        const what = q ? `“${q}”${filters.length ? ` with ${filters.join(", ")}` : ""}` : filters.join(", ");
+        // Offer to drop each part on its own when both a query and filters are set.
+        const input = form.elements.namedItem("q") as HTMLInputElement;
+        const dropQuery = button("Clear search text", () => { input.value = ""; writeUrl(); render(); input.focus(); });
+        const dropFilters = button("Remove filters", () => { for (const s of selects) s.value = ""; writeUrl(); render(); input.focus(); });
+        const actions = q && filters.length ? [dropQuery, dropFilters] : [button("Clear all", () => form.reset())];
+        list.append(notice("No versions match", `Nothing matches ${what}.`, ...actions));
+      }
+    }
+
+    function load() {
+      list.setAttribute("aria-busy", "true");
+      list.replaceChildren();
+      setCount("", "Loading versions…", true);
+      fetch(form.dataset.src!)
+        .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+        .then((d: { entries: Entry[] }) => { entries = d.entries; loaded = true; list.removeAttribute("aria-busy"); render(); })
+        .catch(() => {
+          list.removeAttribute("aria-busy");
+          setCount("", "Search didn’t load.", true);
+          const models = el("a", "btn", "Browse models");
+          (models as HTMLAnchorElement).href = modelsHref;
+          list.replaceChildren(notice("Search didn’t load", "The list of versions could not be fetched. Try again, or browse from Models.", button("Try again", load), models));
+        });
+    }
+
+    form.addEventListener("input", () => { writeUrl(); render(); });
+    form.addEventListener("submit", (ev) => ev.preventDefault());
+    form.addEventListener("reset", () => setTimeout(() => { writeUrl(); render(); }));
+    readUrl();
+    load();
+  </script>
+</Page>

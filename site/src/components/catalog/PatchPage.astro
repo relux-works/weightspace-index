@@ -1,0 +1,83 @@
+---
+import Page from "../../layouts/Page.astro";
+import { href, loadIndex, type Patch, type Version } from "../../lib/index.ts";
+import { activeVersion, downloadUrl } from "../../lib/catalog.ts";
+import { runtimeGuide } from "../../lib/runtime.ts";
+import { apply, hfDownload } from "../../lib/commands.ts";
+import { editStats, stackResults } from "../../lib/insight.ts";
+import GetButtons from "./GetButtons.astro";
+import RuntimeTabs from "./RuntimeTabs.astro";
+import PatchEvidence from "./PatchEvidence.astro";
+import ReleaseDetails from "./ReleaseDetails.astro";
+import EditMap from "../viz/EditMap.astro";
+interface Props { patch: Patch; version?: Version }
+const { patch, version: v } = Astro.props;
+const base = patch.base;
+const index = loadIndex();
+const name = patch.title;
+const guide = v && runtimeGuide(v);
+const plan = v && apply(v);
+const tabs = guide?.tabs.slice() ?? [];
+const source = v?.files.find(f => f.role === "source");
+if (v && plan?.command && source) {
+  const baseChecks = v.profile.files.map(f => `printf '%s  %s\\n' '${f.sha256}' '${base.model}-${v.profile.id}/${f.path}' | shasum -a 256 -c -`);
+  tabs.push({
+    name: "Weightspace", note: `Needs Rust 1.85 or newer and the Hugging Face CLI. The recipe downloads the pinned base and writes the patched model to a new directory. ${plan.notes.join(" ")} ${plan.needsDigests.join(", ")}`.trim(),
+    prepare: [hfDownload(base, v.profile).text, ...baseChecks].join("\n"),
+    command: plan.command.text,
+    docs: index.docsAt("tool/README.md"),
+    // tool/README.md, "Install / From source", at the commit this site was built from.
+    setupLabel: "Build weightspace at this index commit",
+    setup: [
+      `git clone https://github.com/${index.githubRepo}.git weightspace-index`,
+      `git -C weightspace-index checkout ${index.commit}`,
+      "(cd weightspace-index/tool && cargo build --locked --release --bin weightspace)",
+      'export PATH="$PWD/weightspace-index/tool/target/release:$PATH"',
+    ].join("\n"),
+  });
+}
+const latest = activeVersion(patch);
+const stats = editStats(v);
+const partners = v ? [...new Map(stackResults(base).filter(r => r.stack?.includes(v)).map(r => [r.stack!.map(m => m.patch.slug).join("+"), r.stack!])).values()].sort((a, b) => a.length - b.length) : [];
+const lora = guide?.download;
+const replacement = source && patch.kind === "replacement" ? { href: downloadUrl(source), name: source.name, sha256: source.sha256 } : null;
+---
+<Page title={`${name}${v ? " " + v.label : ""} · ${base.address}`} description={patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")} nav="models">
+  <div class="wrap page-flow">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><a href={base.url}>{base.model}</a><span>/</span><span aria-current="page">{name}</span></nav>
+    <header class="release-header">
+      <div>
+        <h1>{name}</h1>
+        <p class="release-goal">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+        <p class="credit">By {patch.authors.map((a,i) => <>{i > 0 && ", "}{a.url ? <a href={a.url}>{a.name}</a> : a.name}</>)} · {patch.license}{v && <> · {v.label}</>}</p>
+        {v && <p class="release-target">Base <a href={base.url}>{base.address}</a> · {v.profile.id.toUpperCase()} <a href={`https://huggingface.co/${v.profile.source.repo_id}/tree/${v.profile.source.revision}`}><code>@{v.profile.source.revision.slice(0,7)}</code></a></p>}
+        {v && v.status !== "active" && <p class="note warn">This release is {v.status}. {latest && <a href={patch.url}>View the current release</a>}</p>}
+      </div>
+      {v ? <section class="release-files" aria-label="Release downloads"><h2>Download files</h2>
+        <GetButtons version={v} />
+      </section> : <p class="quiet-row">No active release. <a href="#versions">View version history</a></p>}
+    </header>
+    <div class="release-layout">
+      <nav class="release-nav" aria-label="On this patch card">
+        {v && <><a href="#use">Runtime setup</a><a href="#results">Benchmarks</a></>}
+        <a href="#records">Release details</a>
+      </nav>
+      <div class="release-content">
+        {v && <>
+          <section class="flow-section" id="use">
+            <h2>Run this patch</h2>
+            {tabs.length > 0 ? <RuntimeTabs tabs={tabs} lora={lora} replacement={replacement} /> : <p class="quiet-row">This release has no documented runtime recipe. <a href="#records">Inspect the release files</a>.</p>}
+          </section>
+          <section class="flow-section" id="results">
+            <h2>Benchmark results</h2>
+            <PatchEvidence version={v} full />
+            {partners.length > 0 && <p class="stack-note">Also measured stacked: {partners.map((s, i) => <>{i > 0 && "; "}{s.map(m => m.patch.title).join(" + ")}</>)}. <a href={`${base.url}#results`}>Compare on the model page</a>.</p>}
+          </section>
+        </>}
+        <ReleaseDetails patch={patch} version={v} guide={guide}>
+          {v && stats && <details class="fold" id="changes"><summary>Explore the edited weights</summary><EditMap version={v} /></details>}
+        </ReleaseDetails>
+      </div>
+    </div>
+  </div>
+</Page>

@@ -1,0 +1,9 @@
+---
+// The site's one arrow icon, drawn rather than typed: "right" for going
+// somewhere on the site, "left" for going back, "out" for another site, "down" for
+// further down the page.
+interface Props { dir?: "right" | "left" | "out" | "down" }
+const { dir = "right" } = Astro.props;
+const d = { right: "M2.5 8h10M9 4.5 12.5 8 9 11.5", left: "M13.5 8h-10M7 4.5 3.5 8 7 11.5", out: "M5 11 11 5M6 5h5v5", down: "M8 2.5v10M4.5 9 8 12.5 11.5 9" }[dir];
+---
+<svg class:list={["arrow", dir]} viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path d={d} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>

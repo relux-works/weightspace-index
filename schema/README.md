@@ -10,6 +10,7 @@
 | `run` | `.../runs/<run-id>/run.json` and `.../v<N>/runs/<run-id>/run.json` | whoever ran it |
 | `comparison` | `.../v<N>/comparisons/<id>.json` | maintainers |
 | `assessment` | `.../v<N>/assessments/<id>.json` | maintainers |
+| `claim` | `.../v<N>/claims/<id>.json` | maintainers, copied from the authors' published source |
 | `index` | `models/<ns>/<model>/index.json` | generator |
 | `modelsIndex` | `models/index.json` | generator |
 | `digestLookup` | `lookup/by-digest/<aa>/<sha256>.json` | generator |

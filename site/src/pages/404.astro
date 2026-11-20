@@ -1,0 +1,15 @@
+---
+import Page from "../layouts/Page.astro";
+import Head from "../components/Head.astro";
+import { href } from "../lib/index.ts";
+---
+<Page title="Not found">
+  <Head>
+    <h1>Not found</h1>
+    <p class="lead">This page is not in the index at the pinned commit.</p>
+    <div class="row">
+      <a class="btn primary" href={href()}>Models</a>
+      <a class="btn" href={href("search/")}>Search</a>
+    </div>
+  </Head>
+</Page>

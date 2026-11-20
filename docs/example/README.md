@@ -12,5 +12,8 @@ Open this synthetic base to see what a filled-in patch folder looks like. This d
 | `runs/baseline-bf16/` | A baseline run, measured once and reused by every patch |
 | `better-math/` | A `replacement` patch: one sparse tensor hosted in this repository, plus a derived GGUF LoRA on Hugging Face, a run, a comparison and an attempted-but-not-established UNKNOWN assessment |
 | `shorter-answers/` | A `lora` patch on Hugging Face with two versions, the first deprecated |
+| `polite-tone/`, `step-by-step/` | Two more `lora` patches on Hugging Face, so the model page has stacks to compare |
 
 To start a real patch, copy the folder shape, not the values: every digest must come from the intake tool. Real patch slugs follow the [author-prefixed sourced-naming rule](../structure.md#rules); the synthetic names here are not naming sources for real submissions.
+
+`bench/combinations/example-org/Example-Model-1B/` holds five made-up [combination studies](../benchmarking.md#combination-studies): patches that help each other, add up, get in each other's way, a report too small to tell, and a three-patch stack filed without solo scores.

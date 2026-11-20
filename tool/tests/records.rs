@@ -226,12 +226,6 @@ fn bad_record_controls() {
             |r| r["score"]["cut_at_limit"] = json!(1.5),
         ),
         (
-            "run-unknown-performer",
-            "run",
-            "runs/baseline-bf16/run.json",
-            |r| r["performed_by"] = json!("someone"),
-        ),
-        (
             "run-unknown-score-without-owner",
             "run",
             "runs/baseline-bf16/run.json",
@@ -265,6 +259,30 @@ fn bad_record_controls() {
                     remove(r, k);
                 }
             },
+        ),
+        (
+            "claim-without-source",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| remove(r, "source"),
+        ),
+        (
+            "claim-plain-http-source",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| r["source"]["url"] = json!("http://example.org/study"),
+        ),
+        (
+            "claim-measure-without-direction",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| remove(&mut r["measures"][0], "better"),
+        ),
+        (
+            "claim-with-outcomes",
+            "claim",
+            "better-math/v1/claims/example-study.json",
+            |r| r["outcomes"] = json!("outcomes.jsonl"),
         ),
         (
             "unknown-without-owner",
@@ -314,7 +332,7 @@ fn decided_assessment() {
 fn generated_shapes() {
     let mut file = example("better-math/v1/version.json")["files"][0].clone();
     file["format"] = json!("safetensors");
-    let run = json!({"id": "baseline-bf16", "profile": "bf16", "performed_by": "index",
+    let run = json!({"id": "baseline-bf16", "profile": "bf16",
         "protocol": {"name": "example-protocol", "sha256": "d".repeat(64)}, "state": "COMPLETE",
         "score": {"metric": "accuracy", "value": 0.5, "value_lm_eval": 0.75, "cut_at_limit": 0.25,
             "finished_without_answer": 0.05, "mean_completion_tokens": 2048.5, "unit": "fraction", "denominator": 200}});

@@ -1,0 +1,257 @@
+/* The directory and featured release share the first viewport on desktop.
+   On a phone the reader reaches the model rows before the worked example. */
+.landing { display: grid; align-items: start; gap: 2rem; padding-block: clamp(2rem, 5vw, 4.8rem); }
+.landing.with-preview { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); column-gap: clamp(var(--space-8), 4.5vw, 4.75rem); }
+.landing > .patch-preview { margin-block-start: clamp(var(--space-4), 2.35vw, var(--space-8)); }
+.landing, #patch-vs-lora {
+  /* The widest equation uses 39 columns, including both LoRA factors. */
+  --home-matrix-columns: 39;
+  --home-matrix-space: calc(100vi - 7rem);
+  --matrix-pitch: min(var(--matrix-pitch-max), calc(var(--home-matrix-space) / var(--home-matrix-columns)));
+}
+#patch-vs-lora .home-matrix-grid {
+  width: calc(var(--cols) * var(--matrix-pitch));
+}
+@media (width > 52rem) {
+  .landing, #patch-vs-lora {
+    /* Allow for the comparison column, its outer gutters, and equation operators. */
+    --home-matrix-space: calc((min(100vi, var(--layout-max)) - 7rem) * .575 - 7rem);
+  }
+}
+.find-intro h1, .release-header h1 { line-height: .99; font-weight: 680; letter-spacing: -.035em; }
+.find-intro h1 { font-size: clamp(3rem, 5.7vw, 4.75rem); }
+.find-intro p, .release-goal { margin-top: 1.1rem; max-width: 46ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
+.find-intro a { white-space: nowrap; }
+.find-model .directory { margin-top: clamp(1.8rem, 3.3vw, 3rem); padding: 0; border: 0; }
+.directory-label, .model-entry { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.directory-label h2 { font-size: 1.3rem; }
+.directory-label > span { color: var(--color-text-muted); font-size: .84rem; }
+.directory .catalog-filter { margin-top: .7rem; border-color: var(--color-border-strong); }
+.directory .catalog-filter input { width: 100%; min-width: 0; }
+.model-list { padding: 0; margin: .55rem 0 0; list-style: none; }
+.model-entry { color: var(--color-text); padding: .85rem .15rem; text-decoration: none; border-bottom: 1px solid var(--color-divider); }
+.model-entry strong { font: 620 1.28rem/1.3 var(--font-display); overflow-wrap: anywhere; }
+.model-entry small, .release-files small { display: block; color: var(--color-text-muted); font-size: .81rem; }
+.model-entry:hover strong { color: var(--color-link); text-decoration: underline; }
+.entry-arrow { display: grid; place-items: center; width: 2rem; height: 2rem; flex-shrink: 0; border: 1px solid var(--color-border); border-radius: 50%; }
+
+.patch-preview { position: relative; isolation: isolate; color: var(--ink-text); background: var(--color-brand-ink); border: 1px solid var(--ink-line); border-radius: .65rem; padding: clamp(var(--space-4), 2.15vw, 1.75rem); --color-focus: var(--ink-hot); }
+.patch-preview:has(.preview-link:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.patch-preview header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; }
+.patch-preview h2 { font-size: clamp(1.65rem, 2.65vw, 2.3rem); line-height: 1.15; overflow-wrap: anywhere; }
+.patch-preview header p, .sample-score figcaption span, .study-link { color: var(--ink-muted); font-size: .83rem; }
+.patch-preview header p { margin-top: .25rem; }
+.preview-link { display: inline-flex; align-items: center; gap: .35rem; min-block-size: 2.75rem; color: var(--ink-text); font-weight: 600; font-size: .88rem; white-space: nowrap; }
+.preview-link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.preview-link:focus-visible { outline: none; }
+.preview-link:hover, .preview-link:focus-visible { color: var(--ink-hot); }
+.preview-summary { margin-top: .9rem; }
+.sample-score { margin: var(--space-4) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
+.sample-score figcaption { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .15rem .75rem; }
+.sample-score figcaption strong { font-weight: 600; font-size: .93rem; }
+.study-link { position: relative; z-index: 2; }
+.study-link:hover, .study-link:focus-visible { color: var(--ink-text); }
+.study-independence { margin-top: var(--space-3); color: color-mix(in srgb, var(--ink-faint) 87%, var(--color-brand-ink)); font-size: .72rem; text-align: right; }
+.score-bars { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: var(--space-2) .65rem; margin: var(--space-3) 0 0; }
+.score-row, .score-row dd { display: grid; grid-template-columns: subgrid; align-items: center; }
+.score-row { grid-column: 1 / -1; }
+.score-row dt { color: var(--ink-muted); font-size: .77rem; }
+.score-row dd { grid-column: 2 / -1; margin: 0; }
+.score-row strong { font: 500 .8rem var(--font-mono); text-align: right; }
+.score-track { position: relative; display: block; height: .4rem; border-radius: .12rem; background: var(--ink-line); }
+.score-track::before { content: ""; position: absolute; inset: 0 auto 0 var(--zero); border-left: 1px solid var(--ink-faint); }
+.score-track i { position: absolute; inset-block: 0; background: var(--score-fill, var(--ink-faint)); border-radius: inherit; }
+.score-row[data-treatment="patched"] { --score-fill: var(--ink-hot); }
+@media (forced-colors: active) { .score-track i { forced-color-adjust: none; background: Highlight; } }
+
+.patch-directory { border-top: 1px solid var(--color-border-strong); }
+.patch-entry { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem 4rem; padding: 1.5rem 0; border-bottom: 1px solid var(--color-divider); }
+.patch-entry h3 { font-size: clamp(1.55rem, 3vw, 2rem); overflow-wrap: anywhere; }
+.patch-entry h3 a, .patch-entry h3 a:hover { color: var(--color-text); text-decoration: none; }
+/* The whole card opens the patch: the title link stretches over it, while the
+   card's own links (View patch, downloads, run records) stay on top. Hover
+   only tints a surface behind the card, bleeding past the text so nothing
+   moves; the evidence inside stays still. */
+.patch-entry { position: relative; isolation: isolate; cursor: pointer; }
+.patch-entry::before { content: ""; position: absolute; inset: -1px -1rem; z-index: -1; border-radius: var(--radius-surface); background: var(--color-surface-hover); opacity: 0; transition: opacity 160ms cubic-bezier(.16, 1, .3, 1); pointer-events: none; }
+.patch-entry:hover::before, .patch-entry:has(h3 a:focus-visible)::before { opacity: .3; transition-duration: 220ms; }
+.patch-entry h3 a::after { content: ""; position: absolute; inset: -1px -1rem; border-radius: var(--radius-surface); }
+.patch-entry h3 a:focus-visible { outline: none; }
+.patch-entry h3 a:focus-visible::after { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.patch-entry :is(a, button, summary, progress):not(h3 a) { position: relative; z-index: 1; }
+.entry-credit, .release-target { color: var(--color-text-muted); font-size: .86rem; margin-top: .3rem; }
+.entry-goal { max-width: 48ch; margin: .7rem 0 1.1rem; }
+.entry-actions, .file-choices.compact { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem 1rem; }
+.entry-actions .btn { gap: .6rem; }
+.file-choices.compact a { display: inline-flex; align-items: center; gap: .28rem; font-size: .82rem; }
+.file-choices.compact a strong { font-weight: 500; }
+.file-choices.compact svg { width: .85rem; }
+.evidence { display: grid; gap: 1.45rem; }
+.evidence.compact { align-content: start; border-inline-start: 1px solid var(--color-divider); padding-inline-start: 2rem; gap: .8rem; container-type: inline-size; }
+/* Patch card and patch page: one chart per benchmark, three rows. The author's
+   report is the solid red bar with its change printed in red; the Measured
+   result is a ghost of it, a faint fill inside a red outline, so the two differ
+   in shape as well as lightness (owner's decision). A score that got worse is drawn and coloured
+   like any other; its sign says so. */
+/* The chart red sits halfway between the link red and the Relux identity red
+   (in OKLCH): #ce090c light, #fc5850 dark. Both clear 4.5:1, so the bar, the
+   outline and the printed change share it. */
+.triad { --tri-red: color-mix(in oklch, var(--color-link), var(--color-brand-red)); --tri-ghost: color-mix(in oklch, var(--tri-red) 22%, var(--color-surface)); --tri-ghost-line: color-mix(in oklch, var(--tri-red) 60%, var(--color-surface)); gap: 1.1rem; }
+.tri-head { margin: 0 0 .3rem; font: 650 .9rem var(--font-ui); display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; }
+.tri-head small { font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
+.tri-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+.tri-row { display: grid; grid-template-columns: 5.4rem minmax(3rem, 1fr) 4.4rem; gap: .7rem; align-items: center; font-size: .78rem; }
+.tri-label { color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tri-track { position: relative; height: .5rem; border-radius: 2px; background: var(--color-surface-subtle); }
+.tri-track i { position: absolute; top: 0; bottom: 0; border-radius: inherit; --c: var(--viz-base); background: var(--c); }
+.tri-row.self i { --c: var(--tri-red); }
+.tri-row.indep i { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
+@media (forced-colors: active) {
+  .tri-track i { forced-color-adjust: none; }
+  .tri-row.base .tri-track i { background: GrayText; }
+  .tri-row.self .tri-track i { --c: Highlight; background: Highlight; }
+  .tri-row.indep .tri-track i { background: Canvas; box-shadow: inset 0 0 0 1.5px Highlight; }
+}
+.tri-tick { position: absolute; top: -.2rem; bottom: -.2rem; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--color-text-muted); }
+.tri-val { justify-self: end; font: 600 .78rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tri-row.base .tri-val { font-weight: 500; color: var(--color-text-muted); }
+.tri-row.self .tri-val { color: var(--tri-red); }
+.tri-miss { grid-column: 2 / -1; font-size: .76rem; font-style: italic; color: var(--color-text-faint); }
+.pending-deck { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: start; padding-top: .9rem; border-top: 1px solid var(--color-divider); }
+.pending-deck .coverage { grid-column: 1; }
+.pending-deck .coverage[hidden] { display: none; }
+.pending-deck .coverage progress { margin: .3rem 0 .1rem; }
+.deck-nav { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1.9rem auto 1.9rem; align-items: center; gap: .3rem; }
+.deck-nav[hidden] { display: none; }
+.deck-step { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface); color: var(--color-text); cursor: pointer; transition: border-color 160ms cubic-bezier(.16, 1, .3, 1); }
+.deck-step:hover { border-color: var(--color-border-strong); }
+.deck-step:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+/* A hidden end arrow keeps its slot so the count never shifts. */
+.deck-step[hidden] { display: grid; visibility: hidden; }
+.deck-step:first-child { grid-column: 1; }
+.deck-step:last-child { grid-column: 3; }
+.deck-count { font: 500 .75rem var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
+/* Patch page: the same charts, larger and side by side, after a line naming
+   who measured and a key; the deck, the study scope and the run records span
+   the full width under them. Every row prints its score, then its change from
+   its own base, so nothing waits for a hover. */
+.triad.full { grid-template-columns: minmax(0, 46rem); gap: 1.6rem; container-type: inline-size; }
+.triad.full > :not(.tri) { grid-column: 1 / -1; }
+.tri-intro { margin: 0; max-width: 68ch; font-size: .9rem; color: var(--color-text-muted); }
+.tri-intro strong { font-weight: 600; color: var(--color-text); }
+.triad.full .tri-key { margin: -.6rem 0 0; }
+/* Patch card legend. With a mouse, hovering a benchmark's chart floats a small
+   legend above it, naming only the marks that chart uses; touch screens, with
+   no hover, get one legend under all the charts instead. */
+.triad.compact .tri-key { margin: -.2rem 0 0; font-size: .72rem; gap: .3rem .9rem; }
+.triad.compact .tri-key span::before { width: .9rem; height: .5rem; }
+.triad.compact .tri-key .k-tick::before { width: 2px; height: .8rem; margin-inline: .35rem; }
+.triad.compact .tri { position: relative; }
+.plot-key.tri-pop { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .plot-key.tri-key-touch { display: none; }
+  .triad.compact .tri-pop {
+    display: flex; flex-wrap: nowrap; white-space: nowrap; position: absolute; right: 0; bottom: calc(100% + .15rem); z-index: 3; margin: 0;
+    padding: .3rem .6rem; border: 1px solid var(--color-border); border-radius: .35rem;
+    background: var(--color-surface); color: var(--color-text-muted); box-shadow: 0 4px 14px rgb(0 0 0 / .12);
+    opacity: 0; translate: 0 .2rem; pointer-events: none;
+    transition: opacity 140ms cubic-bezier(.16, 1, .3, 1), translate 140ms cubic-bezier(.16, 1, .3, 1);
+  }
+  .triad.compact .tri:hover .tri-pop { opacity: 1; translate: 0 0; transition-duration: 200ms; }
+}
+@media (prefers-reduced-motion: reduce) { .triad.compact .tri-pop { transition: none; translate: none; } }
+.tri-key .k-self::before { background: var(--tri-red); }
+.tri-key .k-indep::before { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
+.tri-key .k-tick::before { width: 2px; height: .95rem; border-radius: 1px; background: var(--color-text-muted); margin-inline: .5rem; }
+.triad.full .tri-head { font-size: 1rem; margin-bottom: .45rem; }
+.triad.full .tri-head small { font-size: .8rem; }
+.tri-status { margin-inline-start: auto; font: 600 .75rem var(--font-ui); white-space: nowrap; }
+.tri-status.ok { color: var(--tri-red); }
+.tri-status.miss { color: var(--color-text); }
+.tri-status.miss::before { content: "≠ "; }
+.tri-status.wait { font-weight: 500; color: var(--color-text-muted); }
+.triad.full .tri-rows { gap: .35rem; }
+.triad.full .tri-row { grid-template-columns: 8.4rem minmax(3rem, 1fr) 3.6rem 4.6rem; font-size: .86rem; }
+.triad.full .tri-track { height: .65rem; }
+.triad.full .tri-val { font-size: .86rem; font-weight: 500; }
+.triad.full .tri-row.base .tri-val { color: var(--color-text-muted); }
+.tri-chg { justify-self: end; text-align: right; font: 600 .86rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
+.tri-chg small { display: block; font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
+.tri-row.self .tri-chg { color: var(--tri-red); }
+.triad.full .tri-row.self .tri-val { color: inherit; }
+
+.triad.full .tri-miss { font-size: .84rem; }
+.triad.full .tri-label { white-space: normal; }
+.triad.full .tri-label a { color: inherit; text-decoration-color: color-mix(in oklch, currentColor 45%, transparent); }
+.triad.full .tri-label a:hover { color: var(--color-link); }
+.triad.full .pending-deck { max-width: 36rem; }
+.triad.full .study-scope { margin: 0; }
+@container (max-width: 30rem) {
+  .triad.full .tri-row { grid-template-columns: 5.6rem minmax(2rem, 1fr) 3.3rem 4.5rem; gap: .5rem; font-size: .8rem; }
+  .triad.full .tri-val, .tri-chg { font-size: .8rem; }
+}
+@container (max-width: 22rem) {
+  /* Fixed value column: every row's track must end at the same point. */
+  .tri-row { grid-template-columns: 5.4rem minmax(2rem, 1fr) 4.4rem; gap: .5rem; }
+}
+
+.evidence-group .src-chip { margin: 0 0 .45rem; font-size: .94rem; }
+.coverage p, .no-score { font-size: .93rem; }
+.coverage small, .study-scope, .no-score { color: var(--color-text-muted); }
+.coverage progress { display: block; width: min(100%, 24rem); height: .5rem; margin: .45rem 0 .15rem; accent-color: var(--color-accent); }
+.coverage strong { font-weight: 550; }
+.plot-key { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; margin-top: .75rem; color: var(--color-text-muted); font-size: .78rem; }
+.plot-key span { display: inline-flex; align-items: center; gap: .4rem; }
+.plot-key span::before { content: ""; width: 1.1rem; height: .6rem; border-radius: 2px; }
+.plot-key .k-base::before { background: var(--viz-base); }
+.plot-key .k-up::before { background: var(--color-accent); }
+.plot-key .k-stack::before { background: var(--color-success); }
+.study-scope { font-size: .88rem; max-width: 70ch; }
+.evidence-group > .fold { margin-top: .7rem; }
+/* Compare patches: the legend sits at the top right of its source group, on
+   the heading's line. Touch screens, with no hover, keep the normal flow. */
+@media (hover: hover) {
+  .evidence.key-right .evidence-group { position: relative; }
+  .evidence.key-right .evidence-group .plot-key { position: absolute; top: 0; right: 0; z-index: 2; max-width: 75%; justify-content: flex-end; margin: 0; }
+}
+
+.release-header { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(16rem, .85fr); align-items: start; gap: 2.5rem; padding-block: 2.25rem; }
+.release-header h1 { font-size: clamp(2.7rem, 5vw, 4.3rem); overflow-wrap: anywhere; }
+.release-header .credit { margin-top: .9rem; }
+.release-target { margin-top: .55rem; overflow-wrap: anywhere; }
+.release-target a { color: inherit; }
+.release-files h2 { font-size: 1.16rem; margin: 0 0 .6rem; }
+.file-choices:not(.compact) { display: grid; gap: .5rem; }
+.release-files a { display: grid; grid-template-columns: 1rem minmax(0, 1fr) auto; align-items: center; gap: .9rem; border: 1px solid var(--color-border-strong); border-radius: .4rem; padding: .75rem 1rem; text-decoration: none; color: var(--color-text); background: var(--color-surface); }
+.release-files a:first-child { background: var(--color-strong-action); color: var(--color-on-strong-action); border-color: var(--color-strong-action); }
+.release-files a:first-child small { color: inherit; }
+.release-files a:hover strong { text-decoration: underline; }
+.release-files strong { font-size: 1.02rem; overflow-wrap: anywhere; }
+.file-size { font: 500 .8rem var(--font-mono); white-space: nowrap; }
+.release-layout { display: grid; grid-template-columns: minmax(9rem, .25fr) minmax(0, 1fr); gap: 2rem; border-top: 1px solid var(--color-border-strong); }
+.release-nav { align-self: start; display: grid; padding-block: 1.7rem; gap: .2rem; }
+.release-nav a { color: var(--color-text-muted); text-decoration: none; padding-block: .4rem; font-size: .9rem; }
+.release-nav a:hover { color: var(--color-link); text-decoration: underline; }
+.release-content > section + section { border-top: 1px solid var(--color-divider); margin-top: 2rem; }
+.release-content .terminal pre { max-height: 22rem; }
+.recipe-steps { margin-top: .55rem; }
+.recipe-steps summary { padding: .35rem 0; font-size: .88rem; cursor: pointer; }
+.recipe-steps .terminal { margin-top: .6rem; }
+.release-content .editmap { margin: 1.1rem 0; }
+.release-content .fold summary { cursor: pointer; }
+@media (min-width: 50rem) {
+  .release-nav { position: sticky; top: var(--layout-header-height); }
+}
+@media (max-width: 52rem) {
+  .landing.with-preview { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-8); }
+  .landing > .patch-preview { inline-size: 100%; max-inline-size: 36rem; margin-block-start: 0; }
+}
+@media (max-width: 50rem) {
+  .patch-entry, .release-layout { grid-template-columns: minmax(0, 1fr); }
+  .patch-entry { row-gap: 1.25rem; }
+  .evidence.compact { border: 0; padding: .9rem 1rem; background: var(--color-surface-subtle); }
+  .release-header { grid-template-columns: minmax(0, 1fr); gap: 1.35rem; padding-block: 1.5rem; }
+  .release-layout { gap: 0; }
+  .release-nav { display: flex; flex-wrap: wrap; gap: .1rem 1rem; padding: .5rem 0; border-bottom: 1px solid var(--color-divider); }
+  .release-nav a { font-size: .85rem; }
+}

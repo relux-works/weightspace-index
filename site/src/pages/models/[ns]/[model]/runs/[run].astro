@@ -1,0 +1,21 @@
+---
+import Page from "../../../../../layouts/Page.astro";
+import RunView from "../../../../../components/RunView.astro";
+import { href, loadIndex, type Run } from "../../../../../lib/index.ts";
+
+export function getStaticPaths() {
+  return loadIndex().bases.flatMap((base) =>
+    base.baselineRuns.map((run) => ({ params: { ns: base.ns, model: base.model, run: run.id }, props: { run } })),
+  );
+}
+interface Props { run: Run }
+const { run } = Astro.props;
+const base = run.base;
+---
+<Page
+  title={`Baseline run ${run.id} · ${base.address}`}
+  description={`Benchmark run of the unpatched ${base.address}.`}
+  nav="models"
+>
+  <RunView run={run} crumbs={[{ label: "Models", href: href() }, { label: base.address, href: base.url }, { label: "runs" }, { label: run.id }]} />
+</Page>

@@ -1,0 +1,35 @@
+---
+import Arrow from "../Arrow.astro";
+import WeightGrid from "./WeightGrid.astro";
+import { weight } from "../../lib/heat.ts";
+import { strength, type DeltaCell, type DeltaTensor } from "../../lib/insight.ts";
+
+interface Props { tensor: DeltaTensor; rows: (DeltaCell | null)[][] }
+const { tensor, rows } = Astro.props;
+const views = [{ label: "Base weights", patched: false }, { label: "Patched weights", patched: true }];
+---
+<figure class="matrix-preview" aria-label="Base and patched weight matrices. Gray shades are illustrative. Red intensity shows how much each recorded weight changed.">
+  <div class="matrix-pair" aria-hidden="true">
+    {views.map(({ label, patched }, index) => <>
+      {index > 0 && <span class="matrix-arrow"><Arrow /></span>}
+      <div>
+        <span>{label}</span>
+        <WeightGrid cells={rows.map((row, y) => row.map((cell, x) => {
+          const edited = patched && cell !== null;
+          return {
+            edited,
+            tint: edited ? .42 + .58 * strength(cell, tensor.scale) : .32 + .66 * weight(y, x, 3),
+          };
+        }))} />
+      </div>
+    </>)}
+  </div>
+</figure>
+
+<style>
+  .matrix-preview { margin: var(--space-4) 0 0; padding-top: var(--space-4); border-top: 1px solid var(--ink-line); }
+  .matrix-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(.3rem, 1.6vw, .9rem); }
+  .matrix-pair > div { justify-self: center; }
+  .matrix-pair div > span { display: block; margin-bottom: .3rem; color: var(--ink-text); font-size: .77rem; }
+  .matrix-arrow { color: var(--ink-muted); padding-top: 1.45rem; }
+</style>

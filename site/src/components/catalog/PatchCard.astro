@@ -1,0 +1,38 @@
+---
+import Arrow from "../Arrow.astro";
+import type { Patch } from "../../lib/types.ts";
+import { activeVersion, discoveryText, formats } from "../../lib/catalog.ts";
+import GetButtons from "./GetButtons.astro";
+import PatchEvidence from "./PatchEvidence.astro";
+interface Props { patch: Patch }
+const { patch } = Astro.props;
+const v = activeVersion(patch);
+const name = patch.title;
+const terms = [discoveryText(patch.base.address, [patch], formats(v)), name, patch.summary].join(" ").toLowerCase();
+---
+<article class="patch-entry" data-search={terms}>
+  <div class="patch-entry-main">
+    <h3><a href={patch.url}>{name}</a></h3>
+    <p class="entry-credit">{patch.authors.map(a => a.name).join(", ")}{v && <> · {v.label} · {v.profile.id.toUpperCase()}</>}</p>
+    <p class="entry-goal">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
+    <div class="entry-actions"><a class="btn primary" href={patch.url}>{v ? "View patch" : "Version history"} <Arrow /></a>
+      {v && <GetButtons version={v} compact />}
+    </div>
+  </div>
+  {v && <PatchEvidence version={v} />}
+</article>
+<script>
+  // The title link stretches over the card, but the chart rows sit above it to
+  // keep their score tips on hover; a click there opens the patch too. Inner
+  // links, buttons and text selections keep their own behaviour.
+  document.addEventListener("click", e => {
+    const t = e.target as Element;
+    const card = t.closest?.(".patch-entry");
+    if (!card || t.closest("a, button, summary, input, select, textarea, label")) return;
+    if (String(getSelection()) !== "") return;
+    const link = card.querySelector<HTMLAnchorElement>("h3 a");
+    if (!link) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) window.open(link.href, "_blank");
+    else link.click();
+  });
+</script>

@@ -1,0 +1,87 @@
+---
+// How big each way of shipping one edit is, for any matrix shape. Byte counts
+// follow the index's current formats: a replacement stores position (8 bytes)
+// plus old and new BF16 values per changed weight; a LoRA stores F32 factors
+// of rank k; a dense ΔW stores every cell in BF16. Sizes are before
+// compression; `shipped` puts one real release's files next to the model.
+import { humanBytes } from "../../lib/format.ts";
+import WeightGrid from "./WeightGrid.astro";
+import { weight } from "../../lib/heat.ts";
+interface Shipped { name: string; href: string; loraDownload: number | null; loraUnpacked: number | null; replacement: number | null }
+interface Props { shipped?: Shipped }
+const { shipped } = Astro.props;
+// A small illustrative matrix for each shape, drawn like the other matrices: gray
+// base weights, with the first column edited in red.
+const example = (width: number, height: number) => Array.from({ length: height }, (_, i) =>
+  Array.from({ length: width }, (_, j) => j === 0
+    ? { tint: .35 + .65 * weight(i, j, 7), edited: true }
+    : { tint: .22 + .67 * weight(i, j, 7) }));
+const shapes = [
+  { m: 1024, n: 3584, label: "Wide", note: "e.g. an MLP down-projection", cells: example(3, 2) },
+  { m: 2048, n: 2048, label: "Square", note: "e.g. an attention projection", cells: example(2, 2) },
+  { m: 3584, n: 1024, label: "Tall", note: "e.g. an MLP up-projection", cells: example(1, 3) },
+];
+---
+<figure class="calc" data-calc>
+  <div class="calc-controls">
+    <div class="calc-field">
+      <span class="calc-label">Matrix shape</span>
+      <div class="seg" data-slide="thumb" role="group" aria-label="Matrix shape">
+        {shapes.map((s, i) => <button type="button" data-m={s.m} data-n={s.n} data-note={s.note} aria-pressed={i === 0 ? "true" : "false"} title={s.note}>
+          <span class="shape-art"><WeightGrid cells={s.cells} /></span>
+          <span class="shape-name">{s.label}</span>
+          <small>{s.m.toLocaleString("en-US")} × {s.n.toLocaleString("en-US")}</small>
+        </button>)}
+      </div>
+      <p class="shape-note" data-shape-note aria-live="polite">{shapes[0].note}</p>
+    </div>
+    <label class="calc-field"><span class="calc-label">Edited columns <output data-out="k">64</output></span>
+      <input type="range" min="1" max="512" value="64" data-in="k" /></label>
+    <label class="calc-field"><span class="calc-label">Values changed in each column <output data-out="f">100%</output></span>
+      <input type="range" min="5" max="100" step="5" value="100" data-in="f" /></label>
+  </div>
+  <div class="calc-bars">
+    <div class="calc-row dense"><span class="calc-name">Dense ΔW<small>every cell, BF16</small></span><span class="calc-track"><i></i></span><span class="calc-val" data-v="dense"></span></div>
+    <div class="calc-row lora"><span class="calc-name">LoRA<small>rank = edited columns, F32</small></span><span class="calc-track"><i></i></span><span class="calc-val" data-v="lora"></span></div>
+    <div class="calc-row repl"><span class="calc-name">Replacement<small>changed cells only</small></span><span class="calc-track"><i></i></span><span class="calc-val" data-v="repl"></span></div>
+  </div>
+  {shipped && <figcaption class="calc-read">As shipped, <a href={shipped.href}>{shipped.name}</a>:
+    {shipped.loraDownload && <> LoRA download <b>{humanBytes(shipped.loraDownload)}</b> (compressed){shipped.loraUnpacked && `, ${humanBytes(shipped.loraUnpacked)} unpacked`} ·</>}
+    {shipped.replacement && <> replacement <b>{humanBytes(shipped.replacement)}</b> as stored</>}</figcaption>}
+</figure>
+<style>
+  .calc { --matrix-ink: var(--color-text-muted); --matrix-edit: var(--heat-d); --matrix-paper: var(--color-surface-subtle); --matrix-outline: var(--color-text); }
+  .shape-art { display: flex; align-items: flex-end; height: 2.2rem; margin-bottom: .5rem; --matrix-pitch: .7rem; }
+  .shape-name { display: block; font-weight: 600; }
+  .shape-note { margin-top: .6rem; font-size: .88rem; color: var(--color-text-muted); min-height: 1.4em; }
+</style>
+<script>
+  const human = (b: number) => b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : b >= 1e6 ? `${(b / 1e6).toFixed(2)} MB` : `${(b / 1e3).toFixed(1)} KB`;
+  for (const fig of document.querySelectorAll<HTMLElement>("[data-calc]")) {
+    const shapeButtons = [...fig.querySelectorAll<HTMLButtonElement>("[data-m]")];
+    const kIn = fig.querySelector<HTMLInputElement>('[data-in="k"]')!;
+    const fIn = fig.querySelector<HTMLInputElement>('[data-in="f"]')!;
+    let m = 1024, n = 3584;
+    const render = () => {
+      const k = Math.min(Number(kIn.value), n), f = Number(fIn.value) / 100;
+      const sizes = { dense: 2 * m * n, lora: 4 * k * (m + n), repl: 12 * Math.round(k * m * f) };
+      const max = Math.max(...Object.values(sizes));
+      for (const [key, bytes] of Object.entries(sizes)) {
+        fig.querySelector<HTMLElement>(`.calc-row.${key} i`)!.style.transform = `scaleX(${Math.max(0.006, bytes / max)})`;
+        fig.querySelector<HTMLElement>(`[data-v="${key}"]`)!.textContent = human(bytes);
+      }
+      fig.querySelector('[data-out="k"]')!.textContent = String(k);
+      fig.querySelector('[data-out="f"]')!.textContent = `${Math.round(f * 100)}%`;
+    };
+    const note = fig.querySelector<HTMLElement>("[data-shape-note]")!;
+    shapeButtons.forEach(b => b.addEventListener("click", () => {
+      m = Number(b.dataset.m); n = Number(b.dataset.n);
+      note.textContent = b.dataset.note ?? "";
+      shapeButtons.forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    }));
+    kIn.addEventListener("input", render);
+    fIn.addEventListener("input", render);
+    render();
+  }
+</script>

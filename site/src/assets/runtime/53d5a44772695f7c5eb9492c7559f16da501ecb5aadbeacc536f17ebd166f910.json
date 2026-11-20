@@ -1,0 +1,9 @@
+{
+  "base": "Qwen/Qwen3.5-0.8B",
+  "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+  "source_sha256": "53d5a44772695f7c5eb9492c7559f16da501ecb5aadbeacc536f17ebd166f910",
+  "gguf_sha256": "0d713ba2dc8105db02092d05f486c0f87cb283ef52664cb51e5d480259e50b2f",
+  "converter_commit": "ece963f41b0b02d7a0d61436ae365762c073a4c8",
+  "converter_command": "python3 llama.cpp/convert_lora_to_gguf.py --base ./base --outfile adapter.gguf --outtype f32 ./peft",
+  "smoke_test": "llama-server b10450 loaded the BF16-converted base and F32 adapter and returned a one-token completion over HTTP. PEFT 0.21.3 with Transformers 5.20.2 attached both factors to the pinned base and executed a forward pass. vLLM 0.33.0 validated the rank and loaded both target modules using its Qwen3.5 weight-name mapping on CPU. Serving remains untested."
+}

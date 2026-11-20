@@ -1,0 +1,51 @@
+---
+import Arrow from "../Arrow.astro";
+/** searchHref: the full search page; a typed query is handed to it as ?q=. */
+/** noun is plural ("models"); one is the singular, used when a single row matches. */
+interface Props { target: string; label: string; noun: string; one: string; searchHref?: string }
+const { target, label, noun, one, searchHref } = Astro.props;
+---
+<div class="catalog-filter" data-filter-for={target} data-noun={noun} data-one={one} hidden>
+  <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.6"/></svg>
+  <input type="search" placeholder={label} aria-label={label} aria-controls={target}/>
+  {searchHref && <a class="text-link filter-handoff" href={searchHref} data-base={searchHref} hidden><span>Search every patch version</span><Arrow /></a>}
+</div>
+<script>
+  import { filteredPage } from "../../lib/filter.ts";
+  for (const filter of document.querySelectorAll<HTMLElement>("[data-filter-for]")) {
+    const list = document.getElementById(filter.dataset.filterFor!)!;
+    const rows = [...list.querySelectorAll<HTMLElement>("[data-search]")];
+    const input = filter.querySelector("input")!;
+    const status = document.getElementById(list.id + "-status")!;
+    filter.hidden = false;
+    const more = document.createElement("button");
+    more.className = "btn load-more";
+    more.type = "button";
+    list.after(more);
+    const handoff = filter.querySelector<HTMLAnchorElement>(".filter-handoff");
+    const handoffText = handoff?.querySelector("span");
+    if (handoff) more.after(handoff);
+    const pageSize = 8;
+    const searchText = rows.map(row => row.dataset.search!);
+    let limit = pageSize;
+    const apply = () => {
+      const { visible, matched } = filteredPage(searchText, input.value, limit);
+      const shown = new Set(visible);
+      rows.forEach((row, i) => { row.hidden = !shown.has(i); });
+      const noun = filter.dataset.noun;
+      more.hidden = visible.length === matched;
+      more.textContent = `Show ${Math.min(pageSize, matched - visible.length)} more ${noun}`;
+      status.textContent = !matched ? `No matching ${noun}. Try another name or clear your search.`
+        : input.value || matched > pageSize ? `${visible.length} of ${matched} ${matched === 1 ? filter.dataset.one : noun} shown` : "";
+      if (handoff && handoffText) {
+        const q = input.value.trim().slice(0, 200);
+        handoff.hidden = !q;
+        handoff.href = q ? `${handoff.dataset.base}?${new URLSearchParams({ q })}` : handoff.dataset.base!;
+        handoffText.textContent = `Search every patch version for “${q}”`;
+      }
+    };
+    input.addEventListener("input", () => { limit = pageSize; apply(); });
+    more.addEventListener("click", () => { limit += pageSize; apply(); });
+    apply();
+  }
+</script>

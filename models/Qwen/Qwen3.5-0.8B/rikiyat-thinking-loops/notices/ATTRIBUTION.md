@@ -1,6 +1,6 @@
 # Attribution and changes
 
-Original weight edit: RikiyaT ([author](https://huggingface.co/RikiyaT), [published card](https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/README.md)). Maintainer representation submitted by reluxzion. No endorsement by the author is implied.
+Original weight edit: Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab, MIT CSAIL ([study](https://rikiyat.github.io/blog/weight-space-programming/); [published card](https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/README.md) from Rikiya Takehi's [RikiyaT](https://huggingface.co/RikiyaT) account). Maintainer representation submitted by reluxzion. No endorsement by the authors is implied.
 
 Base weights: Qwen/Qwen3.5-0.8B, Apache-2.0; Copyright 2026 Alibaba Cloud, as retained in [Apache-2.0.txt](Apache-2.0.txt). The [base license](https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/2fc06364715b967f1860aea9cf38778875588b17/LICENSE) and [edited checkpoint license](https://huggingface.co/RikiyaT/Qwen3.5-0.8B-weight-space-programming/blob/d1671a178705bcab7644806d23c535517f35723b/LICENSE) have identical bytes at the pinned revisions.
 

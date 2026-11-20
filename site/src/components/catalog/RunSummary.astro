@@ -1,0 +1,27 @@
+---
+import type { Version, Run } from "../../lib/types.ts";
+import { rankable } from "../../lib/index.ts";
+import { pairedBaseline } from "../../lib/insight.ts";
+import { readCoverage } from "../../lib/catalog.ts";
+interface Props { version: Version; run: Run }
+const { version: v, run: r } = Astro.props;
+const score = r.record.score;
+const coverage = readCoverage(score.reason);
+const paired = pairedBaseline(v, r);
+---
+<div class="run-summary">
+  <div class="run-head"><strong>{r.protocolLabel}</strong><span class="chip">{r.record.profile}</span></div>
+  {rankable(r) ? <>
+    <p class="result-score">{score.value} <small>{score.metric} · {score.unit}</small></p>
+    {paired && <p class="small">Unpatched base · {paired.record.score.value} {score.unit}</p>}
+    {paired && score.unit === "fraction" && [paired.record.score.value!, score.value!].every(n => n >= 0 && n <= 1) &&
+      <div class="double-bar" aria-label="Base and patched score, on a scale from zero to one"><i style={`width:${paired.record.score.value! * 100}%`}></i><i style={`width:${score.value! * 100}%`}></i></div>}
+    <p class="small muted">n = {score.denominator}</p>
+  </> : <>
+    <p class="result-score">{coverage ? <>{coverage.filed}<small> / {coverage.total} pairs filed</small></> : <small>{r.record.state === "INCOMPLETE" ? "In progress" : "Score unavailable"}</small>}</p>
+    {coverage && <progress value={coverage.filed} max={coverage.total} aria-label="Benchmark coverage"></progress>}
+    <p class="small muted">{coverage ? "The score is pending." : score.reason}</p>
+  </>}
+  <details class="fold"><summary>Run details</summary><p class="break">{r.settingsLabel} · {r.record.state}</p><a href={r.url}>Inspect this run</a>
+    {r.paired && <> · <a href={r.paired.url}>Paired base run</a></>}</details>
+</div>

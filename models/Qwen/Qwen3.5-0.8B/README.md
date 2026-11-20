@@ -12,12 +12,12 @@ Generated from the files in this folder by `weightspace generate`; do not edit.
 
 | Patch | Kind | Latest | Summary |
 |---|---|---|---|
-| [rikiyat-thinking-loops](rikiyat-thinking-loops/) | replacement | v1 | Maintainer-produced canonical replacement representation of RikiyaT’s published edit to the language-model MLP down-projection tensors in layers 15 and 19 of Qwen3.5-0.8B, built from the pinned base and edited checkpoints without changing tensor dtype or replacement values. |
+| [rikiyat-thinking-loops](rikiyat-thinking-loops/) | replacement | v1 | Targets repetitive reasoning on math problems by editing two MLP layers. |
 
 ## Results
 
 Latest active version of each patch, against the baseline run on the same profile.
 
-| Patch | Profile | Metric | Baseline | Patched | Measured by |
-|---|---|---|---|---|---|
+| Patch | Profile | Metric | Baseline | Patched |
+|---|---|---|---|---|
 | rikiyat-thinking-loops v1 | `bf16` | not measured | | | |

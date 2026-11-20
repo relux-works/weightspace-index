@@ -49,6 +49,7 @@ models/
           runs/<run-id>/              runs of this version
           comparisons/<id>.json       patched run against baseline run
           assessments/<id>.json       decision for a stated use, citing comparisons
+          claims/<id>.json            results the patch authors published themselves
 ```
 
 `<aa>` is the first two hex characters of the digest, which keeps every directory small enough for GitHub's file browser.
@@ -70,9 +71,10 @@ Addresses are the identities. Records refer to each other by address; a pinned i
 | `base.json` | Profiles of the base. Each profile has an ID, its source (`repo_id` and full revision of a Hugging Face model repository), and every file with path, SHA-256 and size. Every distinct file set is its own profile: another quantization, another publisher's file with the same quantization name, or a later upstream revision with changed weights. |
 | `patch.json` | Title, summary, kind (`replacement` or `lora`, see [Patch forms](#patch-forms)), `authors[]`, `submitter`, license, tags, and the status of each version (`active`, `deprecated`, `withdrawn`). |
 | `version.json` | One-line changelog, target base profile, and every file with its `name`, locators, SHA-256, size and `role` (`source` or `derived`). A derived file also records `derived_from` (file digests) and the tool name and version that built it. |
-| `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score, who performed it, and the outcome and resource files beside it. |
+| `run.json` | Profile and version (none for a baseline), protocol and dataset identities, settings, completion state, score (for bench runs, the share of final answers right, with lm-eval's own score, the shares cut at the token limit and finished without an answer, and mean reply tokens beside it), and the outcome and resource files beside it. |
 | `comparisons/<id>.json` | The baseline and patched runs compared, estimand, matched outcomes, uncertainty, or the reason the comparison is refused. |
 | `assessments/<id>.json` | Intended use, decision policy, supporting comparisons, decision and reason. |
+| `claims/<id>.json` | Aggregate results the patch authors published, copied from one cited source (`https` URL and title): the conditions they state, and per measure the benchmark, an optional name and metric, unit, baseline and patched values, which direction is better, and samples per item when stated. A claim has no per-item outcomes, so it is shown as self-reported and never compared or assessed like a run. |
 | Patch `README.md` | The card. Prose for people, linking to machine facts instead of restating them. |
 | `notices/` | The patch's license and attribution, plus the obligations the base model's license passes on to derivatives. |
 
@@ -124,7 +126,7 @@ the following hold:
 | File | Contains |
 |---|---|
 | `models/<ns>/<model>/index.json` | Everything a client needs for one base: its profiles and baseline runs, every patch with its metadata and latest version, and every version with its status, changelog, target profile, files, runs and assessment decisions. Each file gets a `format` from its extension, and an `index-path` locator is rewritten to be relative to this file. |
-| `models/<ns>/<model>/README.md` | The base's profiles, then a table of every patch: kind, latest version, summary. For each latest version, every comparison against its baseline run (metric, both scores, who measured it) or "not measured", and every assessment decision. |
+| `models/<ns>/<model>/README.md` | The base's profiles, then a table of every patch: kind, latest version, summary. For each latest version, every comparison against its baseline run (metric, both scores) or "not measured", and every assessment decision. |
 | `lookup/by-digest/<aa>/<sha256>.json` | For each known base file digest: base address and profile ID. |
 | `lookup/by-repo/<namespace>/<repo>.json` | For each repository that holds any profile of a base, upstream or not, and for each former name of a renamed repository: base address and profile IDs. |
 | `models/index.json` | `{ "contract_version": 1, "bases": ["<namespace>/<model>"] }`, with every base address sorted. Each base has its own `index.json` and `README.md` at `models/<address>/`. |
@@ -154,13 +156,13 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
    within its base, and never renamed. After adoption, improved bytes for the same
    patch are a new version under the same slug; a new slug is only
    for a genuinely different patch.
-5. **Version policy follows adoption.** Versions are numbered `v1`, `v2`, … with no gaps. The index is currently pre-adoption: merged files under `v<N>/` may be edited in place, including `version.json`, rather than creating a new version. Deletions and file-type changes remain forbidden. When adoption begins, maintainers must set `PRE_ADOPTION` to `'false'` in `.github/workflows/checks.yml`; thereafter merged files may not be modified or deleted, while runs, comparisons and assessments may be added. The legal-takedown exception remains: an admin removes affected files, marks the version `withdrawn`, and retains `version.json`. The card, `notices/` and `patch.json` stay editable, including version statuses.
+5. **Version policy follows adoption.** Versions are numbered `v1`, `v2`, … with no gaps. The index is currently pre-adoption: merged files under `v<N>/` may be edited in place, including `version.json`, rather than creating a new version. Deletions and file-type changes remain forbidden. When adoption begins, maintainers must set `PRE_ADOPTION` to `'false'` in `.github/workflows/checks.yml`; thereafter merged files may not be modified or deleted, while runs, comparisons, assessments and claims may be added. The legal-takedown exception remains: an admin removes affected files, marks the version `withdrawn`, and retains `version.json`. The card, `notices/` and `patch.json` stay editable, including version statuses.
 
    Owner decision, 2026-11-17: "no one have seen this index or used it yet - we may just edit what we have instead of adding a v2"
 6. **Existing patches change under human review.** A new version, a status change or a card edit for an existing patch is always reviewed by a human maintainer. Authors and submitter are recorded separately and may differ.
 7. **Hosting is the submitter's choice.** A patch file may be hosted in this repository (under `files/`) or on Hugging Face. Files uploaded to this repository must each be under 100 MB, GitHub's per-file limit; the cap does not apply to Hugging Face-hosted files. Git LFS is not used.
 8. **Safe formats only.** Weights are safetensors or GGUF; metadata is JSON. Pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`) and any code from a source repository are refused, because loading them can execute code.
-9. **Results say who measured them.** Every run records whether the index maintainers performed it under an index protocol or it is reported by the author or a third party. Generated tables show the two separately.
+9. **Results say where they come from.** A run is the index's own benchmark, filed by the index team or any contributor; all runs stand together, and no one files a benchmark the index does not define. The site labels runs "Measured" and claims "Reported". A patch author's claim is a separate record. Claims and runs are never ranked together, and each takes its change from its own base.
 10. **No symlinks** anywhere in the repository.
 
 ## Where files live

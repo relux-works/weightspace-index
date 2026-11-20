@@ -1,0 +1,54 @@
+---
+import Arrow from "../../../../components/Arrow.astro";
+import Page from "../../../../layouts/Page.astro";
+import FileList from "../../../../components/FileList.astro";
+import Filter from "../../../../components/catalog/Filter.astro";
+import PatchCard from "../../../../components/catalog/PatchCard.astro";
+import ModelResults from "../../../../components/catalog/ModelResults.astro";
+import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.ts";
+import { activeVersion, formats } from "../../../../lib/catalog.ts";
+import { orderPatches, stackResults } from "../../../../lib/insight.ts";
+import { plural } from "../../../../lib/format.ts";
+export function getStaticPaths() {
+  return loadIndex().bases.map(base => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
+}
+interface Props { base: Base }
+const { base } = Astro.props;
+const releases = base.patches.map(activeVersion).filter(v => !!v);
+const forms = [...new Set(releases.flatMap(v => formats(v)))];
+const stacks = new Set(stackResults(base).filter(r => r.stack).map(r => r.stack!.map(v => v.patch.slug).join("+"))).size;
+const profile = base.profiles[0];
+---
+<Page title={base.address} description={`Patches for ${base.address}: results, measured stacks and downloads.`} nav="models">
+  <div class="wrap page-flow">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href={href()}>Models</a><span>/</span><span aria-current="page">{base.model}</span></nav>
+    <header class="model-hero">
+      <h1>{base.model}</h1>
+      <p class="model-meta">
+        <span>{base.ns}</span>
+        {forms.length > 0 && <span>{forms.join(" + ")}</span>}
+        {stacks > 0 && <a href="#results">{plural(stacks, "measured stack", "measured stacks")}</a>}
+        {profile && <a href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`}>Base weights on Hugging Face <Arrow dir="out" /></a>}
+      </p>
+    </header>
+
+    <section class="flow-section" id="patches">
+      <div class="directory-head"><h2>Available patches</h2>{base.patches.length > 3 && <Filter target="patch-list" label="Filter patches" noun="patches" one="patch"/>}</div>
+      <p class="filter-status" id="patch-list-status" role="status"></p>
+      <div id="patch-list" class="patch-directory">{orderPatches(base.patches).map(patch => <PatchCard patch={patch} />)}</div>
+      {!base.patches.length && <p class="quiet-row">This model has no published patches yet. Its supported base files are listed below.</p>}
+    </section>
+
+    {base.patches.length > 1 && <section class="flow-section" id="results">
+      <h2>Compare patches</h2>
+      <ModelResults base={base} />
+    </section>}
+
+    <section class="flow-section" id="profiles"><h2>Model details</h2>
+      {base.profiles.map(p => <details class="fold" id={`profile-${p.id}`}><summary>{p.id.toUpperCase()} · {p.source.repo_id} <code>@{p.source.revision.slice(0,7)}</code></summary>
+        <FileList files={profileFiles(p)} showRole={false} /></details>)}
+      <details class="fold" id="records"><summary>Model record and benchmark runs</summary><a href={base.baseRecord.view}>Base record</a>
+        {base.groups.map(g => <div id={g.id}><h3>{g.protocolLabel} · {g.profile.id}</h3>{g.runs.map(r => <p><a href={r.url}>{r.version ? r.version.patch.title + " " + r.version.label : "Unpatched base"} · {r.record.state}</a></p>)}</div>)}</details>
+    </section>
+  </div>
+</Page>

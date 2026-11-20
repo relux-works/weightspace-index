@@ -1,0 +1,16 @@
+{
+  "contract_version": 1,
+  "profile": "bf16",
+  "benchmark": "Arithmetic",
+  "metric": "Accuracy",
+  "unit": "%",
+  "direction": "higher",
+  "denominator": 200,
+  "protocol": "Synthetic demonstration. All four treatments use the same 200 example prompts and greedy decoding.",
+  "baseline": 50,
+  "members": [
+    {"slug": "better-math", "version": 1, "artifact": "replacements.safetensors", "scale": 1, "alone": 50},
+    {"slug": "shorter-answers", "version": 2, "artifact": "adapter_model.safetensors", "scale": 1, "alone": 47}
+  ],
+  "together": 54
+}

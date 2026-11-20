@@ -1,0 +1,28 @@
+{
+  "contract_version": 1,
+  "profile": "bf16",
+  "benchmark": "IFEval",
+  "metric": "Prompt-level strict accuracy",
+  "unit": "%",
+  "direction": "higher",
+  "denominator": 541,
+  "protocol": "Synthetic demonstration. A contributor ran all four treatments on the 541 IFEval prompts with greedy decoding.",
+  "baseline": 47,
+  "members": [
+    {
+      "slug": "shorter-answers",
+      "version": 2,
+      "artifact": "adapter_model.safetensors",
+      "scale": 1,
+      "alone": 55.4
+    },
+    {
+      "slug": "polite-tone",
+      "version": 1,
+      "artifact": "adapter_model.safetensors",
+      "scale": 1,
+      "alone": 52
+    }
+  ],
+  "together": 49
+}

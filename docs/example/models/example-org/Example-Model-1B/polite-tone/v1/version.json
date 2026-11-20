@@ -1,0 +1,37 @@
+{
+  "contract_version": 1,
+  "changelog": "First release.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "size_bytes": 12000000,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "example-author/polite-tone-lora",
+          "revision": "9999999999999999999999999999999999999999",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "1212121212121212121212121212121212121212121212121212121212121212",
+      "size_bytes": 800,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "example-author/polite-tone-lora",
+          "revision": "9999999999999999999999999999999999999999",
+          "path": "adapter_config.json"
+        }
+      ]
+    }
+  ]
+}

@@ -89,3 +89,9 @@ Any GPU that stock vLLM supports: NVIDIA with compute capability 7.0 or newer (R
 - **Comparison records in the index:** the index can't host per-item comparison data yet, so `compare` prints to the terminal. Fixing that needs a change to the index tool.
 - **Running `bench check` in CI.**
 - **More benchmarks:** MMLU-Pro is prepared but not run.
+
+## Combination studies
+
+Any set of patches can be applied together, so any set can be benchmarked; the site shows only the stacks someone reported. Each study is one JSON file under `bench/combinations/<namespace>/<model>/`. It names two or more members by patch slug, version, artifact filename and scale, and declares its profile, benchmark, protocol, item count (`denominator`), metric, unit, preferred direction and performer. File the unpatched baseline and the score of the whole stack. Also file each member's score alone under the same conditions whenever you can: either every member has an `alone` score or none does. File full measurement conditions in `protocol` and keep experiment outputs with the benchmark contribution.
+
+The model page's Compare patches section shows each study as rows in the Measured group of its benchmark: the stack's score next to the unpatched base, listed after the single patches (pairs before triples). A member's solo score fills that patch's row when the patch has no result of its own for the same benchmark and item count. Only stacks of the patches' active releases are shown, and a patch page names the stacks that include it. The build rejects unavailable artifacts, mismatched profiles, repeated patches and a mix of members with and without solo scores. See the [synthetic studies](example/bench/combinations/example-org/Example-Model-1B/).

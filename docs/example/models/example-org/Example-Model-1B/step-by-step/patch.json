@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "title": "Step-by-step",
+  "summary": "SYNTHETIC EXAMPLE: a published PEFT LoRA that writes out its reasoning.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Example Author"
+    }
+  ],
+  "submitter": "example-user",
+  "license": "MIT",
+  "tags": [
+    "reasoning"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

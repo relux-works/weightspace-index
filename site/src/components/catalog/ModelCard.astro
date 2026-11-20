@@ -1,0 +1,19 @@
+---
+import Arrow from "../Arrow.astro";
+import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
+import { plural } from "../../lib/format.ts";
+import { versionTerms } from "../../lib/search.ts";
+import type { Base } from "../../lib/types.ts";
+interface Props { base: Base }
+const { base } = Astro.props;
+const releases = base.patches.map(activeVersion).filter(v => !!v);
+const names = releases.map(v => v.patch.title);
+const terms = [discoveryText(base.address, base.patches, releases.flatMap(formats)),
+  ...names, ...releases.map(versionTerms)].join(" ").toLowerCase();
+---
+<li data-search={terms}>
+  <a class="model-entry" href={base.url}>
+    <span><strong>{base.model}</strong><small>{base.ns} · {plural(releases.length, "active patch", "active patches")}{base.dir.startsWith("docs/example/") && " · Synthetic example"}</small></span>
+    <span class="entry-arrow"><Arrow /></span>
+  </a>
+</li>

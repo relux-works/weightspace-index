@@ -1,0 +1,31 @@
+---
+import Page from "../layouts/Page.astro";
+import ModelCard from "../components/catalog/ModelCard.astro";
+import Filter from "../components/catalog/Filter.astro";
+import FormatComparison from "../components/viz/FormatComparison.astro";
+import PatchPreview from "../components/viz/PatchPreview.astro";
+import { href, loadIndex } from "../lib/index.ts";
+import { mostBenchmarked } from "../lib/insight.ts";
+import { plural } from "../lib/format.ts";
+const models = loadIndex().bases;
+const featured = mostBenchmarked(models);
+---
+<Page title="Weightspace Index" nav="models" description="Find weight patches for your base model, compare benchmark evidence, and download a LoRA adapter or a direct replacement.">
+  <div class:list={["wrap landing", { "with-preview": featured }]}>
+    <div class="find-model">
+      <header class="find-intro">
+        <h1>Find a patch for<br />your model.</h1>
+        <p>Compare weight edits for open models and download a compatible patch. <a href="#patch-vs-lora">Patch vs LoRA</a></p>
+      </header>
+      <section class="directory" id="models" aria-labelledby="directory-heading">
+        <div class="directory-label"><h2 id="directory-heading">Choose a base model</h2><span>{plural(models.length, "model")}</span></div>
+        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" one="model" searchHref={href("search/")} />}
+        <p class="filter-status" role="status" id="model-list-status"></p>
+        <ul class="model-list" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
+        {!models.length && <p class="quiet-row">No models have been published yet.</p>}
+      </section>
+    </div>
+    {featured && <PatchPreview version={featured} />}
+  </div>
+  <FormatComparison />
+</Page>

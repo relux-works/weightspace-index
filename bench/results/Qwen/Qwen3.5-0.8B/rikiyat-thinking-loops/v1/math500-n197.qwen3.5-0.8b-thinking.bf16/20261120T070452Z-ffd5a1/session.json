@@ -82,7 +82,6 @@
   "concurrency": 10,
   "parallel": false,
   "timeout": 7200,
-  "performed_by": "index",
   "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
   "started": "2026-11-20T07:04:52Z"
 }

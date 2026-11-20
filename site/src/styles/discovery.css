@@ -1,0 +1,81 @@
+/* Catalog layouts share the existing self-hosted typefaces and Relux theme. */
+[hidden] { display: none !important; }
+.page-flow { padding-bottom: 4rem; }
+
+
+.studymeta, .context-label {
+  font: 500 .8rem/1.5 var(--font-ui);
+}
+
+.directory { border-top: 1px solid var(--color-border); padding-top: 2rem; }
+.directory-head, .run-head, .local-nav, .terminal figcaption {
+  display: flex; align-items: center; gap: .65rem; flex-wrap: wrap;
+}
+.directory-head, .terminal figcaption, .run-head { justify-content: space-between; }
+.directory-head p, .credit, .studymeta, .context-label, .filter-status, .quiet-row { color: var(--color-text-muted); }
+.directory-head p { font-size: .85rem; margin-top: .2rem; }
+.catalog-filter { background: var(--color-control); border: 1px solid var(--color-border); border-radius: .4rem; padding: 0 .75rem; display: flex; align-items: center; color: var(--color-text-muted); gap: .5rem; }
+.catalog-filter:focus-within { outline: 2px solid var(--color-focus); }
+.catalog-filter input { appearance: none; width: 15.5rem; min-height: 2.65rem; padding: .3rem 0; font: .86rem var(--font-ui); color: var(--color-text); background: transparent; border: 0; }
+.catalog-filter input:focus { outline: 0; }
+
+.load-more { margin-top: .85rem; }
+.filter-handoff:not([hidden]) { display: inline-flex; align-items: center; gap: .35rem; margin-top: .85rem; }
+.load-more:not([hidden]) + .filter-handoff { margin-left: 1rem; }
+.filter-status { font-size: .85rem; }
+.filter-status:not(:empty) { margin: .8rem 0; }
+.model-tile { min-width: 0; }
+
+
+.chip, .demo-tag { padding: .12rem .4rem; border-radius: .25rem; font: 500 .75rem/1.4 var(--font-ui); background: var(--color-surface-subtle); color: var(--color-text-muted); }
+.demo-tag { margin-left: auto; border: 1px dashed var(--color-border-strong); }
+
+.page-flow > .crumbs { padding: 1.5rem 0 0; margin: 0; }
+
+.context-label { margin-bottom: .5rem; }
+
+.credit { font-size: .83rem; }
+.credit a { color: inherit; }
+
+.local-nav { gap: 1.5rem; padding: .8rem 0; border-block: 1px solid var(--color-border); }
+.local-nav a { color: var(--color-text-muted); font-size: .85rem; font-weight: 550; text-decoration: none; }
+.local-nav a:hover { color: var(--color-link); text-decoration: underline; }
+.flow-section { padding: 2.1rem 0 0; }
+.flow-section > h2, .flow-section > .directory-head { margin-bottom: 1rem; }
+
+.quiet-row { background: var(--color-surface-subtle); border-radius: .4rem; padding: .85rem 1rem; font-size: .88rem; }
+
+.studymeta { font-size: .8rem; margin-bottom: .3rem; }
+
+.double-bar { display: grid; gap: 2px; padding: 1px 0; background: repeating-linear-gradient(90deg,var(--color-border) 0 1px, transparent 1px 25%); }
+.double-bar i { height: 4px; background: var(--color-border-strong); }
+.double-bar i + i { height: 6px; background: var(--color-accent); }
+.run-summary { margin-top: 1.1rem; }
+.run-head { font-size: .86rem; }
+.result-score { font: 600 2.2rem/1.3 var(--font-display); margin: .5rem 0; }
+.result-score small { font: 400 .87rem var(--font-ui); color: var(--color-text-muted); }
+.run-summary progress { width: 100%; height: .55rem; accent-color: var(--color-accent); display: block; margin: .4rem 0 .6rem; }
+.fold { border-top: 1px solid var(--color-divider); padding: .75rem 0; }
+.fold > summary { color: var(--color-text); font-size: .87rem; }
+.fold > p, .fold > a, .fold > ul { font-size: .85rem; }
+.fold > p { margin-block: .55rem; }
+.run-summary > .fold { margin-top: .8rem; padding-bottom: 0; }
+.run-summary .fold > summary { font-size: .76rem; }
+
+.terminal { border-radius: .45rem; margin: .75rem 0 .4rem; background: var(--color-brand-ink); color: #edf3ee; padding: .7rem 1rem 1.05rem; }
+.terminal figcaption { color: #c3cec6; font: .8rem var(--font-ui); }
+.terminal .btn { min-height: 1.8rem; }
+.terminal pre { margin: .7rem 0 0; overflow-x: auto; line-height: 1.6; font-size: .8rem; tab-size: 2; }
+@media(max-width: 42rem) {
+  .catalog-filter { width: 100%; }
+  .catalog-filter input { width: 100%; }
+  .directory { padding-top: 1.35rem; }
+  .directory-head { align-items: flex-start; }
+  .local-nav { gap: .5rem 1rem; }
+  .page-flow > .crumbs { padding-top: .9rem; }
+  .flow-section { padding-top: 1.65rem; }
+}
+@media(forced-colors: active) {
+  .double-bar i { forced-color-adjust: none; background: GrayText; }
+  .double-bar i + i { background: Highlight; }
+}

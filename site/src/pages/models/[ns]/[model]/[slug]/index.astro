@@ -1,0 +1,13 @@
+---
+import PatchPage from "../../../../../components/catalog/PatchPage.astro";
+import { loadIndex, type Patch } from "../../../../../lib/index.ts";
+import { activeVersion } from "../../../../../lib/catalog.ts";
+export function getStaticPaths() {
+  return loadIndex().bases.flatMap((base) =>
+    base.patches.map((patch) => ({ params: { ns: base.ns, model: base.model, slug: patch.slug }, props: { patch } })),
+  );
+}
+interface Props { patch: Patch }
+const { patch } = Astro.props;
+---
+<PatchPage patch={patch} version={activeVersion(patch)} />

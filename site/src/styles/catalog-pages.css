@@ -147,9 +147,9 @@
 .triad.compact .tri-key span::before { width: .9rem; height: .5rem; }
 .triad.compact .tri-key .k-tick::before { width: 2px; height: .8rem; margin-inline: .35rem; }
 .triad.compact .tri { position: relative; }
-.tri-pop { display: none; }
+.plot-key.tri-pop { display: none; }
 @media (hover: hover) and (pointer: fine) {
-  .tri-key-touch { display: none; }
+  .plot-key.tri-key-touch { display: none; }
   .triad.compact .tri-pop {
     display: flex; flex-wrap: nowrap; white-space: nowrap; position: absolute; right: 0; bottom: calc(100% + .15rem); z-index: 3; margin: 0;
     padding: .3rem .6rem; border: 1px solid var(--color-border); border-radius: .35rem;

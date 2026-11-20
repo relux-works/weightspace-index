@@ -8,6 +8,7 @@ weights file it was pointed at.
 from __future__ import annotations
 
 import json
+import logging
 import shutil
 import sys
 from pathlib import Path
@@ -23,7 +24,11 @@ RUN_ID = "tiny.qwen3.5-0.8b-thinking.bf16"
 RESULTS = f"bench/results/Qwen/Qwen3.5-0.8B/p-x/v1/{RUN_ID}"
 
 # Both answer item 14 identically and right. Elsewhere the base is cut in a
-# thinking loop and the patched copy answers pi (right for item 17 only).
+# thinking loop and the patched copy answers pi (right for item 17 only),
+# except on item 2, where it finishes with the right answer but no box.
+# lm-eval credits two replies the headline grades wrong: the base's cut
+# trace on item 17 holds a boxed pi, and the patched item 2 gives the
+# answer in LaTeX outside a box.
 FAKE_VLLM = '''#!{python}
 import json, os, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -68,8 +73,12 @@ class H(BaseHTTPRequestHandler):
         finish = "stop"
         answer = "\\\\sqrt{{51}}" if item14 else "\\\\pi"
         content = "<think>seed %d</think>\\n\\nThe answer is $\\\\boxed{{%s}}$." % (req["seed"], answer)
+        if patched and "f(-2)" in prompt:  # item 2: right, finished, not boxed
+            content = "<think>seed %d</think>\\n\\nThe answer is $\\\\frac{{14}}{{3}}$." % req["seed"]
         if not patched and not item14:  # a thinking loop, cut at the limit
             finish, content = "length", "<think>seed %d. Wait. Wait." % req["seed"]
+            if "f(-2)" not in prompt:  # item 17: a right guess inside the cut trace
+                content = "<think>seed %d. Maybe $\\\\boxed{{\\\\pi}}$? Wait. Wait." % req["seed"]
         self.reply({{"model": req["model"], "choices": [{{
             "index": 0, "finish_reason": finish,
             "message": {{"role": "assistant", "content": content}}}}],
@@ -196,8 +205,22 @@ def test_end_to_end(repo, capsys):
     base = json.loads((root / f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1/run.json").read_text())
     assert patched["state"] == base["state"] == "COMPLETE"
     assert patched["performed_by"] == base["performed_by"] == "index"
+    # Proves: the headline grades the final answer only. A cut trace with a
+    # boxed guess (base item 17) and a finished reply with no box (patched
+    # item 2) are wrong, though lm-eval credits both; its score sits beside.
     assert patched["score"]["value"] == pytest.approx(2 / 3)
+    assert patched["score"]["value_lm_eval"] == 1.0
     assert base["score"]["value"] == pytest.approx(1 / 3)
+    assert base["score"]["value_lm_eval"] == pytest.approx(2 / 3)
+    assert "last \\boxed{} after the think-end token" in base["score"]["unit"]
+    assert base["score"]["finished_without_answer"] == 0.0
+    assert patched["score"]["finished_without_answer"] == pytest.approx(1 / 3)
+    assert base["score"]["mean_completion_tokens"] == 9.0
+    lines = (root / f"{ENTRY}/runs/{RUN_ID}/outcomes.jsonl").read_text().splitlines()
+    graded = {x["id"]: (x["answer"], x["correct"], x["correct_is_equiv"], x["score"])
+              for x in map(json.loads, lines)}
+    assert graded == {2: (None, False, False, 1.0), 14: ("\\sqrt{51}", True, True, 1.0),
+                      17: ("\\pi", True, True, 1.0)}
     # Proves: a completed run records the cut-at-limit share beside the
     # headline score. The fake base is cut on items 2 and 17 of 3; the
     # patched copy is never cut (see FAKE_VLLM).
@@ -214,6 +237,72 @@ def test_end_to_end(repo, capsys):
     # under the same name, beside the same headline scores.
     assert c["base"]["cut_at_limit"] == pytest.approx(base["score"]["cut_at_limit"])
     assert c["patched"]["cut_at_limit"] == patched["score"]["cut_at_limit"]
+    # Proves: `compare` leads with the same headline as the run record and
+    # keeps lm-eval's figures and the MATH checker's beside it.
+    assert c["base"]["score"] == base["score"]["value"]
+    assert c["base"]["score_lm_eval"] == base["score"]["value_lm_eval"]
+    assert c["lm_eval"]["difference"] == pytest.approx(1 / 3)
+    assert c["base"]["right_only_by_lm_eval"] == c["patched"]["right_only_by_lm_eval"] == 1
+    assert c["base"]["right_only_by_final_answer"] == c["patched"]["right_only_by_final_answer"] == 0
+    assert c["base"]["score_is_equiv"] == c["base"]["score"]
+    assert c["base"]["checkers_disagree"] == c["patched"]["checkers_disagree"] == 0
+    assert c["patched"]["finished_without_answer"] == patched["score"]["finished_without_answer"]
+
+    # Proves: `disagreements` lists exactly the two replies lm-eval credits
+    # without a right final answer, with what lm-eval scored in each.
+    capsys.readouterr()
+    assert bench("disagreements", *ARGS) == 0
+    out = capsys.readouterr()
+    found = [json.loads(line) for line in out.out.splitlines() if line]
+    assert [(x["variant"], x["item"], x["answer"], x["lm_eval"], x["math_verify"],
+             x["thinking_finished"], x["lm_eval_text_last_box"]) for x in found] == [
+        ("base", 17, None, True, False, False, "\\pi"),
+        ("patched", 2, None, True, False, True, None)]
+    assert ("2 replies where the graders disagree: 2 right only by lm-eval "
+            "(1 of them cut at the token limit, 2 with no final answer)") in out.err
+
+
+def test_boxed():
+    text = "a \\boxed{\\frac{1}{2}} b \\boxed{x"
+    assert core.boxed(text) == [(2, 21, "\\frac{1}{2}")]
+
+
+@pytest.mark.parametrize("content,answer", [
+    ("<think>\\boxed{1}</think> so $\\boxed{\\frac{1}{2}}$.", "\\frac{1}{2}"),  # after </think>
+    ("<think>\\boxed{1}</think>\\boxed{2} or \\boxed{ 3 }", "3"),               # the last box
+    ("<think>a \\boxed{1}</think> it is 1.", None),                            # no box after
+    ("<think>cut while thinking \\boxed{1}", None),                            # no </think>
+    ("<think></think>\\boxed{2} then \\boxed{3", None),                        # last box unclosed
+    ("<think></think>\\boxed{ }", None),                                       # empty box
+    ("<think></think>\\boxed{\\boxed{4}}", "4"),                               # innermost last
+])
+def test_final_answer(content, answer):
+    assert core.final_answer(content, "</think>") == answer
+
+
+def test_final_answer_without_thinking():
+    assert core.final_answer("so \\boxed{4}", None) == "4"
+
+
+def test_grade():
+    assert core.grade("\\frac{14}{3}", "\\frac{14}{3}") == (True, True)
+    assert core.grade("14/3", "\\frac{14}{3}") == (True, True)
+    assert core.grade("2\\sqrt{2}", "\\sqrt{8}") == (True, False)  # the checkers disagree
+    assert core.grade("3", "\\pi") == (False, False)
+    assert core.grade(None, "\\pi") == (False, False)
+
+
+def test_grade_timeout_refused(monkeypatch):
+    # math-verify reports a timeout as a warning and answers 'not equal'.
+    mv, _ = core.grader()
+
+    def timed_out(*args, **kwargs):
+        logging.getLogger("math_verify.grader").warning("Timeout during comparison")
+        return False
+
+    monkeypatch.setattr(mv, "verify", timed_out)
+    with pytest.raises(core.BenchError, match="timed out"):
+        core.grade("1", "1")
 
 
 def test_repeat_counts_once(repo, capsys, monkeypatch):
@@ -260,6 +349,7 @@ def edit_lines(path: Path, fn) -> str:
     ("patched.requests.jsonl", lambda x: {**x, "request": {**x["request"], "seed": 7}}, "seed"),
     ("base.requests.jsonl", lambda x: {**x, "request": {**x["request"], "logprobs": True}}, "unexpected"),
     ("base.samples.jsonl", lambda x: {**x, "doc_hash": "0" * 64}, "dataset content differs"),
+    ("base.samples.jsonl", lambda x: {**x, "target": "6"}, "not the frozen gold answer"),
     ("patched.samples.jsonl", lambda x: {**x, "resps": [["\\boxed{6}"]]}, "not the recorded reply"),
     ("base.requests.jsonl", lambda x: {**x, "status": 500}, "failed"),
 ])

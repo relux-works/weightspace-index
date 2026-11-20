@@ -11,7 +11,7 @@
       },
       "score": {
         "owner": "bench contributors",
-        "reason": "22 of 197 item-seed pairs filed",
+        "reason": "110 of 197 item-seed pairs filed",
         "state": "UNKNOWN"
       },
       "state": "INCOMPLETE"
@@ -96,7 +96,7 @@
               },
               "score": {
                 "owner": "bench contributors",
-                "reason": "22 of 197 item-seed pairs filed",
+                "reason": "110 of 197 item-seed pairs filed",
                 "state": "UNKNOWN"
               },
               "state": "INCOMPLETE"

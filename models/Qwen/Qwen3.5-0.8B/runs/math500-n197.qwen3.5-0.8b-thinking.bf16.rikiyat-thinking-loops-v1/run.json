@@ -111,6 +111,108 @@
             "--kv-cache-memory-bytes=4294967296"
           ]
         }
+      },
+      "20261119T211923Z-134f1b": {
+        "seed": 1234,
+        "performed_by": "third-party",
+        "hardware": "M3 Max 128 GB, vllm-metal 0.33.0",
+        "concurrency": 4,
+        "items": 50,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
+      },
+      "20261119T215008Z-fab71c": {
+        "seed": 1234,
+        "performed_by": "index",
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 10,
+        "items": 10,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
+      },
+      "20261120T005800Z-355cda": {
+        "seed": 1234,
+        "performed_by": "index",
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 10,
+        "items": 10,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
+      },
+      "20261120T034824Z-f0d2aa": {
+        "seed": 1234,
+        "performed_by": "index",
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 10,
+        "items": 10,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
+      },
+      "20261120T070452Z-ffd5a1": {
+        "seed": 1234,
+        "performed_by": "index",
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 10,
+        "items": 10,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
+      },
+      "20261120T095425Z-cadc38": {
+        "seed": 1234,
+        "performed_by": "index",
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 10,
+        "items": 10,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
       }
     },
     "results": "bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/math500-n197.qwen3.5-0.8b-thinking.bf16"
@@ -119,11 +221,11 @@
   "score": {
     "state": "UNKNOWN",
     "owner": "bench contributors",
-    "reason": "22 of 197 item-seed pairs filed"
+    "reason": "110 of 197 item-seed pairs filed"
   },
   "outcomes": {
-    "sha256": "acfd0e97e4dc3fc8627da5c9d69f6e8e8587017cdbf58c2ef8ce32d26f7b9a73",
-    "size_bytes": 4933,
+    "sha256": "ed8848866954a9b58681eef2a98c9b9cddf5ffe6e5841569e5cab830d982d169",
+    "size_bytes": 30763,
     "locators": [
       {
         "kind": "index-path",

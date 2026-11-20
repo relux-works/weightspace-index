@@ -8,8 +8,11 @@ sessions (`python -m bench check`).
 """
 from __future__ import annotations
 
+import functools
 import hashlib
+import importlib.metadata
 import json
+import logging
 import math
 import re
 from dataclasses import dataclass, field
@@ -293,6 +296,111 @@ def lm_eval_answer(content: str, think_end: str | None) -> str:
     return content.split(think_end)[-1].lstrip() if think_end else content
 
 
+# ---------------------------------------------------------------- grading
+
+# Tasks whose replies end in a \boxed{} final answer, graded by `grade`.
+GRADED_TASKS = ("minerva_math500",)
+BOXED = "\\boxed{"
+
+
+def pinned_packages() -> dict[str, str]:
+    """Installed versions of every pin in bench/requirements.txt; any
+    difference is an error, since another scorer version can score the
+    same reply differently."""
+    out = {}
+    for line in (BENCH / "requirements.txt").read_text().splitlines():
+        line = line.split("#")[0].strip()
+        if not line:
+            continue
+        name, _, version = line.partition("==")
+        name = re.sub(r"\[.*\]", "", name).strip()
+        try:
+            installed = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            raise BenchError(f"{name} is not installed; pip install -r bench/requirements.txt") from None
+        require(installed == version, f"{name} {installed} installed, bench/requirements.txt pins {version}")
+        out[name] = installed
+    return out
+
+
+def boxed(text: str) -> list[tuple[int, int, str]]:
+    """Every \\boxed{...} in `text`, braces balanced: (start, end, inside)."""
+    out, start = [], 0
+    while (j := text.find(BOXED, start)) >= 0:
+        k, depth = j + len(BOXED), 1
+        while k < len(text) and depth:
+            depth += {"{": 1, "}": -1}.get(text[k], 0)
+            k += 1
+        if depth == 0:
+            out.append((j, k, text[j + len(BOXED):k - 1]))
+        start = j + len(BOXED)
+    return out
+
+
+def final_answer(content: str, think_end: str | None) -> str | None:
+    """A reply's final answer: the inside of its last \\boxed{...} after
+    its last think-end token. None, which counts as wrong, when the reply
+    never closed its thinking, when no box follows, or when the last box
+    is unclosed or empty. Nothing else in the text is read as an answer
+    (owner decision: Timur, 2026-11-20; docs/benchmarking.md)."""
+    if think_end:
+        _, found, content = content.rpartition(think_end)
+        if not found:
+            return None
+    start = content.rfind(BOXED)
+    last = boxed(content[start:]) if start >= 0 else []
+    return (last[0][2].strip() or None) if last else None
+
+
+class Timeouts(logging.Handler):
+    """Counts math-verify's timeout warnings. A timed-out parse or
+    comparison comes back as 'not equal', which would make a grade depend
+    on the machine's speed; `grade` refuses it instead."""
+
+    def __init__(self) -> None:
+        super().__init__(logging.WARNING)
+        self.count = 0
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self.count += record.getMessage().startswith("Timeout during")
+
+
+TIMEOUTS = Timeouts()
+
+
+@functools.cache
+def grader():
+    """math-verify, and lm-eval's copy of the original MATH checker
+    (Hendrycks et al.'s is_equiv), at the versions bench/requirements.txt
+    pins. Imported on first use, so commands that grade nothing run
+    without them."""
+    pinned_packages()
+    import math_verify  # noqa: PLC0415
+    from lm_eval.tasks.hendrycks_math.utils import is_equiv  # noqa: PLC0415
+    log = logging.getLogger("math_verify")
+    log.setLevel(logging.WARNING)
+    log.addHandler(TIMEOUTS)
+    return math_verify, is_equiv
+
+
+def grade(answer: str | None, gold: str) -> tuple[bool, bool]:
+    """(math-verify, original MATH checker) verdicts on one final answer.
+    math-verify compares the two boxed answers and nothing else,
+    verify(parse('\\boxed{gold}'), parse('\\boxed{answer}')), with the
+    library's defaults; the MATH checker is is_equiv(answer, gold)."""
+    if answer is None:
+        return False, False
+    mv, is_equiv = grader()
+    before = TIMEOUTS.count
+    g, a = mv.parse(f"\\boxed{{{gold}}}"), mv.parse(f"\\boxed{{{answer}}}")
+    right = bool(g and a and mv.verify(g, a))
+    require(TIMEOUTS.count == before,
+            f"math-verify timed out grading {answer[:80]!r} against {gold!r}; "
+            "a timed-out grade would depend on the machine's speed")
+    require(g, f"gold answer {gold!r} does not parse")
+    return right, bool(is_equiv(answer, gold))
+
+
 def sample_messages(sample: dict) -> list:
     arg = sample["arguments"]["gen_args_0"]["arg_0"]
     if isinstance(arg, list):
@@ -308,7 +416,10 @@ def derive_variant(p: Protocol, s: Settings, ids: list[int], seed: int, samples:
     Each lm-eval sample must be one of the session's frozen items with the
     frozen hashes, and must match exactly one recorded exchange whose
     request carried exactly the expected parameters and seed, and whose
-    reply, cut the way lm-eval cuts it, is the text lm-eval scored."""
+    reply, cut the way lm-eval cuts it, is the text lm-eval scored. The
+    reply's final answer is graded against the sample's target, which must
+    be the frozen gold answer."""
+    require(p.task in GRADED_TASKS, f"bench grades only {', '.join(GRADED_TASKS)} so far ({p.task})")
     frozen = p.items
     by_messages: dict[str, list[dict]] = {}
     served = None
@@ -344,7 +455,13 @@ def derive_variant(p: Protocol, s: Settings, ids: list[int], seed: int, samples:
         require(isinstance(content, str) and isinstance(scored, str)
                 and lm_eval_answer(content, s.think_end) == scored,
                 f"item {i}: scored text is not the recorded reply")
-        out[i] = {"score": float(score), "finish_reason": choice["finish_reason"],
+        gold = sample["target"]
+        require(isinstance(gold, str) and sha256_bytes(gold.encode()) == sample["target_hash"],
+                f"item {i}: target is not the frozen gold answer")
+        answer = final_answer(content, s.think_end)
+        correct, correct_is_equiv = grade(answer, gold)
+        out[i] = {"score": float(score), "answer": answer, "correct": correct,
+                  "correct_is_equiv": correct_is_equiv, "finish_reason": choice["finish_reason"],
                   "prompt_tokens": resp["usage"]["prompt_tokens"],
                   "completion_tokens": resp["usage"]["completion_tokens"],
                   "content_sha256": sha256_bytes(content.encode())}
@@ -456,12 +573,55 @@ def is_cut(outcome: dict) -> bool:
     return outcome["finish_reason"] == "length"
 
 
+def headline(outcome: dict) -> float:
+    """One reply's headline value: 1 if its final answer is right under
+    math-verify, else 0 (see `final_answer` and `grade`; owner decision:
+    Timur, 2026-11-20; docs/benchmarking.md)."""
+    return float(outcome["correct"])
+
+
+def lm_eval_score(outcome: dict) -> float:
+    """One reply's score as lm-eval gave it. lm-eval scores the whole
+    reply when the think-end token is missing, and math_verify then falls
+    back to any number it finds there."""
+    return outcome["score"]
+
+
+def is_equiv_score(outcome: dict) -> float:
+    """One reply's value under the original MATH checker, on the same
+    final answer."""
+    return float(outcome["correct_is_equiv"])
+
+
+def mean_score(p: Protocol, pairs: dict, side: int, value) -> float:
+    """Mean over the filed items of each item's mean over its seeds."""
+    means = item_means(p, pairs, side, value)
+    return sum(means.values()) / len(means)
+
+
 def cut_at_limit(pairs: dict, side: int) -> float:
     """Share of one side's replies cut at the token limit, over every
     filed (item, seed) pair. The one definition: `compare` reports it
     and a completed run records it beside its score."""
     outs = [pair[side] for pair in pairs.values()]
     return sum(map(is_cut, outs)) / len(outs)
+
+
+def finished_without_answer(pairs: dict, side: int) -> float:
+    """Share of one side's replies that stopped on their own but give no
+    final answer, over every filed (item, seed) pair."""
+    outs = [pair[side] for pair in pairs.values()]
+    return sum(not is_cut(o) and o["answer"] is None for o in outs) / len(outs)
+
+
+def mean_completion_tokens(pairs: dict, side: int) -> float:
+    outs = [pair[side] for pair in pairs.values()]
+    return sum(o["completion_tokens"] for o in outs) / len(outs)
+
+
+HEADLINE_UNIT = ("mean over the protocol's frozen items of the mean over its seeds; a reply "
+                 "scores 1 when its final answer, the last \\boxed{} after the think-end token, "
+                 "equals the gold answer under math-verify, else 0")
 
 
 def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str]]:
@@ -480,11 +640,14 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
             canonical({"id": i, "seed": seed, "session": pair[0], **pair[side]}) + "\n"
             for (i, seed), pair in sorted(c.pairs.items()))
         if complete:
-            means = item_means(p, c.pairs, side)
-            score = {"metric": p.metric, "value": sum(means.values()) / len(means),
+            score = {"metric": p.metric,
+                     "value": mean_score(p, c.pairs, side, headline),
+                     "value_lm_eval": mean_score(p, c.pairs, side, lm_eval_score),
                      "cut_at_limit": cut_at_limit(c.pairs, side),
-                     "unit": "mean over the protocol's frozen items of the mean over its seeds",
-                     "denominator": len(means)}
+                     "finished_without_answer": finished_without_answer(c.pairs, side),
+                     "mean_completion_tokens": mean_completion_tokens(c.pairs, side),
+                     "unit": HEADLINE_UNIT,
+                     "denominator": len(item_means(p, c.pairs, side))}
         else:
             score = {"state": "UNKNOWN", "owner": "bench contributors",
                      "reason": f"{len(c.pairs)} of {len(p.cells())} item-seed pairs filed"}
@@ -554,35 +717,47 @@ def compare(v: Version, p: Protocol, s: Settings) -> dict:
     """Paired base-versus-patched comparison over the filed pairs.
 
     The unit of analysis is the item: per item, the patched-minus-base
-    score averaged over its seeds; the standard error is over items."""
+    score averaged over its seeds; the standard error is over items. The
+    headline grades each reply's final answer; the same figures under
+    lm-eval's own score sit under `lm_eval`."""
     c = collect(v, p, s)
     pairs = c.pairs
-    b, q = item_means(p, pairs, 1), item_means(p, pairs, 2)
-    diffs = [q[i] - b[i] for i in b]
-    n = len(diffs)
-    mean = sum(diffs) / n
-    se = math.sqrt(sum((d - mean) ** 2 for d in diffs) / (n - 1) / n) if n > 1 else 0.0
+
+    def difference(value) -> dict:
+        b, q = item_means(p, pairs, 1, value), item_means(p, pairs, 2, value)
+        diffs = [q[i] - b[i] for i in b]
+        n = len(diffs)
+        mean = sum(diffs) / n
+        se = math.sqrt(sum((d - mean) ** 2 for d in diffs) / (n - 1) / n) if n > 1 else 0.0
+        return {"difference": mean, "standard_error": se,
+                "interval_95": [mean - 1.96 * se, mean + 1.96 * se]}
 
     def stats(side: int) -> dict:
         outs = [pair[side] for pair in pairs.values()]
-        strict = item_means(p, pairs, side, lambda o: 0.0 if is_cut(o) else o["score"])
         return {
-            "score": sum(item_means(p, pairs, side).values()) / n,
-            "score_cut_counted_wrong": sum(strict.values()) / n,
+            "score": mean_score(p, pairs, side, headline),
+            "score_lm_eval": mean_score(p, pairs, side, lm_eval_score),
+            "score_is_equiv": mean_score(p, pairs, side, is_equiv_score),
             "cut_at_limit": cut_at_limit(pairs, side),
-            "mean_completion_tokens": sum(o["completion_tokens"] for o in outs) / len(outs),
+            "finished_without_answer": finished_without_answer(pairs, side),
+            "answered_then_cut": sum(is_cut(o) and o["answer"] is not None for o in outs),
+            "right_only_by_lm_eval": sum(o["score"] > 0 and not o["correct"] for o in outs),
+            "right_only_by_final_answer": sum(o["correct"] and o["score"] == 0 for o in outs),
+            "checkers_disagree": sum(o["correct"] != o["correct_is_equiv"] for o in outs),
+            "mean_completion_tokens": mean_completion_tokens(pairs, side),
         }
 
     cells = list(pairs.values())
+    right = [(headline(x[1]), headline(x[2])) for x in cells]
     return {
         "metric": p.metric, "complete": c.complete(p),
-        "items": n, "pairs": len(pairs), "protocol_pairs": len(p.cells()),
+        "items": len(item_means(p, pairs, 1)), "pairs": len(pairs), "protocol_pairs": len(p.cells()),
         "base": stats(1), "patched": stats(2),
-        "difference": mean, "standard_error": se,
-        "interval_95": [mean - 1.96 * se, mean + 1.96 * se],
-        "pairs_both_right": sum(x[1]["score"] == 1 and x[2]["score"] == 1 for x in cells),
-        "pairs_only_base_right": sum(x[1]["score"] > x[2]["score"] for x in cells),
-        "pairs_only_patched_right": sum(x[2]["score"] > x[1]["score"] for x in cells),
+        **difference(headline),
+        "lm_eval": difference(lm_eval_score),
+        "pairs_both_right": sum(b == 1 and q == 1 for b, q in right),
+        "pairs_only_base_right": sum(b > q for b, q in right),
+        "pairs_only_patched_right": sum(q > b for b, q in right),
         "pairs_identical_replies": sum(x[1]["content_sha256"] == x[2]["content_sha256"] for x in cells),
         "repeats": len(c.repeats),
         "repeats_identical_to_first": sum(
@@ -590,3 +765,47 @@ def compare(v: Version, p: Protocol, s: Settings) -> dict:
             and pairs[cell][2]["content_sha256"] == rq["content_sha256"]
             for cell, _, rb, rq in c.repeats),
     }
+
+
+# ---------------------------------------------------------------- disagreements
+
+
+def disagreements(v: Version, p: Protocol, s: Settings) -> list[dict]:
+    """Every filed reply on which lm-eval's score, math-verify on the
+    final answer, and the original MATH checker do not all agree, with
+    the final answer, the gold answer, and the boxes in the text lm-eval
+    scored (the whole reply when the think-end token is missing)."""
+    c = collect(v, p, s)
+    results = v.results_dir(p, s)
+    out = []
+    for side, variant in enumerate(VARIANTS, start=1):
+        by_session: dict[str, list] = {}
+        for (i, seed), pair in sorted(c.pairs.items()):
+            o = pair[side]
+            if len({o["score"] > 0, o["correct"], o["correct_is_equiv"]}) > 1:
+                by_session.setdefault(pair[0], []).append((i, seed, o))
+        for name, cells in sorted(by_session.items()):
+            d = results / name
+            samples = {x["doc_id"]: x for x in read_jsonl(d / f"{variant}.samples.jsonl")}
+            # `collect` already proved each sample matches exactly one exchange.
+            replies = {canonical(x["request"]["messages"]): x["response"]["choices"][0]["message"]["content"]
+                       for x in read_jsonl(d / f"{variant}.requests.jsonl")}
+            for i, seed, o in cells:
+                sample = samples[i]
+                content = replies[canonical(sample_messages(sample))]
+                scored = sample["resps"][0][0]
+                found = boxed(scored)
+                last = found[-1] if found else None
+                out.append({
+                    "variant": variant, "item": i, "seed": seed, "session": name,
+                    "gold": sample["target"], "answer": o["answer"],
+                    "lm_eval": o["score"] > 0, "math_verify": o["correct"],
+                    "is_equiv": o["correct_is_equiv"],
+                    "finish_reason": o["finish_reason"],
+                    "completion_tokens": o["completion_tokens"],
+                    "thinking_finished": bool(s.think_end) and s.think_end in content,
+                    "lm_eval_text_boxes": len(found),
+                    "lm_eval_text_last_box": last[2] if last else None,
+                    "excerpt": scored[max(0, last[0] - 240):last[1] + 160] if last else scored[-400:],
+                })
+    return out

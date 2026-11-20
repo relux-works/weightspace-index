@@ -334,7 +334,8 @@ fn generated_shapes() {
     file["format"] = json!("safetensors");
     let run = json!({"id": "baseline-bf16", "profile": "bf16",
         "protocol": {"name": "example-protocol", "sha256": "d".repeat(64)}, "state": "COMPLETE",
-        "score": {"metric": "accuracy", "value": 0.5, "cut_at_limit": 0.25, "unit": "fraction", "denominator": 200}});
+        "score": {"metric": "accuracy", "value": 0.5, "value_lm_eval": 0.75, "cut_at_limit": 0.25,
+            "finished_without_answer": 0.05, "mean_completion_tokens": 2048.5, "unit": "fraction", "denominator": 200}});
     let index = json!({
         "contract_version": 1, "base": "example-org/Example-Model-1B",
         "profiles": example("base.json")["profiles"], "baseline_runs": [run],

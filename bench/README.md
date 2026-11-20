@@ -20,7 +20,7 @@ What this folder adds around lm-eval is small:
 | `protocols/*.json`: task, shot count, frozen item IDs with lm-eval's own `doc_hash` and `target_hash`, seeds | Stock tasks don't pin a dataset revision. The hashes make any dataset drift fail loudly instead of silently changing items. |
 | `settings/*.json`: the base model card's recommended sampling settings and, where the card gives one, its benchmark prompt; the card is pinned by revision and SHA-256 | Sampling goes in as plain `--gen_kwargs` and `--model_args`; a prompt goes in through a task file that includes the stock task. |
 | A loopback recorder between lm-eval and the server | lm-eval keeps only the reply text. The recorder keeps what was actually sent and returned: every sampling parameter and the seed, `finish_reason`, token counts and the full thinking trace. |
-| `run`, `status`, `merge`, `check`, `compare` (`python -m bench …`) | Pairing, filing, verifying and combining sessions. |
+| `run`, `status`, `merge`, `check`, `compare`, `disagreements` (`python -m bench …`) | Pairing, filing, verifying and combining sessions. |
 
 Weights are prepared with the index's own tool (`weightspace apply`).
 This folder never edits weights.
@@ -61,7 +61,7 @@ items of each item's mean over seeds.
 
 - **Task:** `minerva_math500` (lm-eval task version 3.1), on HuggingFaceH4/MATH-500 at revision `6e4ed1a…`.
   `hendrycks_math500` uses the same data with a different prompt and scorer.
-  `minerva_math500` reports `math_verify`, which is the primary metric here.
+  `minerva_math500` reports `math_verify`, which is the primary metric here. bench files it as lm-eval's own score, beside bench's grade of each reply's final answer (see below).
 - **Items:** the 197 items in [`data/math500-ids.json`](data/math500-ids.json) (frozen selection, seed `20261117-supplement2-v1`).
 - **Two deliberate changes to the stock task, both made through lm-eval's own options:**
   - `--num_fewshot 0`: the worked examples would otherwise reach a thinking model as earlier chat turns.
@@ -84,13 +84,15 @@ These come from the Qwen3.5-0.8B card, thinking mode for text tasks:
 | `enable_thinking` | true |
 | Math prompt | the problem, a newline, then "Please reason step by step, and put your final answer within \boxed{}." |
 
-The card's Best Practices give that sentence for math benchmarks but don't say where it goes. It follows the problem after one newline, as in RikiyaT's evaluation of this patch. It replaces the stock `minerva_math500` prompt (`Problem:` … `Solution:`), which was written for few-shot base models.
+The card's Best Practices give that sentence for math benchmarks but don't say where it goes. It follows the problem after one newline, as in the patch authors' evaluation. It replaces the stock `minerva_math500` prompt (`Problem:` … `Solution:`), which was written for few-shot base models.
 
 **Prompt overrides.** By default a protocol runs the stock lm-eval prompt. A settings file can replace it for one task with its card's prompt (`task_overrides.<task>.doc_to_text`, nothing else). `run` then writes a two-line task file that `include`s the installed stock task and sets only `doc_to_text`; this is lm-eval's own mechanism. Data, scorer and frozen item hashes stay the stock task's. `run` checks that lm-eval resolved exactly this prompt. Another model whose card says nothing about prompts keeps the stock prompt. So prompts can differ between models on the same protocol, but never between a base and its patch.
 
-Output is capped at 32,768 tokens, the card's figure for most queries. For math competitions the card suggests 81,920, so the cap is still an open choice.
+Output is capped at 32,768 tokens, the card's figure for most queries. The card suggests 81,920 for math competitions; bench keeps 32,768, because the model loops until the cap on most hard items (see [docs/benchmarking.md](../docs/benchmarking.md)). The patch author evaluated at temperature 0.6; bench uses the card's 1.0 for text tasks.
 
-lm-eval scores the text after `</think>`, its stock `think_end_token`. A reply cut before `</think>` is scored the way lm-eval scores it: the whole trace. The cut is recorded as `finish_reason: "length"`. A completed run's score carries the share of cut replies as `cut_at_limit`, beside the headline value; `compare` reports the same share and, as its secondary number, a score that counts cut replies as wrong.
+**The headline grades each reply's final answer:** the inside of the last `\boxed{}` after the last `</think>`. No `</think>` (a reply cut while thinking), no box after it, or an unclosed or empty last box means no answer, which counts as wrong. math-verify then compares only the two boxed answers, `verify(parse("\boxed{gold}"), parse("\boxed{answer}"))`. The gold is MATH-500's `answer` field, which must hash to the protocol's frozen target. The original MATH checker (`is_equiv`) grades the same answers as a cross-check. lm-eval's own score differs: when `</think>` is missing it scores the whole trace, and `math_verify` falls back to any number it finds there.
+
+A cut is recorded as `finish_reason: "length"`. A completed run's score carries the headline as `value`. Beside it are lm-eval's own score as `value_lm_eval`, the share of cut replies as `cut_at_limit`, the share that finished without an answer as `finished_without_answer`, and `mean_completion_tokens`. Each outcome line records its `answer`, `correct` (math-verify) and `correct_is_equiv` next to lm-eval's `score`.
 
 A settings file applies only to the base model whose card it cites. Another model gets its own file, copied from its own card.
 
@@ -185,26 +187,30 @@ A settings file applies only to the base model whose card it cites. Another mode
   - the patched run, in the version folder: `models/…/<patch>/v<N>/runs/<protocol>.<settings>.<profile>/`;
   - its paired baseline, in the base folder: `models/…/runs/<protocol>.<settings>.<profile>.<patch>-v<N>/`.
 
-  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score and no cut share, until every item has a pair under every seed; then its score is lm-eval's score with `cut_at_limit` beside it. Then regenerate the index tables with `weightspace generate`.
+  Each run names the other. A run stays `INCOMPLETE`, with an `UNKNOWN` score and no cut share, until every item has a pair under every seed; then its score is the graded final answer, with lm-eval's own score (`value_lm_eval`), `cut_at_limit`, `finished_without_answer` and `mean_completion_tokens` beside it. Then regenerate the index tables with `weightspace generate`.
 - **`check`** rebuilds every run from its sessions and fails on any difference. For every item, in both halves of a session, the lm-eval sample must:
   - be one of the session's frozen items, with the frozen hashes;
   - match exactly one recorded request, sent with exactly the protocol's and settings' parameters and the session's seed;
-  - have scored the reply that the server actually returned.
+  - have scored the reply that the server actually returned;
+  - carry the frozen gold answer as its target.
 
-  Base and patched must also differ only in the weights files, and every session must report the same harness and the same model files.
+  `check` grades every final answer again, so it needs the pinned packages (`bench/requirements.txt`), but no model or network. A math-verify timeout stops it instead of grading the answer wrong. Base and patched must also differ only in the weights files, and every session must report the same harness and the same model files.
 - **`compare`** works on whatever pairs are filed and says whether they are complete. The unit is the item: the patched-minus-base score, averaged over the item's seeds. It reports:
-  - both scores;
+  - both headline scores, from the graded final answers;
   - the mean difference with its standard error across items and a 95% interval;
-  - the share of replies cut at the token limit, and scores that count those as wrong;
-  - mean reply length;
+  - the share of replies cut at the token limit, the share that finished without an answer, how many replies boxed an answer and were then cut, and mean reply length;
+  - lm-eval's own scores, difference and interval (`score_lm_eval`, `lm_eval`), and how many replies only lm-eval scored as right, or only the final answer;
+  - the original MATH checker's scores (`score_is_equiv`), and how many replies it grades differently from math-verify;
   - how many pairs came back byte-identical, and how many repeated filings reproduced the first (expected only at `--concurrency 1` on the same setup).
+- **`disagreements`** lists every filed reply where lm-eval's score, math-verify on the final answer, and the original MATH checker don't all agree, one JSON line each. Each line has the gold answer, the final answer, the three verdicts, whether thinking had finished, and the `\boxed{}` answers in the text lm-eval scored, with an excerpt.
 
 ## Limits
 
 - **A session is the contributor's report.** `check` proves it is internally consistent: right items, right parameters and seed, scored reply equals returned reply. It cannot prove the replies came from the stated weights. Anyone can rerun the same items and seed: the scores should agree statistically. Replies come back byte-identical only at `--concurrency 1` on the same hardware and vLLM build.
 - **Same seed is reproducible only within one setup.** Different hardware or vLLM builds draw different random numbers from the same seed. Pairing still holds within each session, because base and patched run on the same machine with the same settings.
 - **No comparison file in the index yet.** The index's `comparisons/` folder can't host the per-item data, so `compare` prints to the terminal.
-- **Not run in CI yet.** `check` needs no model or network, but the CI workflow doesn't call it yet.
+- **Not run in CI yet.** `check` needs no model or network, only the pinned packages, but the CI workflow doesn't call it yet.
+- **Only `\boxed{...}` is read.** Other spellings (`\fbox{...}`, `\boxed 5`) give no answer. The card's prompt asks for `\boxed{}`.
 
 ## Updating the macOS lock
 
@@ -228,6 +234,8 @@ The tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI
 - freezing a protocol;
 - deterministic and random selection;
 - running and filing sessions, repeats, merging, comparing;
-- detection of tampered parameters, seeds, items, replies, swapped weights and extra requests.
+- final-answer grading: a cut reply with a boxed guess in its trace, and a finished reply with an unboxed answer, both credited by lm-eval and graded wrong, and listed by `disagreements`;
+- reading the final answer (after `</think>`, last box, unclosed and empty boxes), math-verify and MATH checker verdicts, and a refused timeout;
+- detection of tampered parameters, seeds, items, gold answers, replies, swapped weights and extra requests.
 
 They need the MATH-500 test split, which is cached after the first download. They don't exercise the download or `weightspace apply` steps.

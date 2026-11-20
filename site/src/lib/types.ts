@@ -36,6 +36,14 @@ export interface Score {
   owner?: string;
   metric?: string;
   value?: number;
+  /** bench runs: lm-eval's own score, beside the headline. */
+  value_lm_eval?: number;
+  /** bench runs: share of replies cut at the token limit. */
+  cut_at_limit?: number;
+  /** bench runs: share of replies that finished without an answer. */
+  finished_without_answer?: number;
+  /** bench runs: mean reply length in tokens. */
+  mean_completion_tokens?: number;
   unit?: string;
   denominator?: number;
 }

@@ -10,6 +10,6 @@
     { "benchmark": "MATH-500", "metric": "accuracy", "unit": "%", "baseline": 7.9, "patched": 48.1, "better": "higher", "samples_per_item": 4 },
     { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 13.8, "patched": 67.1, "better": "higher", "samples_per_item": 2 },
     { "benchmark": "IFEval", "metric": "score", "unit": "%", "baseline": 21.0, "patched": 62.3, "better": "higher", "samples_per_item": 2 },
-    { "benchmark": "MATH-500", "name": "Hit token limit", "unit": "%", "baseline": 93.0, "patched": 33.1, "better": "lower", "samples_per_item": 4 }
+    { "benchmark": "MATH-500", "name": "Cut at the token limit", "unit": "%", "baseline": 93.0, "patched": 33.1, "better": "lower", "samples_per_item": 4 }
   ]
 }

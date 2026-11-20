@@ -6,6 +6,8 @@
 // own claims another, so the two are set side by side, never ranked against
 // each other (rule 9). Each group lists the base, each patch measured on it,
 // then each measured stack of patches (pairs before triples, in patch order).
+// Sources that name the benchmark's metric differently still share its band;
+// each group then names its own metric.
 // A patch or stack with no score there is left out; a patch whose run is still
 // being scored keeps a progress row. A group draws one "Unpatched base" bar only
 // when every row in it was compared against the same baseline measurement;
@@ -29,7 +31,7 @@ interface Block { title: string; match: string; benchmark: string; metric: strin
 function blocks(scores: Result[], progress: Pending[]) {
   const out = new Map<string, Block>();
   for (const r of scores) {
-    const match = `${r.benchmark}|${r.name ?? ""}|${r.metric.toLowerCase()}|${r.unit}`;
+    const match = `${r.benchmark}|${r.name ?? ""}|${r.unit}`;
     const key = `${match}|${r.n ?? ""}`;
     if (!out.has(key)) out.set(key, { title: resultTitle(r), match, benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
     out.get(key)!.scores.push(r);
@@ -74,8 +76,10 @@ function rows(scores: Result[], progress: Pending[]) {
     const axis = scoreAxis(b.scores.flatMap(r => [r.base, r.patched]), b.unit);
     const sameN = new Set(b.scores.map(r => r.n)).size <= 1;
     const sameSamples = new Set(b.scores.map(r => r.samples)).size <= 1;
+    // Sources may name their metric differently (an author's "accuracy", bench's "final answers right"): then each group names its own.
+    const sameMetric = new Set(b.scores.map(r => r.metric.toLowerCase())).size <= 1;
     const first = b.scores[0];
-    const sub = [first ? resultNote({ ...first, n: sameN ? first.n : undefined, samples: sameSamples ? first.samples : undefined }) : b.metric, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
+    const sub = [first ? resultNote({ ...first, metric: sameMetric ? first.metric : "", n: sameN ? first.n : undefined, samples: sameSamples ? first.samples : undefined }) : b.metric, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
     return <div class="cmp-block">
       <h4 class="cmp-bench">{b.title}{sub && <small>{sub}</small>}</h4>
       {SOURCES.map(src => {
@@ -89,7 +93,7 @@ function rows(scores: Result[], progress: Pending[]) {
         const groupN = !sameN && scores.length > 0 && new Set(scores.map(r => r.n)).size === 1 ? scores[0].n : undefined;
         const groupSamples = !sameSamples && scores.length > 0 && new Set(scores.map(r => r.samples)).size === 1 ? scores[0].samples : undefined;
         const rowN = !sameN && !groupN, rowSamples = !sameSamples && !groupSamples;
-        const label = [groupN && `n\u00a0=\u00a0${groupN}`, groupSamples && `${groupSamples} samples per problem`].filter(Boolean).join(" · ");
+        const label = [!sameMetric && scores[0]?.metric, groupN && `n\u00a0=\u00a0${groupN}`, groupSamples && `${groupSamples} samples per problem`].filter(Boolean).join(" · ");
         const note = (r: Result) => (rowN && r.n) || (rowSamples && r.samples)
           ? <small>{[rowN && r.n && `n\u00a0=\u00a0${r.n}`, rowSamples && r.samples && `${r.samples} samples per problem`].filter(Boolean).join(" · ")}</small>
           : null;

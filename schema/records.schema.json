@@ -164,7 +164,10 @@
           "properties": {
             "metric": { "$ref": "#/$defs/text" },
             "value": { "type": "number" },
+            "value_lm_eval": { "type": "number" },
             "cut_at_limit": { "type": "number", "minimum": 0, "maximum": 1 },
+            "finished_without_answer": { "type": "number", "minimum": 0, "maximum": 1 },
+            "mean_completion_tokens": { "type": "number", "minimum": 0 },
             "unit": { "$ref": "#/$defs/text" },
             "denominator": { "type": "integer", "minimum": 1 }
           },

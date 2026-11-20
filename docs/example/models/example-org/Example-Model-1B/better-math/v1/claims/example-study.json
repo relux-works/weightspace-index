@@ -8,6 +8,6 @@
   "measures": [
     { "benchmark": "MATH-500", "metric": "accuracy", "unit": "%", "baseline": 31.4, "patched": 44.2, "better": "higher" },
     { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 52.6, "patched": 63.9, "better": "higher" },
-    { "benchmark": "MATH-500", "name": "Hit token limit", "unit": "%", "baseline": 18, "patched": 21.5, "better": "lower" }
+    { "benchmark": "MATH-500", "name": "Cut at the token limit", "unit": "%", "baseline": 18, "patched": 21.5, "better": "lower" }
   ]
 }

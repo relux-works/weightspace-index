@@ -8,6 +8,6 @@
   "measures": [
     { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 52.6, "patched": 50.8, "better": "higher" },
     { "benchmark": "IFEval", "metric": "score", "unit": "%", "baseline": 47, "patched": 55.4, "better": "higher" },
-    { "benchmark": "MATH-500", "name": "Hit token limit", "unit": "%", "baseline": 18, "patched": 4.2, "better": "lower" }
+    { "benchmark": "MATH-500", "name": "Cut at the token limit", "unit": "%", "baseline": 18, "patched": 4.2, "better": "lower" }
   ]
 }

@@ -14,7 +14,7 @@ export type Source = "author" | "index";
 export interface Result {
   source: Source;
   benchmark: string;
-  /** What the row measures when it is not the benchmark's own score (e.g. "Hit token limit"). */
+  /** What the row measures when it is not the benchmark's own score (e.g. "Cut at the token limit"). */
   name?: string;
   metric: string;
   unit: string;
@@ -55,10 +55,21 @@ function scale(unit: string, n: number) {
   return unit === "fraction" ? { unit: "%", value: Math.round(n * 1000) / 10 } : { unit, value: n };
 }
 
+const BENCH_PROTOCOL = /^bench\/protocols\/[A-Za-z0-9._-]+\.json$/;
+
+/** Whether a run was filed by bench, whose headline is the share of final answers right (docs/benchmarking.md). */
+/** bench's own terms for its headline and its cut share. */
+export const FINAL_ANSWERS = "final answers right";
+export const CUT = "Cut at the token limit";
+
+export function isBenchRun(run: Run) {
+  return BENCH_PROTOCOL.test(run.record.protocol.name) && exists(run.record.protocol.name);
+}
+
 /** The dataset's own name for a bench protocol (MATH-500, not math500-n197). */
 function benchmarkName(run: Run) {
   const file = run.record.protocol.name;
-  if (!/^bench\/protocols\/[A-Za-z0-9._-]+\.json$/.test(file) || !exists(file)) return run.protocolLabel;
+  if (!isBenchRun(run)) return run.protocolLabel;
   return readJson<{ dataset?: { repo_id?: string } }>(file).dataset?.repo_id?.split("/").pop() || run.protocolLabel;
 }
 
@@ -87,11 +98,16 @@ export function results(v: Version | undefined): Result[] {
   for (const run of v.runs) {
     const base = pairedBaseline(v, run);
     if (!base) continue;
-    const s = run.record.score;
-    const a = scale(s.unit!, base.record.score.value!), b = scale(s.unit!, s.value!);
-    out.push({
-      source: "index", benchmark: benchmarkName(run), metric: s.metric!, unit: b.unit,
-      base: a.value, patched: b.value, higherIsBetter: true, n: s.denominator, baseKey: base.url, version: v, href: run.url,
+    const s = run.record.score, t = base.record.score;
+    // bench's headline is a share of final answers right, so it reads as a percentage, as does its cut share.
+    const bench = isBenchRun(run);
+    const unit = bench ? "fraction" : s.unit!;
+    const a = scale(unit, t.value!), b = scale(unit, s.value!);
+    const row = { source: "index" as const, benchmark: benchmarkName(run), n: s.denominator, baseKey: base.url, version: v, href: run.url };
+    out.push({ ...row, metric: bench ? FINAL_ANSWERS : s.metric!, unit: b.unit, base: a.value, patched: b.value, higherIsBetter: true });
+    if (bench && typeof s.cut_at_limit === "number" && typeof t.cut_at_limit === "number") out.push({
+      ...row, name: CUT, metric: "", unit: "%", base: scale("fraction", t.cut_at_limit).value, patched: scale("fraction", s.cut_at_limit).value,
+      higherIsBetter: false, baseKey: `${base.url}#cut`,
     });
   }
   return out;

@@ -1,5 +1,5 @@
 ---
-// One run: what was measured, how, by whom, and its per-item outcomes next to
+// One run: what was measured and how, and its per-item outcomes next to
 // the paired run's. Values are shown as recorded; nothing is derived from them
 // beyond counting outcome lines.
 import Badge from "./Badge.astro";
@@ -52,6 +52,10 @@ const partnerName = partner ? barLabel(partner) : "";
   )}
   <dl class="facts">
     <div><dt>Score</dt><dd><Score score={r.score} /></dd></div>
+    {typeof r.score.value_lm_eval === "number" && <div><dt>lm-eval's own score</dt><dd class="mono">{r.score.value_lm_eval}</dd></div>}
+    {typeof r.score.cut_at_limit === "number" && <div><dt>Cut at the token limit</dt><dd class="mono">{r.score.cut_at_limit}</dd></div>}
+    {typeof r.score.finished_without_answer === "number" && <div><dt>Finished without an answer</dt><dd class="mono">{r.score.finished_without_answer}</dd></div>}
+    {typeof r.score.mean_completion_tokens === "number" && <div><dt>Mean reply tokens</dt><dd class="mono">{r.score.mean_completion_tokens}</dd></div>}
     <div><dt>Base</dt><dd><a href={run.base.url}>{run.base.address}</a></dd></div>
     <div><dt>Treatment</dt><dd>{run.version ? <a href={run.version.url}>{barLabel(run)}</a> : "unpatched base"}</dd></div>
     <div><dt>Protocol</dt><dd><span class="mono">{r.protocol.name}</span><br /><Hash value={r.protocol.sha256} /></dd></div>

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import importlib.metadata
 import importlib.util
 import json
 import os
@@ -23,8 +22,8 @@ from pathlib import Path
 from . import core
 from .core import (HARNESS_MODEL, VARIANTS, BenchError, Protocol, Settings,
                    Version, all_results, build_runs, check_settings_fit, check_weights, compare,
-                   coverage, derive_session, dumps, gen_kwargs, read_json, read_jsonl, rel,
-                   require, sha256_file, task_config_sha256)
+                   coverage, derive_session, disagreements, dumps, gen_kwargs, pinned_packages,
+                   read_json, read_jsonl, rel, require, sha256_file, task_config_sha256)
 from .proxy import Recorder, get_json
 
 SERVED_NAME = "bench"
@@ -34,26 +33,6 @@ def work_dir(*parts: str) -> Path:
     path = core.REPO.joinpath(".temp", "bench", *parts)
     path.mkdir(parents=True)
     return path
-
-
-def pinned_packages() -> dict[str, str]:
-    """Installed versions of every pin in bench/requirements.txt; any
-    difference is an error, since another scorer version can score the
-    same reply differently."""
-    out = {}
-    for line in (core.BENCH / "requirements.txt").read_text().splitlines():
-        line = line.split("#")[0].strip()
-        if not line:
-            continue
-        name, _, version = line.partition("==")
-        name = re.sub(r"\[.*\]", "", name).strip()
-        try:
-            installed = importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            raise BenchError(f"{name} is not installed; pip install -r bench/requirements.txt") from None
-        require(installed == version, f"{name} {installed} installed, bench/requirements.txt pins {version}")
-        out[name] = installed
-    return out
 
 
 def model_files(model_dir: Path) -> dict[str, str]:
@@ -407,9 +386,10 @@ def cmd_run(a) -> None:
     b, q = sess.outcomes["base"], sess.outcomes["patched"]
     same = sum(b[i]["content_sha256"] == q[i]["content_sha256"] for i in ids)
     for variant, o in (("base", b), ("patched", q)):
-        right = sum(x["score"] for x in o.values())
-        cut = sum(x["finish_reason"] == "length" for x in o.values())
-        print(f"  {variant:8} {right:g}/{len(ids)} {p.metric}, {cut} cut at the token limit")
+        right = sum(map(core.headline, o.values()))
+        cut = sum(map(core.is_cut, o.values()))
+        print(f"  {variant:8} {right:g}/{len(ids)} final answers right, "
+              f"{cut} cut at the token limit")
     print(f"  {same}/{len(ids)} pairs with identical replies")
     print(f"filed {rel(dest)}; commit it, then python -m bench merge")
 
@@ -456,10 +436,36 @@ def cmd_compare(a) -> None:
     c = compare(v, p, s)
     print(json.dumps(c, indent=2))
     state = "complete" if c["complete"] else f"PARTIAL, {c['pairs']} of {c['protocol_pairs']} pairs"
-    print(f"\n{p.metric} over {c['items']} items ({state}): base {c['base']['score']:.3f} "
-          f"(cut at limit {c['base']['cut_at_limit']:.3f}), patched {c['patched']['score']:.3f} "
-          f"(cut at limit {c['patched']['cut_at_limit']:.3f}), difference {c['difference']:+.3f} "
+    b, q, lm = c["base"], c["patched"], c["lm_eval"]
+    print(f"\nfinal answers right over {c['items']} items ({state}): "
+          f"base {b['score']:.3f}, patched {q['score']:.3f}, difference {c['difference']:+.3f} "
           f"(95% {c['interval_95'][0]:+.3f} .. {c['interval_95'][1]:+.3f})")
+    print(f"cut at the token limit: base {b['cut_at_limit']:.3f}, patched {q['cut_at_limit']:.3f}; "
+          f"finished without an answer: base {b['finished_without_answer']:.3f}, "
+          f"patched {q['finished_without_answer']:.3f}; mean reply tokens: "
+          f"base {b['mean_completion_tokens']:.0f}, patched {q['mean_completion_tokens']:.0f}")
+    print(f"lm-eval's own {p.metric}: base {b['score_lm_eval']:.3f}, "
+          f"patched {q['score_lm_eval']:.3f}, difference {lm['difference']:+.3f} "
+          f"(95% {lm['interval_95'][0]:+.3f} .. {lm['interval_95'][1]:+.3f}); "
+          f"right only by lm-eval: base {b['right_only_by_lm_eval']}, "
+          f"patched {q['right_only_by_lm_eval']}")
+    print(f"original MATH checker on the same answers: base {b['score_is_equiv']:.3f}, "
+          f"patched {q['score_is_equiv']:.3f}; disagrees with math-verify: "
+          f"base {b['checkers_disagree']}, patched {q['checkers_disagree']}")
+
+
+def cmd_disagreements(a) -> None:
+    v, p, s = load(a)
+    found = disagreements(v, p, s)
+    for x in found:
+        print(json.dumps(x, ensure_ascii=False))
+    lm_only = [x for x in found if x["lm_eval"] and not x["math_verify"]]
+    print(f"\n{len(found)} replies where the graders disagree: "
+          f"{len(lm_only)} right only by lm-eval ({sum(x['finish_reason'] == 'length' for x in lm_only)} "
+          f"of them cut at the token limit, {sum(x['answer'] is None for x in lm_only)} with no final answer), "
+          f"{sum(x['math_verify'] and not x['lm_eval'] for x in found)} right only by the final answer, "
+          f"{sum(x['math_verify'] != x['is_equiv'] for x in found)} where math-verify and "
+          f"the original MATH checker disagree", file=sys.stderr)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -517,6 +523,11 @@ def main(argv: list[str] | None = None) -> int:
     c = sub.add_parser("compare", help="paired base-versus-patched comparison of the filed pairs")
     entry_args(c)
     c.set_defaults(fn=cmd_compare)
+
+    c = sub.add_parser("disagreements",
+                       help="replies where lm-eval, math-verify and the MATH checker disagree")
+    entry_args(c)
+    c.set_defaults(fn=cmd_disagreements)
 
     a = parser.parse_args(argv)
     try:

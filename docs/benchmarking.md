@@ -7,7 +7,7 @@ How `bench/` measures a patch, and why. For usage, see [bench/README.md](../benc
 - **Trustworthy and cheap to run**, so many people can contribute runs.
 - **Close to stock lm-eval**, so other standard benchmarks can be added the same way.
 - **Not tied to one machine or model.**
-- **Few inventions.** Every setting comes from a named source: lm-eval, the base model's card, or the patch author's published evaluation.
+- **Few inventions.** Every setting comes from a named source: lm-eval, the base model's card, or, only where the card is silent, the patch author's published evaluation.
 
 ## Decisions
 
@@ -16,7 +16,17 @@ How `bench/` measures a patch, and why. For usage, see [bench/README.md](../benc
 - a recorder that keeps every request and reply;
 - filing and checking of results.
 
-**Settings come from the base model's card.** This covers sampling and output length, and the benchmark prompt where the card gives one. For Qwen3.5 the card says to add "Please reason step by step, and put your final answer within \boxed{}." to math prompts, so its settings replace the stock MATH-500 prompt. The card doesn't say where the sentence goes, so it follows the problem after one newline, as in RikiyaT's evaluation. Models whose card gives no prompt use the stock one.
+**Settings come from the base model's card.** This covers sampling and output length, and the benchmark prompt where the card gives one. For Qwen3.5 the card says to add "Please reason step by step, and put your final answer within \boxed{}." to math prompts, so its settings replace the stock MATH-500 prompt. The card doesn't say where the sentence goes, so it follows the problem after one newline, as in the evaluation of the thinking-loops patch by its authors. Models whose card gives no prompt use the stock one.
+
+**The card's settings win over the patch author's (owner decision: Timur, 2026-11-20).** To be fair to every patch, sampling follows the base model's maker, not the settings a patch author evaluated with. For Qwen3.5-0.8B that is the card's recommendation for "thinking mode for text tasks": temperature 1.0, top_p 0.95, top_k 20, min_p 0, presence penalty 1.5, repetition penalty 1.0. Qwen ran its own text benchmarks on the card with the same sampling, including the HMMT math benchmarks (the notes under the card's Language results). The card gives temperature 0.6 in two other places:
+- its recommendation for thinking mode on vision-language or precise-coding tasks, there with presence penalty 0;
+- the notes under its Vision Language results: every vision-language benchmark except video ran in thinking mode at temperature 0.6 with presence penalty 1.5.
+
+RikiyaT's team evaluated the thinking-loops patch at temperature 0.6 with presence penalty 1.5, the combination in those Vision Language notes. Their code describes it as the card's thinking-mode benchmark setting. The card has not changed since 2026-03-02, so they read the same card. Results under an author's own settings may be filed as a separate settings file, but they never replace the card's. The comparison with the patch authors' evaluation is [below](#compared-with-the-patch-authors-evaluation).
+
+**The card warns that Qwen3.5-0.8B loops in thinking mode.** Its Thinking Mode section says that with the recommended sampling this model falls into thinking loops more often than the other Qwen3.5 models, which can keep it from finishing. The card suggests tuning the sampling for each use case and stopping such replies early. bench keeps the recommended settings, so a score shows how the model does when run as its maker recommends, loops included. A tuned setting can be measured as a separate settings file.
+
+**Output is capped at 32,768 tokens (owner decision: Timur, 2026-11-20).** This is the card's figure "for most queries". For math and programming competitions the card suggests 81,920, and bench does not follow it. Qwen3.5-0.8B loops until the cap on most hard items, so a longer cap would mostly buy longer loops at more than twice the compute. Because cut replies count as wrong (below), the cap is part of what a score means: solved within 32,768 tokens.
 
 **Base and patched run as a pair, under the same seed.** Indexed patches are small. Facing the same random draws cancels much of the sampling noise from their difference. The design is called common random numbers.
 
@@ -30,9 +40,44 @@ How `bench/` measures a patch, and why. For usage, see [bench/README.md](../benc
 
 **Baselines are paired per patch.** The index's general rule is one baseline per base profile, shared by all patches. A paired baseline must be measured in the same sessions as its patch, so bench files one per patch, next to the shared ones.
 
-**Cut replies are scored as lm-eval scores them (owner decision: Timur, 2026-11-19).** When a reply hits the token limit before `</think>`, lm-eval scores the whole thinking trace and can count it correct. That score stays the headline, unchanged. The share of replies cut at the token limit is shown right beside it: a completed run records it as `cut_at_limit` next to the score's value, and `compare` reports the same share. `compare` also reports, as the secondary number, a strict score that counts cut replies as wrong. An incomplete run keeps its `UNKNOWN` score and records no cut share as final.
+**The headline grades each reply's final answer (owner decision: Timur, 2026-11-20; replaces the 2026-11-19 decision to keep lm-eval's score as the headline).** The final answer is the inside of the last `\boxed{}` after the last `</think>`. A reply has no answer, and counts as wrong, when it never closed its thinking, when no box follows `</think>`, or when its last box is unclosed or empty. Nothing else in the text is read as an answer. math-verify compares the two boxed answers and nothing else, `verify(parse("\boxed{gold}"), parse("\boxed{answer}"))`. The gold is MATH-500's `answer` field, proven against the protocol's frozen target hash. This is how the original MATH evaluation reads an answer (the last box). The evaluation of the thinking-loops patch by its authors also grades the last box with math-verify. When `</think>` is missing, though, it reads the whole reply, so a box inside a cut thinking trace can count (see the [comparison](#compared-with-the-patch-authors-evaluation)).
+
+Why: when `</think>` is missing, lm-eval scores the whole thinking trace, and `math_verify` falls back from `\boxed{}` to any answer-like expression or plain number in it. On the first 52 `math500-n197` pairs of the Qwen3.5-0.8B patch, lm-eval credited 14 cut replies; 12 of them held no `\boxed{}` answer, only a loop in which `math_verify` found a matching number. Such credit measures how a trace was cut, not whether the problem was solved.
+
+- A reply that closed its thinking and boxed an answer before the token limit cut it counts as answered.
+- The original MATH checker, `is_equiv` (lm-eval's copy), grades the same final answers as a cross-check.
+- bench grades from the recorded replies, so `check` grades every reply again. For that, bench imports the pinned math-verify and lm-eval (owner approval, 2026-11-20).
+- A math-verify timeout stops grading instead of counting as wrong, since a timed-out grade would depend on the machine's speed.
+- A completed run records the headline as the score's `value`. Beside it are lm-eval's own score as `value_lm_eval`, the share of replies cut at the token limit as `cut_at_limit`, the share that finished without an answer as `finished_without_answer`, and `mean_completion_tokens`.
+- `compare` reports the same figures and the MATH checker's score. `python -m bench disagreements` lists every reply where lm-eval, math-verify and the MATH checker disagree.
+- An incomplete run keeps its `UNKNOWN` score.
 
 **All run data stays in git (owner decision: Timur, 2026-11-19).** Sessions, samples and the full request/response logs are filed in this repository. If checkout size ever becomes a problem, the `.jsonl` files get gzipped rather than hosted elsewhere.
+
+## Compared with the patch authors' evaluation
+
+RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinking-loops` v1) with their own code, published with the patch's logs: `evaluate.py` (protocol `think35`) and `mathqa.py`. On MATH-500 the two set-ups differ as below. The card is revision `2fc0636` of `Qwen/Qwen3.5-0.8B`, unchanged since 2026-03-02.
+
+| Setting | Our bench | Patch authors | Why our bench uses its value |
+|---|---|---|---|
+| Thinking | on | on | — |
+| Prompt | problem, a newline, then the card's math sentence | problem, a newline, then the card's math sentence | Card, Best Practices. The placement follows the patch authors. |
+| Temperature | **1.0** | **0.6** | Card: thinking mode for text tasks, and the sampling of Qwen's own text benchmarks. The patch authors' 0.6 matches the card's Vision Language benchmark notes. |
+| top_p | 0.95 | 0.95 | — |
+| top_k | 20 | 20 | — |
+| min_p | 0 | not set (vLLM default, 0) | — |
+| Presence penalty | 1.5 | 1.5 | Card, thinking mode for text tasks. The card's 0.6 recommendation comes with presence penalty 0. |
+| Repetition penalty | 1.0 | not set (vLLM default, 1.0) | — |
+| Max new tokens | 32,768 | 32,768 | Card: "for most queries" (decision above). |
+| Weights | full bf16 checkpoint (`Qwen3_5ForConditionalGeneration`; text prompts don't use the vision encoder) | text-only bf16 export (`Qwen3_5ForCausalLM`) | The index's pinned base weights. |
+| Engine | vLLM server (vllm-metal so far), queried by lm-eval's chat-completions client | vLLM offline engine (`LLM.generate`) | Stock lm-eval tasks (decision above). |
+| Seed | 1234 | 0 | lm-eval's default (decision above). |
+| Samples per problem | 1 | 4, averaged | One seed for now (decision above). |
+| Problems | 197 of 500 (`math500-n197`, stratified by subject and level) | all 500 | The protocol's frozen sample. |
+| Answer read | last `\boxed{}` after the last `</think>`. No `</think>` means no answer. | last `\boxed{}`, `\fbox{}`, `\boxed {..}` or `\boxed 5` after the last `</think>`, or anywhere in the reply when there is no `</think>` | Cut replies count as wrong (decision above). |
+| Comparison with the gold answer | math-verify | math-verify | — |
+
+Temperature, the answer read from cut replies, and the inference engine are the differences that can move scores. Their effect on this patch has not been measured separately.
 
 ## Hardware
 
@@ -40,7 +85,6 @@ Any GPU that stock vLLM supports: NVIDIA with compute capability 7.0 or newer (R
 
 ## Open questions
 
-- **Output cap:** the card's 32,768 for most queries, or its 81,920 for math competitions. Both models often loop until the cap on hard items.
 - **How many seeds per item.**
 - **Comparison records in the index:** the index can't host per-item comparison data yet, so `compare` prints to the terminal. Fixing that needs a change to the index tool.
 - **Running `bench check` in CI.**

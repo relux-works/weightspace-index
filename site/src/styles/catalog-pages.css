@@ -91,8 +91,8 @@
 /* Patch card and patch page: one chart per benchmark, three rows. The author's
    report is the solid red bar with its change printed in red; the Measured
    result is a ghost of it, a faint fill inside a red outline, so the two differ
-   in shape as well as lightness (owner's decision). A score that got worse is
-   hatched. */
+   in shape as well as lightness (owner's decision). A score that got worse is drawn and coloured
+   like any other; its sign says so. */
 /* The chart red sits halfway between the link red and the Relux identity red
    (in OKLCH): #ce090c light, #fc5850 dark. Both clear 4.5:1, so the bar, the
    outline and the printed change share it. */
@@ -105,21 +105,17 @@
 .tri-track { position: relative; height: .5rem; border-radius: 2px; background: var(--color-surface-subtle); }
 .tri-track i { position: absolute; top: 0; bottom: 0; border-radius: inherit; --c: var(--viz-base); background: var(--c); }
 .tri-row.self i { --c: var(--tri-red); }
-.tri-row.self.down i { background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--c); }
 .tri-row.indep i { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
-.tri-row.indep.down i { background: repeating-linear-gradient(135deg, var(--tri-ghost-line) 0 2px, var(--tri-ghost) 2px 5px); }
 @media (forced-colors: active) {
   .tri-track i { forced-color-adjust: none; }
   .tri-row.base .tri-track i { background: GrayText; }
   .tri-row.self .tri-track i { --c: Highlight; background: Highlight; }
-  .tri-row.self.down .tri-track i { background: repeating-linear-gradient(135deg, Highlight 0 2px, transparent 2px 5px); }
   .tri-row.indep .tri-track i { background: Canvas; box-shadow: inset 0 0 0 1.5px Highlight; }
-  .tri-row.indep.down .tri-track i { background: repeating-linear-gradient(135deg, GrayText 0 2px, Canvas 2px 5px); }
 }
 .tri-tick { position: absolute; top: -.2rem; bottom: -.2rem; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--color-text-muted); }
 .tri-val { justify-self: end; font: 600 .78rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tri-row.base .tri-val { font-weight: 500; color: var(--color-text-muted); }
-.tri-row.self.up .tri-val { color: var(--tri-red); }
+.tri-row.self .tri-val { color: var(--tri-red); }
 .tri-miss { grid-column: 2 / -1; font-size: .76rem; font-style: italic; color: var(--color-text-faint); }
 .pending-deck { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: start; padding-top: .9rem; border-top: 1px solid var(--color-divider); }
 .pending-deck .coverage { grid-column: 1; }
@@ -166,7 +162,6 @@
 @media (prefers-reduced-motion: reduce) { .triad.compact .tri-pop { transition: none; translate: none; } }
 .tri-key .k-self::before { background: var(--tri-red); }
 .tri-key .k-indep::before { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
-.tri-key .k-worse::before { background: repeating-linear-gradient(135deg, var(--color-text-muted) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--color-text-muted); }
 .tri-key .k-tick::before { width: 2px; height: .95rem; border-radius: 1px; background: var(--color-text-muted); margin-inline: .5rem; }
 .triad.full .tri-head { font-size: 1rem; margin-bottom: .45rem; }
 .triad.full .tri-head small { font-size: .8rem; }
@@ -182,8 +177,8 @@
 .triad.full .tri-row.base .tri-val { color: var(--color-text-muted); }
 .tri-chg { justify-self: end; text-align: right; font: 600 .86rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
 .tri-chg small { display: block; font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
-.tri-row.self.up .tri-chg { color: var(--tri-red); }
-.triad.full .tri-row.self.up .tri-val { color: inherit; }
+.tri-row.self .tri-chg { color: var(--tri-red); }
+.triad.full .tri-row.self .tri-val { color: inherit; }
 
 .triad.full .tri-miss { font-size: .84rem; }
 .triad.full .tri-label { white-space: normal; }
@@ -211,7 +206,6 @@
 .plot-key .k-base::before { background: var(--viz-base); }
 .plot-key .k-up::before { background: var(--color-accent); }
 .plot-key .k-stack::before { background: var(--color-success); }
-.plot-key .k-down::before { background: repeating-linear-gradient(135deg, var(--color-text) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--color-text); }
 .study-scope { font-size: .88rem; max-width: 70ch; }
 .evidence-group > .fold { margin-top: .7rem; }
 /* Compare patches: the legend sits at the top right of its source group, on

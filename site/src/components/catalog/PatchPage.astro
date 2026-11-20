@@ -4,11 +4,10 @@ import { href, loadIndex, type Patch, type Version } from "../../lib/index.ts";
 import { activeVersion, downloadUrl } from "../../lib/catalog.ts";
 import { runtimeGuide } from "../../lib/runtime.ts";
 import { apply, hfDownload } from "../../lib/commands.ts";
-import { editStats } from "../../lib/insight.ts";
+import { editStats, stackResults } from "../../lib/insight.ts";
 import GetButtons from "./GetButtons.astro";
 import RuntimeTabs from "./RuntimeTabs.astro";
 import PatchEvidence from "./PatchEvidence.astro";
-import CombinationMatrix from "./CombinationMatrix.astro";
 import ReleaseDetails from "./ReleaseDetails.astro";
 import EditMap from "../viz/EditMap.astro";
 interface Props { patch: Patch; version?: Version }
@@ -39,6 +38,7 @@ if (v && plan?.command && source) {
 }
 const latest = activeVersion(patch);
 const stats = editStats(v);
+const partners = v ? [...new Map(stackResults(base).filter(r => r.stack?.includes(v)).map(r => [r.stack!.map(m => m.patch.slug).join("+"), r.stack!])).values()].sort((a, b) => a.length - b.length) : [];
 const lora = guide?.download;
 const replacement = source && patch.kind === "replacement" ? { href: downloadUrl(source), name: source.name, sha256: source.sha256 } : null;
 ---
@@ -59,7 +59,7 @@ const replacement = source && patch.kind === "replacement" ? { href: downloadUrl
     </header>
     <div class="release-layout">
       <nav class="release-nav" aria-label="On this patch card">
-        {v && <><a href="#use">Runtime setup</a><a href="#results">Benchmarks</a><a href="#combinations">Combinations</a></>}
+        {v && <><a href="#use">Runtime setup</a><a href="#results">Benchmarks</a></>}
         <a href="#records">Release details</a>
       </nav>
       <div class="release-content">
@@ -71,10 +71,7 @@ const replacement = source && patch.kind === "replacement" ? { href: downloadUrl
           <section class="flow-section" id="results">
             <h2>Benchmark results</h2>
             <PatchEvidence version={v} full />
-          </section>
-          <section class="flow-section" id="combinations">
-            <h2>Patch combinations</h2>
-            <CombinationMatrix base={base} version={v} />
+            {partners.length > 0 && <p class="stack-note">Also measured stacked: {partners.map((s, i) => <>{i > 0 && "; "}{s.map(m => m.patch.title).join(" + ")}</>)}. <a href={`${base.url}#results`}>Compare on the model page</a>.</p>}
           </section>
         </>}
         <ReleaseDetails patch={patch} version={v} guide={guide}>

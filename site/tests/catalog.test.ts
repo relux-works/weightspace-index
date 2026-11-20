@@ -61,40 +61,6 @@ test("a large patch list shows a short page and searches the entire catalog", as
   assert.deepEqual(filteredPage(rows, "missing", 8), { visible: [], matched: 0 });
 });
 
-test("a stack is read against its best patch alone, then against the sum of the solo changes", async () => {
-  const { readStudy } = await import("../src/lib/combinations.ts");
-  const study = (together: number, alone: (number | undefined)[], n = 2000, direction: "higher" | "lower" = "higher") =>
-    readStudy({ baseline: 50, together, members: alone.map(a => ({ alone: a })), direction, unit: "%", denominator: n });
-  const adds = study(57.5, [58, 49]);
-  assert.equal(adds.lead.against, "best");
-  assert.equal(adds.lead.member, 0);
-  assert.equal(adds.lead.standing, "level");
-  assert.equal(adds.sum!.ref, 7);
-  assert.equal(adds.sum!.verdict, "adds");
-  const helps = study(67, [58, 54]);
-  assert.equal(helps.lead.standing, "above");
-  assert.equal(helps.sum!.verdict, "help");
-  // A stack can beat the base and still lose to its best patch alone.
-  const clash = study(49, [55.4, 52]);
-  assert.equal(clash.lead.member, 0);
-  assert.equal(clash.lead.standing, "below");
-  assert.equal(clash.sum!.verdict, "clash");
-  assert.equal(study(54, [50, 47], 200).sum!.verdict, "unclear");
-  // Lower is better: the best patch is the one that drops the score most.
-  const lower = study(33, [42, 46], 2000, "lower");
-  assert.equal(lower.lead.member, 0);
-  assert.equal(lower.lead.standing, "above");
-  assert.equal(lower.sum!.verdict, "help");
-  const stackOnly = study(55, [undefined, undefined]);
-  assert.equal(stackOnly.lead.against, "base");
-  assert.equal(stackOnly.lead.standing, "above");
-  assert.equal(stackOnly.sum, null);
-  assert.equal(study(50.5, [undefined, undefined]).lead.standing, "level");
-  const tokens = readStudy({ baseline: 900, together: 700, members: [{ alone: 800 }, { alone: 850 }], direction: "lower", unit: "tokens", denominator: 100 });
-  assert.equal(tokens.lead.noise, null);
-  assert.equal(tokens.lead.standing, "above");
-});
-
 test("search terms cover every field a result shows and both formats", async () => {
   const { versionTerms } = await import("../src/lib/search.ts");
   const { matchesAll, queryWords } = await import("../src/lib/filter.ts");

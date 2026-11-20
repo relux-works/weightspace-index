@@ -1,10 +1,10 @@
 // Reader-facing summaries of the records: before/after results per source,
-// what a release edits, and how combinations behaved. Values come from the
+// what a release edits, and how measured stacks scored. Values come from the
 // records unchanged; differences are shown next to the two values they come
 // from and are never ranked across sources (rule 9).
 import { activeVersion, footprint, readCoverage } from "./catalog.ts";
 import { firstAdded } from "./files.ts";
-import { combinationStudies, readStudy, stackKey } from "./combinations.ts";
+import { combinationStudies } from "./combinations.ts";
 import { exists, readBytes, readJson } from "./files.ts";
 import { rankable } from "./queries.ts";
 import type { Base, Patch, Run, Version } from "./types.ts";
@@ -28,6 +28,8 @@ export interface Result {
   /** Identifies the baseline measurement; equal keys mean one shared unpatched result. */
   baseKey: string;
   version: Version;
+  /** A measured stack: its members in the model's patch order; `version` is the first. */
+  stack?: Version[];
   href: string;
 }
 
@@ -205,12 +207,36 @@ export function percent(part: number, whole: number) {
   return p >= 1 ? `${+p.toFixed(1)}%` : p >= 0.01 ? `${+p.toFixed(3)}%` : `${+p.toPrecision(2)}%`;
 }
 
-// ── Combinations ─────────────────────────────────────────────────────────────
+// ── Stacks ───────────────────────────────────────────────────────────────────
 
-export function combos(base: Base, version?: Version) {
-  return combinationStudies(base, version).map(s => ({ ...s, key: stackKey(s.members.map(m => m.slug)), reading: readStudy(s) }));
+/**
+ * Measured stacks of the model's active releases as before/after results: one
+ * row for the stack itself and, when the study filed them, one per member's
+ * solo score. `stack` lists the members in the model's patch order; solo rows
+ * have none. Studies naming an older release are left out. Rows of one
+ * protocol with the same base score share a base key, so they share a base bar.
+ */
+export function stackResults(base: Base): Result[] {
+  const order = base.patches.map(activeVersion).filter(v => !!v);
+  return combinationStudies(base).flatMap(s => {
+    const stack = s.members.map(m => m.release).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    if (stack.some(v => !order.includes(v))) return [];
+    const row = {
+      source: s.measured_by, benchmark: s.benchmark, metric: s.metric, unit: s.unit, base: s.baseline,
+      higherIsBetter: s.direction === "higher", n: s.denominator, href: s.file,
+      baseKey: `stack:${s.measured_by}|${s.benchmark}|${s.metric}|${s.unit}|${s.denominator}@${s.baseline}`,
+    };
+    return [
+      { ...row, patched: s.together, version: stack[0], stack },
+      ...s.members.flatMap(m => m.alone === undefined ? [] : [{ ...row, patched: m.alone, version: m.release }]),
+    ];
+  });
 }
-export type Combo = ReturnType<typeof combos>[number];
+
+/** Every patch's own results, then the measured stacks (and their filed solo scores). */
+export function modelResults(base: Base) {
+  return [...base.patches.map(activeVersion).filter(v => !!v).flatMap(v => results(v)), ...stackResults(base)];
+}
 
 // ── Real per-weight changes ──────────────────────────────────────────────────
 

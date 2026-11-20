@@ -1,19 +1,22 @@
 ---
 // Every patch of one model, benchmark by benchmark: for each measuring source
-// (never mixed, rule 9), one block per benchmark listing every patch — a full
-// outer join, so a patch without that benchmark shows "Not measured" instead of
-// disappearing. A block draws one "Unpatched base" bar only when every patch in
-// it was compared against the same baseline measurement; otherwise each patch
-// keeps its own base bar beside its patched bar.
+// (never mixed, rule 9), one block per benchmark and protocol size listing the
+// base, each patch measured on it, then each measured stack of patches (pairs
+// before triples, in patch order). A patch or stack with no score there is left
+// out; a patch whose run is still being scored keeps a progress row. A block
+// draws one "Unpatched base" bar only when every row in it was compared against
+// the same baseline measurement; otherwise each row keeps its own base bar
+// beside its patched bar.
 import type { Base } from "../../lib/types.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
-import { results, pending, groupEvidence, resultNote, resultTitle, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
+import { loadIndex } from "../../lib/index.ts";
+import { modelResults, pending, groupEvidence, resultNote, resultTitle, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
-const nameOf = (v: Result["version"]) => v.patch.title;
-const groups = groupEvidence(releases.flatMap(v => results(v)), releases.flatMap(v => pending(v)), [])
+const submit = loadIndex().docsAt("docs/benchmarking.md") + "#combination-studies";
+const groups = groupEvidence(modelResults(base), releases.flatMap(v => pending(v)), [])
   .filter(g => g.scores.length || g.progress.length);
 const trend = (g: number) => g > 0 ? "up" : g < 0 ? "down" : "flat";
 
@@ -21,7 +24,7 @@ interface Block { title: string; benchmark: string; metric: string; unit: string
 function blocks(scores: Result[], progress: Pending[]) {
   const out = new Map<string, Block>();
   for (const r of scores) {
-    const key = `${r.benchmark}|${r.name ?? ""}|${r.metric}|${r.unit}`;
+    const key = `${r.benchmark}|${r.name ?? ""}|${r.metric}|${r.unit}|${r.n ?? ""}`;
     if (!out.has(key)) out.set(key, { title: resultTitle(r), benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
     out.get(key)!.scores.push(r);
   }
@@ -32,19 +35,50 @@ function blocks(scores: Result[], progress: Pending[]) {
   }
   return [...out.values()];
 }
+
+/** One row per treatment: a patch's own score wins over a solo score filed with a stack study. */
+function rows(b: Block) {
+  const singles = releases.flatMap(v => {
+    const r = b.scores.find(r => r.version === v && !r.stack);
+    const w = r ? undefined : b.progress.find(w => w.version === v);
+    return r || w ? [{ v, r, w }] : [];
+  });
+  const at = (v: Result["version"]) => releases.indexOf(v);
+  const stacks = b.scores.filter(r => r.stack).sort((x, y) => {
+    const a = x.stack!, c = y.stack!;
+    if (a.length !== c.length) return a.length - c.length;
+    const k = a.findIndex((v, i) => v !== c[i]);
+    return k < 0 ? 0 : at(a[k]) - at(c[k]);
+  });
+  return { singles, stacks };
+}
 ---
-<p class="cmp-intro">Each benchmark lists every patch. Where patches were measured against the same unpatched run, they share one base bar; otherwise each shows its own.</p>
+<p class="cmp-intro">Each benchmark lists the patches and stacks of patches measured on it. Where rows were measured against the same unpatched run, they share one base bar; otherwise each shows its own. Any patches can be stacked; a stack appears here once someone <a href={submit}>benchmarks it</a>.</p>
 <div class="evidence key-right">
   {groups.map(g => {
     const list = blocks(g.scores, g.progress);
-    const anyDown = g.scores.some(r => gain(r) < 0);
     return <section class="evidence-group">
       <h3 class:list={["src-chip", g.source === "author" ? "self" : "indep"]}>{g.source === "author" ? "Self-reported" : sourceLabels[g.source] + " benchmark"}</h3>
-      <p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patched, better</span>{anyDown && <span class="k-down">Patched, worse</span>}</p>
+      <p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patch</span>{g.scores.some(r => r.stack) && <span class="k-stack">Stack</span>}</p>
       {list.map(b => {
         const axis = scoreAxis(b.scores.flatMap(r => [r.base, r.patched]), b.unit);
         const shared = b.scores.length > 0 && b.scores.every(r => r.baseKey === b.scores[0].baseKey);
         const sub = [b.scores[0] ? resultNote(b.scores[0]) : b.metric, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
+        const { singles, stacks } = rows(b);
+        const row = (r: Result, name: any, kind?: string) => {
+          const t = trend(gain(r));
+          return <li class:list={["rrow", t, kind]}>
+            <span class="rname">{name}</span>
+            <span class="rplot">
+              <span class="rbars" aria-hidden="true">
+                {!shared && <span class="rbar base"><i style={axis.bar(r.base)}></i></span>}
+                <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
+              </span>
+              <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
+            </span>
+            <span class:list={["delta", t]}>{signed(r.patched - r.base, r.unit)}<small>{t === "up" ? "better" : t === "down" ? "worse" : "no change"}</small></span>
+          </li>;
+        };
         return <div class="cmp-block">
           <h4 class="cmp-bench">{b.title}{sub && <small>{sub}</small>}</h4>
           <ul class="rlist cmp">
@@ -54,28 +88,12 @@ function blocks(scores: Result[], progress: Pending[]) {
                 <span class="rvals"><strong>{fmt(b.scores[0].base, b.unit)}</strong></span></span>
               <span></span>
             </li>}
-            {releases.map(v => {
-              const r = b.scores.find(r => r.version === v);
-              const w = b.progress.find(w => w.version === v);
-              const name = <a href={v.patch.url}>{nameOf(v)}</a>;
-              if (!r) return <li class="rrow cmp-missing">
-                <span class="rname">{name}</span>
-                <span class="rmiss">{w ? <a href={w.href}>Score pending · {w.filed} of {w.total} item–seed pairs filed</a> : "Not measured"}</span>
-                <span></span>
-              </li>;
-              const t = trend(gain(r));
-              return <li class:list={["rrow", t]}>
-                <span class="rname">{name}</span>
-                <span class="rplot">
-                  <span class="rbars" aria-hidden="true">
-                    {!shared && <span class="rbar base"><i style={axis.bar(r.base)}></i></span>}
-                    <span class="rbar patched"><i style={axis.bar(r.patched)}></i></span>
-                  </span>
-                  <span class="rvals"><span class="rfrom">{fmt(r.base, r.unit)} →</span> <strong>{fmt(r.patched, r.unit)}</strong></span>
-                </span>
-                <span class:list={["delta", t]}>{signed(r.patched - r.base, r.unit)}<small>{t === "up" ? "better" : t === "down" ? "worse" : "no change"}</small></span>
-              </li>;
-            })}
+            {singles.map(({ v, r, w }) => r ? row(r, <a href={v.patch.url}>{v.patch.title}</a>) : <li class="rrow cmp-missing">
+              <span class="rname"><a href={v.patch.url}>{v.patch.title}</a></span>
+              <span class="rmiss"><a href={w!.href}>Score pending · {w!.filed} of {w!.total} item–seed pairs filed</a></span>
+              <span></span>
+            </li>)}
+            {stacks.map(r => row(r, r.stack!.map((v, i) => <>{i > 0 && <span class="plus"> + </span>}<a href={v.patch.url}>{v.patch.title}</a></>), "cmp-stack"))}
           </ul>
         </div>;
       })}

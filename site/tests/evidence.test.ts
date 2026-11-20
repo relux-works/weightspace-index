@@ -24,7 +24,3 @@ test("the preview favors independent evidence even if its result is flat or nega
   assert.equal(previewResult([]), undefined);
 });
 
-test("a stack's key ignores the order its patches were listed in", async () => {
-  const { stackKey } = await import("../src/lib/combinations.ts");
-  assert.equal(stackKey(["b", "a", "c"]), stackKey(["c", "b", "a"]));
-});

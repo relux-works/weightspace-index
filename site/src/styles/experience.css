@@ -33,7 +33,6 @@
 .src-chip.self::before { border: 1.5px solid var(--color-text-muted); }
 .src-chip.indep::before { background: var(--viz-up); }
 .studymeta .src-chip { font: inherit; color: inherit; }
-.src-chip.combo::before { border: 1.5px solid var(--viz-up); background: linear-gradient(90deg, var(--viz-up) 50%, transparent 50%); }
 
 /* Heatmap matrices */
 .heat { display: block; width: 100%; height: auto; }
@@ -87,9 +86,10 @@
 .cmp-intro { margin: 0 0 1.2rem; color: var(--color-text-muted); font-size: .9rem; max-width: 62ch; }
 /* Benchmark lanes alternate a faint tint so each block reads as one band; the
    tint bleeds past the text so the columns stay aligned with the page. */
-.cmp-block { margin-inline: -1rem; padding: .1rem 1rem .5rem; border-radius: var(--radius-surface); }
+/* The bottom padding matches the band's top edge to its first bar (title included), so the bars sit symmetrically. */
+.cmp-block { margin-inline: -1rem; padding: .1rem 1rem 2.1rem; border-radius: var(--radius-surface); }
 .cmp-block + .cmp-block { margin-top: .4rem; }
-.cmp-block:nth-of-type(odd) { background: color-mix(in srgb, var(--color-surface-hover) 45%, transparent); }
+.cmp-block:nth-of-type(odd) { background: var(--color-surface-hover); }
 .cmp-bench { margin: .9rem 0 .1rem; font: 650 1rem var(--font-display); display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .6rem; }
 .cmp-bench small { font: 400 .76rem var(--font-ui); color: var(--color-text-muted); }
 .rlist.cmp .rrow { padding: .35rem 0; border-bottom: 0; }
@@ -107,69 +107,14 @@
 .rtable .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .rnote { font-size: .85rem; color: var(--color-text-muted); margin-top: 1rem; }
 
-/* Combinations */
-.combo-intro { font-size: .92rem; color: var(--color-text-muted); max-width: 46rem; margin: 0 0 1rem; }
-.stack-pick { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin: 0 0 1.2rem; }
-.stack-pick-label { font: 600 .78rem var(--font-ui); color: var(--color-text-muted); margin-right: .2rem; }
-.stack-chip, .stack-clear { font: 500 .84rem var(--font-ui); padding: .32rem .75rem; border-radius: 999px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); cursor: pointer; transition: background-color 160ms cubic-bezier(.16, 1, .3, 1), border-color 160ms cubic-bezier(.16, 1, .3, 1); }
-.stack-chip:hover { border-color: var(--color-border-strong); }
-.stack-chip[aria-pressed="true"] { background: var(--color-text); border-color: var(--color-text); color: var(--color-surface); }
-.stack-clear { border-color: transparent; background: none; color: var(--color-text-muted); }
-.stack-clear:hover { color: var(--color-text); }
-.stack-chip:focus-visible, .stack-clear:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-
-
-
-.combo-details { display: flex; flex-direction: column; gap: 1rem; }
-.combo-status { font: 600 .82rem var(--font-ui); color: var(--color-text-muted); margin: 0; }
-.combo-empty { font-size: .9rem; margin: 0; padding: .9rem 1.1rem; border: 1px dashed var(--color-border-strong); border-radius: .6rem; color: var(--color-text-muted); order: 0; }
-.combo-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: .6rem; padding: 1.1rem 1.3rem; }
-.combo-card[hidden] { display: none; }
-.combo-inside { display: none; font: 600 .75rem var(--font-ui); color: var(--color-text-faint); margin-bottom: .35rem; }
-.combo-card.inside { background: none; }
-.combo-card.inside .combo-inside { display: block; }
-.combo-head { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
-.combo-head h3 { font-size: 1.15rem; }
-.combo-head .plus { color: var(--color-text-faint); }
-.verdict { font: 650 .9rem var(--font-ui); white-space: nowrap; color: var(--color-text-muted); }
-.combo-head .verdict { margin: 0; text-align: right; }
-.combo-head .verdict small { display: block; margin-top: .2rem; font: 500 .78rem var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
-.combo-head + .cv-chart { margin-top: 1rem; }
-.verdict.above { color: var(--viz-up); }
-.verdict.below { color: var(--viz-down); }
-
-.cv-chart { display: grid; gap: .4rem; margin-bottom: .6rem; }
-.cv-row { display: grid; grid-template-columns: minmax(8rem, 13rem) minmax(6rem, 1fr) 4.6rem; gap: .8rem; align-items: center; font-size: .86rem; }
-.cv-row.expected { color: var(--color-text-muted); }
-.cv-row.together { font-weight: 650; }
-.cv-track { position: relative; height: 1.1rem; }
-.cv-track::before { content: ""; position: absolute; left: 50%; top: -.3rem; bottom: -.3rem; border-left: 1px solid var(--color-border-strong); }
-.cv-track i { position: absolute; top: .15rem; bottom: .15rem; min-width: 2px; border-radius: 2px; background: var(--viz-base); }
-.cv-row.alone.top i { background: var(--color-text-muted); }
-.cv-row.expected i { background: none; border: 1.5px dashed var(--color-text-muted); }
-.cv-row.together i { background: var(--color-text); }
-.cv-row.together.above i { background: var(--viz-up); }
-.cv-row.together.below i { background: var(--viz-down); }
-.cv-band { position: absolute; inset: -.2rem auto; border-radius: 3px; background: color-mix(in srgb, var(--color-text-faint) 16%, transparent); }
-.cv-label a { color: inherit; text-decoration-line: none; }
-.cv-label a:is(:hover, :focus-visible) { text-decoration-line: underline; }
-.cv-val { text-align: right; font: 600 .84rem var(--font-mono); white-space: nowrap; }
-.cv-axis { display: grid; grid-template-columns: minmax(8rem, 13rem) minmax(6rem, 1fr) 4.6rem; column-gap: .8rem; font-size: .75rem; color: var(--color-text-faint); }
-.cv-axis span:nth-child(1) { grid-column: 2; grid-row: 1; justify-self: start; }
-.cv-axis span:nth-child(2) { grid-column: 2; grid-row: 1; justify-self: center; }
-.cv-axis span:nth-child(3) { grid-column: 2; grid-row: 1; justify-self: end; }
-.cv-key { font-size: .84rem; color: var(--color-text-muted); margin: .4rem 0 0; max-width: 60ch; }
-.combo-earlier p { font-size: .86rem; margin: .4rem 0; }
-.untested-list { font-size: .86rem; color: var(--color-text-muted); margin-top: .8rem; }
-
-@media (max-width: 40rem) {
-  .cv-row { grid-template-columns: 1fr auto; }
-  .cv-track { grid-column: 1 / -1; grid-row: 2; }
-  .cv-axis { grid-template-columns: 1fr; }
-  .cv-axis span:is(:nth-child(1), :nth-child(2), :nth-child(3)) { grid-column: 1; }
-  .combo-head { flex-direction: column; gap: .3rem; }
-  .combo-head .verdict { text-align: left; white-space: normal; }
-}
+/* Compare patches colours a bar by what was applied, never by direction: red
+   for a single patch, green for a stack (members joined by a faint plus). The
+   change column says better or worse. */
+.cmp-stack .rname .plus { color: var(--color-text-faint); }
+.rlist.cmp .rrow:not(.cmp-base) .rbar.patched i { background: var(--r-up); box-shadow: none; }
+.rlist.cmp .rrow.cmp-stack .rbar.patched i { background: var(--color-success); }
+.rrow.cmp-stack .delta.up { color: var(--color-success); }
+.stack-note { font-size: .86rem; color: var(--color-text-muted); margin-top: 1rem; }
 
 /* ── Patch page ───────────────────────────────────────────────────── */
 .flow-section > h2 { margin-bottom: 1rem; }

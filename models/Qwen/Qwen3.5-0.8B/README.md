@@ -18,6 +18,6 @@ Generated from the files in this folder by `weightspace generate`; do not edit.
 
 Latest active version of each patch, against the baseline run on the same profile.
 
-| Patch | Profile | Metric | Baseline | Patched | Measured by |
-|---|---|---|---|---|---|
+| Patch | Profile | Metric | Baseline | Patched |
+|---|---|---|---|---|
 | rikiyat-thinking-loops v1 | `bf16` | not measured | | | |

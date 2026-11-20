@@ -153,7 +153,7 @@ def test_end_to_end(repo, capsys):
     assert bench("run", *ARGS, "--seed", "99", "--dry-run") == 1
     assert "not one of the protocol's seeds" in capsys.readouterr().err
 
-    assert run(repo, "--items", "0:2", "--performed-by", "index") == 0  # items 2 and 14
+    assert run(repo, "--items", "0:2") == 0  # items 2 and 14
     out = capsys.readouterr().out
     assert "seed 1234, 2 items (items 0:2): [2, 14]" in out
     assert "1/2 pairs with identical replies" in out
@@ -169,7 +169,7 @@ def test_end_to_end(repo, capsys):
         assert "value" not in record["score"] and "cut_at_limit" not in record["score"]
     capsys.readouterr()
 
-    assert run(repo, "--performed-by", "index") == 0  # random: only item 17 is open
+    assert run(repo) == 0  # random: only item 17 is open
     assert "1 items (random among pairs filed 0 time(s)): [17]" in capsys.readouterr().out
 
     first = sessions(repo)[0]
@@ -195,7 +195,6 @@ def test_end_to_end(repo, capsys):
     patched = json.loads((root / f"{ENTRY}/runs/{RUN_ID}/run.json").read_text())
     base = json.loads((root / f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1/run.json").read_text())
     assert patched["state"] == base["state"] == "COMPLETE"
-    assert patched["performed_by"] == base["performed_by"] == "index"
     assert patched["score"]["value"] == pytest.approx(2 / 3)
     assert base["score"]["value"] == pytest.approx(1 / 3)
     # Proves: a completed run records the cut-at-limit share beside the
@@ -225,9 +224,6 @@ def test_repeat_counts_once(repo, capsys, monkeypatch):
     assert '"parallel": true' in (sessions(repo)[-1] / "session.json").read_text()
     assert bench("check") == 1                       # merged runs are stale
     assert bench("merge") == 0 and bench("check") == 0
-    root = repo["root"]  # sessions by index and by a third party
-    for path in (f"{ENTRY}/runs/{RUN_ID}", f"models/Qwen/Qwen3.5-0.8B/runs/{RUN_ID}.p-x-v1"):
-        assert json.loads((root / path / "run.json").read_text())["performed_by"] == "third-party"
     capsys.readouterr()
     assert bench("compare", *ARGS) == 0
     c = json.loads(capsys.readouterr().out.split("\n\n")[0])

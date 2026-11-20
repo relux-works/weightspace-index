@@ -22,7 +22,6 @@ export interface SessionRecord {
   harness: { packages: Record<string, string>; task_config_sha256: string };
   concurrency: number;
   timeout: number;
-  performed_by: "index" | "author" | "third-party";
   hardware: string;
   started: string;
 }
@@ -61,7 +60,6 @@ export function checkSession(p: string, v: any): SessionRecord {
   hex(harness.task_config_sha256, "harness.task_config_sha256");
   int(v.concurrency, "concurrency");
   int(v.timeout, "timeout");
-  if (!["index", "author", "third-party"].includes(v.performed_by)) bad("performed_by", "index, author or third-party");
   str(v.hardware, "hardware");
   if (typeof v.started !== "string" || Number.isNaN(Date.parse(v.started))) bad("started", "an ISO 8601 time");
   return v as SessionRecord;

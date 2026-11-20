@@ -21,7 +21,7 @@ from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
 from . import core
-from .core import (HARNESS_MODEL, PERFORMED_BY, VARIANTS, BenchError, Protocol, Settings,
+from .core import (HARNESS_MODEL, VARIANTS, BenchError, Protocol, Settings,
                    Version, all_results, build_runs, check_settings_fit, check_weights, compare,
                    coverage, derive_session, dumps, gen_kwargs, read_json, read_jsonl, rel,
                    require, sha256_file, task_config_sha256)
@@ -394,7 +394,7 @@ def cmd_run(a) -> None:
     record.update({
         "harness": {"packages": packages, "task_config_sha256": configs.pop()},
         "concurrency": a.concurrency, "parallel": a.parallel, "timeout": a.timeout,
-        "performed_by": a.performed_by, "hardware": a.hardware,
+        "hardware": a.hardware,
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
     })
     (stage / "session.json").write_text(dumps(record))
@@ -504,7 +504,6 @@ def main(argv: list[str] | None = None) -> int:
                    help="seconds lm-eval waits for one reply (its default, 300, is too short "
                         "for long thinking replies)")
     c.add_argument("--startup-timeout", type=int, default=1800, help="seconds to wait for vllm")
-    c.add_argument("--performed-by", default="third-party", choices=PERFORMED_BY)
     c.add_argument("--hardware", help="free text, e.g. 'M1 Pro 32 GB, vllm-metal'")
     c.set_defaults(fn=cmd_run)
 

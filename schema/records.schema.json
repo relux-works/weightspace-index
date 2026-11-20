@@ -17,7 +17,6 @@
     "githubHandle": { "type": "string", "pattern": "^[A-Za-z0-9](?:-?[A-Za-z0-9])*$(?![\\s\\S])" },
     "kind": { "enum": ["replacement", "lora"] },
     "versionStatus": { "enum": ["active", "deprecated", "withdrawn"] },
-    "performedBy": { "enum": ["index", "author", "third-party"] },
     "fileFormat": { "enum": ["safetensors", "gguf", "json"] },
 
     "unknown": {
@@ -236,7 +235,6 @@
       "properties": {
         "contract_version": { "$ref": "#/$defs/contractVersion" },
         "profile": { "$ref": "#/$defs/id" },
-        "performed_by": { "$ref": "#/$defs/performedBy" },
         "protocol": { "$ref": "#/$defs/namedDigest" },
         "dataset": { "$ref": "#/$defs/namedDigest" },
         "settings": { "type": "object" },
@@ -245,7 +243,7 @@
         "outcomes": { "$ref": "#/$defs/artifact" },
         "resources": { "$ref": "#/$defs/artifact" }
       },
-      "required": ["contract_version", "profile", "performed_by", "protocol", "dataset", "settings", "state", "score", "outcomes"],
+      "required": ["contract_version", "profile", "protocol", "dataset", "settings", "state", "score", "outcomes"],
       "additionalProperties": false
     },
 
@@ -372,12 +370,11 @@
       "properties": {
         "id": { "$ref": "#/$defs/id" },
         "profile": { "$ref": "#/$defs/id" },
-        "performed_by": { "$ref": "#/$defs/performedBy" },
         "protocol": { "$ref": "#/$defs/namedDigest" },
         "state": { "enum": ["COMPLETE", "INCOMPLETE"] },
         "score": { "$ref": "#/$defs/score" }
       },
-      "required": ["id", "profile", "performed_by", "protocol", "state", "score"],
+      "required": ["id", "profile", "protocol", "state", "score"],
       "additionalProperties": false
     },
 

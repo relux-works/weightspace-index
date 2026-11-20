@@ -29,10 +29,6 @@ export function rankable(run: Run): boolean {
   return run.record.state === "COMPLETE" && typeof run.record.score.value === "number";
 }
 
-/** Rule 9: index-performed results and reported ones are never ranked together. */
-export function measuredBy(run: Run) {
-  return run.record.performed_by;
-}
 
 export function runLabel(run: Run): string {
   return run.version ? `${run.version.patch.slug} ${run.version.label}` : "unpatched base";

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { activeVersion, discoveryText, measurementGroups, readCoverage, columnBins } from "../src/lib/catalog.ts";
+import { activeVersion, discoveryText, readCoverage, columnBins } from "../src/lib/catalog.ts";
 import { validateStudy } from "../src/lib/combinations.ts";
 import type { Patch, Run, Version } from "../src/lib/index.ts";
 
@@ -23,14 +23,6 @@ test("coverage accepts a filed item count without treating it as a score", () =>
   assert.equal(readCoverage("3 of 2 item-seed pairs filed"), null);
 });
 
-test("author, index and contributor runs stay distinct", () => {
-  const roles = ["index", "author", "third-party", "author"];
-  const runs = roles.map(performed_by => ({ record: { performed_by } })) as Run[];
-  assert.deepEqual(measurementGroups(runs).map(g => [g.source, g.runs.length]), [
-    ["index", 1], ["third-party", 1], ["author", 2]
-  ]);
-});
-
 test("column density counts all active columns across the full tensor width", () => {
   assert.deepEqual(columnBins([0, 2, 7], 8, 4), [1, 1, 0, 1]);
 });
@@ -38,7 +30,7 @@ test("column density counts all active columns across the full tensor width", ()
 const versions = ["alpha", "beta"].map(slug => ({ n: 1, patch: { slug }, profile: { id: "bf16" }, files: [{role:"source",sha256:"a".repeat(64), name:"adapter_model.safetensors"}] })) as Version[];
 const study = {
   contract_version: 1, profile: "bf16", benchmark: "Arithmetic", metric: "Accuracy", unit: "%", direction: "higher", denominator: 100,
-  measured_by: "index", protocol: "Identical 100 prompts, greedy decoding.", baseline: 40, together: 48,
+  protocol: "Identical 100 prompts, greedy decoding.", baseline: 40, together: 48,
   members: ["alpha", "beta"].map(slug => ({ slug, version: 1, artifact: "adapter_model.safetensors", scale: 1, alone: 45 })),
 };
 test("a combination needs a joint result for exact versions on one profile, with every solo score or none", () => {

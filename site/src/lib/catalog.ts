@@ -31,15 +31,8 @@ export function readCoverage(reason?: string) {
 
 export const sourceLabels = {
   index: "Weightspace Index",
-  "third-party": "Contributor",
   author: "Patch author",
 };
-
-export function measurementGroups(runs: Run[]) {
-  return (["index", "third-party", "author"] as const)
-    .map(source => ({ source, runs: runs.filter(r => r.record.performed_by === source) }))
-    .filter(g => g.runs.length);
-}
 
 export function columnBins(columns: number[], width: number, count: number) {
   const bins = Array<number>(count).fill(0);

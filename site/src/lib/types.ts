@@ -43,7 +43,6 @@ export interface Score {
 export interface RunRecord {
   contract_version: 1;
   profile: string;
-  performed_by: "index" | "author" | "third-party";
   protocol: { name: string; sha256: string };
   dataset: { name: string; sha256: string };
   settings: Record<string, any>;

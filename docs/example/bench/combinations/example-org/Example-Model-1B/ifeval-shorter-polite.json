@@ -7,7 +7,6 @@
   "direction": "higher",
   "denominator": 541,
   "protocol": "Synthetic demonstration. A contributor ran all four treatments on the 541 IFEval prompts with greedy decoding.",
-  "measured_by": "third-party",
   "baseline": 47,
   "members": [
     {

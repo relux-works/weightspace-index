@@ -1,7 +1,6 @@
 {
   "contract_version": 1,
   "profile": "bf16",
-  "performed_by": "third-party",
   "protocol": {
     "name": "bench/protocols/math500-n197.json",
     "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"
@@ -63,7 +62,6 @@
     "sessions": {
       "20261118T103745Z-671da7": {
         "seed": 1234,
-        "performed_by": "index",
         "hardware": "M1 Pro, vllm-metal 0.33.0",
         "concurrency": 1,
         "items": 2,
@@ -80,7 +78,6 @@
       },
       "20261118T115119Z-2b5945": {
         "seed": 1234,
-        "performed_by": "index",
         "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
         "concurrency": 10,
         "items": 10,
@@ -97,7 +94,6 @@
       },
       "20261119T190503Z-94a246": {
         "seed": 1234,
-        "performed_by": "third-party",
         "hardware": "M3 Max 128 GB, vllm-metal 0.33.0",
         "concurrency": 10,
         "items": 10,

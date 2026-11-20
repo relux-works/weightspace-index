@@ -42,7 +42,7 @@ const partnerName = partner ? barLabel(partner) : "";
   </div>
   <p class="lead">
     {run.version ? <>Benchmark run of <a href={run.version.url}>{run.version.patch.slug} {run.version.label}</a></> : <>Baseline run of the unpatched base</>}
-    {" "}on profile <span class="mono">{r.profile}</span>, measured by {r.performed_by}.
+    {" "}on profile <span class="mono">{r.profile}</span>.
   </p>
   {r.state === "INCOMPLETE" && (
     <p class="note warn">
@@ -52,7 +52,6 @@ const partnerName = partner ? barLabel(partner) : "";
   )}
   <dl class="facts">
     <div><dt>Score</dt><dd><Score score={r.score} /></dd></div>
-    <div><dt>Measured by</dt><dd>{r.performed_by}</dd></div>
     <div><dt>Base</dt><dd><a href={run.base.url}>{run.base.address}</a></dd></div>
     <div><dt>Treatment</dt><dd>{run.version ? <a href={run.version.url}>{barLabel(run)}</a> : "unpatched base"}</dd></div>
     <div><dt>Protocol</dt><dd><span class="mono">{r.protocol.name}</span><br /><Hash value={r.protocol.sha256} /></dd></div>
@@ -156,7 +155,6 @@ const partnerName = partner ? barLabel(partner) : "";
           <div class="card-head"><h3 class="mono">{s.name}</h3></div>
           <dl class="facts">
             <div><dt>Started</dt><dd>{utc(s.record.started)}</dd></div>
-            <div><dt>Run by</dt><dd>{s.record.performed_by}</dd></div>
             <div><dt>Hardware</dt><dd>{s.record.hardware}</dd></div>
             <div><dt>Seed</dt><dd class="mono">{s.record.seed}</dd></div>
             <div><dt>Items</dt><dd><span class="mono">{s.record.items.join(", ")}</span></dd></div>

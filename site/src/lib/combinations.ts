@@ -18,7 +18,6 @@ interface Study {
   unit: string;
   denominator: number;
   direction: Direction;
-  measured_by: "index" | "third-party" | "author";
   protocol: string;
   baseline: number;
   together: number;
@@ -29,7 +28,6 @@ export function validateStudy(input: unknown, versions: Version[]) {
   const s = input as Study;
   const invalid = () => fail("combination study needs a measured base and joint score, exact artifacts on a shared profile, and either every member's solo score or none");
   if (!s || s.contract_version !== 1 || ![s.benchmark, s.metric, s.unit, s.protocol, s.profile].every(x => typeof x === "string" && x.trim()) ||
-      !["index", "third-party", "author"].includes(s.measured_by) ||
       !["higher", "lower"].includes(s.direction) || !Number.isSafeInteger(s.denominator) || s.denominator < 1 || !Number.isFinite(s.together) || !Number.isFinite(s.baseline) ||
       !Array.isArray(s.members) || s.members.length < 2) invalid();
   const solo = s.members.filter(m => m?.alone !== undefined).length;

@@ -9,7 +9,7 @@ import { exists, readBytes, readJson } from "./files.ts";
 import { rankable } from "./queries.ts";
 import type { Base, Patch, Run, Version } from "./types.ts";
 
-export type Source = "author" | "index" | "third-party";
+export type Source = "author" | "index";
 
 export interface Result {
   source: Source;
@@ -90,7 +90,7 @@ export function results(v: Version | undefined): Result[] {
     const s = run.record.score;
     const a = scale(s.unit!, base.record.score.value!), b = scale(s.unit!, s.value!);
     out.push({
-      source: run.record.performed_by, benchmark: benchmarkName(run), metric: s.metric!, unit: b.unit,
+      source: "index", benchmark: benchmarkName(run), metric: s.metric!, unit: b.unit,
       base: a.value, patched: b.value, higherIsBetter: true, n: s.denominator, baseKey: base.url, version: v, href: run.url,
     });
   }
@@ -103,25 +103,25 @@ export function pending(v: Version | undefined): Pending[] {
   return v.runs.flatMap(run => {
     if (rankable(run)) return [];
     const c = readCoverage(run.record.score.reason);
-    return c ? [{ source: run.record.performed_by, benchmark: benchmarkName(run), ...c, version: v, href: run.url }] : [];
+    return c ? [{ source: "index" as const, benchmark: benchmarkName(run), ...c, version: v, href: run.url }] : [];
   });
 }
 
 export const gain = (r: Pick<Result, "base" | "patched" | "higherIsBetter">) => (r.patched - r.base) * (r.higherIsBetter ? 1 : -1);
 
-/** Preserve the performer on scores, partial coverage and underlying run records. */
+/** Split author claims from index results: scores, partial coverage and the index's run records. */
 export function groupEvidence(scores: Result[], progress: Pending[], runs: Run[]) {
-  return (["author", "index", "third-party"] as const).map(source => ({
+  return (["author", "index"] as const).map(source => ({
     source,
     scores: scores.filter(r => r.source === source),
     progress: progress.filter(r => r.source === source),
-    runs: runs.filter(r => r.record.performed_by === source),
+    runs: source === "index" ? runs : [],
   }));
 }
 
 /** Pick a representative comparison without sorting different protocols by effect size. */
 export function previewResult(rows: Result[]) {
-  return rows.find(r => r.source === "index") ?? rows.find(r => r.source === "third-party") ?? rows[0];
+  return rows.find(r => r.source === "index") ?? rows[0];
 }
 
 export function signed(n: number, unit = "") {
@@ -222,9 +222,9 @@ export function stackResults(base: Base): Result[] {
     const stack = s.members.map(m => m.release).sort((a, b) => order.indexOf(a) - order.indexOf(b));
     if (stack.some(v => !order.includes(v))) return [];
     const row = {
-      source: s.measured_by, benchmark: s.benchmark, metric: s.metric, unit: s.unit, base: s.baseline,
+      source: "index" as const, benchmark: s.benchmark, metric: s.metric, unit: s.unit, base: s.baseline,
       higherIsBetter: s.direction === "higher", n: s.denominator, href: s.file,
-      baseKey: `stack:${s.measured_by}|${s.benchmark}|${s.metric}|${s.unit}|${s.denominator}@${s.baseline}`,
+      baseKey: `stack:${s.benchmark}|${s.metric}|${s.unit}|${s.denominator}@${s.baseline}`,
     };
     return [
       { ...row, patched: s.together, version: stack[0], stack },

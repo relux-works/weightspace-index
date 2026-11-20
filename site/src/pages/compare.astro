@@ -7,8 +7,8 @@ import Hash from "../components/Hash.astro";
 import Head from "../components/Head.astro";
 import Section from "../components/Section.astro";
 import Score from "../components/Score.astro";
-import { href, loadIndex, measuredBy, type Run } from "../lib/index.ts";
-import { BUCKET_LABEL, barLabel } from "../lib/rank.ts";
+import { href, loadIndex, type Run } from "../lib/index.ts";
+import { barLabel } from "../lib/rank.ts";
 
 const index = loadIndex();
 const order = (a: Run, b: Run) =>
@@ -43,14 +43,13 @@ const order = (a: Run, b: Run) =>
               <div class="table-wrap">
                 <table class="compact">
                   <thead>
-                    <tr><th>Treatment</th><th>Run</th><th>Measured by</th><th>State</th><th>Score</th><th>Paired with</th></tr>
+                    <tr><th>Treatment</th><th>Run</th><th>State</th><th>Score</th><th>Paired with</th></tr>
                   </thead>
                   <tbody>
                     {[...g.runs].sort(order).map((r) => (
                       <tr>
                         <td>{r.version ? <a href={r.version.url}>{barLabel(r)}</a> : "unpatched base"}</td>
                         <td><a href={r.url} class="mono small">{r.id}</a></td>
-                        <td title={BUCKET_LABEL[measuredBy(r)]}>{r.record.performed_by}</td>
                         <td><Badge state={r.record.state} /></td>
                         <td><Score score={r.record.score} compact /></td>
                         <td>{r.paired ? <a href={r.paired.url} class="small">{barLabel(r.paired)}</a> : <span class="muted small">none</span>}</td>

@@ -2,7 +2,7 @@
 import type { Version, Run } from "../../lib/types.ts";
 import { rankable } from "../../lib/index.ts";
 import { pairedBaseline } from "../../lib/insight.ts";
-import { sourceLabels, readCoverage } from "../../lib/catalog.ts";
+import { readCoverage } from "../../lib/catalog.ts";
 interface Props { version: Version; run: Run }
 const { version: v, run: r } = Astro.props;
 const score = r.record.score;
@@ -13,7 +13,7 @@ const paired = pairedBaseline(v, r);
   <div class="run-head"><strong>{r.protocolLabel}</strong><span class="chip">{r.record.profile}</span></div>
   {rankable(r) ? <>
     <p class="result-score">{score.value} <small>{score.metric} · {score.unit}</small></p>
-    {paired && <p class="small">Unpatched base · {paired.record.score.value} {score.unit} · {sourceLabels[paired.record.performed_by]}</p>}
+    {paired && <p class="small">Unpatched base · {paired.record.score.value} {score.unit}</p>}
     {paired && score.unit === "fraction" && [paired.record.score.value!, score.value!].every(n => n >= 0 && n <= 1) &&
       <div class="double-bar" aria-label="Base and patched score, on a scale from zero to one"><i style={`width:${paired.record.score.value! * 100}%`}></i><i style={`width:${score.value! * 100}%`}></i></div>}
     <p class="small muted">n = {score.denominator}</p>

@@ -1,16 +1,15 @@
 ---
 import type { Ranking } from "../lib/rank.ts";
 import { barLabel } from "../lib/rank.ts";
-import { sourceLabels } from "../lib/catalog.ts";
 import type { Group } from "../lib/types.ts";
 import BarChart from "./BarChart.astro";
 interface Props { group: Group; ranking: Ranking }
 const { group, ranking } = Astro.props;
 ---
 <details class="fold">
-  <summary>{group.protocolLabel} · {ranking.metric} · {sourceLabels[ranking.bucket]} · {group.profile.id}</summary>
+  <summary>{group.protocolLabel} · {ranking.metric} · {group.profile.id}</summary>
   <p class="small muted">{group.dataset.name} · {group.settingsLabel}</p>
-  <BarChart metric={ranking.metric} unit={ranking.unit} caption={group.label + " · " + sourceLabels[ranking.bucket]}
+  <BarChart metric={ranking.metric} unit={ranking.unit} caption={group.label}
     bars={ranking.runs.map(r => ({
       label: barLabel(r), sub: `n = ${r.record.score.denominator}`, value: r.record.score.value!,
       href: r.version?.patch.url ?? r.url, base: !r.version

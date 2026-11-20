@@ -22,10 +22,10 @@ Generated from the files in this folder by `weightspace generate`; do not edit.
 
 Latest active version of each patch, against the baseline run on the same profile.
 
-| Patch | Profile | Metric | Baseline | Patched | Measured by |
-|---|---|---|---|---|---|
-| better-math v1 | `bf16` | accuracy | 0.5 fraction (n=200) | 0.5 fraction (n=200) | index |
-| better-math v1 | `bf16` | accuracy | 0.515 fraction (n=1319) | 0.607 fraction (n=1319) | index |
+| Patch | Profile | Metric | Baseline | Patched |
+|---|---|---|---|---|
+| better-math v1 | `bf16` | accuracy | 0.5 fraction (n=200) | 0.5 fraction (n=200) |
+| better-math v1 | `bf16` | accuracy | 0.515 fraction (n=1319) | 0.607 fraction (n=1319) |
 | polite-tone v1 | `bf16` | not measured | | | |
 | shorter-answers v2 | `bf16` | not measured | | | |
 | step-by-step v1 | `bf16` | not measured | | | |

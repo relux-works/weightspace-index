@@ -7,7 +7,6 @@
   "direction": "higher",
   "denominator": 2000,
   "protocol": "Synthetic demonstration. A contributor ran the unpatched base and the three-patch stack on the same 2,000 example prompts with greedy decoding; no solo runs were filed.",
-  "measured_by": "third-party",
   "baseline": 50,
   "members": [
     {

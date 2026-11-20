@@ -7,7 +7,6 @@
   "direction": "higher",
   "denominator": 2000,
   "protocol": "Synthetic demonstration. All four treatments use the same 2,000 example prompts and greedy decoding.",
-  "measured_by": "index",
   "baseline": 50,
   "members": [
     {

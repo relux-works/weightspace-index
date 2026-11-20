@@ -3,7 +3,6 @@
   "baseline_runs": [
     {
       "id": "math500-n197.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
-      "performed_by": "third-party",
       "profile": "bf16",
       "protocol": {
         "name": "bench/protocols/math500-n197.json",
@@ -97,7 +96,6 @@
           "runs": [
             {
               "id": "math500-n197.qwen3.5-0.8b-thinking.bf16",
-              "performed_by": "third-party",
               "profile": "bf16",
               "protocol": {
                 "name": "bench/protocols/math500-n197.json",

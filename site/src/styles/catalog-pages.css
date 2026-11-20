@@ -89,8 +89,8 @@
 .evidence { display: grid; gap: 1.45rem; }
 .evidence.compact { align-content: start; border-inline-start: 1px solid var(--color-divider); padding-inline-start: 2rem; gap: .8rem; container-type: inline-size; }
 /* Patch card and patch page: one chart per benchmark, three rows. The author's
-   report is the solid red bar with its change printed in red; the independent
-   check is a ghost of it, a faint fill inside a red outline, so the two differ
+   report is the solid red bar with its change printed in red; the Measured
+   result is a ghost of it, a faint fill inside a red outline, so the two differ
    in shape as well as lightness (owner's decision). A score that got worse is
    hatched. */
 /* The chart red sits halfway between the link red and the Relux identity red
@@ -144,6 +144,26 @@
 .tri-intro { margin: 0; max-width: 68ch; font-size: .9rem; color: var(--color-text-muted); }
 .tri-intro strong { font-weight: 600; color: var(--color-text); }
 .triad.full .tri-key { margin: -.6rem 0 0; }
+/* Patch card legend. With a mouse, hovering a benchmark's chart floats a small
+   legend above it, naming only the marks that chart uses; touch screens, with
+   no hover, get one legend under all the charts instead. */
+.triad.compact .tri-key { margin: -.2rem 0 0; font-size: .72rem; gap: .3rem .9rem; }
+.triad.compact .tri-key span::before { width: .9rem; height: .5rem; }
+.triad.compact .tri-key .k-tick::before { width: 2px; height: .8rem; margin-inline: .35rem; }
+.triad.compact .tri { position: relative; }
+.tri-pop { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .tri-key-touch { display: none; }
+  .triad.compact .tri-pop {
+    display: flex; flex-wrap: nowrap; white-space: nowrap; position: absolute; right: 0; bottom: calc(100% + .15rem); z-index: 3; margin: 0;
+    padding: .3rem .6rem; border: 1px solid var(--color-border); border-radius: .35rem;
+    background: var(--color-surface); color: var(--color-text-muted); box-shadow: 0 4px 14px rgb(0 0 0 / .12);
+    opacity: 0; translate: 0 .2rem; pointer-events: none;
+    transition: opacity 140ms cubic-bezier(.16, 1, .3, 1), translate 140ms cubic-bezier(.16, 1, .3, 1);
+  }
+  .triad.compact .tri:hover .tri-pop { opacity: 1; translate: 0 0; transition-duration: 200ms; }
+}
+@media (prefers-reduced-motion: reduce) { .triad.compact .tri-pop { transition: none; translate: none; } }
 .tri-key .k-self::before { background: var(--tri-red); }
 .tri-key .k-indep::before { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
 .tri-key .k-worse::before { background: repeating-linear-gradient(135deg, var(--color-text-muted) 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1.5px var(--color-text-muted); }

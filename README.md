@@ -11,7 +11,7 @@ An open index of weight patches for open models: what each patch changes, which 
 
 ## Browse
 
-Filter the [site directory](site/README.md) by model, patch or author. Open a model to compare patch goals, author reports, Weightspace Index benchmarks, and measured stacks of patches. Each patch card includes its downloads and copyable runtime commands.
+Filter the [site directory](site/README.md) by model, patch or author. Open a model to compare patch goals, reported and measured results, and measured stacks of patches. Each patch card includes its downloads and copyable runtime commands.
 
 For a file-based view, start with the generated [model catalog](models/README.md), which lists every base and its patch count. Client discovery lives under `lookup/by-digest/` and `lookup/by-repo/`; [models/index.json](models/index.json) lists the base addresses.
 

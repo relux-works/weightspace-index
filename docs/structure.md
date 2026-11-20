@@ -162,7 +162,7 @@ The latest version of a patch is its highest-numbered `active` version. Deprecat
 6. **Existing patches change under human review.** A new version, a status change or a card edit for an existing patch is always reviewed by a human maintainer. Authors and submitter are recorded separately and may differ.
 7. **Hosting is the submitter's choice.** A patch file may be hosted in this repository (under `files/`) or on Hugging Face. Files uploaded to this repository must each be under 100 MB, GitHub's per-file limit; the cap does not apply to Hugging Face-hosted files. Git LFS is not used.
 8. **Safe formats only.** Weights are safetensors or GGUF; metadata is JSON. Pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`) and any code from a source repository are refused, because loading them can execute code.
-9. **Results say where they come from.** A run is the index's own benchmark, filed by the index team or any contributor; all runs stand together, and no one files a benchmark the index does not define. A patch author's claim is a separate record. Claims and runs are never ranked together, and each takes its change from its own base.
+9. **Results say where they come from.** A run is the index's own benchmark, filed by the index team or any contributor; all runs stand together, and no one files a benchmark the index does not define. The site labels runs "Measured" and claims "Reported". A patch author's claim is a separate record. Claims and runs are never ranked together, and each takes its change from its own base.
 10. **No symlinks** anywhere in the repository.
 
 ## Where files live

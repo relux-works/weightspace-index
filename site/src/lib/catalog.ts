@@ -29,9 +29,12 @@ export function readCoverage(reason?: string) {
   return total > 0 && filed <= total ? { filed, total } : null;
 }
 
+/** Reported: the patch authors' own published figures. Measured: a run of the
+ * index's own benchmark, filed with every request and reply (the receipts), by
+ * the index team or any contributor. Neither word ranks one above the other. */
 export const sourceLabels = {
-  index: "Weightspace Index",
-  author: "Patch author",
+  index: "Measured",
+  author: "Reported",
 };
 
 export function columnBins(columns: number[], width: number, count: number) {

@@ -14,7 +14,7 @@ test("author claims stay apart from index results, and every filed run is an ind
   ]);
 });
 
-test("the preview favors independent evidence even if its result is flat or negative", () => {
+test("the preview favors Measured evidence even if its result is flat or negative", () => {
   const author = { source: "author", base: 2, patched: 9 } as Result;
   for (const patched of [1, 2]) {
     const measured = { source: "index", base: 2, patched } as Result;

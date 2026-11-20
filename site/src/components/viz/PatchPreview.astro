@@ -15,7 +15,7 @@ const sample = editDeltas(version, 6).map(tensor => ({ tensor, rows: weightWindo
 const treatments = result ? [{ label: "Base", score: result.base }, { label: "Patched", score: result.patched }] : [];
 const axis = result && scoreAxis(treatments.map(({ score }) => score), result.unit);
 const studyUrl = result?.source === "author" ? version.claims.find(c => c.record.source.url === result.href)?.record.source.url : undefined;
-const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : result && sourceLabels[result.source];
+const performer = result?.source === "author" ? patch.authors.map(a => a.name).join(", ") : undefined;
 ---
 <aside class="patch-preview" aria-label="Featured patch">
   <header>
@@ -31,7 +31,7 @@ const performer = result?.source === "author" ? patch.authors.map(a => a.name).j
       <strong>{result.benchmark} {result.metric}</strong>
       {studyUrl
         ? <a class="study-link" href={studyUrl} target="_blank" rel="noopener noreferrer" aria-label="Original study results (opens in a new tab)">Original study results.</a>
-        : <span>{result.source === "author" ? "Reported by" : "Measured by"} {performer}</span>}
+        : <span>{performer ? `${sourceLabels.author} by ${performer}` : `${sourceLabels.index} on the index benchmark`}</span>}
     </figcaption>
     <dl class="score-bars">
       {treatments.map(({ label, score }) => (

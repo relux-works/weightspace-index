@@ -113,7 +113,7 @@ export function results(v: Version | undefined): Result[] {
   return out;
 }
 
-/** Independent runs that are filed but not yet scored. */
+/** Measured runs that are filed but not yet scored. */
 export function pending(v: Version | undefined): Pending[] {
   if (!v) return [];
   return v.runs.flatMap(run => {
@@ -142,7 +142,7 @@ export function previewResult(rows: Result[]) {
 
 export function signed(n: number, unit = "") {
   const v = Math.round(n * 10) / 10;
-  const u = unit === "%" ? " pts" : unit ? ` ${unit}` : "";
+  const u = unit === "%" ? " pp" : unit ? ` ${unit}` : "";
   return `${v > 0 ? "+" : v < 0 ? "−" : "±"}${Math.abs(v)}${u}`;
 }
 

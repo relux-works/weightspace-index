@@ -84,7 +84,7 @@ export function facetLabel(key: FacetKey, value: string): string {
 
 /** The first score, else partial coverage, else a filed run, for each performer. */
 export function resultLines(v: Version): SearchEntry["results"] {
-  const label = { author: "Author report", index: sourceLabels.index };
+  const label = sourceLabels;
   return groupEvidence(results(v), pending(v), v.runs).flatMap(({ source, scores, progress, runs }) => {
     const [s] = scores;
     if (s) return [{ source: label[source], text: `${s.benchmark} ${s.metric}`, value: `${fmt(s.base, s.unit)} → ${fmt(s.patched, s.unit)}` }];

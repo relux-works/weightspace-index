@@ -1,16 +1,17 @@
 ---
-// A patch card's evidence: one small chart per benchmark with three rows, the
-// unpatched base, the author's own report and an independent measurement. The
-// author's row is a solid red bar, the independent check a ghost of it (a
-// faint fill inside a red outline), and a score that got worse is hatched. Each
-// patched row's change is taken from its own source's base, printed beside it,
-// and never ranked against the other source (rule 9); when the independent
-// base differs from the one drawn, its own base shows as a tick on the row.
+// A patch card's evidence: one small chart per benchmark with up to three rows,
+// the unpatched base, what the patch authors Reported and what the index
+// Measured on its own benchmark. The reported row is a solid red bar, the
+// measured one a ghost of it (a faint fill inside a red outline), and a score
+// that got worse is hatched. Each patched row's change is taken from its own
+// source's base, printed beside it, and never ranked against the other source
+// (rule 9); when the measured base differs from the one drawn, its own base
+// shows as a tick on the row. A row with no figure is left out: no Reported
+// row where the authors reported nothing, no Measured row where nothing was run.
 // Runs still being scored sit below as plates, one at a time with arrows.
-// `full` is the patch page's version: a line naming who measured, a key, the
-// charts side by side with every score printed and a status per benchmark,
-// independent labels linked to their records, then the author's study scope
-// and the runs. The card labels the third row "Independent" to fit.
+// `full` is the patch page's version: a line on what each word means, a key,
+// the charts with every score printed and a status per benchmark, measured
+// labels linked to their records, then the authors' study scope and the runs.
 import Arrow from "../Arrow.astro";
 import type { Version } from "../../lib/types.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
@@ -43,29 +44,31 @@ const blocks = keys.map(key => {
 type Block = typeof blocks[number];
 
 // Patch page only: one plain status per benchmark. It says whether an
-// independent check went the same way as the author's claim, never which
+// measurement went the same way as the reported figure, never which
 // number is right (rule 9).
 const sign = (r: Result) => Math.sign(gain(r));
 function status(b: Block): { text: string; tone: string } {
   if (b.author && b.indep) return sign(b.indep) === sign(b.author)
     ? { text: "Confirmed", tone: "ok" } : { text: "Not reproduced", tone: "miss" };
-  if (b.indep) return sign(b.indep) > 0 ? { text: "Independent only", tone: "ok" } : { text: "No gain found", tone: "miss" };
-  return b.waiting ? { text: "Check in progress", tone: "wait" } : { text: "Author only", tone: "wait" };
+  if (b.indep) return sign(b.indep) > 0 ? { text: "Measured only", tone: "ok" } : { text: "No gain found", tone: "miss" };
+  return b.waiting ? { text: "Being measured", tone: "wait" } : { text: "Reported only", tone: "wait" };
 }
 const rerun = scores.some(r => r.source === "index") || waits.some(w => w.source === "index");
+const anySelf = blocks.some(b => b.author);
+const anyIndep = blocks.some(b => b.indep || b.waiting);
 const anyDown = blocks.some(b => [b.author, b.indep].some(r => r && gain(r) < 0));
 const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
 ---
 <div class:list={["evidence", "triad", full ? "full" : "compact"]}>
-  {full && blocks.length > 0 && <>
-    <p class="tri-intro">Each benchmark shows the unpatched base, the patch author's own report and an independent check. {rerun && <><strong>{sourceLabels.index}</strong>: the release re-run on the index's own benchmark, by the index team or any contributor.</>}</p>
-    <p class="plot-key tri-key" aria-hidden="true"><span class="k-base">Base</span><span class="k-self">Author's report</span><span class="k-indep">Independent check</span>{anyDown && <span class="k-worse">Worse</span>}{anyTick && <span class="k-tick">Independent base</span>}</p>
-  </>}
+  {full && blocks.length > 0 && <p class="tri-intro">Each benchmark shows the unpatched base, the patch authors' own figure (<strong>{sourceLabels.author}</strong>) and{rerun ? "" : ", once it is run,"} a run of the index's own benchmark (<strong>{sourceLabels.index}</strong>), filed with every request and reply. Anyone can file a measurement: the index team or any contributor.</p>}
+  {full && blocks.length > 0 && <p class="plot-key tri-key" aria-hidden="true"><span class="k-base">Base</span>{anySelf && <span class="k-self">{sourceLabels.author}</span>}{anyIndep && <span class="k-indep">{sourceLabels.index}</span>}{anyDown && <span class="k-worse">Worse</span>}{anyTick && <span class="k-tick">Measured base</span>}</p>}
   {blocks.map(b => {
     const base = b.lead.base;
     const u = b.lead.unit;
     const st = full && status(b);
+    const down = [b.author, b.indep].some(r => r && gain(r) < 0);
     return <section class="tri">
+      {!full && <p class="plot-key tri-key tri-pop" aria-hidden="true"><span class="k-base">Base</span>{b.author && <span class="k-self">{sourceLabels.author}</span>}{b.indep && <span class="k-indep">{sourceLabels.index}</span>}{down && <span class="k-worse">Worse</span>}{b.indep && b.indep.base !== base && <span class="k-tick">Measured base</span>}</p>}
       <Head class="tri-head">{resultTitle(b.lead)}{b.note && <small>{b.note}</small>}{st && <span class:list={["tri-status", st.tone]}>{st.text}</span>}</Head>
       <ul class="tri-rows">
         <li class="tri-row base">
@@ -73,20 +76,20 @@ const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
           <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(base)}></i></span>
           <span class="tri-val">{fmt(base, u)}</span>
         </li>
-        <li class:list={["tri-row", "self", b.author && trend(b.author)]}>
-          <span class="tri-label">Author</span>
-          {b.author ? <>
-            <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(b.author.patched)}></i></span>
-            {full
-              ? <><span class="tri-val">{fmt(b.author.patched, u)}</span><span class="tri-chg">{signed(b.author.patched - b.author.base, u)}</span></>
-              : <span class="tri-val"><span class="visually-hidden">{fmt(b.author.patched, u)}, </span>{signed(b.author.patched - b.author.base, u)}</span>}
-          </> : <span class="tri-miss">Not reported</span>}
-        </li>
-        <li class:list={["tri-row", "indep", b.indep && trend(b.indep)]}>
+        {/* A benchmark the authors didn't report has no Reported row. */}
+        {b.author && <li class:list={["tri-row", "self", trend(b.author)]}>
+          <span class="tri-label">{sourceLabels.author}</span>
+          <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(b.author.patched)}></i></span>
+          {full
+            ? <><span class="tri-val">{fmt(b.author.patched, u)}</span><span class="tri-chg">{signed(b.author.patched - b.author.base, u)}</span></>
+            : <span class="tri-val"><span class="visually-hidden">{fmt(b.author.patched, u)}, </span>{signed(b.author.patched - b.author.base, u)}</span>}
+        </li>}
+        {/* An index row that was never run is left out; one still being scored stays as "Score pending". */}
+        {(b.indep || b.waiting) && <li class:list={["tri-row", "indep", b.indep && trend(b.indep)]}>
           <span class="tri-label">{b.indep
             ? full ? (!claimUrls.has(b.indep.href) ? <a href={b.indep.href}>{sourceLabels[b.indep.source]}</a> : sourceLabels[b.indep.source])
-              : <span title={sourceLabels[b.indep.source]}>Independent<span class="visually-hidden">, {sourceLabels[b.indep.source]}</span></span>
-            : "Independent"}</span>
+              : sourceLabels.index
+            : sourceLabels.index}</span>
           {b.indep ? <>
             <span class="tri-track" aria-hidden="true">
               <i style={b.axis.bar(b.indep.patched)}></i>
@@ -95,17 +98,20 @@ const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
             {full
               ? <><span class="tri-val">{fmt(b.indep.patched, u)}</span><span class="tri-chg">{signed(b.indep.patched - b.indep.base, u)}{b.indep.base !== base && <small>from {fmt(b.indep.base, u)}</small>}</span></>
               : <span class="tri-val"><span class="visually-hidden">{fmt(b.indep.patched, u)}, from its own base of {fmt(b.indep.base, u)}, </span>{signed(b.indep.patched - b.indep.base, u)}</span>}
-          </> : <span class="tri-miss">{b.waiting ? "Score pending" : "Not measured"}</span>}
-        </li>
+          </> : <span class="tri-miss">Score pending</span>}
+        </li>}
       </ul>
     </section>;
   })}
+
+  {/* On a patch card each benchmark shows its own legend on hover; touch screens, with no hover, get this one under the charts. */}
+  {!full && blocks.length > 0 && <p class="plot-key tri-key tri-key-touch" aria-hidden="true"><span class="k-base">Base</span>{anySelf && <span class="k-self">{sourceLabels.author}</span>}{anyIndep && <span class="k-indep">{sourceLabels.index}</span>}{anyDown && <span class="k-worse">Worse</span>}{anyTick && <span class="k-tick">Measured base</span>}</p>}
 
   {waits.length > 0 && <div class="pending-deck" data-deck>
     {waits.map((w, i) => <div class="coverage" data-plate>
       <p>{w.benchmark} · <strong>Score pending</strong></p>
       <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
-      <small>{sourceLabels[w.source]} · {w.filed} of {w.total} item–seed pairs filed</small>
+      <small>{sourceLabels.index} on the index benchmark · {w.filed} of {w.total} item–seed pairs filed</small>
     </div>)}
     {waits.length > 1 && <div class="deck-nav" data-nav hidden>
       <button type="button" class="deck-step" data-step="-1" aria-label="Previous pending benchmark"><Arrow dir="left" /></button>
@@ -116,7 +122,7 @@ const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
 
   {!blocks.length && !waits.length && <p class="no-score">No measurements published yet.</p>}
 
-  {full && v.claims.map(c => <p class="study-scope">Author figures: reported by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
+  {full && v.claims.map(c => <p class="study-scope">{sourceLabels.author} by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
   {full && v.runs.length > 0 && <details class="fold"><summary>Run records ({v.runs.length})</summary>{v.runs.map(r => <RunSummary version={v} run={r} />)}</details>}
 </div>
 <script>

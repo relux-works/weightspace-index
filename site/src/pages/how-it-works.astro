@@ -121,7 +121,7 @@ const windowCells = patched.map(row => row.slice(0, 8));
 
     <section class="form" aria-labelledby="lora-heading">
       <h2 id="lora-heading">LoRA adapter: store the change as two factors</h2>
-      <p>The file stores two thin matrices, B and A. Multiply them to get the change for each weight, then add the change to the base weight.</p>
+      <p>The file stores two thin matrices, B and A. Their product represents the change to add to each base weight.</p>
       <div class="factor-pair" style={`--equation-columns:${cols + 4}`}>
         {factors.map(({ label, symbol, cells }, i) => <>
           {i === 1 && <span class="factor-operator" aria-hidden="true">×</span>}
@@ -155,7 +155,7 @@ const windowCells = patched.map(row => row.slice(0, 8));
             <li><a href="https://huggingface.co/docs/peft/developer_guides/lora" target="_blank" rel="noopener noreferrer">Transformers (PEFT)</a></li>
           </ul>
           <p class="works-on"><b>Works on</b> Any model its runtime can attach it to, including GGUF quants.</p>
-          <p class="option-note">Our derived adapters aren't verified in these runtimes yet.</p>
+          <p class="option-note">See the patch page for its runtime recipes and loading checks.</p>
         </div>
         <div class="option">
           <h3>Direct replacement</h3>
@@ -170,13 +170,13 @@ const windowCells = patched.map(row => row.slice(0, 8));
           <div class="lanes">
             <div class="lane">
               <span class="lane-name">Attached LoRA</span>
-              <div class="steps-row" aria-hidden="true"><i>matmul</i><i class="extra">+ B·A</i><i>output</i></div>
-              <span class="visually-hidden">Attached LoRA: the base matmul, then one extra low-rank product, on every token.</span>
+              <div class="steps-row" aria-hidden="true"><i>Wx</i><i class="extra">+ B(Ax)</i><i>output</i></div>
+              <span class="visually-hidden">For each token, the runtime applies A and then B to the input and adds that result to the base layer’s output.</span>
             </div>
             <div class="lane">
               <span class="lane-name">Baked replacement</span>
-              <div class="steps-row" aria-hidden="true"><i>matmul</i><i>output</i></div>
-              <span class="visually-hidden">Baked replacement: the base matmul only. The extra step is gone.</span>
+              <div class="steps-row" aria-hidden="true"><i>W′x</i><i>output</i></div>
+              <span class="visually-hidden">For each token, the runtime multiplies the baked weights by the input.</span>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ const windowCells = patched.map(row => row.slice(0, 8));
               <span class="eqn-note">written as stored</span>
             </div>
             <div class="eqn">
-              <span class="eqn-label">LoRA</span>
+              <span class="eqn-label">Merged LoRA</span>
               <code class="eqn-value">{fmt(before)} + ({fmt(change)})</code>
               <span class="eqn-note">computed, then rounded. May differ.</span>
             </div>

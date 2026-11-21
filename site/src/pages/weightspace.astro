@@ -1,7 +1,5 @@
 ---
-// Landing page for the weightspace command-line tool: what it is for, when to
-// reach for it, and that the index never requires it (every patch also ships
-// as a LoRA adapter). Claims follow tool/README.md; the bit rows are illustrative.
+// Landing page for the weightspace CLI and the index's LoRA adapters.
 import Arrow from "../components/Arrow.astro";
 import Page from "../layouts/Page.astro";
 import ShellCommand from "../components/ShellCommand.astro";
@@ -35,20 +33,10 @@ const hero = [
   "  --out ./my-model-patched",
 ].join("\n");
 
-// One illustrative BF16 weight. The replacement writes the published bits; a
-// LoRA recomputes base + B·A at run time and rounds, so low bits can differ.
-const published = "0011111001001101";
-const computed = "0011111001001100";
-const bits = (pattern: string) => [...pattern].map((bit, i) => ({ bit, differs: bit !== published[i] }));
-const bitRows = [
-  { label: "Published value", bits: bits(published), note: "0x3E4D" },
-  { label: "Baked by weightspace", bits: bits(published), note: "identical" },
-  { label: "LoRA at run time", bits: bits(computed), note: "may differ" },
-];
+const exampleBits = [..."0011111001001101"];
+const bitLabels = ["Published value", "Baked copy"];
 
 const reasons = [
-  { title: "Bit-exact", text: "Changed weights are copied, not computed. The patched copy holds exactly the published values." },
-  { title: "Free at run time", text: "The edit lives in the model file. No adapter, no extra matmul per token." },
   { title: "Checks before it writes", text: "Each replaced tensor is checked against the base the patch expects: saved old values or a SHA-256. A mismatched model is refused." },
   { title: "Never touches your original", text: "Output is a new directory. The source model stays byte-for-byte as it was." },
   { title: "Offline, data only", text: "No network, no downloads, no code from a checkpoint. Inputs are read as data." },
@@ -67,7 +55,7 @@ const skipIt = [
   "You just want to try a patch in your runtime today.",
 ];
 ---
-<Page title="weightspace" nav="tool" description="weightspace bakes a replacement patch into a copy of your model, bit for bit. Optional: every patch in the index also ships as a LoRA adapter.">
+<Page title="weightspace" nav="tool" description="Bake a bit-exact replacement into a copy of your model with weightspace, or load the LoRA adapter in a compatible runtime.">
   <section class="wrap tool-hero" aria-labelledby="tool-title">
     <header>
       <p class="tool-name"><code>weightspace</code> command-line tool</p>
@@ -96,49 +84,25 @@ const skipIt = [
     </figure>
   </section>
 
-  <section class="home-band" id="optional" aria-labelledby="optional-heading">
-    <div class="wrap">
-      <div class="band-title"><h2 id="optional-heading">You don't need it to use the index</h2></div>
-      <p class="band-note">The index is built so every patch works with the tools you already have. Each patch also ships as a LoRA adapter. <code>weightspace</code> is there for when you want the exact replacement.</p>
-      <div class="paths">
-        <div class="path">
-          <h3>Without the tool</h3>
-          <p class="path-form">LoRA adapter</p>
-          <ol>
-            <li>Download the adapter.</li>
-            <li>Load it in vLLM, llama.cpp, SGLang or PEFT.</li>
-          </ol>
-          <p class="path-note">Works on quantized models too. Our derived adapters aren't verified in these runtimes yet.</p>
-        </div>
-        <div class="path accent">
-          <h3>With the tool</h3>
-          <p class="path-form">Exact replacement</p>
-          <ol>
-            <li>Download the replacement and the base model.</li>
-            <li>Run <code>weightspace apply</code> once.</li>
-            <li>Run the patched copy like any model.</li>
-          </ol>
-          <p class="path-note">Unquantized target model only.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="home-band subtle" id="exact" aria-labelledby="exact-heading">
-    <div class="wrap">
-      <div class="band-title"><h2 id="exact-heading">Exact means the same bits</h2></div>
-      <figure class="bits-figure">
-        <div class="bit-rows">
-          {bitRows.map(row => <div class="bit-row">
-            <span class="bit-label">{row.label}</span>
-            <span class="bit-cells" aria-label={`${row.label}: ${row.bits.map(b => b.bit).join("")}, ${row.note}`} role="img">
-              {row.bits.map(({ bit, differs }, i) => <i class:list={{ one: bit === "1", differs, last: i === row.bits.length - 1 }} aria-hidden="true">{bit}</i>)}
-            </span>
-            <code class:list={["bit-note", { differs: row.bits.some(b => b.differs) }]}>{row.note}</code>
-          </div>)}
+    <!-- Keep links to the former #optional section pointing here. -->
+    <div class="wrap" id="optional">
+      <div class="band-title"><h2 id="exact-heading">Bit-exact replacements</h2></div>
+      <div class="replacement-layout">
+        <div class="replacement-copy">
+          <p><code>weightspace apply</code> writes the published weights bit for bit into a copy of the matching unquantized model. Baking can speed up inference by removing the adapter’s per-token matrix multiplies and save the memory used for its weights.</p>
+          <p>Load our LoRA adapter in a <a href={href("how-it-works/#why-both")}>compatible runtime</a>, including on supported quantized models.</p>
         </div>
-        <figcaption>One BF16 weight, illustrative. A LoRA adds B·A to the base and rounds, so the last bits can land elsewhere.</figcaption>
-      </figure>
+        <figure class="bits-figure">
+          {bitLabels.map(label => <div class="bit-row">
+            <span class="bit-label">{label}</span>
+            <span class="bit-cells" aria-label={exampleBits.join(" ")} role="img">
+              {exampleBits.map(bit => <span class:list={{ one: bit === "1" }} aria-hidden="true">{bit}</span>)}
+            </span>
+          </div>)}
+          <figcaption>One illustrative BF16 weight.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -252,33 +216,21 @@ const skipIt = [
   .hero-terminal pre { overflow-x: auto; }
   .hero-terminal .out { display: block; margin-top: .6rem; color: var(--ink-muted); }
 
-  .band-note { max-width: 62ch; margin: -.4rem 0 1.75rem; color: var(--color-text-muted); }
   .fine { margin-top: 1rem; max-width: 70ch; font-size: .9rem; color: var(--color-text-muted); }
 
-  .paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3.5rem); }
-  .path { border-top: 2px solid var(--color-text); padding-top: 1rem; }
-  .path.accent { border-top-color: var(--color-accent); }
-  .path h3 { font-size: .95rem; font-weight: 600; color: var(--color-text-muted); }
-  .path-form { margin-top: .2rem; font: 650 clamp(1.4rem, 2.4vw, 1.9rem)/1.15 var(--font-display); letter-spacing: -.02em; color: var(--color-text); }
-  .path ol { margin: .9rem 0 0; padding-left: 1.2rem; display: grid; gap: .35rem; }
-  .path-note { margin-top: .9rem; font-size: .88rem; color: var(--color-text-muted); }
+  .replacement-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem); }
+  .replacement-copy { max-width: 53ch; color: var(--color-text-muted); }
+  .replacement-copy p + p { margin-top: .75rem; }
 
-  .bits-figure { margin: 0; max-width: 46rem; }
-  .bit-rows { display: grid; gap: .7rem; }
-  .bit-row { display: grid; grid-template-columns: 11rem minmax(0, auto) 6rem; align-items: center; gap: .5rem 1rem; justify-content: start; }
+  .bits-figure { display: grid; gap: .7rem; margin: 0; max-width: 35rem; }
+  .bit-row { display: grid; grid-template-columns: 8rem minmax(0, 1fr); align-items: center; gap: .4rem 1rem; }
   .bit-label { font-size: .92rem; font-weight: 600; }
   .bit-cells { display: grid; grid-template-columns: repeat(16, minmax(0, 1.5rem)); gap: 2px; }
-  .bit-cells i { display: grid; place-items: center; aspect-ratio: 1; font: 600 .75rem/1 var(--font-mono); font-style: normal; background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 2px; }
-  .bit-cells i.one { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
-  .bit-cells i.differs { box-shadow: 0 0 0 2px var(--color-accent); }
-  /* The last bit column, where a LoRA's rounding can land: bold red in every row. */
-  .bit-cells i.last { font-weight: 800; color: var(--color-accent); border: 2px solid var(--color-accent); }
-  .bit-cells i.one.last { background: var(--color-accent); color: var(--color-on-accent); }
-  .bit-note { font-size: .85rem; color: var(--color-text-muted); }
-  .bit-note.differs { color: var(--color-accent); }
-  .bits-figure figcaption { margin-top: 1rem; color: var(--color-text-muted); font-size: .875rem; }
+  .bit-cells span { display: grid; place-items: center; aspect-ratio: 1; font: 600 .75rem/1 var(--font-mono); background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 2px; }
+  .bit-cells .one { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
+  .bits-figure figcaption { color: var(--color-text-muted); font-size: .875rem; }
 
-  .reasons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 3vw, 2.5rem); }
+  .reasons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 3vw, 2.5rem); }
   .reasons li { border-top: 1px solid var(--color-divider); padding-top: 1rem; }
   .reasons h3 { font-size: 1.1rem; }
   .reasons p { margin-top: .4rem; color: var(--color-text-muted); font-size: .95rem; }
@@ -292,15 +244,9 @@ const skipIt = [
   .closing-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
 
   @media (max-width: 60rem) {
-    .tool-hero { grid-template-columns: minmax(0, 1fr); }
-    .reasons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 60rem) {
-    .run-cmds { grid-template-columns: minmax(0, 1fr); }
+    .tool-hero, .replacement-layout, .run-cmds { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 40rem) {
-    .paths, .when, .reasons { grid-template-columns: minmax(0, 1fr); }
-    .bit-row { grid-template-columns: minmax(0, 1fr); }
-    .bit-cells { grid-template-columns: repeat(16, minmax(0, 1fr)); }
+    .when, .reasons, .bit-row { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

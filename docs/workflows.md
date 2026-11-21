@@ -14,7 +14,13 @@ Copy the target profile's safetensors files, confirm each copied file's SHA-256 
 vllm serve ./patched-copy
 ```
 
-On any other profile, such as a GGUF quant, use the patch's derived LoRA instead.
+For another profile, such as a GGUF quant, use the patch's LoRA when the runtime supports that adapter and base model.
+
+## Attached and merged LoRAs
+
+The Qwen bundle uses F32 `selector-exact` factors, with rank 64 for each of the two edited tensors. The site's Transformers/PEFT, llama.cpp and vLLM recipes load the factors as separate adapter weights. During prompt processing and generation, each adapted layer computes `B(Ax)` for the token activations and adds it to the base layer's output. The additional weights take up inference memory. [PEFT forward pass](https://github.com/huggingface/peft/blob/v0.21.3/src/peft/tuners/lora/layer.py#L977-L1009), [llama.cpp inference graph](https://github.com/ggml-org/llama.cpp/blob/ece963f41b0b02d7a0d61436ae365762c073a4c8/src/llama-graph.cpp#L1373-L1400), [vLLM linear layers](https://docs.vllm.ai/en/stable/api/vllm/lora/layers/base_linear/).
+
+An explicit merge applies the scaled `B·A` update to the base weights once before inference. PEFT's [`merge_and_unload()`](https://huggingface.co/docs/peft/main/package_reference/lora#merge-lora-weights-into-the-base-model) and llama.cpp's export command below produce weights for ordinary inference. A merge can round the computed values. `weightspace apply` writes the published replacement values bit for bit.
 
 ## LoRA with vLLM
 

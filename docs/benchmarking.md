@@ -80,6 +80,8 @@ The fourth session ran prompts 40–89 with seed 1234 and concurrency 8. The bas
 
 The fifth session ran prompts 90–139 with seed 1234 and concurrency 8. The base passed 30 of 50 and hit the token cap on six replies. The patched model passed 25 of 50 and hit the cap on one reply. Across the 140 prompts filed so far, the base passed 80 and the patched model passed 75. The base hit the cap on 23 replies and the patched model hit it on three. [Fifth session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261121T161449Z-f252fb/session.json)
 
+The sixth session ran prompts 140–179 with seed 1234 and concurrency 8. The base passed 24 of 40 and hit the token cap on six replies. The patched model passed 15 of 40 and hit the cap on three. Across the 180 prompts filed so far, the base passed 104 and the patched model passed 90. The base hit the cap on 29 replies and the patched model hit it on six. [Sixth session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261121T193908Z-3000ad/session.json)
+
 ## Compared with the patch authors' evaluation
 
 RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinking-loops` v1) with their own code, published with the patch's logs: `evaluate.py` (protocol `think35`) and `mathqa.py`. On MATH-500 the two set-ups differ as below. The card is revision `2fc0636` of `Qwen/Qwen3.5-0.8B`, unchanged since 2026-03-02.

@@ -6,69 +6,80 @@
 // got worse looks the same, and its sign says so. Each patched row's change is taken from its own
 // source's base, printed beside it, and never ranked against the other source
 // (rule 9); when the measured base differs from the one drawn, its own base
-// shows as a tick on the row. A row with no figure is left out: no Reported
-// row where the authors reported nothing, no Measured row where nothing was run.
-// Runs still being scored sit below as plates, one at a time with arrows.
+// shows as a tick on the row. Provisional rows show their coverage alongside
+// the score. Benchmarks without a displayable score show progress below.
 // `full` is the patch page's version: a line on what each word means, a key,
 // the charts with every score printed and a status per benchmark, measured
-// labels linked to their records, then the authors' study scope and the runs.
+// labels linked to their records, then the authors' study scope, pending
+// progress, and run records.
+import { getEntry, render } from "astro:content";
 import Arrow from "../Arrow.astro";
 import type { Version } from "../../lib/types.ts";
 import { sourceLabels } from "../../lib/catalog.ts";
+import { exists, fail } from "../../lib/files.ts";
+import { NEW_TAB } from "../../lib/links.ts";
+import BenchmarkLegend from "./BenchmarkLegend.astro";
 import RunSummary from "./RunSummary.astro";
 import { scoreAxis } from "../../lib/score-axis.ts";
-import { results, pending, resultTitle, resultNote, fmt, signed, gain, type Result } from "../../lib/insight.ts";
+import { results, pending, resultTitle, resultKey, resultNote, fmt, signed, gain, type Result } from "../../lib/insight.ts";
 interface Props { version: Version; full?: boolean }
 const { version: v, full = false } = Astro.props;
 const Head = full ? "h3" : "h4";
 const claimUrls = new Set(v.claims.map(c => c.record.source.url));
 const names = v.patch.authors.map(a => a.name);
 const byline = names.length > 1 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names[0];
-const scores = results(v);
-const waits = pending(v);
+const scores = results(v, { includeProvisional: true });
+const progress = pending(v);
+const noteId = `${v.patch.base.address}/${v.patch.slug}/${v.label}`;
+const prefix = v.dir.startsWith("docs/example/") ? "docs/example/" : "";
+const notePath = `${prefix}bench/notes/${noteId}.md`;
+const hasNote = exists(notePath);
+const noteTitle = "Why the scores may differ";
+const noteLink = hasNote ? { href: `${full ? "" : v.patch.url}#benchmark-notes`, label: noteTitle } : undefined;
+const note = full && hasNote ? await getEntry("benchmarkNotes", noteId) : undefined;
+if (full && hasNote && !note) fail(`Missing benchmark note: ${notePath}`);
+const BenchmarkNote = note ? (await render(note)).Content : null;
 
-const keyOf = (r: Result) => `${resultTitle(r)}|${r.unit}`;
-const keys = [...new Set(scores.map(keyOf))];
+const keys = [...new Set(scores.map(resultKey))];
 const axes = new Map([...new Set(scores.map(r => r.unit))].map(unit =>
   [unit, scoreAxis(scores.filter(r => r.unit === unit).flatMap(r => [r.base, r.patched]), unit)] as const));
 
 const blocks = keys.map(key => {
-  const rows = scores.filter(r => keyOf(r) === key);
+  const rows = scores.filter(r => resultKey(r) === key);
   const author = rows.find(r => r.source === "author");
-  const indep = rows.find(r => r.source === "index");
+  const indep = rows.find(r => r.source === "index" && !r.provisional) ?? rows.find(r => r.source === "index");
   const lead = (author ?? indep)!;
-  const waiting = !indep && !lead.name ? waits.find(w => w.benchmark === lead.benchmark) : undefined;
-  return { lead, author, indep, waiting, axis: axes.get(lead.unit)!, note: [resultNote(lead), !lead.higherIsBetter && "lower is better"].filter(Boolean).join(" · ") };
+  return { lead, author, indep, axis: axes.get(lead.unit)!, note: [resultNote(lead), !lead.higherIsBetter && "lower is better"].filter(Boolean).join(" · ") };
 });
 type Block = typeof blocks[number];
+const provisionalRuns = new Set(blocks.flatMap(({ indep }) => indep?.provisional ? [indep.href] : []));
+const waits = progress.filter(w => !provisionalRuns.has(w.href));
 
-// Patch page only: one plain status per benchmark. It says whether an
-// measurement went the same way as the reported figure, never which
-// number is right (rule 9).
+// On the patch page, only a final measurement can confirm a reported direction.
 const sign = (r: Result) => Math.sign(gain(r));
-function status(b: Block): { text: string; tone: string } {
-  if (b.author && b.indep) return sign(b.indep) === sign(b.author)
+function status(b: Block): { text: string; tone: string } | undefined {
+  if (!b.indep || b.indep.provisional) return;
+  if (b.author) return sign(b.indep) === sign(b.author)
     ? { text: "Confirmed", tone: "ok" } : { text: "Not reproduced", tone: "miss" };
-  if (b.indep) return sign(b.indep) > 0 ? { text: "Measured only", tone: "ok" } : { text: "No gain found", tone: "miss" };
-  return b.waiting ? { text: "Being measured", tone: "wait" } : { text: "Reported only", tone: "wait" };
+  return sign(b.indep) > 0 ? { text: "Measured only", tone: "ok" } : { text: "No gain found", tone: "miss" };
 }
-const rerun = scores.some(r => r.source === "index") || waits.some(w => w.source === "index");
 const anySelf = blocks.some(b => b.author);
-const anyIndep = blocks.some(b => b.indep || b.waiting);
+const anyIndep = blocks.some(b => b.indep);
+const rerun = anyIndep || progress.length > 0;
 const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
 ---
 <div class:list={["evidence", "triad", full ? "full" : "compact"]}>
   {full && blocks.length > 0 && <p class="tri-intro">Each benchmark shows the unpatched base, the patch authors' own figure (<strong>{sourceLabels.author}</strong>) and{rerun ? "" : ", once it is run,"} a run of the index's own benchmark (<strong>{sourceLabels.index}</strong>), filed with every request and reply. Anyone can file a measurement: the index team or any contributor.</p>}
-  {full && blocks.length > 0 && <p class="plot-key tri-key" aria-hidden="true"><span class="k-base">Base</span>{anySelf && <span class="k-self">{sourceLabels.author}</span>}{anyIndep && <span class="k-indep">{sourceLabels.index}</span>}{anyTick && <span class="k-tick">Measured base</span>}</p>}
+  {full && blocks.length > 0 && <BenchmarkLegend reported={anySelf} measured={anyIndep} measuredBase={anyTick} noteLink={noteLink} />}
   {blocks.map(b => {
     const base = b.lead.base;
     const u = b.lead.unit;
     const st = full && status(b);
     return <section class="tri">
-      {!full && <p class="plot-key tri-key tri-pop" aria-hidden="true"><span class="k-base">Base</span>{b.author && <span class="k-self">{sourceLabels.author}</span>}{b.indep && <span class="k-indep">{sourceLabels.index}</span>}{b.indep && b.indep.base !== base && <span class="k-tick">Measured base</span>}</p>}
+      {!full && <BenchmarkLegend class="tri-pop" reported={!!b.author} measured={!!b.indep} measuredBase={!!b.indep && b.indep.base !== base} noteLink={noteLink} />}
       <Head class="tri-head">{resultTitle(b.lead)}{b.note && <small>{b.note}</small>}{st && <span class:list={["tri-status", st.tone]}>{st.text}</span>}</Head>
       <ul class="tri-rows">
-        <li class="tri-row base">
+        <li class:list={["tri-row", "base", { provisional: !!b.lead.provisional }]}>
           <span class="tri-label">Base</span>
           <span class="tri-track" aria-hidden="true"><i style={b.axis.bar(base)}></i></span>
           <span class="tri-val">{fmt(base, u)}</span>
@@ -81,68 +92,64 @@ const anyTick = blocks.some(b => b.indep && b.indep.base !== b.lead.base);
             ? <><span class="tri-val">{fmt(b.author.patched, u)}</span><span class="tri-chg">{signed(b.author.patched - b.author.base, u)}</span></>
             : <span class="tri-val"><span class="visually-hidden">{fmt(b.author.patched, u)}, </span>{signed(b.author.patched - b.author.base, u)}</span>}
         </li>}
-        {/* An index row that was never run is left out; one still being scored stays as "Score pending". */}
-        {(b.indep || b.waiting) && <li class="tri-row indep">
-          <span class="tri-label">{b.indep
-            ? full ? (!claimUrls.has(b.indep.href) ? <a href={b.indep.href}>{sourceLabels[b.indep.source]}</a> : sourceLabels[b.indep.source])
-              : sourceLabels.index
-            : sourceLabels.index}</span>
-          {b.indep ? <>
-            <span class="tri-track" aria-hidden="true">
-              <i style={b.axis.bar(b.indep.patched)}></i>
-              {b.indep.base !== base && <b class="tri-tick" style={`left:${b.axis.position(b.indep.base)}%`} title={`Its own base: ${fmt(b.indep.base, u)}`}></b>}
-            </span>
-            {full
-              ? <><span class="tri-val">{fmt(b.indep.patched, u)}</span><span class="tri-chg">{signed(b.indep.patched - b.indep.base, u)}{b.indep.base !== base && <small>from {fmt(b.indep.base, u)}</small>}</span></>
-              : <span class="tri-val"><span class="visually-hidden">{fmt(b.indep.patched, u)}, from its own base of {fmt(b.indep.base, u)}, </span>{signed(b.indep.patched - b.indep.base, u)}</span>}
-          </> : <span class="tri-miss">Score pending</span>}
+        {b.indep && <li class:list={["tri-row", "indep", { provisional: !!b.indep.provisional }]}>
+          <span class="tri-label">{full && !claimUrls.has(b.indep.href)
+            ? <a href={b.indep.href}>{sourceLabels.index}</a> : sourceLabels.index}</span>
+          <span class="tri-track" aria-hidden="true">
+            <i style={b.axis.bar(b.indep.patched)}></i>
+            {b.indep.base !== base && <b class="tri-tick" style={`left:${b.axis.position(b.indep.base)}%`} title={`Its own base: ${fmt(b.indep.base, u)}`}></b>}
+          </span>
+          {full
+            ? <><span class="tri-val">{fmt(b.indep.patched, u)}</span><span class="tri-chg">{signed(b.indep.patched - b.indep.base, u)}{b.indep.base !== base && <small>from {fmt(b.indep.base, u)}</small>}</span></>
+            : <span class="tri-val"><span class="visually-hidden">{fmt(b.indep.patched, u)}, from its own base of {fmt(b.indep.base, u)}, </span>{signed(b.indep.patched - b.indep.base, u)}</span>}
+          {b.indep.provisional && <small class="tri-provisional">Provisional · {b.indep.provisional.filed} of {b.indep.provisional.total} item–seed pairs filed</small>}
         </li>}
       </ul>
     </section>;
   })}
 
-  {/* On a patch card each benchmark shows its own legend on hover; touch screens, with no hover, get this one under the charts. */}
-  {!full && blocks.length > 0 && <p class="plot-key tri-key tri-key-touch" aria-hidden="true"><span class="k-base">Base</span>{anySelf && <span class="k-self">{sourceLabels.author}</span>}{anyIndep && <span class="k-indep">{sourceLabels.index}</span>}{anyTick && <span class="k-tick">Measured base</span>}</p>}
-
-  {waits.length > 0 && <div class="pending-deck" data-deck>
-    {waits.map((w, i) => <div class="coverage" data-plate>
-      <p>{w.benchmark} · <strong>Score pending</strong></p>
-      <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
-      <small>{sourceLabels.index} on the index benchmark · {w.filed} of {w.total} item–seed pairs filed</small>
-    </div>)}
-    {waits.length > 1 && <div class="deck-nav" data-nav hidden>
-      <button type="button" class="deck-step" data-step="-1" aria-label="Previous pending benchmark"><Arrow dir="left" /></button>
-      <span class="deck-count" data-count aria-live="polite">1 of {waits.length}</span>
-      <button type="button" class="deck-step" data-step="1" aria-label="Next pending benchmark"><Arrow /></button>
-    </div>}
-  </div>}
+  {!full && blocks.length > 0 && <BenchmarkLegend class="tri-key-touch" reported={anySelf} measured={anyIndep} measuredBase={anyTick} noteLink={noteLink} />}
 
   {!blocks.length && !waits.length && <p class="no-score">No measurements published yet.</p>}
 
-  {full && v.claims.map(c => <p class="study-scope">{sourceLabels.author} by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
+  {full && v.claims.map(c => <p class="study-scope">{sourceLabels.author} by {byline}{c.record.affiliation && ` (${c.record.affiliation})`} in <a href={c.record.source.url} {...NEW_TAB}>{c.record.source.title} <Arrow dir="out" /></a>. {c.record.conditions}</p>)}
+
+  {waits.length > 0 && <div class="pending-deck" data-deck>
+    {waits.length > 1 && <button type="button" class="deck-step" data-step="-1" aria-label="Previous pending benchmark" hidden><Arrow dir="left" chevron /></button>}
+    <div class="pending-items" aria-live={waits.length > 1 ? "polite" : undefined} aria-atomic="true">
+      {waits.map(w => <div class="coverage" data-plate>
+        <p>{w.benchmark} · <strong>Benchmark pending</strong></p>
+        <progress aria-label={`${w.benchmark} benchmark coverage`} value={w.filed} max={w.total} />
+        <small>{w.filed} of {w.total} item–seed pairs filed</small>
+      </div>)}
+    </div>
+    {waits.length > 1 && <button type="button" class="deck-step" data-step="1" aria-label="Next pending benchmark" hidden><Arrow chevron /></button>}
+  </div>}
+
+  {BenchmarkNote && <details class="fold benchmark-notes" id="benchmark-notes" open>
+    <summary>{noteTitle}</summary>
+    <article class="prose"><BenchmarkNote /></article>
+  </details>}
   {full && v.runs.length > 0 && <details class="fold"><summary>Run records ({v.runs.length})</summary>{v.runs.map(r => <RunSummary version={v} run={r} />)}</details>}
 </div>
 <script>
   // Without JavaScript every plate stays visible; with it, one shows at a time.
   for (const deck of document.querySelectorAll<HTMLElement>("[data-deck]")) {
+    const [prev, next] = deck.querySelectorAll<HTMLButtonElement>("[data-step]");
+    if (!prev || !next) continue;
     const plates = [...deck.querySelectorAll<HTMLElement>("[data-plate]")];
-    const nav = deck.querySelector<HTMLElement>("[data-nav]");
-    if (!nav) continue;
-    const [prev, next] = [...nav.querySelectorAll<HTMLButtonElement>("[data-step]")];
-    const count = nav.querySelector<HTMLElement>("[data-count]")!;
     let at = 0;
     const show = () => {
       plates.forEach((p, i) => p.hidden = i !== at);
       prev.hidden = at === 0;
       next.hidden = at === plates.length - 1;
-      count.textContent = `${at + 1} of ${plates.length}`;
     };
     for (const b of [prev, next]) b.addEventListener("click", () => {
       at = Math.min(Math.max(at + Number(b.dataset.step), 0), plates.length - 1);
       show();
       (at === 0 ? next : at === plates.length - 1 ? prev : b).focus();
     });
-    nav.hidden = false;
+    deck.dataset.nav = "";
     show();
   }
 </script>

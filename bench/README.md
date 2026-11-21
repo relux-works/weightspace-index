@@ -25,6 +25,9 @@ What this folder adds around lm-eval is small:
 Weights are prepared with the index's own tool (`weightspace apply`).
 This folder never edits weights.
 
+Release-specific benchmark notes live at `notes/<namespace>/<model>/<patch-slug>/v<N>.md`.
+They cite run records and published protocols, and the site displays them with that version’s results.
+
 ## Why pairs, and why one seed
 
 The patches indexed so far are small. A small effect is easier to see

@@ -88,14 +88,9 @@
 .file-choices.compact svg { width: .85rem; }
 .evidence { display: grid; gap: 1.45rem; }
 .evidence.compact { align-content: start; border-inline-start: 1px solid var(--color-divider); padding-inline-start: 2rem; gap: .8rem; container-type: inline-size; }
-/* Patch card and patch page: one chart per benchmark, three rows. The author's
-   report is the solid red bar with its change printed in red; the Measured
-   result is a ghost of it, a faint fill inside a red outline, so the two differ
-   in shape as well as lightness (owner's decision). A score that got worse is drawn and coloured
-   like any other; its sign says so. */
-/* The chart red sits halfway between the link red and the Relux identity red
-   (in OKLCH): #ce090c light, #fc5850 dark. Both clear 4.5:1, so the bar, the
-   outline and the printed change share it. */
+/* The Reported bar uses solid red. The Measured bar uses a faint fill and a red
+   outline. The chart red is the OKLCH midpoint of the link red and the Relux
+   identity red (#ce090c in light mode and #fc5850 in dark mode). */
 .triad { --tri-red: color-mix(in oklch, var(--color-link), var(--color-brand-red)); --tri-ghost: color-mix(in oklch, var(--tri-red) 22%, var(--color-surface)); --tri-ghost-line: color-mix(in oklch, var(--tri-red) 60%, var(--color-surface)); gap: 1.1rem; }
 .tri-head { margin: 0 0 .3rem; font: 650 .9rem var(--font-ui); display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; }
 .tri-head small { font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
@@ -115,22 +110,23 @@
 .tri-tick { position: absolute; top: -.2rem; bottom: -.2rem; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--color-text-muted); }
 .tri-val { justify-self: end; font: 600 .78rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tri-row.base .tri-val { font-weight: 500; color: var(--color-text-muted); }
-.tri-row.self .tri-val { color: var(--tri-red); }
-.tri-miss { grid-column: 2 / -1; font-size: .76rem; font-style: italic; color: var(--color-text-faint); }
-.pending-deck { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: start; padding-top: .9rem; border-top: 1px solid var(--color-divider); }
-.pending-deck .coverage { grid-column: 1; }
+.tri-row.provisional { row-gap: .15rem; }
+.tri-row.indep.provisional { opacity: .5; }
+.tri-row.provisional :is(.tri-val, .tri-chg), .tri-provisional { color: var(--color-text-muted); }
+.tri-provisional { grid-column: 2 / -1; font-size: .75rem; }
+.pending-deck { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; padding-top: .9rem; border-top: 1px solid var(--color-divider); }
+.pending-deck[data-nav] { grid-template-columns: 2.75rem minmax(0, 24rem) 2.75rem; column-gap: .25rem; }
+.pending-items { display: grid; grid-column: 1; grid-row: 1; row-gap: .65rem; }
+.pending-deck[data-nav] .pending-items { grid-column: 2; }
 .pending-deck .coverage[hidden] { display: none; }
 .pending-deck .coverage progress { margin: .3rem 0 .1rem; }
-.deck-nav { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: 1.9rem auto 1.9rem; align-items: center; gap: .3rem; }
-.deck-nav[hidden] { display: none; }
-.deck-step { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; border: 1px solid var(--color-border); border-radius: 50%; background: var(--color-surface); color: var(--color-text); cursor: pointer; transition: border-color 160ms cubic-bezier(.16, 1, .3, 1); }
-.deck-step:hover { border-color: var(--color-border-strong); }
+.deck-step { grid-row: 1; display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--color-text-muted); cursor: pointer; }
+.deck-step svg { width: 1.25rem; height: 1.25rem; }
+.deck-step:hover { color: var(--color-link); }
 .deck-step:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-/* A hidden end arrow keeps its slot so the count never shifts. */
-.deck-step[hidden] { display: grid; visibility: hidden; }
-.deck-step:first-child { grid-column: 1; }
-.deck-step:last-child { grid-column: 3; }
-.deck-count { font: 500 .75rem var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-text-muted); }
+.deck-step[hidden] { display: none; }
+.deck-step[data-step="-1"] { grid-column: 1; }
+.deck-step[data-step="1"] { grid-column: 3; }
 /* Patch page: the same charts, larger and side by side, after a line naming
    who measured and a key; the deck, the study scope and the run records span
    the full width under them. Every row prints its score, then its change from
@@ -140,9 +136,8 @@
 .tri-intro { margin: 0; max-width: 68ch; font-size: .9rem; color: var(--color-text-muted); }
 .tri-intro strong { font-weight: 600; color: var(--color-text); }
 .triad.full .tri-key { margin: -.6rem 0 0; }
-/* Patch card legend. With a mouse, hovering a benchmark's chart floats a small
-   legend above it, naming only the marks that chart uses; touch screens, with
-   no hover, get one legend under all the charts instead. */
+/* Patch cards reveal the legend on hover and keyboard focus. Touch screens
+   get one shared legend below the charts. */
 .triad.compact .tri-key { margin: -.2rem 0 0; font-size: .72rem; gap: .3rem .9rem; }
 .triad.compact .tri-key span::before { width: .9rem; height: .5rem; }
 .triad.compact .tri-key .k-tick::before { width: 2px; height: .8rem; margin-inline: .35rem; }
@@ -151,13 +146,13 @@
 @media (hover: hover) and (pointer: fine) {
   .plot-key.tri-key-touch { display: none; }
   .triad.compact .tri-pop {
-    display: flex; flex-wrap: nowrap; white-space: nowrap; position: absolute; right: 0; bottom: calc(100% + .15rem); z-index: 3; margin: 0;
+    display: flex; white-space: nowrap; position: absolute; right: 0; bottom: 100%; z-index: 3; margin: 0; max-inline-size: 100%;
     padding: .3rem .6rem; border: 1px solid var(--color-border); border-radius: .35rem;
     background: var(--color-surface); color: var(--color-text-muted); box-shadow: 0 4px 14px rgb(0 0 0 / .12);
     opacity: 0; translate: 0 .2rem; pointer-events: none;
     transition: opacity 140ms cubic-bezier(.16, 1, .3, 1), translate 140ms cubic-bezier(.16, 1, .3, 1);
   }
-  .triad.compact .tri:hover .tri-pop { opacity: 1; translate: 0 0; transition-duration: 200ms; }
+  .triad.compact .tri:is(:hover, :focus-within) .tri-pop { opacity: 1; translate: 0 0; pointer-events: auto; transition-duration: 200ms; }
 }
 @media (prefers-reduced-motion: reduce) { .triad.compact .tri-pop { transition: none; translate: none; } }
 .tri-key .k-self::before { background: var(--tri-red); }
@@ -169,7 +164,6 @@
 .tri-status.ok { color: var(--tri-red); }
 .tri-status.miss { color: var(--color-text); }
 .tri-status.miss::before { content: "≠ "; }
-.tri-status.wait { font-weight: 500; color: var(--color-text-muted); }
 .triad.full .tri-rows { gap: .35rem; }
 .triad.full .tri-row { grid-template-columns: 8.4rem minmax(3rem, 1fr) 3.6rem 4.6rem; font-size: .86rem; }
 .triad.full .tri-track { height: .65rem; }
@@ -177,10 +171,7 @@
 .triad.full .tri-row.base .tri-val { color: var(--color-text-muted); }
 .tri-chg { justify-self: end; text-align: right; font: 600 .86rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
 .tri-chg small { display: block; font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
-.tri-row.self .tri-chg { color: var(--tri-red); }
-.triad.full .tri-row.self .tri-val { color: inherit; }
 
-.triad.full .tri-miss { font-size: .84rem; }
 .triad.full .tri-label { white-space: normal; }
 .triad.full .tri-label a { color: inherit; text-decoration-color: color-mix(in oklch, currentColor 45%, transparent); }
 .triad.full .tri-label a:hover { color: var(--color-link); }
@@ -200,6 +191,9 @@
 .coverage small, .study-scope, .no-score { color: var(--color-text-muted); }
 .coverage progress { display: block; width: min(100%, 24rem); height: .5rem; margin: .45rem 0 .15rem; accent-color: var(--color-accent); }
 .coverage strong { font-weight: 550; }
+.benchmark-notes { scroll-margin-top: calc(var(--layout-header-height) + 1rem); }
+.benchmark-notes .prose { margin-top: .65rem; font-size: .9rem; }
+.benchmark-notes .prose > :first-child { margin-top: 0; }
 .plot-key { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; margin-top: .75rem; color: var(--color-text-muted); font-size: .78rem; }
 .plot-key span { display: inline-flex; align-items: center; gap: .4rem; }
 .plot-key span::before { content: ""; width: 1.1rem; height: .6rem; border-radius: 2px; }

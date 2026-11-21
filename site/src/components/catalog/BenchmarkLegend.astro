@@ -1,0 +1,19 @@
+---
+import { sourceLabels } from "../../lib/catalog.ts";
+
+interface Props {
+  reported: boolean;
+  measured: boolean;
+  measuredBase: boolean;
+  noteLink?: { href: string; label: string };
+  class?: string;
+}
+const { reported, measured, measuredBase, noteLink, class: className } = Astro.props;
+---
+<p class:list={["plot-key", "tri-key", className]}>
+  <span class="k-base" aria-hidden="true">Base</span>
+  {reported && <span class="k-self" aria-hidden="true">{sourceLabels.author}</span>}
+  {measured && <span class="k-indep" aria-hidden="true">{sourceLabels.index}</span>}
+  {measuredBase && <span class="k-tick" aria-hidden="true">Measured base</span>}
+  {noteLink && <a href={noteLink.href}>{noteLink.label}</a>}
+</p>

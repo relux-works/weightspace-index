@@ -9,9 +9,9 @@ import { cardHast, cardMdast } from "../src/lib/card-plugin.ts";
 import { REPO_ROOT } from "../src/lib/files.ts";
 
 const card = "models/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/README.md";
-const render = (md: string) =>
+const render = (md: string, file = card) =>
   markdownToHtml(md, {
-    fileURL: pathToFileURL(path.join(REPO_ROOT, card)),
+    fileURL: pathToFileURL(path.join(REPO_ROOT, file)),
     mdastPlugins: [cardMdast],
     hastPlugins: [cardHast],
   }).html;
@@ -36,14 +36,24 @@ test("unsafe schemes and missing targets lose their link", () => {
 
 test("relative links go to site pages or to GitHub at the pinned commit", () => {
   const html = render(`[v](v1/version.json) [base](../base.json) [doc](../../../../docs/structure.md#patch-forms) [ext](https://huggingface.co/x)`);
-  assert.match(html, /href="\/models\/Qwen\/Qwen3.5-0.8B\/rikiyat-thinking-loops\/v1\/"/);
+  assert.match(html, /<a href="\/models\/Qwen\/Qwen3.5-0.8B\/rikiyat-thinking-loops\/v1\/">v<\/a>/);
   assert.match(html, /href="\/models\/Qwen\/Qwen3.5-0.8B\/"/);
   assert.match(html, /href="https:\/\/github.com\/[^"]+\/blob\/[0-9a-f]{40}\/docs\/structure.md#patch-forms"/);
-  assert.match(html, /href="https:\/\/huggingface.co\/x" rel="noopener noreferrer nofollow"/);
+  assert.match(html, /href="https:\/\/huggingface.co\/x" target="_blank" rel="noopener noreferrer nofollow"/);
 });
 
 test("the card title heading is dropped and the rest move one level down", () => {
   const html = render(`# Qwen3.5-0.8B, edited by an LLM with no training (Weight-Space Programming)\n\n## Base model\n\ntext`);
   assert.doesNotMatch(html, /<h1/);
   assert.match(html, /<h3[^>]*>Base model<\/h3>/);
+});
+
+test("benchmark notes use repository-relative links and the same safe Markdown as cards", () => {
+  const note = "bench/notes/example/Model/patch/v1.md";
+  const target = `../../../../../${card.replace("README.md", "v1/version.json")}`;
+  const html = render(`## Settings\n\n[release](${target}) [source](https://example.invalid/study) ![image](https://example.invalid/image.png) <b>markup</b>`, note);
+  assert.match(html, /<h3[^>]*>Settings<\/h3>/);
+  assert.match(html, /href="\/models\/Qwen\/Qwen3.5-0.8B\/rikiyat-thinking-loops\/v1\/"/);
+  assert.match(html, /href="https:\/\/example.invalid\/study" target="_blank" rel="noopener noreferrer nofollow"/);
+  assert.doesNotMatch(html, /<img|<b>/);
 });

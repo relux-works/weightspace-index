@@ -20,6 +20,7 @@ import symbolMono from "../assets/brand/relux-symbol-one-color.svg?raw";
 // GitHub mark from Primer Octicons (MIT, see ../assets/octicons/LICENSE), unchanged.
 import githubMark from "../assets/octicons/mark-github-16.svg?raw";
 import { loadIndex, href } from "../lib/index.ts";
+import { NEW_TAB } from "../lib/links.ts";
 
 interface Props {
   title: string;
@@ -94,14 +95,14 @@ const logo = (svg: string, variant: string) =>
         <div>
           <p class="product-line">Weightspace Index</p>
           <p>
-            Built from <a href={commitUrl}><span class="mono">{index.githubRepo}@{index.short}</span></a>, record contract version 1.
+            Built from <a href={commitUrl} {...NEW_TAB}><span class="mono">{index.githubRepo}@{index.short}</span></a>, record contract version 1.
           </p>
           <nav aria-label="Index documents">
             <a href={href("#patch-vs-lora")}>Patch vs LoRA</a>
             <a href={href("compare/")}>All benchmark runs</a>
-            <a href={index.docsAt("docs/structure.md")}>How the index works</a>
-            <a href={index.docsAt("DISCLAIMER.md")}>Disclaimer</a>
-            <a href={`https://github.com/${index.githubRepo}`}>Source</a>
+            <a href={index.docsAt("docs/structure.md")} {...NEW_TAB}>How the index works</a>
+            <a href={index.docsAt("DISCLAIMER.md")} {...NEW_TAB}>Disclaimer</a>
+            <a href={`https://github.com/${index.githubRepo}`} {...NEW_TAB}>Source</a>
           </nav>
           <p class="safety">
             Patched models may behave unexpectedly or unsafely. Inclusion, redistribution and published results do not guarantee safety.
@@ -112,7 +113,7 @@ const logo = (svg: string, variant: string) =>
         </div>
         <div class="operator">
           <span class="operator-label">A project of</span>
-          <a class="relux" href="https://github.com/relux-works" aria-label="Relux Works">
+          <a class="relux" href="https://github.com/relux-works" {...NEW_TAB} aria-label="Relux Works">
             <Fragment set:html={logo(reluxLight, "light")} />
             <Fragment set:html={logo(reluxDark, "dark")} />
             <Fragment set:html={logo(reluxMono, "mono")} />

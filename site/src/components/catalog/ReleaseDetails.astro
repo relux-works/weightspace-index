@@ -5,6 +5,7 @@ import Command from "../Command.astro";
 import { benchCommands } from "../../lib/commands.ts";
 import { loadIndex, profileFiles, type Patch, type Version } from "../../lib/index.ts";
 import { fail } from "../../lib/files.ts";
+import { NEW_TAB } from "../../lib/links.ts";
 import type { RuntimeGuide } from "../../lib/runtime.ts";
 interface Props { patch: Patch; version?: Version; guide?: RuntimeGuide }
 const { patch, version: v, guide } = Astro.props;
@@ -21,8 +22,8 @@ const bench = v ? benchCommands(index, v) : [];
     {guide?.download && <p class="small break">{guide.download.name} · SHA-256 <code>{guide.download.sha256}</code></p>}
     <h3>Target base</h3><FileList files={profileFiles(v.profile)} showRole={false} /></details>}
   {v && (v.comparisons.length > 0 || v.assessments.length > 0) && <details class="fold"><summary>Comparisons and assessments</summary>
-    {v.comparisons.map(c => <p id={`comparison-${c.id}`}><a href={c.file.view}>{c.id}</a> · {c.record.state} · {c.record.estimand}</p>)}
-    {v.assessments.map(a => <p id={`assessment-${a.id}`}><a href={a.file.view}>{a.record.intended_use}</a> · {a.record.decision} · {a.record.reason}</p>)}
+    {v.comparisons.map(c => <p id={`comparison-${c.id}`}><a href={c.file.view} {...NEW_TAB}>{c.id}</a> · {c.record.state} · {c.record.estimand}</p>)}
+    {v.assessments.map(a => <p id={`assessment-${a.id}`}><a href={a.file.view} {...NEW_TAB}>{a.record.intended_use}</a> · {a.record.decision} · {a.record.reason}</p>)}
   </details>}
   {bench.length > 0 && <details class="fold" id="benchmark"><summary>Reproduce the benchmark</summary>
     {bench.map(b => <div class="cmds"><h3>{b.protocol} · {b.settings}</h3><Command title="Run" command={b.run}/><Command title="Progress" command={b.status}/><Command title="Compare" command={b.compare}/></div>)}</details>}
@@ -31,5 +32,5 @@ const bench = v ? benchCommands(index, v) : [];
   {Card && <details class="fold" id="card"><summary>Original submission</summary><article class="prose"><Card /></article></details>}
   <details class="fold" id="notices"><summary>License and attribution</summary><p>{patch.license} · Submitted by {patch.submitter}</p>
     {patch.notices.length > 0 && <FileList files={patch.notices} showRole={false}/>}
-    <p><a href={patch.record.view}>Patch record</a>{v && <> · <a href={v.record.view}>Version record</a></>}</p></details>
+    <p><a href={patch.record.view} {...NEW_TAB}>Patch record</a>{v && <> · <a href={v.record.view} {...NEW_TAB}>Version record</a></>}</p></details>
 </section>

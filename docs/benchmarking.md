@@ -54,6 +54,8 @@ Why: when `</think>` is missing, lm-eval scores the whole thinking trace, and `m
 - `compare` reports the same figures and the MATH checker's score. `python -m bench disagreements` lists every reply where lm-eval, math-verify and the MATH checker disagree.
 - An incomplete run keeps its `UNKNOWN` score.
 
+The site's patch charts show provisional scores once at least 25% of the planned item–seed pairs have been filed for both base and patched models. The headline averages seeds within each filed item, then weights the items equally. The cut share uses all filed pairs. The charts show the filed count until the run is complete. Final scores come from the completed run records.
+
 **All run data stays in git (owner decision: Timur, 2026-11-19).** Sessions, samples and the full request/response logs are filed in this repository. If checkout size ever becomes a problem, the `.jsonl` files get gzipped rather than hosted elsewhere.
 
 ## IFEval protocol and verification
@@ -97,7 +99,7 @@ RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinkin
 | Answer read | last `\boxed{}` after the last `</think>`. No `</think>` means no answer. | last `\boxed{}`, `\fbox{}`, `\boxed {..}` or `\boxed 5` after the last `</think>`, or anywhere in the reply when there is no `</think>` | Cut replies count as wrong (decision above). |
 | Comparison with the gold answer | math-verify | math-verify | — |
 
-Temperature, the answer read from cut replies, and the inference engine are the differences that can move scores. Their effect on this patch has not been measured separately.
+Temperature, the prompts and seeds sampled, answer extraction, and the inference engine can all affect scores. A temperature-only test would hold the other conditions fixed. The [version 1 benchmark note](../bench/notes/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1.md) describes the observed gap in the initial filed pairs and is shown beside the site’s benchmark results.
 
 ## Hardware
 

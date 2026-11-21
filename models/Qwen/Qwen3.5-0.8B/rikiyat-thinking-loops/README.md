@@ -40,7 +40,7 @@ The slug `rikiyat-thinking-loops` uses the author's namespace `RikiyaT`, lowerca
 
 The base and edited checkpoint are published under Apache-2.0. The original compact edit's data are published under CC BY 4.0. Both layers travel with this representation: [attribution and change marking](notices/ATTRIBUTION.md), [Apache-2.0](notices/Apache-2.0.txt), and [CC BY 4.0](notices/CC-BY-4.0.txt).
 
-**no benchmarks submitted**. No inference was run for this entry. It contains no run, comparison or assessment records and makes no behavioral efficacy claim.
+Version 1 has [published results](v1/claims/weight-space-programming.json) and paired Index runs for [MATH-500](v1/runs/math500-n197.qwen3.5-0.8b-thinking.bf16/run.json) and [IFEval](v1/runs/ifeval.qwen3.5-0.8b-thinking.bf16/run.json). The version’s [benchmark note](../../../../bench/notes/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1.md) compares the MATH-500 protocols and their observed results.
 
 ## Derived LoRA publication
 

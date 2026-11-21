@@ -89,7 +89,7 @@ export function resultLines(v: Version): SearchEntry["results"] {
     const [s] = scores;
     if (s) return [{ source: label[source], text: `${s.benchmark} ${s.metric}`, value: `${fmt(s.base, s.unit)} → ${fmt(s.patched, s.unit)}` }];
     const [p] = progress;
-    if (p) return [{ source: label[source], text: `${p.benchmark} score pending`, value: `${p.filed} of ${p.total} item–seed pairs` }];
+    if (p) return [{ source: label[source], text: `${p.benchmark} · Benchmark pending`, value: `${p.filed} of ${p.total} item–seed pairs` }];
     return runs.length ? [{ source: label[source], text: "Run filed, no matched score yet" }] : [];
   });
 }

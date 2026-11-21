@@ -1,13 +1,12 @@
 // Reader-facing summaries of the records: before/after results per source,
-// what a release edits, and how measured stacks scored. Values come from the
-// records unchanged; differences are shown next to the two values they come
-// from and are never ranked across sources (rule 9).
-import { activeVersion, footprint, readCoverage } from "./catalog.ts";
-import { firstAdded } from "./files.ts";
+// what a release edits, and how measured stacks scored. Final scores come
+// from the records. Provisional scores summarize the filed outcomes.
+import { activeVersion, footprint, readCoverage, type Coverage } from "./catalog.ts";
 import { combinationStudies } from "./combinations.ts";
-import { exists, readBytes, readJson } from "./files.ts";
+import { exists, firstAdded, readBytes, readJson } from "./files.ts";
+import { provisionalBenchScores } from "./provisional-benchmark.ts";
 import { rankable } from "./queries.ts";
-import type { Base, Patch, Run, Version } from "./types.ts";
+import type { Base, Patch, Run, Score, Version } from "./types.ts";
 
 export type Source = "author" | "index";
 
@@ -30,25 +29,33 @@ export interface Result {
   version: Version;
   /** A measured stack: its members in the model's patch order; `version` is the first. */
   stack?: Version[];
+  provisional?: Coverage;
   href: string;
 }
 
-export interface Pending {
+export interface Pending extends Coverage {
   source: Source;
   benchmark: string;
-  filed: number;
-  total: number;
   version: Version;
   href: string;
 }
 
-/** The matched unpatched baseline for a patched run, when the two are comparable. */
-export function pairedBaseline(v: Version, run: Run): Run | undefined {
+function comparisonBaseline(v: Version, run: Run) {
   const explicit = v.comparisons.find(c => c.patched === run && c.record.state === "MATCHED")?.baseline;
-  const b = explicit ?? run.paired;
-  if (!b || b.version || b.group !== run.group || !rankable(b) || !rankable(run)) return;
-  const s = run.record.score, t = b.record.score;
-  return s.metric === t.metric && s.unit === t.unit && s.denominator === t.denominator ? b : undefined;
+  const base = explicit ?? run.paired;
+  return base && !base.version && base.group === run.group ? base : undefined;
+}
+
+function haveComparableScores(base: Run, patched: Run) {
+  if (!rankable(base) || !rankable(patched)) return false;
+  const a = base.record.score, b = patched.record.score;
+  return a.metric === b.metric && a.unit === b.unit && a.denominator === b.denominator;
+}
+
+/** The matched unpatched baseline with a comparable final score. */
+export function pairedBaseline(v: Version, run: Run): Run | undefined {
+  const base = comparisonBaseline(v, run);
+  return base && haveComparableScores(base, run) ? base : undefined;
 }
 
 function scale(unit: string, n: number) {
@@ -64,27 +71,31 @@ const BENCH_METRICS: Record<string, string> = {
   prompt_level_strict_acc: "strict prompt-level accuracy",
 };
 
-export function isBenchRun(run: Run) {
-  return BENCH_PROTOCOL.test(run.record.protocol.name) && exists(run.record.protocol.name);
+interface BenchProtocol { dataset?: { repo_id?: string }; primary_metric?: string }
+
+function benchProtocol(run: Run) {
+  const file = run.record.protocol.name;
+  if (BENCH_PROTOCOL.test(file) && exists(file)) return readJson<BenchProtocol>(file);
 }
 
 /** The dataset's own name for a bench protocol (MATH-500, not math500-n197). */
-function benchmarkName(run: Run) {
-  const file = run.record.protocol.name;
-  if (!isBenchRun(run)) return run.protocolLabel;
-  return readJson<{ dataset?: { repo_id?: string } }>(file).dataset?.repo_id?.split("/").pop() || run.protocolLabel;
+function benchmarkName(run: Run, protocol: BenchProtocol | undefined) {
+  return protocol?.dataset?.repo_id?.split("/").pop() || run.protocolLabel;
 }
 
-/** The small print under a result's name: metric, item count and samples per problem. */
 /** A result's row title: what it measures, or the benchmark when it is the benchmark's own score. */
 export const resultTitle = (r: Pick<Result, "name" | "benchmark">) => r.name ?? r.benchmark;
+
+/** Groups a benchmark's measurements of the same quantity. */
+export const resultKey = (r: Pick<Result, "benchmark" | "name" | "unit">) =>
+  JSON.stringify([r.benchmark, r.name ?? "", r.unit]);
 
 /** The small print under a result's title: benchmark (when the title is not it), metric, item count, samples per problem. */
 export const resultNote = (r: Pick<Result, "name" | "benchmark" | "metric" | "n" | "samples">) =>
   [r.name && r.benchmark, r.metric, r.n && `n = ${r.n}`, r.samples && `${r.samples} samples per problem`].filter(Boolean).join(" · ");
 
-/** Every before/after pair for one release, author reports first. */
-export function results(v: Version | undefined): Result[] {
+/** Before/after pairs for one release, with provisional scores available to the evidence charts. */
+export function results(v: Version | undefined, { includeProvisional = false } = {}): Result[] {
   if (!v) return [];
   const out: Result[] = [];
   for (const c of v.claims) {
@@ -98,17 +109,26 @@ export function results(v: Version | undefined): Result[] {
     }
   }
   for (const run of v.runs) {
-    const base = pairedBaseline(v, run);
+    const base = comparisonBaseline(v, run);
     if (!base) continue;
-    const s = run.record.score, t = base.record.score;
+    const complete = haveComparableScores(base, run);
+    if (!complete && !includeProvisional) continue;
+    const protocol = benchProtocol(run);
+    const provisional = !complete && protocol?.primary_metric ? provisionalBenchScores(base, run) : undefined;
+    if (!complete && !provisional) continue;
+    const s: Score = provisional?.patched ?? run.record.score;
+    const t: Score = provisional?.base ?? base.record.score;
     // Bench reports both the headline and the cut share as fractions.
-    const bench = isBenchRun(run);
-    const unit = bench ? "fraction" : s.unit!;
+    const unit = protocol ? "fraction" : s.unit!;
     const a = scale(unit, t.value!), b = scale(unit, s.value!);
-    const row = { source: "index" as const, benchmark: benchmarkName(run), n: s.denominator, baseKey: base.url, version: v, href: run.url };
-    const metric = bench ? BENCH_METRICS[s.metric!] ?? s.metric! : s.metric!;
+    const row = {
+      source: "index" as const, benchmark: benchmarkName(run, protocol), n: s.denominator, baseKey: base.url, version: v, href: run.url,
+      ...(provisional && { provisional: provisional.coverage }),
+    };
+    const metricId = s.metric ?? protocol?.primary_metric ?? "";
+    const metric = protocol ? BENCH_METRICS[metricId] ?? metricId : metricId;
     out.push({ ...row, metric, unit: b.unit, base: a.value, patched: b.value, higherIsBetter: true });
-    if (bench && typeof s.cut_at_limit === "number" && typeof t.cut_at_limit === "number") out.push({
+    if (protocol && typeof s.cut_at_limit === "number" && typeof t.cut_at_limit === "number") out.push({
       ...row, name: CUT, metric: "", unit: "%", base: scale("fraction", t.cut_at_limit).value, patched: scale("fraction", s.cut_at_limit).value,
       higherIsBetter: false, baseKey: `${base.url}#cut`,
     });
@@ -122,7 +142,7 @@ export function pending(v: Version | undefined): Pending[] {
   return v.runs.flatMap(run => {
     if (rankable(run)) return [];
     const c = readCoverage(run.record.score.reason);
-    return c ? [{ source: "index" as const, benchmark: benchmarkName(run), ...c, version: v, href: run.url }] : [];
+    return c ? [{ source: "index" as const, benchmark: benchmarkName(run, benchProtocol(run)), ...c, version: v, href: run.url }] : [];
   });
 }
 

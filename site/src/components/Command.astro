@@ -4,6 +4,7 @@
 import { createHash } from "node:crypto";
 import type { Command } from "../lib/commands.ts";
 import { loadIndex } from "../lib/index.ts";
+import { NEW_TAB } from "../lib/links.ts";
 import CopyButton from "./CopyButton.astro";
 interface Props { command: Command; title?: string }
 const { command, title } = Astro.props;
@@ -15,7 +16,7 @@ const src = index.docsAt(command.source.path) + (command.source.anchor ? `#${com
 <figure class="cmd">
   <figcaption>
     <span class="grow">
-      {title && <><strong>{title}</strong> · </>}<a href={src} title="Where this command form is documented">{command.source.label}</a>
+      {title && <><strong>{title}</strong> · </>}<a href={src} {...NEW_TAB} title="Where this command form is documented">{command.source.label}</a>
     </span>
     <CopyButton from={id} label="Copy" title="Copy command" quiet />
   </figcaption>

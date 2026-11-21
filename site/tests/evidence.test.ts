@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { groupEvidence, previewResult, type Result, type Pending } from "../src/lib/insight.ts";
-import type { Run } from "../src/lib/types.ts";
+import { CUT, FINAL_ANSWERS, groupEvidence, pending, previewResult, resultKey, results, type Result, type Pending } from "../src/lib/insight.ts";
+import type { Run, Version } from "../src/lib/types.ts";
 
 test("author claims stay apart from index results, and every filed run is an index run", () => {
   const author = { source: "author" } as Result;
@@ -24,9 +24,7 @@ test("the preview favors Measured evidence even if its result is flat or negativ
   assert.equal(previewResult([]), undefined);
 });
 
-
-test("a bench run reads as final answers right and its cut share, in percent, against its paired baseline", async () => {
-  const { results, FINAL_ANSWERS, CUT } = await import("../src/lib/insight.ts");
+test("a bench run reads as final answers right and its cut share, in percent, against its paired baseline", () => {
   const protocol = { name: "bench/protocols/math500-n197.json", sha256: "a".repeat(64) };
   const score = (value: number, cut: number) => ({ metric: "math_verify", value, value_lm_eval: value + 0.1, cut_at_limit: cut, unit: "mean over items", denominator: 197 });
   const base = { url: "/base/", group: "g", record: { state: "COMPLETE", protocol, score: score(0.2, 0.8) } } as unknown as Run;
@@ -35,10 +33,10 @@ test("a bench run reads as final answers right and its cut share, in percent, ag
   const [head, cut] = results(v);
   assert.deepEqual([head.benchmark, head.metric, head.unit, head.base, head.patched, head.higherIsBetter], ["MATH-500", FINAL_ANSWERS, "%", 20, 27.3, true]);
   assert.deepEqual([cut.name, cut.unit, cut.base, cut.patched, cut.higherIsBetter], [CUT, "%", 80, 64.5, false]);
+  assert.deepEqual(results(v, { includeProvisional: true }), [head, cut]);
 });
 
-test("an IFEval bench run labels the strict prompt-level metric", async () => {
-  const { results } = await import("../src/lib/insight.ts");
+test("an IFEval bench run labels the strict prompt-level metric", () => {
   const protocol = { name: "bench/protocols/ifeval.json", sha256: "a".repeat(64) };
   const record = (value: number) => ({ state: "COMPLETE", protocol, score: {
     metric: "prompt_level_strict_acc", value, unit: "strict prompt-level accuracy", denominator: 541,
@@ -49,4 +47,63 @@ test("an IFEval bench run labels the strict prompt-level metric", async () => {
   const [score] = results(v);
   assert.deepEqual([score.benchmark, score.metric, score.unit, score.base, score.patched],
     ["IFEval", "strict prompt-level accuracy", "%", 20, 50]);
+});
+
+function incompleteBench(
+  total: number,
+  baseOutcomes: Run["outcomes"],
+  patchedOutcomes: Run["outcomes"],
+  protocolLabel = "math500-n197",
+) {
+  const protocol = { name: `bench/protocols/${protocolLabel}.json`, sha256: "a".repeat(64) };
+  const record = { state: "INCOMPLETE", protocol, score: {
+    state: "UNKNOWN", reason: `3 of ${total} item-seed pairs filed`,
+  } };
+  const group = {};
+  const base = { url: "/base/", version: null, group, record, outcomes: baseOutcomes } as unknown as Run;
+  const run = { url: "/run/", group, paired: base, protocolLabel, record, outcomes: patchedOutcomes } as unknown as Run;
+  return { claims: [], comparisons: [], runs: [run] } as unknown as Version;
+}
+
+const outcome = (id: number, seed: number, correct: boolean, finish_reason = "stop") =>
+  ({ id, seed, correct, finish_reason, score: 1 });
+const baseOutcomes = [outcome(1, 1, true, "length"), outcome(1, 2, true, "length"), outcome(2, 1, false)];
+const patchedOutcomes = [outcome(2, 1, true), outcome(1, 2, true), outcome(1, 1, false, "length")];
+
+test("a quarter of filed pairs unlocks provisional scores, averaging seeds per item", () => {
+  const v = incompleteBench(12, baseOutcomes, patchedOutcomes);
+  const [head, cut] = results(v, { includeProvisional: true });
+  assert.ok(head && cut);
+  assert.deepEqual([head.metric, head.base, head.patched, head.n, head.provisional],
+    [FINAL_ANSWERS, 50, 75, 2, { filed: 3, total: 12 }]);
+  assert.deepEqual([cut.name, cut.base, cut.patched, cut.provisional], [CUT, 66.7, 33.3, head.provisional]);
+  assert.deepEqual(results(v), []);
+});
+
+test("coverage below a quarter shows progress without a provisional score", () => {
+  const v = incompleteBench(13, baseOutcomes, patchedOutcomes);
+  assert.deepEqual(results(v, { includeProvisional: true }), []);
+  assert.equal(pending(v)[0]?.filed, 3);
+});
+
+test("provisional scores require the same unique, graded item–seed pairs on both sides", () => {
+  const [first, second, third] = patchedOutcomes;
+  for (const outcomes of [null, [first, second], [first, second, second], [first, second, { ...third, seed: 3 }],
+      [first, second, { ...third, correct: undefined }]]) {
+    const v = incompleteBench(12, baseOutcomes, outcomes);
+    assert.deepEqual(results(v, { includeProvisional: true }), []);
+    assert.equal(pending(v)[0]?.filed, 3);
+  }
+});
+
+test("provisional IFEval uses the protocol's strict prompt-level metric", () => {
+  const v = incompleteBench(12, baseOutcomes, patchedOutcomes, "ifeval");
+  const [head] = results(v, { includeProvisional: true });
+  assert.ok(head);
+  assert.equal(head.metric, "strict prompt-level accuracy");
+});
+
+test("benchmarks with the same measure name have distinct chart keys", () => {
+  const math = { benchmark: "MATH-500", name: CUT, unit: "%" };
+  assert.notEqual(resultKey(math), resultKey({ ...math, benchmark: "IFEval" }));
 });

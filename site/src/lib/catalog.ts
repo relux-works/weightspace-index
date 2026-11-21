@@ -22,7 +22,9 @@ export function discoveryText(address: string, patches: Patch[], available: stri
     [p.title, p.summary, p.slug, ...p.tags, ...p.authors.map(a => a.name)])].join(" ").toLowerCase();
 }
 
-export function readCoverage(reason?: string) {
+export interface Coverage { filed: number; total: number }
+
+export function readCoverage(reason?: string): Coverage | null {
   const match = /^(\d+) of (\d+) item-seed pairs filed$/.exec(reason ?? "");
   if (!match) return null;
   const [, filed, total] = match.map(Number);

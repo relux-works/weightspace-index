@@ -1,5 +1,4 @@
-// Sätteri plugins for patch cards (models/<ns>/<model>/<slug>/README.md),
-// which are written by submitters and therefore untrusted:
+// Sätteri plugins for repository Markdown shown on patch pages.
 // - raw HTML is shown as text, never rendered;
 // - images are never loaded (that would be a third-party request); they
 //   become links;
@@ -12,13 +11,15 @@ import { fileURLToPath } from "node:url";
 import { defineHastPlugin, defineMdastPlugin } from "satteri";
 import { DEMO, GITHUB_REPO, PIN_PATHS, PREFIX, href, seg } from "./config.ts";
 import { REPO_ROOT, exists, isDir, pinCommit, readRecord } from "./files.ts";
+import { externalLinkAttrs } from "./links.ts";
 
 
 const CARD = /^models\/[^/]+\/[^/]+\/[^/]+\/README\.md$/;
+const BENCHMARK_NOTE = /^bench\/notes\/[^/]+\/[^/]+\/[^/]+\/v[1-9][0-9]*\.md$/;
 const SAFE_ABS = /^(https?:\/\/|mailto:)/i;
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
-/** Maps a link target in the card at `cardPath` (repository path) to the href the site shows, or null. */
+/** Resolves links in a patch card or benchmark note to their published targets. */
 export function resolveCardLink(cardPath: string, target: string): string | null {
   const t = target.trim();
   if (!t) return null;
@@ -64,20 +65,21 @@ function sitePage(p: string): string | null {
   return null;
 }
 
-function cardPathOf(fileURL: URL | undefined): string | null {
+function markdownPathOf(fileURL: URL | undefined): string | null {
   if (!fileURL) return null;
   const rel = path.relative(REPO_ROOT, fileURLToPath(fileURL)).split(path.sep).join("/");
-  if (DEMO && CARD.test(rel.replace(/^docs\/example\//, ""))) return rel;
-  const inCollection = PREFIX ? (rel.startsWith(PREFIX) ? rel.slice(PREFIX.length) : null) : rel;
-  return inCollection && CARD.test(inCollection) ? rel : null;
+  const prefix = DEMO && rel.startsWith("docs/example/") ? "docs/example/" : PREFIX;
+  if (!rel.startsWith(prefix)) return null;
+  const inCollection = rel.slice(prefix.length);
+  return CARD.test(inCollection) || BENCHMARK_NOTE.test(inCollection) ? rel : null;
 }
 
 export const cardMdast = (ctx: { fileURL: URL | undefined }) => {
-  const card = cardPathOf(ctx.fileURL);
-  if (!card) return null;
-  const patchJson = path.posix.join(path.posix.dirname(card), "patch.json");
-  const title: string | undefined = exists(patchJson) ? readRecord<any>(patchJson, "patch record").title : undefined;
-  const resolve = (url: string) => resolveCardLink(card, url);
+  const markdown = markdownPathOf(ctx.fileURL);
+  if (!markdown) return null;
+  const patchJson = path.posix.join(path.posix.dirname(markdown), "patch.json");
+  const title: string | undefined = markdown.endsWith("/README.md") && exists(patchJson) ? readRecord<any>(patchJson, "patch record").title : undefined;
+  const resolve = (url: string) => resolveCardLink(markdown, url);
   let seenHeading = false;
   const inlineParents = new Set(["paragraph", "heading", "tableCell", "emphasis", "strong", "delete", "link", "linkReference"]);
   return defineMdastPlugin({
@@ -115,16 +117,18 @@ export const cardMdast = (ctx: { fileURL: URL | undefined }) => {
   });
 };
 
-/** External links in cards open without a referrer and carry no endorsement. */
+/** External web links in repository Markdown open in a new tab. */
 export const cardHast = (ctx: { fileURL: URL | undefined }) =>
-  cardPathOf(ctx.fileURL)
+  markdownPathOf(ctx.fileURL)
     ? defineHastPlugin({
         name: "weightspace-card-links",
         element: {
           filter: ["a"],
           visit(node, v) {
             const h = node.properties?.href;
-            if (typeof h === "string" && /^https?:\/\//i.test(h)) {
+            const { target } = typeof h === "string" ? externalLinkAttrs(h) : {};
+            if (target) {
+              v.setProperty(node, "target", target);
               v.setProperty(node, "rel", ["noopener", "noreferrer", "nofollow"]);
               v.setProperty(node, "className", ["ext"]);
             }

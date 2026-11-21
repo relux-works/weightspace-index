@@ -46,7 +46,7 @@ const partnerName = partner ? barLabel(partner) : "";
   </p>
   {r.state === "INCOMPLETE" && (
     <p class="note warn">
-      <strong>INCOMPLETE run.</strong> Shown for transparency; it is not ranked or charted.
+      <strong>INCOMPLETE run.</strong> Rankings use completed runs.
       {r.score.state === "UNKNOWN" && <> Score UNKNOWN: {r.score.reason} (owner: {r.score.owner}).</>}
     </p>
   )}

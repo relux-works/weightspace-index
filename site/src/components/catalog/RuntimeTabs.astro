@@ -3,6 +3,7 @@ import Arrow from "../Arrow.astro";
 import CopyButton from "../CopyButton.astro";
 import { highlight } from "../../lib/shell.ts";
 import { localRecipe, type RecipeFile } from "../../lib/recipe.ts";
+import { externalLinkAttrs } from "../../lib/links.ts";
 import type { RuntimeTab } from "../../lib/runtime.ts";
 interface Props { tabs: RuntimeTab[]; lora?: RecipeFile | null; replacement?: RecipeFile | null }
 const { tabs, lora, replacement } = Astro.props;
@@ -18,7 +19,7 @@ const isBake = (t: RuntimeTab) => t.name === "Weightspace";
     const [start, strict, ...body] = localRecipe(tab, file).split("\n");
     return <div class="setup-panel" data-panel>
       <h3 class="panel-title">{tab.name}</h3>
-      <p class="setup-note">{tab.note} <a href={tab.docs}>Runtime guide <Arrow dir="out" /></a></p>
+      <p class="setup-note">{tab.note} <a href={tab.docs} {...externalLinkAttrs(tab.docs)}>Runtime guide <Arrow dir="out" /></a></p>
       <figure class="terminal sh">
         <figcaption><span>{isBake(tab) ? "Apply to the prepared base" : "Launch after setup"}</span><CopyButton from={`recipe-${i}`} label="Copy full recipe" /></figcaption>
         <pre tabindex="0"><code set:html={highlight(tab.command)} /></pre>

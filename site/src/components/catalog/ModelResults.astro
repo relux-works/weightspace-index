@@ -16,7 +16,8 @@ import type { Base } from "../../lib/types.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
 import { loadIndex } from "../../lib/index.ts";
-import { modelResults, pending, resultNote, resultTitle, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
+import { NEW_TAB } from "../../lib/links.ts";
+import { modelResults, pending, resultNote, resultTitle, resultKey, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
@@ -31,7 +32,7 @@ interface Block { title: string; match: string; benchmark: string; metric: strin
 function blocks(scores: Result[], progress: Pending[]) {
   const out = new Map<string, Block>();
   for (const r of scores) {
-    const match = `${r.benchmark}|${r.name ?? ""}|${r.unit}`;
+    const match = resultKey(r);
     const key = `${match}|${r.n ?? ""}`;
     if (!out.has(key)) out.set(key, { title: resultTitle(r), match, benchmark: r.benchmark, metric: r.metric, unit: r.unit, higherIsBetter: r.higherIsBetter, scores: [], progress: [] });
     out.get(key)!.scores.push(r);
@@ -69,7 +70,7 @@ function rows(scores: Result[], progress: Pending[]) {
   return { singles, stacks };
 }
 ---
-<p class="cmp-intro">Patches and stacks of patches, per benchmark. Any patches can be stacked; <a href={submit}>benchmark a stack</a> to add it here.</p>
+<p class="cmp-intro">Patches and stacks of patches, per benchmark. Any patches can be stacked; <a href={submit} {...NEW_TAB}>benchmark a stack</a> to add it here.</p>
 <div class="evidence">
   {(scores.length > 0 || progress.length > 0) && <p class="plot-key"><span class="k-base">Base</span><span class="k-up">Patch</span>{scores.some(r => r.stack) && <span class="k-stack">Stack</span>}</p>}
   {blocks(scores, progress).map(b => {
@@ -122,7 +123,7 @@ function rows(scores: Result[], progress: Pending[]) {
             </li>}
             {singles.map(({ v, r, w }) => r ? row(r, <a href={v.patch.url}>{v.patch.title}</a>) : <li class="rrow cmp-missing">
               <span class="rname"><a href={v.patch.url}>{v.patch.title}</a></span>
-              <span class="rmiss"><a href={w!.href}>Score pending · {w!.filed} of {w!.total} item–seed pairs filed</a></span>
+              <span class="rmiss"><a href={w!.href}>Benchmark pending · {w!.filed} of {w!.total} item–seed pairs filed</a></span>
               <span></span>
             </li>)}
             {stacks.map(r => row(r, r.stack!.map((v, i) => <>{i > 0 && <span class="plus"> + </span>}<a href={v.patch.url}>{v.patch.title}</a></>), "cmp-stack"))}

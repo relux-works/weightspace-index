@@ -9,6 +9,7 @@ import { href, loadIndex, profileFiles, type Base } from "../../../../lib/index.
 import { activeVersion, formats } from "../../../../lib/catalog.ts";
 import { orderPatches, stackResults } from "../../../../lib/insight.ts";
 import { plural } from "../../../../lib/format.ts";
+import { NEW_TAB } from "../../../../lib/links.ts";
 export function getStaticPaths() {
   return loadIndex().bases.map(base => ({ params: { ns: base.ns, model: base.model }, props: { base } }));
 }
@@ -28,7 +29,7 @@ const profile = base.profiles[0];
         <span>{base.ns}</span>
         {forms.length > 0 && <span>{forms.join(" + ")}</span>}
         {stacks > 0 && <a href="#results">{plural(stacks, "measured stack", "measured stacks")}</a>}
-        {profile && <a href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`}>Base weights on Hugging Face <Arrow dir="out" /></a>}
+        {profile && <a href={`https://huggingface.co/${profile.source.repo_id}/tree/${profile.source.revision}`} {...NEW_TAB}>Base weights on Hugging Face <Arrow dir="out" /></a>}
       </p>
     </header>
 
@@ -47,7 +48,7 @@ const profile = base.profiles[0];
     <section class="flow-section" id="profiles"><h2>Model details</h2>
       {base.profiles.map(p => <details class="fold" id={`profile-${p.id}`}><summary>{p.id.toUpperCase()} · {p.source.repo_id} <code>@{p.source.revision.slice(0,7)}</code></summary>
         <FileList files={profileFiles(p)} showRole={false} /></details>)}
-      <details class="fold" id="records"><summary>Model record and benchmark runs</summary><a href={base.baseRecord.view}>Base record</a>
+      <details class="fold" id="records"><summary>Model record and benchmark runs</summary><a href={base.baseRecord.view} {...NEW_TAB}>Base record</a>
         {base.groups.map(g => <div id={g.id}><h3>{g.protocolLabel} · {g.profile.id}</h3>{g.runs.map(r => <p><a href={r.url}>{r.version ? r.version.patch.title + " " + r.version.label : "Unpatched base"} · {r.record.state}</a></p>)}</div>)}</details>
     </section>
   </div>

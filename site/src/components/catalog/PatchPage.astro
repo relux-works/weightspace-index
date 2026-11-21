@@ -2,6 +2,7 @@
 import Page from "../../layouts/Page.astro";
 import { href, loadIndex, type Patch, type Version } from "../../lib/index.ts";
 import { activeVersion, downloadUrl } from "../../lib/catalog.ts";
+import { externalLinkAttrs, NEW_TAB } from "../../lib/links.ts";
 import { runtimeGuide } from "../../lib/runtime.ts";
 import { apply, hfDownload } from "../../lib/commands.ts";
 import { editStats, stackResults } from "../../lib/insight.ts";
@@ -49,8 +50,8 @@ const replacement = source && patch.kind === "replacement" ? { href: downloadUrl
       <div>
         <h1>{name}</h1>
         <p class="release-goal">{patch.summary.replace(/^SYNTHETIC EXAMPLE:\s*/i, "")}</p>
-        <p class="credit">By {patch.authors.map((a,i) => <>{i > 0 && ", "}{a.url ? <a href={a.url}>{a.name}</a> : a.name}</>)} · {patch.license}{v && <> · {v.label}</>}</p>
-        {v && <p class="release-target">Base <a href={base.url}>{base.address}</a> · {v.profile.id.toUpperCase()} <a href={`https://huggingface.co/${v.profile.source.repo_id}/tree/${v.profile.source.revision}`}><code>@{v.profile.source.revision.slice(0,7)}</code></a></p>}
+        <p class="credit">By {patch.authors.map((a,i) => <>{i > 0 && ", "}{a.url ? <a href={a.url} {...externalLinkAttrs(a.url)}>{a.name}</a> : a.name}</>)} · {patch.license}{v && <> · {v.label}</>}</p>
+        {v && <p class="release-target">Base <a href={base.url}>{base.address}</a> · {v.profile.id.toUpperCase()} <a href={`https://huggingface.co/${v.profile.source.repo_id}/tree/${v.profile.source.revision}`} {...NEW_TAB}><code>@{v.profile.source.revision.slice(0,7)}</code></a></p>}
         {v && v.status !== "active" && <p class="note warn">This release is {v.status}. {latest && <a href={patch.url}>View the current release</a>}</p>}
       </div>
       {v ? <section class="release-files" aria-label="Release downloads"><h2>Download files</h2>

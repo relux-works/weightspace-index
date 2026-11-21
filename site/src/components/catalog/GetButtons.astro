@@ -3,6 +3,7 @@ import type { Version } from "../../lib/types.ts";
 import { downloadUrl } from "../../lib/catalog.ts";
 import { runtimeGuide } from "../../lib/runtime.ts";
 import { humanBytes } from "../../lib/format.ts";
+import { externalLinkAttrs } from "../../lib/links.ts";
 interface Props { version: Version; compact?: boolean }
 const { version: v, compact = false } = Astro.props;
 const guide = runtimeGuide(v);
@@ -14,7 +15,7 @@ const items = [
 ];
 ---
 <div class:list={["file-choices", { compact }]}>
-  {items.map(file => <a href={file.href} download={file.filename} data-tab-select={compact ? undefined : file.tab} aria-label={`Download ${file.label} · ${humanBytes(file.size)}`}>
+  {items.map(file => <a href={file.href} download={file.filename} {...externalLinkAttrs(file.href)} data-tab-select={compact ? undefined : file.tab} aria-label={`Download ${file.label} · ${humanBytes(file.size)}`}>
     <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span><strong>{file.label}</strong>{!compact && <small>{file.hint}</small>}</span>
     {!compact && <span class="file-size">{humanBytes(file.size)}</span>}

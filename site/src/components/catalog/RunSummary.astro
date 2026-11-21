@@ -20,7 +20,7 @@ const paired = pairedBaseline(v, r);
   </> : <>
     <p class="result-score">{coverage ? <>{coverage.filed}<small> / {coverage.total} pairs filed</small></> : <small>{r.record.state === "INCOMPLETE" ? "In progress" : "Score unavailable"}</small>}</p>
     {coverage && <progress value={coverage.filed} max={coverage.total} aria-label="Benchmark coverage"></progress>}
-    <p class="small muted">{coverage ? "The score is pending." : score.reason}</p>
+    <p class="small muted">{coverage ? "Benchmark pending" : score.reason}</p>
   </>}
   <details class="fold"><summary>Run details</summary><p class="break">{r.settingsLabel} · {r.record.state}</p><a href={r.url}>Inspect this run</a>
     {r.paired && <> · <a href={r.paired.url}>Paired base run</a></>}</details>

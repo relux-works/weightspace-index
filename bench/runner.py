@@ -215,6 +215,8 @@ def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how:
         "hardware": a.hardware,
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
     })
+    if p.task == ifeval.TASK:
+        record["ifeval_grader"] = ifeval.GRADER
     (stage / "session.json").write_text(dumps(record))
     # The same verification `check` applies; nothing is filed if it fails.
     sess = derive_session(v, p, s, stage)

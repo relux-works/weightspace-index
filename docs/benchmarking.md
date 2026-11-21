@@ -66,6 +66,10 @@ The implementation freezes the official task and adds its grader to the existing
 
 The first standard session ran prompts 0–9 with seed 1234 and concurrency 5 on an M1 Pro. The base passed 3 of 10 and hit the 32,768-token cap on 3 replies. The patched model passed 6 of 10 and hit the cap on 1 reply. The session covers 10 of the 541 prompts. [Session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261120T182333Z-56a1bd/session.json)
 
+**Literal character counts.** The pinned lm-eval letter-frequency checker randomly substitutes an ASCII letter when it receives punctuation. An audit of all 541 prompts found two affected items, 19 for `#` and 22 for `!`. Bench now counts the supplied character using the existing threshold rule, both in lm-eval runs and offline replay. Replay preserves each older session's recorded lm-eval diagnostic and verifies the unaffected instruction verdicts and their aggregation. The headline uses the corrected grading for all sessions.
+
+Replay recovered the second session from its saved replies. Prompts 10–19 ran with seed 1234 and concurrency 8. Both checkpoints passed 7 of 10. One base reply hit the cap, and all patched replies finished within it. The two sessions give 10 of 20 base passes and 13 of 20 patched passes. [Second session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261121T050545Z-34d090/session.json)
+
 ## Compared with the patch authors' evaluation
 
 RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinking-loops` v1) with their own code, published with the patch's logs: `evaluate.py` (protocol `think35`) and `mathqa.py`. On MATH-500 the two set-ups differ as below. The card is revision `2fc0636` of `Qwen/Qwen3.5-0.8B`, unchanged since 2026-03-02.

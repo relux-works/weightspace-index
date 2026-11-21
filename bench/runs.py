@@ -173,6 +173,8 @@ def build_runs(v: Version, p: Protocol, s: Settings) -> dict[str, tuple[str, str
             "outcomes": {"sha256": sha256_bytes(lines.encode()), "size_bytes": len(lines.encode()),
                          "locators": [{"kind": "index-path", "path": "outcomes.jsonl"}]},
         }
+        if p.task == ifeval.TASK:
+            run["settings"]["ifeval_grader"] = ifeval.GRADER
         out[variant] = (dumps(run), lines)
     return out
 

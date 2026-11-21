@@ -28,7 +28,7 @@ def sample_messages(sample: dict) -> list:
 
 
 def derive_variant(p: Protocol, s: Settings, ids: list[int], seed: int, samples: list[dict],
-                   exchanges: list[dict]) -> dict[int, dict]:
+                   exchanges: list[dict], *, ifeval_grader: str | None = None) -> dict[int, dict]:
     """Outcomes of one model's half of a session, by item.
 
     Each lm-eval sample must be one of the session's frozen items with the
@@ -78,7 +78,7 @@ def derive_variant(p: Protocol, s: Settings, ids: list[int], seed: int, samples:
                  else f"item {i}: target differs from the frozen IFEval target"))
         if p.task == ifeval.TASK:
             try:
-                verdict = ifeval.grade_sample(sample, messages, choice, scored, s.think_end)
+                verdict = ifeval.grade_sample(sample, messages, choice, scored, s.think_end, ifeval_grader)
             except BenchError as e:
                 raise BenchError(f"item {i}: {e}") from None
         else:
@@ -134,7 +134,7 @@ def derive_session(v: Version, p: Protocol, s: Settings, d: Path) -> Session:
             check_weights(v.profile, rec[variant]["model_files"], variant)
             outcomes[variant] = derive_variant(
                 p, s, ids, seed, read_jsonl(d / f"{variant}.samples.jsonl"),
-                read_jsonl(d / f"{variant}.requests.jsonl"))
+                read_jsonl(d / f"{variant}.requests.jsonl"), ifeval_grader=rec.get("ifeval_grader"))
         require(non_weights(rec["base"]["model_files"]) == non_weights(rec["patched"]["model_files"]),
                 "base and patched model folders differ outside the weights files")
     except (BenchError, KeyError, TypeError) as e:

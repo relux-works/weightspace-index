@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from bench import comparison, core, harness, sessions
+from bench import comparison, core, harness, ifeval, sessions
 from bench.runs import Collected
 
 
@@ -130,3 +130,56 @@ def test_compares_paired_passes_and_cuts(paired_reply, monkeypatch):
     assert result["base"]["cut_at_limit"] == 1 and result["patched"]["cut_at_limit"] == 0
     assert "score_is_equiv" not in result["base"]
     assert "interval_95" not in result
+
+
+@pytest.mark.parametrize(("character", "relation", "text", "expected"), [
+    ("#", "at least", "hello #a #b #c #d", True),
+    ("#", "at least", "hello aaaa ###", False),
+    ("!", "at least", "hello !!!!!!", True),
+    ("!", "less than", "hello !", True),
+])
+def test_harness_checks_the_literal_character(monkeypatch, character, relation, text, expected):
+    ifeval.prepare()
+    from lm_eval.tasks.ifeval import instructions, utils
+
+    def unexpected_choice(*args):
+        pytest.fail("the checker must use the character from the prompt")
+
+    monkeypatch.setattr(instructions.random, "choice", unexpected_choice)
+    doc = {**DOC, "instruction_id_list": ["keywords:letter_frequency"],
+           "kwargs": [{"letter": character, "let_relation": relation,
+                       "let_frequency": 4 if character == "#" else 6}]}
+    assert utils.process_results(doc, [text])[ifeval.METRIC] is expected
+
+
+def literal_prompt(paired_reply):
+    protocol, _, sample, _, _ = paired_reply
+    sample["doc"].update(instruction_id_list=["keywords:existence", "keywords:letter_frequency"],
+                         kwargs=[{"keywords": ["hello"]},
+                                 {"letter": "#", "let_relation": "at least", "let_frequency": 4}])
+    doc_hash = core.sha256_bytes(json.dumps(sample["doc"], indent=2, ensure_ascii=False).encode())
+    sample["doc_hash"] = doc_hash
+    protocol.data["items"][0][1] = doc_hash
+
+
+def test_legacy_session_regrades_literal_character_and_preserves_logged_diagnostic(paired_reply):
+    literal_prompt(paired_reply)
+    record_reply(paired_reply, "Thinking</think>Hello #a #b #c #d", False)
+    paired_reply[2]["inst_level_strict_acc"] = [True, False]
+    outcome = verify(paired_reply)
+    assert outcome["correct"] is True
+    assert outcome["score"] == 0.0
+
+    paired_reply[2]["inst_level_strict_acc"] = [False, False]
+    with pytest.raises(core.BenchError, match="strict score"):
+        verify(paired_reply)
+
+
+def test_corrected_session_rejects_a_mismatched_score(paired_reply):
+    literal_prompt(paired_reply)
+    record_reply(paired_reply, "Thinking</think>Hello #a #b #c #d", False)
+    paired_reply[2]["inst_level_strict_acc"] = [True, False]
+    protocol, settings, sample, exchange, _ = paired_reply
+    with pytest.raises(core.BenchError, match="strict score"):
+        sessions.derive_variant(protocol, settings, [0], 1234, [sample], [exchange],
+                                ifeval_grader=ifeval.GRADER)

@@ -14,7 +14,29 @@ const DOCS = {
   apply: { label: "tool/README.md, “Apply a replacement patch”", path: "tool/README.md", anchor: "apply-a-replacement-patch-patch-users" },
   bench: { label: "bench/README.md", path: "bench/README.md", anchor: "running" },
   benchStatus: { label: "bench/README.md", path: "bench/README.md", anchor: "status-merging-checking-comparing" },
+  install: { label: "tool/README.md, “From source”", path: "tool/README.md", anchor: "from-source" },
+  replacement: { label: "tool/README.md, “Build a replacement patch”", path: "tool/README.md", anchor: "build-a-replacement-patch-patch-authors" },
 };
+
+/** The tool's own documented forms, with the README's placeholder paths. Used by /weightspace/. */
+export function toolInstall(githubRepo: string): Command {
+  const dir = githubRepo.split("/").pop();
+  return {
+    text: `git clone https://github.com/${githubRepo}\ncd ${dir}/tool\ncargo build --locked --release --bin weightspace`,
+    source: DOCS.install,
+  };
+}
+
+export const toolCommands = {
+  apply: {
+    text: "weightspace apply \\\n  --patch ./my-patch.safetensors \\\n  --model ./my-model \\\n  --out ./my-model-patched",
+    source: DOCS.apply,
+  },
+  replacement: {
+    text: "weightspace replacement \\\n  --base ./base.safetensors \\\n  --edited ./edited.safetensors \\\n  --out ./my-patch.safetensors",
+    source: DOCS.replacement,
+  },
+} satisfies Record<string, Command>;
 
 /** The folder a profile is downloaded into, used by every later command. */
 export function profileDir(base: Base, profile: Profile): string {

@@ -16,7 +16,9 @@ The catalog serves someone who has a base model and wants to find, evaluate and 
    - A file-size calculator for any matrix shape, with the featured patch's shipped sizes.
    - A closing action into the directory and a link to the featured patch's results. It names the featured result only; it makes no claim that every patch is benchmarked.
 
-Header navigation is Models, How it works, Search. The full benchmark run list (`/compare/`) is linked from the footer.
+5. **Tool** (`/weightspace/`). A landing page for the `weightspace` CLI. It opens with what the tool does (bakes a replacement bit for bit) beside a terminal, then says plainly that the index never requires it: every patch also ships as a LoRA adapter, shown as two paths (without the tool, with the tool). Then an illustrative BF16 bit row (published, baked, LoRA at run time), six reasons, when to use it versus the LoRA, documented install and command forms from `lib/commands.ts`, and what the tool does not do. Claims follow `tool/README.md`.
+
+Header navigation is Models, How it works, Tool, Search. The full benchmark run list (`/compare/`) is linked from the footer.
 
 Pending benchmarks without a charted score show a status and progress bar. When several benchmarks are pending, chevrons flank the progress block. Each chevron appears when there is another pending benchmark in that direction. Long patch directories show eight entries at a time and search every entry.
 
@@ -47,7 +49,7 @@ Inter Tight sets headings, Inter sets UI copy and Roboto Mono sets code, numbers
 |---|---|---|
 | h1 3.5rem, h2 2.75rem | Responsive h1 up to 4.75rem on the directory, 4.3rem on patch cards, h2 1.75rem | Pages are dense reference material with many sections; large headings would push data below the fold. |
 | Section padding 6rem (4rem mobile) | 3rem (2rem mobile) | Same reason: operational density. |
-| Mobile navigation drawer | Navigation on a second header row | There are only three links; a drawer would hide them behind an extra tap. |
+| Mobile navigation drawer | Navigation on a second header row | There are only four links; a drawer would hide them behind an extra tap. |
 | RTL and locale coverage | English only, LTR | The index and its records are English-only. |
 | Footer uses the theme's subtle surface | In the light theme the footer is an ink surface (`#181a18`) with the dark-theme text, link and focus roles and the dark lockup; forced colors keep the system palette | Owner's decision: the footer closes every page as a dark band. Its colors are the family's own dark-theme roles, scoped in `tokens.css`. |
 | Product keeps its own mark, separate from the Relux symbol; the symbol pairs only with the full name nearby | Header pairs the Relux symbol with the live-type product name "Weightspace Index" | Owner's decision: the index reads as a Relux product. The symbol artwork is unchanged, and the outlined Relux wordmark is not altered or re-typed. |

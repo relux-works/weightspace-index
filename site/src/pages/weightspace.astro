@@ -1,0 +1,244 @@
+---
+// Landing page for the weightspace command-line tool: what it is for, when to
+// reach for it, and that the index never requires it (every patch also ships
+// as a LoRA adapter). Claims follow tool/README.md; the bit rows are illustrative.
+import Arrow from "../components/Arrow.astro";
+import Command from "../components/Command.astro";
+import Page from "../layouts/Page.astro";
+import { toolCommands, toolInstall } from "../lib/commands.ts";
+import { href, loadIndex } from "../lib/index.ts";
+import { NEW_TAB } from "../lib/links.ts";
+import { highlight } from "../lib/shell.ts";
+
+const index = loadIndex();
+const guide = index.docsAt("tool/README.md");
+const hero = [
+  "weightspace apply \\",
+  "  --patch ./my-patch.safetensors \\",
+  "  --model ./my-model \\",
+  "  --out ./my-model-patched",
+].join("\n");
+
+// One illustrative BF16 weight. The replacement writes the published bits; a
+// LoRA recomputes base + B·A at run time and rounds, so low bits can differ.
+const published = "0011111001001101";
+const computed = "0011111001001100";
+const bits = (pattern: string) => [...pattern].map((bit, i) => ({ bit, differs: bit !== published[i] }));
+const bitRows = [
+  { label: "Published value", bits: bits(published), note: "0x3E4D" },
+  { label: "Baked by weightspace", bits: bits(published), note: "identical" },
+  { label: "LoRA at run time", bits: bits(computed), note: "may differ" },
+];
+
+const reasons = [
+  { title: "Bit-exact", text: "Changed weights are copied, not computed. The patched copy holds exactly the published values." },
+  { title: "Free at run time", text: "The edit lives in the model file. No adapter, no extra matmul per token." },
+  { title: "Checks before it writes", text: "Each replaced tensor is checked against the base the patch expects: saved old values or a SHA-256. A mismatched model is refused." },
+  { title: "Never touches your original", text: "Output is a new directory. The source model stays byte-for-byte as it was." },
+  { title: "Offline, data only", text: "No network, no downloads, no code from a checkpoint. Inputs are read as data." },
+  { title: "Only what changed", text: "Patches store each tensor sparse or whole, whichever file is smaller." },
+];
+
+const useIt = [
+  "You run the unquantized target model the patch was made for.",
+  "You want the exact model a study measured. Study results attach to the replacement, not to a derived LoRA.",
+  "You serve at scale and want zero adapter overhead.",
+  "You author patches: build one from a base and an edited checkpoint.",
+];
+const skipIt = [
+  "You run GGUF or other quantized weights. Load the LoRA instead.",
+  "You want to stack several patches. A baked copy takes one replacement.",
+  "You just want to try a patch in your runtime today.",
+];
+---
+<Page title="weightspace" nav="tool" description="weightspace bakes a replacement patch into a copy of your model, bit for bit. Optional: every patch in the index also ships as a LoRA adapter.">
+  <section class="wrap tool-hero" aria-labelledby="tool-title">
+    <header>
+      <p class="tool-name"><code>weightspace</code> command-line tool</p>
+      <h1 id="tool-title">Bake a patch,<br />bit for bit.</h1>
+      <p class="lede">Writes a replacement patch into a copy of your model. Every changed weight lands at exactly its published value.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#install">Install <Arrow /></a>
+        <a class="btn" href={guide} {...NEW_TAB}>Read the guide</a>
+      </div>
+    </header>
+    <figure class="terminal sh hero-terminal">
+      <figcaption>Apply a patch to a copy</figcaption>
+      <pre tabindex="0"><code set:html={highlight(hero)} /><span class="out">patched model written: ./my-model-patched</span></pre>
+    </figure>
+  </section>
+
+  <section class="home-band" id="optional" aria-labelledby="optional-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="optional-heading">You don't need it to use the index</h2></div>
+      <p class="band-note">The index is built so every patch works with the tools you already have. Each patch also ships as a LoRA adapter. <code>weightspace</code> is there for when you want the exact replacement.</p>
+      <div class="paths">
+        <div class="path">
+          <h3>Without the tool</h3>
+          <p class="path-form">LoRA adapter</p>
+          <ol>
+            <li>Download the adapter.</li>
+            <li>Load it in vLLM, llama.cpp, SGLang or PEFT.</li>
+          </ol>
+          <p class="path-note">Works on quantized models too. Our derived adapters aren't verified in these runtimes yet.</p>
+        </div>
+        <div class="path accent">
+          <h3>With the tool</h3>
+          <p class="path-form">Exact replacement</p>
+          <ol>
+            <li>Download the replacement and the base model.</li>
+            <li>Run <code>weightspace apply</code> once.</li>
+            <li>Run the patched copy like any model.</li>
+          </ol>
+          <p class="path-note">Unquantized target model only.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-band subtle" id="exact" aria-labelledby="exact-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="exact-heading">Exact means the same bits</h2></div>
+      <figure class="bits-figure">
+        <div class="bit-rows">
+          {bitRows.map(row => <div class="bit-row">
+            <span class="bit-label">{row.label}</span>
+            <span class="bit-cells" aria-label={`${row.label}: ${row.bits.map(b => b.bit).join("")}, ${row.note}`} role="img">
+              {row.bits.map(({ bit, differs }, i) => <i class:list={{ one: bit === "1", differs, last: i === row.bits.length - 1 }} aria-hidden="true">{bit}</i>)}
+            </span>
+            <code class:list={["bit-note", { differs: row.bits.some(b => b.differs) }]}>{row.note}</code>
+          </div>)}
+        </div>
+        <figcaption>One BF16 weight, illustrative. A LoRA adds B·A to the base and rounds, so the last bits can land elsewhere.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="home-band" id="why" aria-labelledby="why-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="why-heading">Why it's worth it</h2></div>
+      <ul class="reasons">
+        {reasons.map(reason => <li><h3>{reason.title}</h3><p>{reason.text}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="home-band subtle" id="when" aria-labelledby="when-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="when-heading">When to use it</h2></div>
+      <div class="when">
+        <div>
+          <h3>Reach for it when</h3>
+          <ul>{useIt.map(item => <li>{item}</li>)}</ul>
+        </div>
+        <div>
+          <h3>Use the LoRA when</h3>
+          <ul>{skipIt.map(item => <li>{item}</li>)}</ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-band" id="install" aria-labelledby="install-heading">
+    <div class="wrap">
+      <div class="band-title">
+        <h2 id="install-heading">Install and run</h2>
+        <p>Rust 1.85 or newer. Linux, macOS, Windows. Release binaries aren't published yet.</p>
+      </div>
+      <div class="cmds">
+        <Command command={toolInstall(index.githubRepo)} title="Build from source" />
+        <Command command={toolCommands.apply} title="Apply a patch" />
+        <Command command={toolCommands.replacement} title="Build a patch (authors)" />
+      </div>
+      <p class="fine">If a patch stores whole tensors, <code>apply</code> also needs their expected base digests. Take them from the patch author, never from your own model. <a href={`${guide}#apply-a-replacement-patch-patch-users`} {...NEW_TAB}>Details</a></p>
+    </div>
+  </section>
+
+  <section class="home-band subtle" aria-labelledby="limits-heading">
+    <div class="wrap">
+      <div class="band-title"><h2 id="limits-heading">What it doesn't do</h2></div>
+      <ul class="limits">
+        <li>Train, run inference or benchmark</li>
+        <li>Combine patches</li>
+        <li>Quantize or convert weights</li>
+        <li>Read sharded or pickle checkpoints</li>
+        <li>Prove a patch is safe or does what it claims</li>
+      </ul>
+      <p class="fine">It checks bytes and tensor identities, not behavior. Read a patch's evidence before you run it.</p>
+    </div>
+  </section>
+
+  <section class="home-band" aria-labelledby="closing-heading">
+    <div class="wrap closing">
+      <h2 id="closing-heading">Find a patch for your model</h2>
+      <div class="closing-actions">
+        <a class="btn primary" href={href()}>Browse models <Arrow /></a>
+        <a class="btn" href={href("how-it-works/")}>Patch vs LoRA</a>
+      </div>
+    </div>
+  </section>
+</Page>
+
+<style>
+  .tool-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; gap: 2rem clamp(2rem, 5vw, 4.5rem); padding-block: clamp(2rem, 5vw, 4.8rem); }
+  .tool-name { color: var(--color-text-muted); font-size: .95rem; }
+  .tool-name code { color: var(--color-text); font-weight: 600; }
+  .tool-hero h1 { margin-top: .6rem; font-size: clamp(2.3rem, 4.6vw, 4rem); line-height: .98; font-weight: 680; letter-spacing: -.035em; }
+  .lede { margin-top: 1.1rem; max-width: 40ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.6rem; }
+  .hero-terminal { margin: 0; min-width: 0; }
+  .hero-terminal pre { overflow-x: auto; }
+  .hero-terminal .out { display: block; margin-top: .6rem; color: var(--ink-muted); }
+
+  .band-note { max-width: 62ch; margin: -.4rem 0 1.75rem; color: var(--color-text-muted); }
+  .fine { margin-top: 1rem; max-width: 70ch; font-size: .9rem; color: var(--color-text-muted); }
+
+  .paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3.5rem); }
+  .path { border-top: 2px solid var(--color-text); padding-top: 1rem; }
+  .path.accent { border-top-color: var(--color-accent); }
+  .path h3 { font-size: .95rem; font-weight: 600; color: var(--color-text-muted); }
+  .path-form { margin-top: .2rem; font: 650 clamp(1.4rem, 2.4vw, 1.9rem)/1.15 var(--font-display); letter-spacing: -.02em; color: var(--color-text); }
+  .path ol { margin: .9rem 0 0; padding-left: 1.2rem; display: grid; gap: .35rem; }
+  .path-note { margin-top: .9rem; font-size: .88rem; color: var(--color-text-muted); }
+
+  .bits-figure { margin: 0; max-width: 46rem; }
+  .bit-rows { display: grid; gap: .7rem; }
+  .bit-row { display: grid; grid-template-columns: 11rem minmax(0, auto) 6rem; align-items: center; gap: .5rem 1rem; justify-content: start; }
+  .bit-label { font-size: .92rem; font-weight: 600; }
+  .bit-cells { display: grid; grid-template-columns: repeat(16, minmax(0, 1.5rem)); gap: 2px; }
+  .bit-cells i { display: grid; place-items: center; aspect-ratio: 1; font: 600 .75rem/1 var(--font-mono); font-style: normal; background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 2px; }
+  .bit-cells i.one { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
+  .bit-cells i.differs { box-shadow: 0 0 0 2px var(--color-accent); }
+  /* The last bit column, where a LoRA's rounding can land: bold red in every row. */
+  .bit-cells i.last { font-weight: 800; color: var(--color-accent); border: 2px solid var(--color-accent); }
+  .bit-cells i.one.last { background: var(--color-accent); color: var(--color-on-accent); }
+  .bit-note { font-size: .85rem; color: var(--color-text-muted); }
+  .bit-note.differs { color: var(--color-accent); }
+  .bits-figure figcaption { margin-top: 1rem; color: var(--color-text-muted); font-size: .875rem; }
+
+  .reasons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 3vw, 2.5rem); }
+  .reasons li { border-top: 1px solid var(--color-divider); padding-top: 1rem; }
+  .reasons h3 { font-size: 1.1rem; }
+  .reasons p { margin-top: .4rem; color: var(--color-text-muted); font-size: .95rem; }
+
+  .when { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3.5rem); }
+  .when h3 { font-size: 1.1rem; border-top: 2px solid var(--color-text); padding-top: 1rem; }
+  .when ul { margin: .8rem 0 0; padding-left: 1.2rem; display: grid; gap: .5rem; color: var(--color-text-muted); }
+
+  .limits { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+  .limits li { padding: .35rem .7rem; border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); font-size: .9rem; }
+
+  .closing { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem 3rem; flex-wrap: wrap; }
+  .closing h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0; }
+  .closing-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+
+  @media (max-width: 60rem) {
+    .tool-hero { grid-template-columns: minmax(0, 1fr); }
+    .reasons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 40rem) {
+    .paths, .when, .reasons { grid-template-columns: minmax(0, 1fr); }
+    .bit-row { grid-template-columns: minmax(0, 1fr); }
+    .bit-cells { grid-template-columns: repeat(16, minmax(0, 1fr)); }
+  }
+</style>

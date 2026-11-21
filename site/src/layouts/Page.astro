@@ -25,7 +25,7 @@ import { NEW_TAB } from "../lib/links.ts";
 interface Props {
   title: string;
   description?: string;
-  nav?: "models" | "search" | "compare" | "learn";
+  nav?: "models" | "search" | "compare" | "learn" | "tool";
 }
 const { title, description, nav } = Astro.props;
 const index = loadIndex();
@@ -78,6 +78,7 @@ const logo = (svg: string, variant: string) =>
         <nav class="site-nav" aria-label="Site">
           <a href={href()} aria-current={nav === "models" ? "page" : undefined}>Models</a>
           <a href={href("how-it-works/")} aria-current={nav === "learn" ? "page" : undefined}>How it works</a>
+          <a href={href("weightspace/")} aria-current={nav === "tool" ? "page" : undefined}>Tool</a>
           <a href={href("search/")} aria-current={nav === "search" ? "page" : undefined}>Search</a>
         </nav>
         <div class="site-header__actions">

@@ -64,6 +64,8 @@ The headline is strict prompt-level accuracy. Weight each prompt equally, averag
 
 The implementation freezes the official task and adds its grader to the existing recording, checking and merging path. Tests cover passing replies, failed instructions and unfinished thinking, and rejection of altered prompts, instruction metadata and scores.
 
+The first standard session ran prompts 0–9 with seed 1234 and concurrency 5 on an M1 Pro. The base passed 3 of 10 and hit the 32,768-token cap on 3 replies. The patched model passed 6 of 10 and hit the cap on 1 reply. The session covers 10 of the 541 prompts. [Session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261120T182333Z-56a1bd/session.json)
+
 ## Compared with the patch authors' evaluation
 
 RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinking-loops` v1) with their own code, published with the patch's logs: `evaluate.py` (protocol `think35`) and `mathqa.py`. On MATH-500 the two set-ups differ as below. The card is revision `2fc0636` of `Qwen/Qwen3.5-0.8B`, unchanged since 2026-03-02.

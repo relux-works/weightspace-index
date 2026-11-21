@@ -190,6 +190,36 @@
 
 /* ── Explainer ────────────────────────────────────────────────────── */
 
+/* Comparison diagrams crossfade on the same cycle and pause in place. */
+.crossfade-dots { display: none; }
+[data-crossfade]:is([data-offscreen], :focus-within),
+[data-page-hidden] [data-crossfade] { --crossfade-play-state: paused; }
+
+@media (hover: hover) {
+  [data-crossfade]:hover { --crossfade-play-state: paused; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .crossfade-dots {
+    display: flex;
+    justify-content: center;
+    gap: .45rem;
+    margin-top: .85rem;
+    color: color-mix(in srgb, var(--color-text-muted) 30%, transparent);
+  }
+  .crossfade-dots span { width: .45rem; height: .45rem; border: 1px solid currentColor; border-radius: 50%; }
+  .crossfade-dots span::before { content: ""; display: block; height: 100%; border-radius: inherit; background: currentColor; }
+  .crossfade-item, .crossfade-dots span::before {
+    animation: comparison-crossfade 7s ease-in-out infinite;
+    animation-play-state: var(--crossfade-play-state, running);
+  }
+  .crossfade-second, .crossfade-dots span:last-child::before { animation-delay: -3.5s; }
+}
+
+@keyframes comparison-crossfade {
+  0%, 40%, 100% { opacity: 1; }
+  50%, 90% { opacity: 0; }
+}
 
 /* Sliding marker (scripts/slide.ts): a thumb behind the pressed button of a
    segmented switch, or a 2px line under the chosen tab or step. */

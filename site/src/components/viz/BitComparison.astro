@@ -1,0 +1,79 @@
+---
+const firstBits = [..."001111100100110"];
+const published = [...firstBits, "1"];
+const lora = [...firstBits, "0"];
+const rows = [
+  { label: "Published value", bits: published, reference: true },
+  { label: "Baked copy", bits: published, animation: "crossfade-item" },
+  { label: "LoRA", bits: lora, animation: "crossfade-item crossfade-second" },
+];
+const description = rows.map(({ label, bits }) => `${label}, ${bits.join(" ")}.`).join(" ");
+---
+<figure class="bits-figure" data-crossfade tabindex="0">
+  <div class="bit-grid" role="img" aria-label={`${description} The final LoRA bit differs.`}>
+    {rows.map(({ label, bits, animation, reference }) => <div class:list={["bit-row", animation]}>
+      <span class="bit-label">{label}</span>
+      {bits.map((bit, column) => <span class:list={["bit-cell", { one: bit === "1", differs: bit !== published[column] }]}>
+        {bit}
+        {reference && bit !== lora[column] && <span class="bit-highlight crossfade-item crossfade-second" aria-hidden="true">{bit}</span>}
+      </span>)}
+    </div>)}
+  </div>
+  <div class="crossfade-dots" aria-hidden="true"><span></span><span></span></div>
+  <figcaption>One illustrative BF16 weight. A LoRA merge can round the value.</figcaption>
+</figure>
+
+<script>
+  import "../../scripts/crossfade.ts";
+</script>
+
+<style>
+  .bits-figure { margin: 0; max-width: 35rem; }
+  .bit-grid {
+    display: grid;
+    grid-template-columns: 8.875rem repeat(16, minmax(0, 1.5rem));
+    gap: .7rem 2px;
+  }
+  .bit-row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: center;
+  }
+  .bit-label { font-size: .92rem; font-weight: 600; }
+  .bit-cell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    font: 600 .75rem/1 var(--font-mono);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+  }
+  .bit-cell.one { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
+  .bit-cell.differs, .bit-highlight { background: var(--color-accent); color: var(--color-on-accent); }
+  .bit-cell.differs { border-color: var(--color-accent); }
+  .bit-highlight {
+    position: absolute;
+    inset: -1px;
+    display: grid;
+    place-items: center;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  figcaption { margin-top: .7rem; color: var(--color-text-muted); font-size: .875rem; }
+
+  @media (max-width: 40rem) {
+    .bit-grid { grid-template-columns: repeat(16, minmax(0, 1.5rem)); row-gap: .5rem; }
+    .bit-label { grid-column: 1 / -1; }
+    .bit-row { grid-row: span 2; grid-template-rows: subgrid; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bit-row.crossfade-item { grid-row: 2; }
+  }
+  @media (max-width: 40rem) and (prefers-reduced-motion: no-preference) {
+    .bit-row.crossfade-item { grid-row: 3 / span 2; }
+  }
+</style>

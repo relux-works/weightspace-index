@@ -34,7 +34,7 @@ The default production build excludes the demo model, its files and its combinat
 
 ## Tool release
 
-The tool page illustrates bit-exact replacement and explains the inference overhead of an attached LoRA. Its LoRA description links to `/how-it-works/#why-both`. See the [runtime workflows](../docs/workflows.md#attached-and-merged-loras) for how the shipped adapters run.
+The tool page illustrates bit-exact replacement with a BF16 comparison that crossfades between a baked copy and a merged LoRA. Reduced motion shows all three rows together. Its LoRA description links to `/how-it-works/#why-both`. See the [runtime workflows](../docs/workflows.md#attached-and-merged-loras) for how the shipped adapters run.
 
 `/weightspace/` offers the release recorded in `src/data/tool-release.json`, because the build stays offline. The release workflow (`.github/workflows/release.yml`) writes this file from the files it just published (tag, tool version, and each platform's archive and bare binary with size and SHA-256) and commits it to `main`, so a new tag updates the page on the next build. Don't edit it by hand except to fix a record. `npm test` and the build check the names against the release workflow.
 

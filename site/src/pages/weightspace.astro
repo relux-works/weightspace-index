@@ -3,6 +3,7 @@
 import Arrow from "../components/Arrow.astro";
 import Page from "../layouts/Page.astro";
 import ShellCommand from "../components/ShellCommand.astro";
+import BitComparison from "../components/viz/BitComparison.astro";
 import { toolCommands, toolDownload, toolInstall } from "../lib/commands.ts";
 import { humanBytes } from "../lib/format.ts";
 import { href, loadIndex } from "../lib/index.ts";
@@ -32,9 +33,6 @@ const hero = [
   "  --model ./my-model \\",
   "  --out ./my-model-patched",
 ].join("\n");
-
-const exampleBits = [..."0011111001001101"];
-const bitLabels = ["Published value", "Baked copy"];
 
 const reasons = [
   { title: "Checks before it writes", text: "Each replaced tensor is checked against the base the patch expects: saved old values or a SHA-256. A mismatched model is refused." },
@@ -90,18 +88,13 @@ const skipIt = [
       <div class="band-title"><h2 id="exact-heading">Bit-exact replacements</h2></div>
       <div class="replacement-layout">
         <div class="replacement-copy">
-          <p><code>weightspace apply</code> writes the published weights bit for bit into a copy of the matching unquantized model. Baking can speed up inference by removing the adapter’s per-token matrix multiplies and save the memory used for its weights.</p>
+          <p>
+            The <code>weightspace apply</code> command bakes the published weights bit for bit into a copy of the matching unquantized model.
+            The patched copy avoids the extra matrix multiplies per token and the memory used by an attached LoRA’s weights.
+          </p>
           <p>Load our LoRA adapter in a <a href={href("how-it-works/#why-both")}>compatible runtime</a>, including on supported quantized models.</p>
         </div>
-        <figure class="bits-figure">
-          {bitLabels.map(label => <div class="bit-row">
-            <span class="bit-label">{label}</span>
-            <span class="bit-cells" aria-label={exampleBits.join(" ")} role="img">
-              {exampleBits.map(bit => <span class:list={{ one: bit === "1" }} aria-hidden="true">{bit}</span>)}
-            </span>
-          </div>)}
-          <figcaption>One illustrative BF16 weight.</figcaption>
-        </figure>
+        <BitComparison />
       </div>
     </div>
   </section>
@@ -221,14 +214,13 @@ const skipIt = [
   .replacement-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem); }
   .replacement-copy { max-width: 53ch; color: var(--color-text-muted); }
   .replacement-copy p + p { margin-top: .75rem; }
-
-  .bits-figure { display: grid; gap: .7rem; margin: 0; max-width: 35rem; }
-  .bit-row { display: grid; grid-template-columns: 8rem minmax(0, 1fr); align-items: center; gap: .4rem 1rem; }
-  .bit-label { font-size: .92rem; font-weight: 600; }
-  .bit-cells { display: grid; grid-template-columns: repeat(16, minmax(0, 1.5rem)); gap: 2px; }
-  .bit-cells span { display: grid; place-items: center; aspect-ratio: 1; font: 600 .75rem/1 var(--font-mono); background: var(--color-surface); color: var(--color-text-muted); border: 1px solid var(--color-border); border-radius: 2px; }
-  .bit-cells .one { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
-  .bits-figure figcaption { color: var(--color-text-muted); font-size: .875rem; }
+  .replacement-copy code {
+    background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface-subtle));
+    color: var(--color-text);
+    padding: .1em .3em;
+    border-radius: var(--radius-control);
+    white-space: nowrap;
+  }
 
   .reasons { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem clamp(1.5rem, 3vw, 2.5rem); }
   .reasons li { border-top: 1px solid var(--color-divider); padding-top: 1rem; }
@@ -247,6 +239,6 @@ const skipIt = [
     .tool-hero, .replacement-layout, .run-cmds { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 40rem) {
-    .when, .reasons, .bit-row { grid-template-columns: minmax(0, 1fr); }
+    .when, .reasons { grid-template-columns: minmax(0, 1fr); }
   }
 </style>

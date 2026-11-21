@@ -126,6 +126,22 @@
             "--kv-cache-memory-bytes=4294967296"
           ]
         }
+      },
+      "20261121T161449Z-f252fb": {
+        "seed": 1234,
+        "hardware": "M1 Pro 32 GB, vllm-metal 0.33.0",
+        "concurrency": 8,
+        "items": 50,
+        "parallel": false,
+        "server": {
+          "max_model_len": 34816,
+          "version": "0.33.0",
+          "managed": true,
+          "args": [
+            "--language-model-only",
+            "--kv-cache-memory-bytes=4294967296"
+          ]
+        }
       }
     },
     "results": "bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16",
@@ -135,11 +151,11 @@
   "score": {
     "state": "UNKNOWN",
     "owner": "bench contributors",
-    "reason": "90 of 541 item-seed pairs filed"
+    "reason": "140 of 541 item-seed pairs filed"
   },
   "outcomes": {
-    "sha256": "aa65ae1b618ef7a96fdfd87a216ea3c43602580958cff4875f8d8e7859c88e26",
-    "size_bytes": 123020,
+    "sha256": "91cd32020d9a9c73f23517614e6b5afe8c5ccb594fee283e7a47b17efaac690b",
+    "size_bytes": 194667,
     "locators": [
       {
         "kind": "index-path",

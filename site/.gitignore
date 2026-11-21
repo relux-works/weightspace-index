@@ -13,3 +13,6 @@ dist-demo/
 npm-debug.log*
 *.log
 .DS_Store
+
+# Local Wrangler state
+.wrangler/

@@ -1,0 +1,11 @@
+{
+  "name": "weightspace-index",
+  "compatibility_date": "2026-11-21",
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}

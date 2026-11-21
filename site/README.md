@@ -40,3 +40,21 @@ The default production build excludes the demo model, its files and its combinat
 | `WS_ALLOW_DIRTY=1` | Preview uncommitted data with a visible development banner. |
 
 See [DESIGN.md](DESIGN.md) for the layout and evidence presentation.
+
+## Cloudflare Workers
+
+Build from a full Git checkout so the index check can read the committed model
+records and run the Rust tool. Run Wrangler from `site/`. Its configuration runs
+the production build and serves only `site/dist/` as static assets. Leave the
+demo, dirty-preview and check-skipping environment variables unset for release.
+
+From the repository root, validate the deployment locally:
+
+```sh
+cd site
+npm ci
+npx --yes wrangler@4.110.0 deploy --dry-run
+```
+
+When the Cloudflare account and Worker name are confirmed, use the same command
+without `--dry-run`. Attach the intended hostname to that Worker in Cloudflare.

@@ -154,21 +154,7 @@ const skipIt = [
     </div>
   </section>
 
-  <section class="home-band subtle" aria-labelledby="limits-heading">
-    <div class="wrap">
-      <div class="band-title"><h2 id="limits-heading">What it doesn't do</h2></div>
-      <ul class="limits">
-        <li>Train, run inference or benchmark</li>
-        <li>Combine patches</li>
-        <li>Quantize or convert weights</li>
-        <li>Read sharded or pickle checkpoints</li>
-        <li>Prove a patch is safe or does what it claims</li>
-      </ul>
-      <p class="fine">It checks bytes and tensor identities, not behavior. Read a patch's evidence before you run it.</p>
-    </div>
-  </section>
-
-  <section class="home-band" aria-labelledby="closing-heading">
+  <section class="home-band subtle" aria-labelledby="closing-heading">
     <div class="wrap closing">
       <h2 id="closing-heading">Find a patch for your model</h2>
       <div class="closing-actions">
@@ -224,9 +210,6 @@ const skipIt = [
   .when { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 4vw, 3.5rem); }
   .when h3 { font-size: 1.1rem; border-top: 2px solid var(--color-text); padding-top: 1rem; }
   .when ul { margin: .8rem 0 0; padding-left: 1.2rem; display: grid; gap: .5rem; color: var(--color-text-muted); }
-
-  .limits { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
-  .limits li { padding: .35rem .7rem; border: 1px solid var(--color-border-strong); border-radius: var(--radius-control); font-size: .9rem; }
 
   .closing { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem 3rem; flex-wrap: wrap; }
   .closing h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0; }

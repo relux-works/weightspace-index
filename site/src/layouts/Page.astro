@@ -6,6 +6,10 @@ import "@fontsource-variable/inter-tight/index.css";
 import "@fontsource/roboto-mono/400.css";
 import "@fontsource/roboto-mono/500.css";
 import "@fontsource/roboto-mono/600.css";
+// The Latin subsets of the heading and UI faces paint every page's first screen.
+// Preloading them skips the wait for the stylesheet that names them.
+import interTightLatin from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
+import interLatin from "@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2?url";
 import "../styles/global.css";
 import "../styles/discovery.css";
 import "../styles/experience.css";
@@ -49,6 +53,8 @@ const logo = (svg: string, variant: string) =>
     {(index.example || DEMO) && <meta name="robots" content="noindex, nofollow" />}
     <meta name="referrer" content="no-referrer" />
     <meta name="color-scheme" content="light dark" />
+    <link rel="preload" href={interTightLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href={href("favicon-light.svg")} type="image/svg+xml" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={href("favicon-dark.svg")} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
   </head>

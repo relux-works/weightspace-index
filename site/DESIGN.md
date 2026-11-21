@@ -16,7 +16,7 @@ The catalog serves someone who has a base model and wants to find, evaluate and 
    - A file-size calculator for any matrix shape, with the featured patch's shipped sizes.
    - A closing action into the directory and a link to the featured patch's results. It names the featured result only; it makes no claim that every patch is benchmarked.
 
-5. **Tool** (`/weightspace/`). A landing page for the `weightspace` CLI. It opens with what the tool does (bakes a replacement bit for bit) beside a terminal, then says plainly that the index never requires it: every patch also ships as a LoRA adapter, shown as two paths (without the tool, with the tool). Then an illustrative BF16 bit row (published, baked, LoRA at run time), six reasons, when to use it versus the LoRA, documented install and command forms from `lib/commands.ts`, and what the tool does not do. Claims follow `tool/README.md`.
+5. **Tool** (`/weightspace/`). A landing page for the `weightspace` CLI. It opens with what the tool does (bakes a replacement bit for bit) beside a terminal, then says plainly that the index never requires it: every patch also ships as a LoRA adapter, shown as two paths (without the tool, with the tool). Then an illustrative BF16 bit row (published, baked, LoRA at run time), six reasons, when to use it versus the LoRA, and documented install and command forms from `lib/commands.ts`. Claims follow `tool/README.md`.
 
 Header navigation is Models, How it works, Tool, Search. The full benchmark run list (`/compare/`) is linked from the footer.
 

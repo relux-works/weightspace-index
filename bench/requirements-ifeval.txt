@@ -1,0 +1,4 @@
+# Task-specific pins. Keep the MATH-500 session's common package list intact.
+immutabledict==4.3.1
+langdetect==1.0.9
+nltk==3.10.4

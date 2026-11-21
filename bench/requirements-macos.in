@@ -1,5 +1,6 @@
 # vLLM for Apple Silicon (vllm-metal), the two release wheels our sessions
 # used. Locked with hashes into requirements-macos.txt; see README.
 -r requirements.txt
+-r requirements-ifeval.txt
 vllm @ https://github.com/vllm-project/vllm/releases/download/v0.33.0rc3/vllm-0.33.0%2Bcpu-cp38-abi3-macosx_11_0_arm64.whl
 vllm-metal @ https://github.com/vllm-project/vllm-metal/releases/download/v0.33.0/vllm_metal-0.33.0-cp312-cp312-macosx_15_0_arm64.whl

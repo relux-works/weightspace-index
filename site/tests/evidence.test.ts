@@ -36,3 +36,17 @@ test("a bench run reads as final answers right and its cut share, in percent, ag
   assert.deepEqual([head.benchmark, head.metric, head.unit, head.base, head.patched, head.higherIsBetter], ["MATH-500", FINAL_ANSWERS, "%", 20, 27.3, true]);
   assert.deepEqual([cut.name, cut.unit, cut.base, cut.patched, cut.higherIsBetter], [CUT, "%", 80, 64.5, false]);
 });
+
+test("an IFEval bench run labels the strict prompt-level metric", async () => {
+  const { results } = await import("../src/lib/insight.ts");
+  const protocol = { name: "bench/protocols/ifeval.json", sha256: "a".repeat(64) };
+  const record = (value: number) => ({ state: "COMPLETE", protocol, score: {
+    metric: "prompt_level_strict_acc", value, unit: "strict prompt-level accuracy", denominator: 541,
+  } });
+  const base = { url: "/base/", group: "g", record: record(0.2) } as unknown as Run;
+  const run = { url: "/run/", group: "g", paired: base, protocolLabel: "ifeval", record: record(0.5) } as unknown as Run;
+  const v = { claims: [], comparisons: [], runs: [run] } as unknown as Parameters<typeof results>[0];
+  const [score] = results(v);
+  assert.deepEqual([score.benchmark, score.metric, score.unit, score.base, score.patched],
+    ["IFEval", "strict prompt-level accuracy", "%", 20, 50]);
+});

@@ -54,6 +54,16 @@ Why: when `</think>` is missing, lm-eval scores the whole thinking trace, and `m
 
 **All run data stays in git (owner decision: Timur, 2026-11-19).** Sessions, samples and the full request/response logs are filed in this repository. If checkout size ever becomes a problem, the `.jsonl` files get gzipped rather than hosted elsewhere.
 
+## IFEval protocol and verification
+
+IFEval measures whether the thinking-loops patch improves instruction following. Each prompt has one or more machine-checkable instructions. Use all 541 prompts in the official `google/IFEval` evaluation split, which the dataset names `train`. Pin the dataset revision, lm-eval task version, and per-item hashes. Send the stock prompt verbatim as one user message with zero examples. Keep the stock instruction checkers and pin their dependencies, sentence tokenizer tables, and language detection seed. [IFEval paper](https://arxiv.org/abs/2311.07911) · [lm-eval task](https://github.com/EleutherAI/lm-evaluation-harness/blob/v0.4.13/lm_eval/tasks/ifeval/ifeval.yaml)
+
+Use the same paired design as MATH-500. The base and patched BF16 models answer the same prompts under the same seed and Qwen text-thinking settings, including a 32,768-token cap. The outcome is one if every official check passes on the visible reply after the last `</think>`, and zero if any check fails or the model never produces a visible reply. If a reply hits the cap after thinking ends, grade the text that reached the user and also record the cut. Verify the frozen prompt and instruction metadata against the logged document, and recompute the headline and the stock lm-eval score from the recorded reply. [Patch authors’ grading code](https://github.com/RikiyaT/lm_understand-logs/blob/main/exp8_math/code/evaluate.py#L96-L114)
+
+The headline is strict prompt-level accuracy. Weight each prompt equally, averaging its seeds first if more are added. Report paired differences, counts of discordant pairs, token-limit hits, replies that stop without an answer, and reply length. The authors’ reported 21.0% and 62.3% used two samples per prompt and temperature 0.6. The index uses the model card's temperature of 1.0 and starts with one seed, so the measured scores describe this protocol. [Experiment 8](https://rikiyat.github.io/blog/weight-space-programming/#make-a-language-model-better-at-math)
+
+The implementation freezes the official task and adds its grader to the existing recording, checking and merging path. Tests cover passing replies, failed instructions and unfinished thinking, and rejection of altered prompts, instruction metadata and scores.
+
 ## Compared with the patch authors' evaluation
 
 RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinking-loops` v1) with their own code, published with the patch's logs: `evaluate.py` (protocol `think35`) and `mathqa.py`. On MATH-500 the two set-ups differ as below. The card is revision `2fc0636` of `Qwen/Qwen3.5-0.8B`, unchanged since 2026-03-02.

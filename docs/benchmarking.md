@@ -38,6 +38,8 @@ RikiyaT's team evaluated the thinking-loops patch at temperature 0.6 with presen
 
 **One model in memory at a time by default.** A session runs base on its items, then patched on the same items. For large models most people can't hold both. `--parallel` runs both at once when they fit.
 
+**Recovery after the base half.** Bench writes a checkpoint after a managed sequential base run. Patched-only recovery verifies the saved replies, checkpoint hashes and pairing inputs against the new session before starting inference. The local recorder uses the operating system's listen backlog to absorb lm-eval's connection bursts.
+
 **Baselines are paired per patch.** The index's general rule is one baseline per base profile, shared by all patches. A paired baseline must be measured in the same sessions as its patch, so bench files one per patch, next to the shared ones.
 
 **The headline grades each reply's final answer (owner decision: Timur, 2026-11-20; replaces the 2026-11-19 decision to keep lm-eval's score as the headline).** The final answer is the inside of the last `\boxed{}` after the last `</think>`. A reply has no answer, and counts as wrong, when it never closed its thinking, when no box follows `</think>`, or when its last box is unclosed or empty. Nothing else in the text is read as an answer. math-verify compares the two boxed answers and nothing else, `verify(parse("\boxed{gold}"), parse("\boxed{answer}"))`. The gold is MATH-500's `answer` field, proven against the protocol's frozen target hash. This is how the original MATH evaluation reads an answer (the last box). The evaluation of the thinking-loops patch by its authors also grades the last box with math-verify. When `</think>` is missing, though, it reads the whole reply, so a box inside a cut thinking trace can count (see the [comparison](#compared-with-the-patch-authors-evaluation)).
@@ -69,6 +71,8 @@ The first standard session ran prompts 0–9 with seed 1234 and concurrency 5 on
 **Literal character counts.** The pinned lm-eval letter-frequency checker randomly substitutes an ASCII letter when it receives punctuation. An audit of all 541 prompts found two affected items, 19 for `#` and 22 for `!`. Bench now counts the supplied character using the existing threshold rule, both in lm-eval runs and offline replay. Replay preserves each older session's recorded lm-eval diagnostic and verifies the unaffected instruction verdicts and their aggregation. The headline uses the corrected grading for all sessions.
 
 Replay recovered the second session from its saved replies. Prompts 10–19 ran with seed 1234 and concurrency 8. Both checkpoints passed 7 of 10. One base reply hit the cap, and all patched replies finished within it. The two sessions give 10 of 20 base passes and 13 of 20 patched passes. [Second session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261121T050545Z-34d090/session.json)
+
+The third session reused the verified base replies for prompts 20–39 and completed the patched half with seed 1234 and concurrency 8. Strict passes were 10 of 20 for base and 11 of 20 for patched. The base hit the token cap on six replies and the patch hit it on one. Across the first 40 prompts, strict passes total 20 for base and 24 for patched. [Third session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/ifeval.qwen3.5-0.8b-thinking.bf16/20261121T075956Z-da71d8/session.json)
 
 ## Compared with the patch authors' evaluation
 

@@ -134,7 +134,8 @@ def derive_session(v: Version, p: Protocol, s: Settings, d: Path) -> Session:
             check_weights(v.profile, rec[variant]["model_files"], variant)
             outcomes[variant] = derive_variant(
                 p, s, ids, seed, read_jsonl(d / f"{variant}.samples.jsonl"),
-                read_jsonl(d / f"{variant}.requests.jsonl"), ifeval_grader=rec.get("ifeval_grader"))
+                read_jsonl(d / f"{variant}.requests.jsonl"),
+                ifeval_grader=rec[variant].get("ifeval_grader", rec.get("ifeval_grader")))
         require(non_weights(rec["base"]["model_files"]) == non_weights(rec["patched"]["model_files"]),
                 "base and patched model folders differ outside the weights files")
     except (BenchError, KeyError, TypeError) as e:

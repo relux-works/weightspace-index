@@ -16,13 +16,13 @@ from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
 from . import core, ifeval
-from .core import (HARNESS_MODEL, VARIANTS, Protocol, Settings, Version, check_weights,
-                   dumps, rel, require, sha256_file)
+from .core import (HARNESS_MODEL, SESSION_NAME, VARIANTS, Protocol, Settings, Version, check_weights,
+                   dumps, non_weights, read_json, read_jsonl, rel, require, sha256_file)
 from .harness import (check_results, harness_packages, lm_eval_argv, lm_eval_outputs,
                       run_logged, task_arg, work_dir)
 from .proxy import Recorder, get_json
 from .runs import headline, is_cut
-from .sessions import derive_session, task_config_sha256
+from .sessions import derive_session, derive_variant, task_config_sha256
 
 SERVED_NAME = "bench"
 
@@ -136,9 +136,31 @@ def server(a, model_dir: Path, s: Settings, log: Path, external_port: int | None
                 proc.wait()
 
 
+def reuse_base(source: Path, stage: Path, common: dict, files: dict, server_args: list[str],
+               p: Protocol, s: Settings) -> tuple[dict, str]:
+    """Verify a completed base half against the new session before using it."""
+    checkpoint = read_json(source / "base.checkpoint.json")
+    for key, expected in common.items():
+        require(checkpoint["run"].get(key) == expected, f"saved base has different {key}")
+    base = checkpoint["base"]
+    require(base["model_files"] == files, "saved base has different model files")
+    require(base["server"]["managed"] and base["server"]["args"] == server_args,
+            "saved base requires the same managed server arguments")
+    samples = source / "session/base.samples.jsonl"
+    requests = source / "session/base.requests.jsonl"
+    derive_variant(p, s, common["items"], common["seed"], read_jsonl(samples), read_jsonl(requests),
+                   ifeval_grader=base.get("ifeval_grader"))
+    for path in (samples, requests):
+        shutil.copyfile(path, stage / path.name)
+    return base, checkpoint["task_config_sha256"]
+
+
 def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how: str) -> None:
     a.concurrency = a.concurrency or len(ids)
     require(a.concurrency >= 1, "--concurrency must be at least 1")
+    if a.reuse_base:
+        require(a.items is not None and not (a.parallel or a.base_port or a.patched_port),
+                "--reuse-base requires --items and both halves must use managed servers")
     print(f"{p.id} / {s.id} on {v.folder}: seed {seed}, {len(ids)} items ({how}): {ids}")
     if a.dry_run:
         return
@@ -164,14 +186,22 @@ def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how:
         print(f"hashing {dirs[variant]} ...", flush=True)
         files[variant] = model_files(dirs[variant])
         check_weights(v.profile, files[variant], variant)
+    require(non_weights(files["base"]) == non_weights(files["patched"]),
+            "base and patched model folders differ outside the weights files")
 
     task = task_arg(p, s, work)
-    record = {"protocol_sha256": p.sha256, "settings_sha256": s.sha256,
-              "profile": v.profile["id"], "seed": seed, "items": ids}
+    common = {"protocol_sha256": p.sha256, "settings_sha256": s.sha256, "profile": v.profile["id"],
+              "seed": seed, "items": ids, "concurrency": a.concurrency, "parallel": a.parallel,
+              "hardware": a.hardware}
+    record = dict(common)
+
     def half(variant: str, port: int, external: int | None) -> str:
         """One model's half of the session, against a server on `port`."""
         t0 = time.time()
         served, info = check_server(port, dirs[variant], s)
+        if a.reuse_base:
+            require(all(value == record["base"]["server"].get(key) for key, value in info.items()),
+                    "patched server version or context length differs from the saved base")
         recorder = Recorder(port, stage / f"{variant}.requests.jsonl")
         try:
             argv = lm_eval_argv(p, s, ids, f"http://127.0.0.1:{recorder.port}/v1/chat/completions",
@@ -187,6 +217,15 @@ def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how:
                            "server": {**info, "managed": not external,
                                       "args": [] if external else a.server_arg},
                            "seconds": round(time.time() - t0)}
+        if variant == "base" and not a.parallel and not external:
+            require(model_files(dirs["base"]) == files["base"], "the base model folder changed during its run")
+            base = dict(record["base"])
+            if p.task == ifeval.TASK:
+                base["ifeval_grader"] = ifeval.GRADER
+            checkpoint = {"run": common, "base": base, "task_config_sha256": config}
+            temp = work / "base.checkpoint.tmp"
+            temp.write_text(dumps(checkpoint))
+            temp.rename(work / "base.checkpoint.json")
         return config
 
     external = {"base": a.base_port, "patched": a.patched_port}
@@ -202,7 +241,19 @@ def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how:
                            for variant in VARIANTS]
                 configs = {f.result() for f in futures}
     else:
-        for variant in VARIANTS:
+        variants = VARIANTS
+        if a.reuse_base:
+            source = Path(a.reuse_base).expanduser().resolve()
+            require(SESSION_NAME.fullmatch(source.name), "--reuse-base needs a session work folder")
+            base, config = reuse_base(source, stage, common, files["base"], a.server_arg, p, s)
+            if p.task == ifeval.TASK:
+                base.setdefault("ifeval_grader", None)
+            record["base"] = base
+            record["base_reused_from"] = source.name
+            configs.add(config)
+            variants = ("patched",)
+            print(f"Reusing {len(ids)} verified base replies from {rel(source)}", flush=True)
+        for variant in variants:
             with server(a, dirs[variant], s, work / f"{variant}.vllm.log", external[variant]) as port:
                 configs.add(half(variant, port, external[variant]))
     require(len(configs) == 1, "lm_eval resolved the task differently for base and patched")
@@ -211,8 +262,7 @@ def run(a, v: Version, p: Protocol, s: Settings, seed: int, ids: list[int], how:
                 f"the {variant} model folder changed during the run")
     record.update({
         "harness": {"packages": packages, "task_config_sha256": configs.pop()},
-        "concurrency": a.concurrency, "parallel": a.parallel, "timeout": a.timeout,
-        "hardware": a.hardware,
+        "timeout": a.timeout,
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(started)),
     })
     if p.task == ifeval.TASK:

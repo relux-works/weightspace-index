@@ -215,6 +215,7 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--count", type=int, default=10, help="items per session when picking at random")
     c.add_argument("--dry-run", action="store_true", help="print the selection and stop")
     c.add_argument("--base-dir", help="base model folder (default: downloaded under .temp/bench/models)")
+    c.add_argument("--reuse-base", help="previous session work folder with a completed base checkpoint")
     c.add_argument("--patched-dir", help="patched copy (default: built with weightspace apply)")
     c.add_argument("--vllm", default=default_vllm(),
                    help="vllm executable (default: the one beside this Python, else PATH's)")

@@ -16,6 +16,7 @@ from __future__ import annotations
 import http.client
 import json
 import os
+import socket
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,6 +24,12 @@ from pathlib import Path
 
 CHAT_PATH = "/v1/chat/completions"
 FORWARDED = ("/v1/", "/version", "/health")
+
+
+class RecorderServer(ThreadingHTTPServer):
+    # lm-eval opens connections in bursts. Python 3.12 defaults to a
+    # backlog of five, which can reset otherwise healthy local requests.
+    request_queue_size = socket.SOMAXCONN
 
 
 def call(port: int, method: str, path: str, body: bytes | None = None,
@@ -108,7 +115,7 @@ class Recorder:
             def do_POST(self):
                 self._forward("POST")
 
-        self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.server = RecorderServer(("127.0.0.1", 0), Handler)
         self.server.daemon_threads = True
         self.port = self.server.server_address[1]
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)

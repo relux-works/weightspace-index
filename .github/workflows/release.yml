@@ -76,8 +76,24 @@ jobs:
             tar -czf "$stage.tar.gz" "$stage"
             artifact="$stage.tar.gz"
           fi
-          sha256sum "$artifact" > "$artifact.sha256" || shasum -a 256 "$artifact" > "$artifact.sha256"
+          # The same binary, unpacked, so it runs straight after download.
+          if [ "${{ matrix.archive }}" = zip ]; then
+            binary="$stage.exe"
+            cp "$stage/weightspace.exe" "$binary"
+          else
+            # Named like the archive without its extension; the staging
+            # folder holds that name, so it goes once the archive exists.
+            binary="$stage"
+            cp "$stage/weightspace" weightspace.tmp
+            rm -rf "$stage"
+            mv weightspace.tmp "$binary"
+            chmod +x "$binary"
+          fi
+          for f in "$artifact" "$binary"; do
+            sha256sum "$f" > "$f.sha256" || shasum -a 256 "$f" > "$f.sha256"
+          done
           echo "ARTIFACT=$artifact" >> "$GITHUB_ENV"
+          echo "BINARY=$binary" >> "$GITHUB_ENV"
 
       # Pinned to the v4.6.2 commit.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -86,6 +102,8 @@ jobs:
           path: |
             ${{ env.ARTIFACT }}
             ${{ env.ARTIFACT }}.sha256
+            ${{ env.BINARY }}
+            ${{ env.BINARY }}.sha256
           if-no-files-found: error
 
   release:
@@ -124,6 +142,9 @@ jobs:
           subject-path: |
             artifacts/*.tar.gz
             artifacts/*.zip
+            artifacts/*-apple-darwin
+            artifacts/*-linux-musl
+            artifacts/*.exe
 
       - name: Publish release
         shell: bash
@@ -134,3 +155,78 @@ jobs:
             --title "weightspace ${{ github.ref_name }}" \
             --generate-notes \
             --verify-tag
+
+      # The site's /weightspace/ page reads this file for its download
+      # links and install commands; the site-release job commits it.
+      - name: Site release record
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' tool/Cargo.toml | head -n 1)
+          published=$(gh release view "$TAG" --json publishedAt --jq '.publishedAt[0:10]')
+          file() { # name -> {name, size, sha256}, from the published files
+            sha=$(awk -v f="$1" '$2 == f || $2 == "*" f { print $1 }' artifacts/SHA256SUMS)
+            [ -n "$sha" ] || { echo "no checksum for $1" >&2; exit 1; }
+            jq -n --arg name "$1" --argjson size "$(stat -c %s "artifacts/$1")" --arg sha256 "$sha" '{$name, $size, $sha256}'
+          }
+          entry() { # target os label arch archive-extension binary-suffix
+            stage="weightspace-$TAG-$1"
+            jq -n --arg target "$1" --arg os "$2" --arg label "$3" --arg arch "$4" \
+              --argjson archive "$(file "$stage.$5")" --argjson binary "$(file "$stage$6")" \
+              '{$target, $os, $label, $arch} + $archive + {$binary}'
+          }
+          # The first entry is the page's download button when it cannot
+          # tell the visitor's platform.
+          {
+            entry aarch64-apple-darwin macos macOS "Apple Silicon" tar.gz ""
+            entry x86_64-unknown-linux-musl linux Linux x86_64 tar.gz ""
+            entry x86_64-pc-windows-msvc windows Windows x86_64 zip .exe
+          } | jq -s --arg tag "$TAG" --arg toolVersion "$version" --arg published "$published" \
+            '{$tag, $toolVersion, $published, assets: .}' > tool-release.json
+          cat tool-release.json
+
+      # Pinned to the v4.6.2 commit.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: site-release
+          path: tool-release.json
+          if-no-files-found: error
+
+  # Points the site at the release just published by committing the record
+  # to main. A tag cut from an older commit than the recorded one still
+  # moves the page to it, so tag releases in order.
+  site-release:
+    name: site release record
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Pinned to the v7.0.1 commit. Keeps the token so the job can push.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+
+      # Pinned to the v4.3.0 commit.
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: site-release
+          path: site-release
+
+      - name: Commit to main
+        shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          cp site-release/tool-release.json site/src/data/tool-release.json
+          rm -rf site-release
+          if git diff --quiet; then
+            echo "site/src/data/tool-release.json already records $TAG"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Point the tool page at weightspace $TAG" site/src/data/tool-release.json
+          git push origin HEAD:main

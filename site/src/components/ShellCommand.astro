@@ -1,0 +1,32 @@
+---
+// A copyable shell command on the dark terminal surface, highlighted by
+// lib/shell.ts. Like Command.astro, the command comes from src/lib/commands.ts
+// and the caption links the document its form comes from.
+import { createHash } from "node:crypto";
+import type { Command } from "../lib/commands.ts";
+import { loadIndex } from "../lib/index.ts";
+import { NEW_TAB } from "../lib/links.ts";
+import { highlight } from "../lib/shell.ts";
+import CopyButton from "./CopyButton.astro";
+interface Props { command: Command; title: string }
+const { command, title } = Astro.props;
+const index = loadIndex();
+const id = `sh-${createHash("sha256").update(command.text).digest("hex").slice(0, 12)}`;
+const src = index.docsAt(command.source.path) + (command.source.anchor ? `#${command.source.anchor}` : "");
+---
+<figure class="terminal sh shell-command">
+  <figcaption>
+    <span><strong>{title}</strong> · <a href={src} {...NEW_TAB} title="Where this command form is documented">{command.source.label}</a></span>
+    <CopyButton from={id} label="Copy" />
+  </figcaption>
+  <pre id={id} tabindex="0"><code set:html={highlight(command.text)} /></pre>
+</figure>
+
+<style>
+  .shell-command { margin: 0; min-width: 0; }
+  .shell-command figcaption { gap: 1rem; flex-wrap: nowrap; }
+  .shell-command figcaption > span { flex: 1; min-width: 0; }
+  .shell-command strong { color: var(--ink-text); font-weight: 600; }
+  .shell-command figcaption a { color: inherit; }
+  .shell-command pre { overflow-x: auto; }
+</style>

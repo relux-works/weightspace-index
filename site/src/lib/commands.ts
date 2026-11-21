@@ -2,6 +2,7 @@
 // filled in from the records; nothing is written per page. `source` names the
 // document the command form comes from, and the page links to it.
 import type { Base, FileEntry, Index, Profile, Run, Version } from "./index.ts";
+import { assetDir, assetUrl, download, type ToolAsset, type ToolRelease } from "./tool-release.ts";
 
 export interface Command {
   text: string;
@@ -14,11 +15,39 @@ const DOCS = {
   apply: { label: "tool/README.md, “Apply a replacement patch”", path: "tool/README.md", anchor: "apply-a-replacement-patch-patch-users" },
   bench: { label: "bench/README.md", path: "bench/README.md", anchor: "running" },
   benchStatus: { label: "bench/README.md", path: "bench/README.md", anchor: "status-merging-checking-comparing" },
+  release: { label: "tool/README.md, “From a release archive”", path: "tool/README.md", anchor: "from-a-release-archive" },
   install: { label: "tool/README.md, “From source”", path: "tool/README.md", anchor: "from-source" },
   replacement: { label: "tool/README.md, “Build a replacement patch”", path: "tool/README.md", anchor: "build-a-replacement-patch-patch-authors" },
 };
 
 /** The tool's own documented forms, with the README's placeholder paths. Used by /weightspace/. */
+/**
+ * Downloads one platform's release file, checks it against the recorded SHA-256
+ * before anything runs, and puts the binary on PATH. Uses the bare binary when
+ * the release publishes one, else unpacks the archive.
+ */
+export function toolDownload(githubRepo: string, release: ToolRelease, asset: ToolAsset): Command {
+  const file = download(asset);
+  const url = assetUrl(githubRepo, release, file);
+  const dir = assetDir(release, asset);
+  const lines = asset.os === "windows"
+    ? [
+        `Invoke-WebRequest ${url} -OutFile ${file.name}`,
+        `if ((Get-FileHash ${file.name}).Hash -ne '${file.sha256.toUpperCase()}') { throw 'checksum mismatch' }`,
+        ...(file.ready
+          ? [`# Rename ${file.name} to weightspace.exe and move it to a folder on your PATH`]
+          : [`Expand-Archive ${file.name} -DestinationPath .`, `# Move ${dir}\\weightspace.exe to a folder on your PATH`]),
+      ]
+    : [
+        `curl -fLO ${url}`,
+        `echo '${file.sha256}  ${file.name}' | ${asset.os === "linux" ? "sha256sum -c" : "shasum -a 256 -c"}`,
+        ...(file.ready
+          ? [`sudo install -m 755 ${file.name} /usr/local/bin/weightspace`]
+          : [`tar -xzf ${file.name}`, `sudo install ${dir}/weightspace /usr/local/bin/`]),
+      ];
+  return { text: lines.join("\n"), source: DOCS.release };
+}
+
 export function toolInstall(githubRepo: string): Command {
   const dir = githubRepo.split("/").pop();
   return {

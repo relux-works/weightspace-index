@@ -3,15 +3,31 @@
 // reach for it, and that the index never requires it (every patch also ships
 // as a LoRA adapter). Claims follow tool/README.md; the bit rows are illustrative.
 import Arrow from "../components/Arrow.astro";
-import Command from "../components/Command.astro";
 import Page from "../layouts/Page.astro";
-import { toolCommands, toolInstall } from "../lib/commands.ts";
+import ShellCommand from "../components/ShellCommand.astro";
+import { toolCommands, toolDownload, toolInstall } from "../lib/commands.ts";
+import { humanBytes } from "../lib/format.ts";
 import { href, loadIndex } from "../lib/index.ts";
 import { NEW_TAB } from "../lib/links.ts";
 import { highlight } from "../lib/shell.ts";
+import { assetUrl, download, releasePage, toolRelease as release } from "../lib/tool-release.ts";
 
 const index = loadIndex();
 const guide = index.docsAt("tool/README.md");
+const notes = releasePage(index.githubRepo, release);
+// The bare binary when the release has one, else the archive.
+const downloads = release.assets.map(asset => {
+  const file = download(asset);
+  return {
+    ...asset,
+    size: file.size,
+    href: assetUrl(index.githubRepo, release, file),
+    format: file.ready ? "ready to run" : asset.os === "windows" ? "zip" : "tar.gz",
+    command: toolDownload(index.githubRepo, release, asset),
+  };
+});
+// Without script the big button offers the first recorded platform.
+const main = downloads[0];
 const hero = [
   "weightspace apply \\",
   "  --patch ./my-patch.safetensors \\",
@@ -57,9 +73,21 @@ const skipIt = [
       <p class="tool-name"><code>weightspace</code> command-line tool</p>
       <h1 id="tool-title">Bake a patch,<br />bit for bit.</h1>
       <p class="lede">Writes a replacement patch into a copy of your model. Every changed weight lands at exactly its published value.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#install">Install <Arrow /></a>
-        <a class="btn" href={guide} {...NEW_TAB}>Read the guide</a>
+      <section class="release-files tool-downloads" aria-labelledby="download-heading">
+        <h2 id="download-heading">Download weightspace</h2>
+        <div class="file-choices">
+          <a id="tool-download" href={main.href} data-tab-select={main.os} aria-label={`Download weightspace for ${main.label} ${main.arch} · ${humanBytes(main.size)}`}>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M3 13.5h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span><strong data-field="label">{main.label}</strong><small data-field="hint">{main.arch} · {main.format}</small></span>
+            <span class="file-size" data-field="size">{humanBytes(main.size)}</span>
+          </a>
+        </div>
+      </section>
+      <div class="release-meta">
+        <ul class="platform-links" aria-label="All platforms">
+          {downloads.map(d => <li><a href={d.href} data-os={d.os} data-tab-select={d.os} data-label={d.label} data-hint={`${d.arch} · ${d.format}`} data-size={humanBytes(d.size)} aria-label={`Download weightspace for ${d.label} ${d.arch} · ${humanBytes(d.size)}`}>{d.label}</a></li>)}
+        </ul>
+        <a class="release-tag" href={notes} {...NEW_TAB} aria-label={`Release notes for ${release.tag}`}>{release.tag} <Arrow dir="out" /></a>
       </div>
     </header>
     <figure class="terminal sh hero-terminal">
@@ -143,12 +171,25 @@ const skipIt = [
     <div class="wrap">
       <div class="band-title">
         <h2 id="install-heading">Install and run</h2>
-        <p>Rust 1.85 or newer. Linux, macOS, Windows. Release binaries aren't published yet.</p>
+        <p>Binaries in {release.tag} are tool {release.toolVersion}. Build from source for the latest commands.</p>
       </div>
-      <div class="cmds">
-        <Command command={toolInstall(index.githubRepo)} title="Build from source" />
-        <Command command={toolCommands.apply} title="Apply a patch" />
-        <Command command={toolCommands.replacement} title="Build a patch (authors)" />
+      <div class="install" data-tabs id="install-tabs">
+        <div class="setup-tabs" data-slide="line" role="tablist" hidden aria-label="Platform">
+          {downloads.map((d, i) => <button role="tab" type="button" data-label={d.os} aria-selected={String(i === 0)}>{d.label}</button>)}
+          <button role="tab" type="button" data-label="source" aria-selected="false">From source</button>
+        </div>
+        {downloads.map(d => <div class="install-panel" data-panel>
+          <h3 class="panel-title">{d.label}</h3>
+          <ShellCommand command={d.command} title={`Download, verify and install · ${d.arch}`} />
+        </div>)}
+        <div class="install-panel" data-panel>
+          <h3 class="panel-title">From source</h3>
+          <ShellCommand command={toolInstall(index.githubRepo)} title="Build with Rust 1.85 or newer" />
+        </div>
+      </div>
+      <div class="run-cmds">
+        <ShellCommand command={toolCommands.apply} title="Apply a patch" />
+        <ShellCommand command={toolCommands.replacement} title="Build a patch (authors)" />
       </div>
       <p class="fine">If a patch stores whole tensors, <code>apply</code> also needs their expected base digests. Take them from the patch author, never from your own model. <a href={`${guide}#apply-a-replacement-patch-patch-users`} {...NEW_TAB}>Details</a></p>
     </div>
@@ -165,13 +206,48 @@ const skipIt = [
   </section>
 </Page>
 
+<script>
+  import "../scripts/tabs.ts";
+  // Put the visitor's platform first: it takes the dark primary row and its install tab.
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  const platform = `${nav.userAgentData?.platform ?? ""} ${navigator.platform} ${navigator.userAgent}`;
+  const os = /Win/i.test(platform) ? "windows" : /Android|iPhone|iPad/i.test(platform) ? null
+    : /Mac/i.test(platform) ? "macos" : /Linux|X11/i.test(platform) ? "linux" : null;
+  // The one big button points at the visitor's platform; the links below keep all three.
+  const button = document.getElementById("tool-download") as HTMLAnchorElement | null;
+  const link = os && document.querySelector<HTMLAnchorElement>(`.platform-links a[data-os="${os}"]`);
+  if (button && link) {
+    button.href = link.href;
+    button.dataset.tabSelect = os;
+    button.setAttribute("aria-label", link.getAttribute("aria-label")!);
+    for (const field of ["label", "hint", "size"] as const) {
+      button.querySelector(`[data-field="${field}"]`)!.textContent = link.dataset[field]!;
+    }
+    link.setAttribute("aria-current", "true");
+    document.querySelector<HTMLButtonElement>(`#install-tabs [role=tab][data-label="${os}"]`)?.click();
+  }
+</script>
+
 <style>
   .tool-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; gap: 2rem clamp(2rem, 5vw, 4.5rem); padding-block: clamp(2rem, 5vw, 4.8rem); }
   .tool-name { color: var(--color-text-muted); font-size: .95rem; }
   .tool-name code { color: var(--color-text); font-weight: 600; }
   .tool-hero h1 { margin-top: .6rem; font-size: clamp(2.3rem, 4.6vw, 4rem); line-height: .98; font-weight: 680; letter-spacing: -.035em; }
   .lede { margin-top: 1.1rem; max-width: 40ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.6rem; }
+  /* Same rows as the patch page's "Download files" (.release-files). */
+  .tool-downloads { margin-top: 1.8rem; max-width: 26rem; }
+  /* A quiet caption as wide as the button: every platform, then the release. */
+  .release-meta { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 26rem; font-size: .85rem; color: var(--color-text-muted); }
+  .release-meta a { display: inline-flex; align-items: center; gap: .2rem; min-height: 2.75rem; color: inherit; text-decoration: none; }
+  .release-meta a:hover { color: var(--color-link); text-decoration: underline; }
+  .platform-links { list-style: none; margin: 0; padding: 0; display: flex; }
+  .platform-links li + li::before { content: "·"; padding-inline: .45rem; }
+  .platform-links a[aria-current] { color: var(--color-text); font-weight: 600; }
+  .release-tag { font-variant-numeric: tabular-nums; }
+
+  .install, .install-panel { min-width: 0; }
+  .install-panel:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+  .run-cmds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
   .hero-terminal { margin: 0; min-width: 0; }
   .hero-terminal pre { overflow-x: auto; }
   .hero-terminal .out { display: block; margin-top: .6rem; color: var(--ink-muted); }
@@ -218,6 +294,9 @@ const skipIt = [
   @media (max-width: 60rem) {
     .tool-hero { grid-template-columns: minmax(0, 1fr); }
     .reasons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 60rem) {
+    .run-cmds { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 40rem) {
     .paths, .when, .reasons { grid-template-columns: minmax(0, 1fr); }

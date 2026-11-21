@@ -32,6 +32,10 @@ The default production build excludes the demo model, its files and its combinat
 - Each runtime tab shows the launch command. Its copy button includes the full download, checksum, preparation and launch recipe. Without JavaScript, readers can download the file and expand the same preparation steps. Directory search, paging, runtime tabs and copy buttons use local JavaScript. Navigation, the complete directory, download links, evidence and every recipe work as static HTML. Fonts and visualizations are served locally.
 - External web links open in a new tab.
 
+## Tool release
+
+`/weightspace/` offers the release recorded in `src/data/tool-release.json`, because the build stays offline. The release workflow (`.github/workflows/release.yml`) writes this file from the files it just published (tag, tool version, and each platform's archive and bare binary with size and SHA-256) and commits it to `main`, so a new tag updates the page on the next build. Don't edit it by hand except to fix a record. `npm test` and the build check the names against the release workflow.
+
 ## Build settings
 
 | Variable | Effect |

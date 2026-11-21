@@ -1,0 +1,34 @@
+{
+  "tag": "v0.1.0-alpha.1",
+  "toolVersion": "0.1.0",
+  "published": "2026-11-16",
+  "assets": [
+    {
+      "target": "aarch64-apple-darwin",
+      "os": "macos",
+      "label": "macOS",
+      "arch": "Apple Silicon",
+      "name": "weightspace-v0.1.0-alpha.1-aarch64-apple-darwin.tar.gz",
+      "size": 2481999,
+      "sha256": "14c4640f38643b2e1e98fb811bb375214281854ccc2213fff92a07489885a664"
+    },
+    {
+      "target": "x86_64-unknown-linux-musl",
+      "os": "linux",
+      "label": "Linux",
+      "arch": "x86_64",
+      "name": "weightspace-v0.1.0-alpha.1-x86_64-unknown-linux-musl.tar.gz",
+      "size": 2952718,
+      "sha256": "2c4cce7310ce76b7f6dcbececdacb9c3d37663a88edaa33510814fe4fb525166"
+    },
+    {
+      "target": "x86_64-pc-windows-msvc",
+      "os": "windows",
+      "label": "Windows",
+      "arch": "x86_64",
+      "name": "weightspace-v0.1.0-alpha.1-x86_64-pc-windows-msvc.zip",
+      "size": 2411563,
+      "sha256": "a6f3fe802b1b8987ebe0ae7e0420a2309208e05a5861a5eb0b042796750c5770"
+    }
+  ]
+}

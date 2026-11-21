@@ -28,9 +28,9 @@ Everything runs **offline**. The tool never uses the network, never downloads mo
 
 ## Install
 
-### From a release archive (when published)
+### From a release archive
 
-No downloadable release exists yet; until one is published, install [from source](#from-source) — that is the verified path. When releases are published, they will appear under **GitHub Releases** for this repository, one archive per platform, where `<tag>` is the release tag including its leading `v` (for example, `v0.1.0`):
+Tagged releases are published under **GitHub Releases** for this repository, one archive per platform, where `<tag>` is the release tag including its leading `v` (for example, `v0.1.0-alpha.1`). A release contains the tool as of its tag; `v0.1.0-alpha.1` is tool version 0.1.0 and predates `derive-lora`. For newer commands, install [from source](#from-source).
 
 | Platform | Archive |
 |---|---|
@@ -38,7 +38,9 @@ No downloadable release exists yet; until one is published, install [from source
 | macOS, Apple Silicon (arm64) | `weightspace-<tag>-aarch64-apple-darwin.tar.gz` |
 | Windows, x86_64 | `weightspace-<tag>-x86_64-pc-windows-msvc.zip` |
 
-Each archive will contain a single top-level directory, `weightspace-<tag>-<target>/`, holding the `weightspace` binary (`weightspace.exe` on Windows) and its `LICENSE`, and the release will publish a combined `SHA256SUMS` file. To install one: download the archive and `SHA256SUMS`, verify the archive's SHA-256 before extracting it (stop on any mismatch), extract it, and put the binary from that directory in a directory already on your `PATH`. For any other platform or architecture, build from source.
+Releases after `v0.1.0-alpha.1` also publish each binary unpacked, ready to run: `weightspace-<tag>-<target>` (`weightspace-<tag>-<target>.exe` on Windows), listed in the same `SHA256SUMS`. Check its SHA-256, make it executable (`chmod +x` on Linux and macOS), and put it on your `PATH` under the name `weightspace`.
+
+Each archive contains a single top-level directory, `weightspace-<tag>-<target>/`, holding the `weightspace` binary (`weightspace.exe` on Windows) and its `LICENSE`, and each release publishes a combined `SHA256SUMS` file. To install one: download the archive and `SHA256SUMS`, verify the archive's SHA-256 before extracting it (stop on any mismatch), extract it, and put the binary from that directory in a directory already on your `PATH`. For any other platform or architecture, build from source.
 
 ### From source
 

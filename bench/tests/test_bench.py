@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from bench import cli, core
+from bench import cli, core, grading
 
 REAL = Path(core.BENCH)
 IDS = [2, 14, 17]  # gold answers: \frac{14}{3}, \sqrt{51}, \pi
@@ -263,7 +263,7 @@ def test_end_to_end(repo, capsys):
 
 def test_boxed():
     text = "a \\boxed{\\frac{1}{2}} b \\boxed{x"
-    assert core.boxed(text) == [(2, 21, "\\frac{1}{2}")]
+    assert grading.boxed(text) == [(2, 21, "\\frac{1}{2}")]
 
 
 @pytest.mark.parametrize("content,answer", [
@@ -276,24 +276,24 @@ def test_boxed():
     ("<think></think>\\boxed{\\boxed{4}}", "4"),                               # innermost last
 ])
 def test_final_answer(content, answer):
-    assert core.final_answer(content, "</think>") == answer
+    assert grading.final_answer(content, "</think>") == answer
 
 
 def test_final_answer_without_thinking():
-    assert core.final_answer("so \\boxed{4}", None) == "4"
+    assert grading.final_answer("so \\boxed{4}", None) == "4"
 
 
 def test_grade():
-    assert core.grade("\\frac{14}{3}", "\\frac{14}{3}") == (True, True)
-    assert core.grade("14/3", "\\frac{14}{3}") == (True, True)
-    assert core.grade("2\\sqrt{2}", "\\sqrt{8}") == (True, False)  # the checkers disagree
-    assert core.grade("3", "\\pi") == (False, False)
-    assert core.grade(None, "\\pi") == (False, False)
+    assert grading.grade("\\frac{14}{3}", "\\frac{14}{3}") == (True, True)
+    assert grading.grade("14/3", "\\frac{14}{3}") == (True, True)
+    assert grading.grade("2\\sqrt{2}", "\\sqrt{8}") == (True, False)  # the checkers disagree
+    assert grading.grade("3", "\\pi") == (False, False)
+    assert grading.grade(None, "\\pi") == (False, False)
 
 
 def test_grade_timeout_refused(monkeypatch):
     # math-verify reports a timeout as a warning and answers 'not equal'.
-    mv, _ = core.grader()
+    mv, _ = grading.grader()
 
     def timed_out(*args, **kwargs):
         logging.getLogger("math_verify.grader").warning("Timeout during comparison")
@@ -301,7 +301,7 @@ def test_grade_timeout_refused(monkeypatch):
 
     monkeypatch.setattr(mv, "verify", timed_out)
     with pytest.raises(core.BenchError, match="timed out"):
-        core.grade("1", "1")
+        grading.grade("1", "1")
 
 
 def test_repeat_counts_once(repo, capsys, monkeypatch):

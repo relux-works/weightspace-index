@@ -57,6 +57,15 @@ the list out, so pairs already filed stay valid. A run is complete when
 every item has a pair under every listed seed. Its score is the mean over
 items of each item's mean over seeds.
 
+## Protocol `ifeval`
+
+- **Task and prompts** use stock lm-eval `ifeval` v4.0 with all 541 official prompts from the pinned [google/IFEval split](https://huggingface.co/datasets/google/IFEval/tree/966cd89545d6b6acfd7638bc708b98261ca58e84), named `train` in the dataset. Each prompt is sent verbatim as one user message, with zero examples and no task stop strings.
+- **Headline** is strict prompt-level accuracy. A nonempty visible reply must pass every instruction check. When thinking is enabled, the grader reads the text after the last `</think>`. Missing or empty visible replies score zero. A reply cut after thinking is graded on the visible text already returned. vLLM must return raw content including the think-end token, as it does by default without a reasoning parser.
+- **Verification** checks the logged prompt and instruction metadata against the frozen document, and replays strict grading with pinned packages, a fixed language detector seed, and pinned NLTK tokenizer tables. The stock lm-eval score is retained alongside the headline because lm-eval can see thinking when the end token is missing.
+- **Comparison** uses the same seed and settings on base and patched. It reports strict passes and their difference over the prompts filed, alongside token-limit hits and reply lengths. Only a run covering every prompt under every protocol seed gets an index score.
+
+The standard Qwen run uses `--protocol ifeval --settings qwen3.5-0.8b-thinking`. Use the command under [Running](#running) with those options.
+
 ## Protocol `math500-n197`
 
 - **Task:** `minerva_math500` (lm-eval task version 3.1), on HuggingFaceH4/MATH-500 at revision `6e4ed1a…`.
@@ -90,9 +99,9 @@ The card's Best Practices give that sentence for math benchmarks but don't say w
 
 Output is capped at 32,768 tokens, the card's figure for most queries. The card suggests 81,920 for math competitions; bench keeps 32,768, because the model loops until the cap on most hard items (see [docs/benchmarking.md](../docs/benchmarking.md)). The patch author evaluated at temperature 0.6; bench uses the card's 1.0 for text tasks.
 
-**The headline grades each reply's final answer:** the inside of the last `\boxed{}` after the last `</think>`. No `</think>` (a reply cut while thinking), no box after it, or an unclosed or empty last box means no answer, which counts as wrong. math-verify then compares only the two boxed answers, `verify(parse("\boxed{gold}"), parse("\boxed{answer}"))`. The gold is MATH-500's `answer` field, which must hash to the protocol's frozen target. The original MATH checker (`is_equiv`) grades the same answers as a cross-check. lm-eval's own score differs: when `</think>` is missing it scores the whole trace, and `math_verify` falls back to any number it finds there.
+**The MATH-500 headline grades each reply's final answer** using the inside of the last `\boxed{}` after the last `</think>`. No `</think>` (a reply cut while thinking), no box after it, or an unclosed or empty last box means no answer, which counts as wrong. math-verify then compares only the two boxed answers, `verify(parse("\boxed{gold}"), parse("\boxed{answer}"))`. The gold is MATH-500's `answer` field, which must hash to the protocol's frozen target. The original MATH checker (`is_equiv`) grades the same answers as a cross-check. lm-eval's own score differs: when `</think>` is missing it scores the whole trace, and `math_verify` falls back to any number it finds there.
 
-A cut is recorded as `finish_reason: "length"`. A completed run's score carries the headline as `value`. Beside it are lm-eval's own score as `value_lm_eval`, the share of cut replies as `cut_at_limit`, the share that finished without an answer as `finished_without_answer`, and `mean_completion_tokens`. Each outcome line records its `answer`, `correct` (math-verify) and `correct_is_equiv` next to lm-eval's `score`.
+A cut is recorded as `finish_reason: "length"`. A completed run's score carries the headline as `value`. Beside it are lm-eval's own score as `value_lm_eval`, the share of cut replies as `cut_at_limit`, the share that finished without an answer as `finished_without_answer`, and `mean_completion_tokens`. Each outcome records its `answer` and `correct` next to lm-eval's `score`. MATH-500 also records `correct_is_equiv`.
 
 A settings file applies only to the base model whose card it cites. Another model gets its own file, copied from its own card.
 
@@ -114,6 +123,14 @@ A settings file applies only to the base model whose card it cites. Another mode
 
    ```bash
    uv pip install -p .venv -r bench/requirements.txt
+   ```
+
+   The macOS lock includes the IFEval packages. On other platforms, add them with `uv pip install -p .venv -r bench/requirements-ifeval.txt`. For running or checking IFEval, install the pinned sentence tokenizer once in the same environment.
+
+   ```bash
+   mkdir -p .venv/nltk_data/tokenizers
+   curl --fail --location https://raw.githubusercontent.com/nltk/nltk_data/4f15a3d89eefe9748ec1c05be495d91289197155/packages/tokenizers/punkt_tab.zip -o .venv/punkt_tab.zip
+   unzip -q .venv/punkt_tab.zip -d .venv/nltk_data/tokenizers
    ```
 
    Nothing needs activating. Every command below runs `.venv/bin/python`, and `run` starts the `vllm` installed beside it.
@@ -192,17 +209,17 @@ A settings file applies only to the base model whose card it cites. Another mode
   - be one of the session's frozen items, with the frozen hashes;
   - match exactly one recorded request, sent with exactly the protocol's and settings' parameters and the session's seed;
   - have scored the reply that the server actually returned;
-  - carry the frozen gold answer as its target.
+  - carry the frozen gold answer for MATH-500 or the frozen prompt and instruction metadata for IFEval.
 
-  `check` grades every final answer again, so it needs the pinned packages (`bench/requirements.txt`), but no model or network. A math-verify timeout stops it instead of grading the answer wrong. Base and patched must also differ only in the weights files, and every session must report the same harness and the same model files.
+  `check` grades every final answer again. It uses the installed scorer pins and IFEval tokenizer tables offline. A math-verify timeout stops grading. Base and patched must differ only in the weights files, and every session must report the same harness and model files.
 - **`compare`** works on whatever pairs are filed and says whether they are complete. The unit is the item: the patched-minus-base score, averaged over the item's seeds. It reports:
   - both headline scores, from the graded final answers;
-  - the mean difference with its standard error across items and a 95% interval;
-  - the share of replies cut at the token limit, the share that finished without an answer, how many replies boxed an answer and were then cut, and mean reply length;
-  - lm-eval's own scores, difference and interval (`score_lm_eval`, `lm_eval`), and how many replies only lm-eval scored as right, or only the final answer;
-  - the original MATH checker's scores (`score_is_equiv`), and how many replies it grades differently from math-verify;
+  - the mean paired difference and counts of base-only and patch-only passes;
+  - the share of replies cut at the token limit, the share that finished without an answer, how many replies gave an answer and were then cut, and mean reply length;
+  - lm-eval's own scores and difference (`score_lm_eval`, `lm_eval`), and how many replies only lm-eval scored as right, or only the final answer;
+  - for MATH-500, standard errors and 95% intervals for both differences, the original MATH checker's scores (`score_is_equiv`), and how many replies it grades differently from math-verify;
   - how many pairs came back byte-identical, and how many repeated filings reproduced the first (expected only at `--concurrency 1` on the same setup).
-- **`disagreements`** lists every filed reply where lm-eval's score, math-verify on the final answer, and the original MATH checker don't all agree, one JSON line each. Each line has the gold answer, the final answer, the three verdicts, whether thinking had finished, and the `\boxed{}` answers in the text lm-eval scored, with an excerpt.
+- **`disagreements`** lists replies where the final-answer grade differs from lm-eval or the MATH cross-check. Each line includes the final answer, scores, thinking status and a scored-text excerpt. MATH-500 includes the gold answer and boxes found in that text.
 
 ## Limits
 
@@ -210,7 +227,7 @@ A settings file applies only to the base model whose card it cites. Another mode
 - **Same seed is reproducible only within one setup.** Different hardware or vLLM builds draw different random numbers from the same seed. Pairing still holds within each session, because base and patched run on the same machine with the same settings.
 - **No comparison file in the index yet.** The index's `comparisons/` folder can't host the per-item data, so `compare` prints to the terminal.
 - **Not run in CI yet.** `check` needs no model or network, only the pinned packages, but the CI workflow doesn't call it yet.
-- **Only `\boxed{...}` is read.** Other spellings (`\fbox{...}`, `\boxed 5`) give no answer. The card's prompt asks for `\boxed{}`.
+- **MATH-500 only reads `\boxed{...}` answers.** Other spellings (`\fbox{...}`, `\boxed 5`) give no answer. The card's prompt asks for `\boxed{}`.
 
 ## Updating the macOS lock
 
@@ -230,7 +247,7 @@ uv pip install -p .venv pytest
 .venv/bin/python -m pytest bench/tests -q
 ```
 
-The tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI-shaped stub) in a temporary repository. They cover:
+The MATH-500 tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI-shaped stub) in a temporary repository. They cover:
 - freezing a protocol;
 - deterministic and random selection;
 - running and filing sessions, repeats, merging, comparing;
@@ -239,3 +256,5 @@ The tests run the real `lm-eval run` against a fake `vllm` executable (an OpenAI
 - detection of tampered parameters, seeds, items, gold answers, replies, swapped weights and extra requests.
 
 They need the MATH-500 test split, which is cached after the first download. They don't exercise the download or `weightspace apply` steps.
+
+The IFEval tests replay synthetic instruction checks and paired results, including unfinished thinking and changes to frozen documents, prompts and grader verdicts. They need the pinned scorer and tokenizer tables.

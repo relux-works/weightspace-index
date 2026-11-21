@@ -57,10 +57,12 @@ function scale(unit: string, n: number) {
 
 const BENCH_PROTOCOL = /^bench\/protocols\/[A-Za-z0-9._-]+\.json$/;
 
-/** Whether a run was filed by bench, whose headline is the share of final answers right (docs/benchmarking.md). */
-/** bench's own terms for its headline and its cut share. */
 export const FINAL_ANSWERS = "final answers right";
 export const CUT = "Cut at the token limit";
+const BENCH_METRICS: Record<string, string> = {
+  math_verify: FINAL_ANSWERS,
+  prompt_level_strict_acc: "strict prompt-level accuracy",
+};
 
 export function isBenchRun(run: Run) {
   return BENCH_PROTOCOL.test(run.record.protocol.name) && exists(run.record.protocol.name);
@@ -99,12 +101,13 @@ export function results(v: Version | undefined): Result[] {
     const base = pairedBaseline(v, run);
     if (!base) continue;
     const s = run.record.score, t = base.record.score;
-    // bench's headline is a share of final answers right, so it reads as a percentage, as does its cut share.
+    // Bench reports both the headline and the cut share as fractions.
     const bench = isBenchRun(run);
     const unit = bench ? "fraction" : s.unit!;
     const a = scale(unit, t.value!), b = scale(unit, s.value!);
     const row = { source: "index" as const, benchmark: benchmarkName(run), n: s.denominator, baseKey: base.url, version: v, href: run.url };
-    out.push({ ...row, metric: bench ? FINAL_ANSWERS : s.metric!, unit: b.unit, base: a.value, patched: b.value, higherIsBetter: true });
+    const metric = bench ? BENCH_METRICS[s.metric!] ?? s.metric! : s.metric!;
+    out.push({ ...row, metric, unit: b.unit, base: a.value, patched: b.value, higherIsBetter: true });
     if (bench && typeof s.cut_at_limit === "number" && typeof t.cut_at_limit === "number") out.push({
       ...row, name: CUT, metric: "", unit: "%", base: scale("fraction", t.cut_at_limit).value, patched: scale("fraction", s.cut_at_limit).value,
       higherIsBetter: false, baseKey: `${base.url}#cut`,

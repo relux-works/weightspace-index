@@ -2,6 +2,20 @@
   "base": "Qwen/Qwen3.5-0.8B",
   "baseline_runs": [
     {
+      "id": "ifeval.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
+      "profile": "bf16",
+      "protocol": {
+        "name": "bench/protocols/ifeval.json",
+        "sha256": "cddaa6fd261da02bc74a7db89dbf79b674645c9241fc256d1ebf27d8f8c2d891"
+      },
+      "score": {
+        "owner": "bench contributors",
+        "reason": "10 of 541 item-seed pairs filed",
+        "state": "UNKNOWN"
+      },
+      "state": "INCOMPLETE"
+    },
+    {
       "id": "math500-n197.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
       "profile": "bf16",
       "protocol": {
@@ -94,6 +108,20 @@
             }
           ],
           "runs": [
+            {
+              "id": "ifeval.qwen3.5-0.8b-thinking.bf16",
+              "profile": "bf16",
+              "protocol": {
+                "name": "bench/protocols/ifeval.json",
+                "sha256": "cddaa6fd261da02bc74a7db89dbf79b674645c9241fc256d1ebf27d8f8c2d891"
+              },
+              "score": {
+                "owner": "bench contributors",
+                "reason": "10 of 541 item-seed pairs filed",
+                "state": "UNKNOWN"
+              },
+              "state": "INCOMPLETE"
+            },
             {
               "id": "math500-n197.qwen3.5-0.8b-thinking.bf16",
               "profile": "bf16",

@@ -130,7 +130,6 @@
 .setup-tabs button small { font: 400 .76rem var(--font-ui); color: var(--color-text-muted); }
 .setup-tabs button:hover { color: var(--color-text); }
 .setup-tabs button[aria-selected="true"] { color: var(--color-text); border-bottom-color: var(--color-accent); }
-.setup-tabs button[data-label="weightspace"] { margin-left: auto; }
 .tabs-on .panel-title { display: none; }
 .panel-title { font-size: 1.05rem; margin: 1rem 0 .5rem; }
 .setup, .setup-panel { min-width: 0; }
@@ -171,9 +170,6 @@
 .heat-key .ramp { width: 6rem; height: .6rem; border-radius: 2px; background: linear-gradient(90deg, color-mix(in srgb, var(--heat-d) 15%, transparent), var(--heat-d)); }
 .heat-key .none { width: .7rem; height: .6rem; border: 1px solid var(--color-border-strong); border-radius: 2px; margin-left: 1rem; }
 
-@media (max-width: 62rem) {
-  .setup-tabs button[data-label="weightspace"] { margin-left: 0; }
-}
 @media (max-width: 40rem) {
   .rrow { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem 1rem; }
   .rplot, .rmiss { grid-column: 1 / -1; grid-row: 2; }

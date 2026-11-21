@@ -1,6 +1,7 @@
 ---
 import Arrow from "../Arrow.astro";
 import CopyButton from "../CopyButton.astro";
+import WeightspaceMark from "../WeightspaceMark.astro";
 import { highlight } from "../../lib/shell.ts";
 import { localRecipe, type RecipeFile } from "../../lib/recipe.ts";
 import { externalLinkAttrs } from "../../lib/links.ts";
@@ -11,8 +12,14 @@ const isBake = (t: RuntimeTab) => t.name === "Weightspace";
 ---
 <div class="setup" data-tabs id="runtime">
   <div class="setup-tabs" data-slide="line" role="tablist" hidden aria-label="Runtime">
-    {tabs.map((tab, i) => <button role="tab" type="button" data-label={isBake(tab) ? "weightspace" : tab.name} data-format={isBake(tab) ? "replacement" : "lora"} aria-selected={String(i === 0)}>
-      {isBake(tab) ? "weightspace" : tab.name}</button>)}
+    {tabs.map((tab, i) => {
+      const bake = isBake(tab);
+      const label = bake ? "weightspace" : tab.name;
+      return <button role="tab" type="button" data-label={label} data-format={bake ? "replacement" : "lora"} aria-selected={String(i === 0)}>
+        {bake && <WeightspaceMark />}
+        {label}
+      </button>;
+    })}
   </div>
   {tabs.map((tab, i) => {
     const file = isBake(tab) ? replacement : lora;
@@ -32,6 +39,9 @@ const isBake = (t: RuntimeTab) => t.name === "Weightspace";
     </div>;
   })}
 </div>
+<style>
+  .setup-tabs button[data-format="replacement"] { column-gap: var(--space-1); }
+</style>
 <script>
   import "../../scripts/tabs.ts";
   import { downloadCommand } from "../../lib/recipe.ts";

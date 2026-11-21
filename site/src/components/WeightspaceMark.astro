@@ -1,0 +1,11 @@
+---
+import { href } from "../lib/config.ts";
+---
+<img class="weightspace-mark" src={href("favicon-light.svg")} alt="" width="16" height="16" />
+
+<style>
+  .weightspace-mark { align-self: center; flex: none; filter: brightness(0); }
+  @media (prefers-color-scheme: dark) {
+    .weightspace-mark { filter: brightness(0) invert(1); }
+  }
+</style>

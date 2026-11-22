@@ -6,6 +6,7 @@ import { combinationStudies } from "./combinations.ts";
 import { exists, firstAdded, readBytes, readJson } from "./files.ts";
 import { provisionalBenchScores } from "./provisional-benchmark.ts";
 import { rankable } from "./queries.ts";
+import { claimSampling, runSampling, type Sampling } from "./sampling.ts";
 import type { Base, Patch, Run, Score, Version } from "./types.ts";
 
 export type Source = "author" | "index";
@@ -24,6 +25,8 @@ export interface Result {
   n?: number;
   /** Answers drawn per problem, when the source states it. */
   samples?: number;
+  /** Inference settings behind the result, when its source states them. */
+  sampling?: Sampling;
   /** Identifies the baseline measurement; equal keys mean one shared unpatched result. */
   baseKey: string;
   version: Version;
@@ -103,7 +106,7 @@ export function results(v: Version | undefined, { includeProvisional = false } =
     for (const m of c.record.measures) {
       out.push({
         source: "author", benchmark: m.benchmark, name: m.name, metric: m.metric ?? "", unit: m.unit, base: m.baseline, patched: m.patched,
-        samples: m.samples_per_item, higherIsBetter: m.better === "higher",
+        samples: m.samples_per_item, sampling: claimSampling(c.record), higherIsBetter: m.better === "higher",
         baseKey: `${url}#${m.benchmark}|${m.name ?? ""}|${m.metric ?? ""}@${m.baseline}`, version: v, href: url,
       });
     }
@@ -123,6 +126,7 @@ export function results(v: Version | undefined, { includeProvisional = false } =
     const a = scale(unit, t.value!), b = scale(unit, s.value!);
     const row = {
       source: "index" as const, benchmark: benchmarkName(run, protocol), n: s.denominator, baseKey: base.url, version: v, href: run.url,
+      sampling: runSampling(run.record.settings),
       ...(provisional && { provisional: provisional.coverage }),
     };
     const metricId = s.metric ?? protocol?.primary_metric ?? "";

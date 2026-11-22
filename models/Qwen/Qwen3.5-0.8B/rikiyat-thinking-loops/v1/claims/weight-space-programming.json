@@ -6,6 +6,7 @@
   },
   "affiliation": "MIT CSAIL",
   "conditions": "Experiment 8, the edit found with 50 forward passes. The authors sampled with thinking on, a 32,768-token limit and temperature 0.6.",
+  "sampling": { "temperature": 0.6, "max_tokens": 32768, "thinking": true },
   "measures": [
     { "benchmark": "MATH-500", "metric": "accuracy", "unit": "%", "baseline": 7.9, "patched": 48.1, "better": "higher", "samples_per_item": 4 },
     { "benchmark": "GSM8K", "metric": "accuracy", "unit": "%", "baseline": 13.8, "patched": 67.1, "better": "higher", "samples_per_item": 2 },

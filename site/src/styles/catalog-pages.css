@@ -97,7 +97,15 @@
 .tri-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
 .tri-row { display: grid; grid-template-columns: 5.4rem minmax(3rem, 1fr) 4.4rem; gap: .7rem; align-items: center; font-size: .78rem; }
 .tri-label { color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tri-track { position: relative; height: .5rem; border-radius: 2px; background: var(--color-surface-subtle); }
+/* A line under every row: the inference settings that differ between this row and its neighbours on the
+   left, a provisional run's progress on the right, so the label column and the bars never move. Reserved, even empty,
+   in every row of every chart, so all charts share one row rhythm. 80% of the faint token: secondary to the
+   label (which carries the full text for screen readers), still at least 3.2:1 on every surface in both themes. */
+.tri-row:has(> .tri-sub) { row-gap: 0; }
+.tri-sub { grid-column: 1 / -1; display: flex; align-items: baseline; gap: .75rem; height: .6875rem; margin-top: -.15rem; font-size: .625rem; line-height: .6875rem; color: color-mix(in oklch, var(--color-text-faint) 80%, transparent); }
+.tri-sub > small { font-size: inherit; font-weight: 400; }
+.tri-setting { min-width: 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tri-track { position: relative; height: var(--viz-bar-compact); border-radius: 2px; background: var(--color-surface-subtle); }
 .tri-track i { position: absolute; top: 0; bottom: 0; border-radius: inherit; --c: var(--viz-base); background: var(--c); }
 .tri-row.self i { --c: var(--tri-red); }
 .tri-row.indep i { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
@@ -110,10 +118,10 @@
 .tri-tick { position: absolute; top: -.2rem; bottom: -.2rem; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--color-text-muted); }
 .tri-val { justify-self: end; font: 600 .78rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tri-row.base .tri-val { font-weight: 500; color: var(--color-text-muted); }
-.tri-row.provisional { row-gap: .15rem; }
-.tri-row.indep.provisional { opacity: .5; }
-.tri-row.provisional :is(.tri-val, .tri-chg), .tri-provisional { color: var(--color-text-muted); }
-.tri-provisional { grid-column: 2 / -1; font-size: .75rem; }
+/* A provisional run fades its label, bar and values; the line under it stays legible. */
+.tri-row.indep.provisional > :not(.tri-sub) { opacity: .5; }
+.tri-row.provisional :is(.tri-val, .tri-chg) { color: var(--color-text-muted); }
+.tri-provisional { flex: none; margin-inline-start: auto; font-family: var(--font-ui); white-space: nowrap; }
 .pending-deck { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; padding-top: .9rem; border-top: 1px solid var(--color-divider); }
 .pending-deck[data-nav] { grid-template-columns: 2.75rem minmax(0, 24rem) 2.75rem; column-gap: .25rem; }
 .pending-items { display: grid; grid-column: 1; grid-row: 1; row-gap: .65rem; }
@@ -139,8 +147,8 @@
 /* Patch cards reveal the legend on hover and keyboard focus. Touch screens
    get one shared legend below the charts. */
 .triad.compact .tri-key { margin: -.2rem 0 0; font-size: .72rem; gap: .3rem .9rem; }
-.triad.compact .tri-key span::before { width: .9rem; height: .5rem; }
-.triad.compact .tri-key .k-tick::before { width: 2px; height: .8rem; margin-inline: .35rem; }
+.triad.compact .tri-key span::before { width: .9rem; height: var(--viz-bar-compact); }
+.triad.compact .tri-key .k-tick::before { width: 2px; height: calc(var(--viz-bar-compact) + .4rem); margin-inline: .35rem; }
 .triad.compact .tri { position: relative; }
 .plot-key.tri-pop { display: none; }
 @media (hover: hover) and (pointer: fine) {
@@ -157,7 +165,7 @@
 @media (prefers-reduced-motion: reduce) { .triad.compact .tri-pop { transition: none; translate: none; } }
 .tri-key .k-self::before { background: var(--tri-red); }
 .tri-key .k-indep::before { background: var(--tri-ghost); box-shadow: inset 0 0 0 1.5px var(--tri-red); }
-.tri-key .k-tick::before { width: 2px; height: .95rem; border-radius: 1px; background: var(--color-text-muted); margin-inline: .5rem; }
+.tri-key .k-tick::before { width: 2px; height: calc(var(--viz-bar) + .4rem); border-radius: 1px; background: var(--color-text-muted); margin-inline: .5rem; }
 .triad.full .tri-head { font-size: 1rem; margin-bottom: .45rem; }
 .triad.full .tri-head small { font-size: .8rem; }
 .tri-status { margin-inline-start: auto; font: 600 .75rem var(--font-ui); white-space: nowrap; }
@@ -166,11 +174,15 @@
 .tri-status.miss::before { content: "≠ "; }
 .triad.full .tri-rows { gap: .35rem; }
 .triad.full .tri-row { grid-template-columns: 8.4rem minmax(3rem, 1fr) 3.6rem 4.6rem; font-size: .86rem; }
-.triad.full .tri-track { height: .65rem; }
+.triad.full .tri-track { height: var(--viz-bar); }
 .triad.full .tri-val { font-size: .86rem; font-weight: 500; }
 .triad.full .tri-row.base .tri-val { color: var(--color-text-muted); }
 .tri-chg { justify-self: end; text-align: right; font: 600 .86rem var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.2; }
 .tri-chg small { display: block; font: 400 .75rem var(--font-ui); color: var(--color-text-muted); }
+/* "from …" drops into the line under the row, in the change column; that line stops short of it. */
+.triad.full .tri-row:has(> .tri-sub) .tri-chg { position: relative; }
+.triad.full .tri-row:has(> .tri-sub) .tri-chg small { position: absolute; top: calc(100% - .15rem); right: 0; font-size: .7rem; line-height: 1.1; }
+.triad.full .tri-sub { grid-column: 1 / -2; }
 
 .triad.full .tri-label { white-space: normal; }
 .triad.full .tri-label a { color: inherit; text-decoration-color: color-mix(in oklch, currentColor 45%, transparent); }
@@ -184,6 +196,8 @@
 @container (max-width: 22rem) {
   /* Fixed value column: every row's track must end at the same point. */
   .tri-row { grid-template-columns: 5.4rem minmax(2rem, 1fr) 4.4rem; gap: .5rem; }
+  /* Too narrow for both: the progress reads "Provisional · 110 of 197"; screen readers keep the unit. */
+  .tri-prov-unit { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 
 .evidence-group .src-chip { margin: 0 0 .45rem; font-size: .94rem; }
@@ -196,7 +210,7 @@
 .benchmark-notes .prose > :first-child { margin-top: 0; }
 .plot-key { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem; margin-top: .75rem; color: var(--color-text-muted); font-size: .78rem; }
 .plot-key span { display: inline-flex; align-items: center; gap: .4rem; }
-.plot-key span::before { content: ""; width: 1.1rem; height: .6rem; border-radius: 2px; }
+.plot-key span::before { content: ""; width: 1.1rem; height: var(--viz-bar); border-radius: 2px; }
 .plot-key .k-base::before { background: var(--viz-base); }
 .plot-key .k-up::before { background: var(--color-accent); }
 .plot-key .k-stack::before { background: var(--color-success); }

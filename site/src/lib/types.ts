@@ -1,4 +1,5 @@
 import type { SessionRecord } from "./session.ts";
+import type { Sampling } from "./sampling.ts";
 
 export type Locator =
   | { kind: "index-path"; path: string }
@@ -124,7 +125,7 @@ export interface ClaimMeasure {
 export interface Claim {
   id: string;
   version: Version;
-  record: { source: { url: string; title: string }; affiliation?: string; conditions: string; measures: ClaimMeasure[] };
+  record: { source: { url: string; title: string }; affiliation?: string; conditions: string; sampling?: Sampling; measures: ClaimMeasure[] };
   file: FileEntry;
 }
 

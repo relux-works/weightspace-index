@@ -12,12 +12,16 @@
 // being scored keeps a progress row. A group draws one "Unpatched base" bar only
 // when every row in it was compared against the same baseline measurement;
 // otherwise each row keeps its own base bar beside its patched bar.
+// When rows in a block state different inference settings (the authors'
+// temperature against the run's), the settings that differ are named: once
+// beside a group's label when the whole group shares them, else on each row.
 import type { Base } from "../../lib/types.ts";
 import { activeVersion, sourceLabels } from "../../lib/catalog.ts";
 import { scoreAxis } from "../../lib/score-axis.ts";
 import { loadIndex } from "../../lib/index.ts";
 import { NEW_TAB } from "../../lib/links.ts";
 import { modelResults, pending, resultNote, resultTitle, resultKey, fmt, signed, gain, type Result, type Pending } from "../../lib/insight.ts";
+import { samplingDiff, settingParts, settingText, type SamplingKey } from "../../lib/sampling.ts";
 interface Props { base: Base }
 const { base } = Astro.props;
 const releases = base.patches.map(activeVersion).filter(v => !!v);
@@ -53,12 +57,20 @@ function blocks(scores: Result[], progress: Pending[]) {
   return [...out.values()];
 }
 
-/** One row per treatment: a patch's own score wins over a solo score filed with a stack study. */
+/** A row's values for the settings that differ within its block, e.g. "(t=0.6)". */
+function setting(r: Result, keys: SamplingKey[]) {
+  const parts = settingParts(r.sampling, keys);
+  return parts.length ? { short: `(${parts.map(p => `${p.short}=${p.value}`).join(", ")})`, long: settingText(parts) } : undefined;
+}
+
+/** One row per treatment and run: a patch's own scores win over a solo score filed with a stack study. */
 function rows(scores: Result[], progress: Pending[]) {
   const singles = releases.flatMap(v => {
-    const r = scores.find(r => r.version === v && !r.stack);
-    const w = r ? undefined : progress.find(w => w.version === v);
-    return r ? [{ v, r, w: undefined }] : w ? [{ v, r: undefined, w }] : [];
+    const own = scores.filter(r => r.version === v && !r.stack && !r.baseKey.startsWith("stack:"));
+    const solo = scores.find(r => r.version === v && !r.stack);
+    const found = own.length ? own : solo ? [solo] : [];
+    const w = found.length ? undefined : progress.find(w => w.version === v);
+    return found.length ? found.map(r => ({ v, r, w: undefined })) : w ? [{ v, r: undefined, w }] : [];
   });
   const at = (v: Result["version"]) => releases.indexOf(v);
   const stacks = scores.filter(r => r.stack).sort((x, y) => {
@@ -80,6 +92,7 @@ function rows(scores: Result[], progress: Pending[]) {
     // Sources may name their metric differently (an author's "accuracy", bench's "final answers right"): then each group names its own.
     const sameMetric = new Set(b.scores.map(r => r.metric.toLowerCase())).size <= 1;
     const first = b.scores[0];
+    const keys = samplingDiff(b.scores.map(r => r.sampling));
     const sub = [first ? resultNote({ ...first, metric: sameMetric ? first.metric : "", n: sameN ? first.n : undefined, samples: sameSamples ? first.samples : undefined }) : b.metric, !b.higherIsBetter && "lower is better"].filter(Boolean).join(" · ");
     return <div class="cmp-block">
       <h4 class="cmp-bench">{b.title}{sub && <small>{sub}</small>}</h4>
@@ -94,10 +107,14 @@ function rows(scores: Result[], progress: Pending[]) {
         const groupN = !sameN && scores.length > 0 && new Set(scores.map(r => r.n)).size === 1 ? scores[0].n : undefined;
         const groupSamples = !sameSamples && scores.length > 0 && new Set(scores.map(r => r.samples)).size === 1 ? scores[0].samples : undefined;
         const rowN = !sameN && !groupN, rowSamples = !sameSamples && !groupSamples;
+        const tags = scores.map(r => setting(r, keys));
+        const groupSetting = tags.length > 0 && tags.every(t => t && t.short === tags[0]!.short) ? tags[0] : undefined;
         const label = [!sameMetric && scores[0]?.metric, groupN && `n\u00a0=\u00a0${groupN}`, groupSamples && `${groupSamples} samples per problem`].filter(Boolean).join(" · ");
-        const note = (r: Result) => (rowN && r.n) || (rowSamples && r.samples)
-          ? <small>{[rowN && r.n && `n\u00a0=\u00a0${r.n}`, rowSamples && r.samples && `${r.samples} samples per problem`].filter(Boolean).join(" · ")}</small>
-          : null;
+        const note = (r: Result) => {
+          const t = !groupSetting && setting(r, keys);
+          const text = [rowN && r.n && `n\u00a0=\u00a0${r.n}`, rowSamples && r.samples && `${r.samples} samples per problem`, t && t.short].filter(Boolean).join(" · ");
+          return text ? <small title={t ? t.long : undefined}>{text}</small> : null;
+        };
         const row = (r: Result, name: any, kind?: string) => {
           const t = trend(gain(r));
           return <li class:list={["rrow", t, kind]}>
@@ -113,7 +130,7 @@ function rows(scores: Result[], progress: Pending[]) {
           </li>;
         };
         return <section class="cmp-src">
-          <h5 class="cmp-src-head"><span>{sourceLabels[src]}</span>{label && <small>{label}</small>}</h5>
+          <h5 class="cmp-src-head"><span>{sourceLabels[src]}</span>{(label || groupSetting) && <small>{label}{label && groupSetting && " · "}{groupSetting && <span class="cmp-setting" title={groupSetting.long}>{groupSetting.short}</span>}</small>}</h5>
           <ul class="rlist cmp">
             {shared && <li class="rrow cmp-base">
               <span class="rname">Unpatched base</span>

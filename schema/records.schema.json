@@ -266,6 +266,23 @@
       "additionalProperties": false
     },
 
+    "claimSampling": {
+      "description": "Inference settings the cited source states for every measure of the claim. Record only what the source states; a setting left out is unknown, not a default. The site shows the settings that differ from a measured run's.",
+      "type": "object",
+      "properties": {
+        "temperature": { "type": "number", "minimum": 0 },
+        "top_p": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "top_k": { "type": "integer" },
+        "min_p": { "type": "number", "minimum": 0, "maximum": 1 },
+        "presence_penalty": { "type": "number" },
+        "repetition_penalty": { "type": "number", "exclusiveMinimum": 0 },
+        "max_tokens": { "type": "integer", "minimum": 1 },
+        "thinking": { "type": "boolean" }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+
     "claim": {
       "description": ".../v<N>/claims/<id>.json; aggregate results the patch authors published themselves, copied verbatim from the cited source. No per-item outcomes: a claim is shown as self-reported and never matched, compared or assessed like a run.",
       "type": "object",
@@ -282,6 +299,7 @@
         },
         "affiliation": { "$ref": "#/$defs/text" },
         "conditions": { "$ref": "#/$defs/text" },
+        "sampling": { "$ref": "#/$defs/claimSampling" },
         "measures": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/claimMeasure" } }
       },
       "required": ["contract_version", "source", "conditions", "measures"],

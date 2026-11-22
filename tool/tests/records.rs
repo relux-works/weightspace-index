@@ -29,7 +29,9 @@ const KEYWORDS: &[&str] = &[
     "minItems",
     "maxItems",
     "minimum",
+    "exclusiveMinimum",
     "maximum",
+    "minProperties",
     "pattern",
     "minLength",
 ];

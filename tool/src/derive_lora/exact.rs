@@ -384,9 +384,9 @@ pub fn check_exact_publication(
         _ => return Err(invalid("invalid report input_mode/base digest")),
     };
     if offline
-        && !r["tensor_shapes_sha256"]
+        && r["tensor_shapes_sha256"]
             .as_str()
-            .is_some_and(|s| Sha256Hex::parse(s).is_ok())
+            .is_none_or(|s| Sha256Hex::parse(s).is_err())
     {
         return Err(invalid("offline report requires shape-map digest"));
     }

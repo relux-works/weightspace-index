@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 // Entry point for every site command (see package.json scripts).
-//   build | dev  run `weightspace check` first (schema, layout, references,
-//                digests, generated files; tool/README.md), then Astro. A
-//                failing check stops here. The check runs on a `git archive`
-//                snapshot of HEAD, the commit every page and download link is
-//                pinned to, so untracked local files (.temp/, node_modules/)
-//                are not part of it. Non-dev builds also refuse index files
-//                that differ from HEAD (src/lib/index.ts).
+//   build | dev  run Astro over the index checkout. Non-dev builds refuse index
+//                files that differ from HEAD (src/lib/index.ts). Set
+//                WS_RUN_INDEX_CHECK=1 to also run `weightspace check` via Cargo
+//                on a `git archive` snapshot of HEAD first (schema, layout,
+//                references, digests, generated files; CI runs this in checks.yml).
 //   preview      serves the last build.
 //   test         runs the site's own tests.
 // Astro's telemetry is always disabled.
@@ -52,7 +50,7 @@ function checkSnapshot() {
 switch (cmd) {
   case "build":
   case "dev":
-    if (env.WS_SKIP_INDEX_CHECK !== "1") {
+    if (env.WS_RUN_INDEX_CHECK === "1") {
       checkSnapshot();
     }
     run(process.execPath, [astro, cmd, ...rest]);

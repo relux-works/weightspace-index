@@ -6,7 +6,7 @@ Patch cards and patch pages show **Benchmark pending** with coverage until 25% o
 
 ## Run locally
 
-Use Node 22.23.4 or newer and Rust for the offline index check.
+Use Node 22.23.4 or newer (and Rust only if opting into `WS_RUN_INDEX_CHECK=1`).
 
 ```sh
 cd site
@@ -24,7 +24,7 @@ The default production build excludes the demo model, its files and its combinat
 
 ## Inputs and outputs
 
-- The reader checks the index contract, local digests, profiles and run references. Builds run `weightspace check` against a Git archive of HEAD. A production build stops when the index inputs differ from HEAD.
+- The reader checks the index contract, local digests, profiles and run references. A production build stops when the index inputs differ from HEAD. Set `WS_RUN_INDEX_CHECK=1` to also run the Rust `weightspace check` against a Git archive of HEAD locally (CI runs it in `.github/workflows/checks.yml`).
 - In-repository downloads are served from the site under their SHA-256 and filename. External artifacts use their pinned locators. Each supported canonical LoRA can produce a PEFT bundle with the original factor bytes, runtime configuration, notices and provenance. A verified architecture-specific GGUF export can travel in the same archive.
 - Published author studies come from each release’s `claims/` records. When the homepage features a result from an original study, the benchmark links to the article in a new tab and states that the listing is independent of the study authors. The rest of the card opens the patch page. Independent measurements come from run records and keep their performer, profile, settings and completion state.
 - Patch pages render benchmark notes directly from `bench/notes/<namespace>/<model>/<patch-slug>/v<N>.md`. The chart legends link to the release’s note when one is available.
@@ -46,17 +46,18 @@ The tool page illustrates bit-exact replacement with a BF16 comparison that cros
 | `WS_GITHUB_REPO` | Owner/repository for pinned source links. Defaults to `relux-works/weightspace-index`. |
 | `WS_INDEX_ROOT=docs/example` | Read the synthetic fixture alone. |
 | `WS_SITE_DEMO=1` | Include the fixture beside the real catalog. |
-| `WS_SKIP_INDEX_CHECK=1` | Skip the Rust check during local iteration. |
+| `WS_RUN_INDEX_CHECK=1` | Also run the Rust `weightspace check` before building locally. |
 | `WS_ALLOW_DIRTY=1` | Preview uncommitted data with a visible development banner. |
 
 See [DESIGN.md](DESIGN.md) for the layout and evidence presentation.
 
 ## Cloudflare Workers
 
-Build from a full Git checkout so the index check can read the committed model
-records and run the Rust tool. Run Wrangler from `site/`. Its configuration runs
-the production build and serves only `site/dist/` as static assets. Leave the
-demo, dirty-preview and check-skipping environment variables unset for release.
+Build from a full Git checkout so the site can resolve commit history (`firstAdded`)
+and committed model records. Run Wrangler from `site/`. Its configuration runs
+the production build (Node only; Rust index validation runs in `.github/workflows/checks.yml`)
+and serves only `site/dist/` as static assets. Leave the demo and dirty-preview
+environment variables unset for release.
 
 From the repository root, validate the deployment locally:
 

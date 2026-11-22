@@ -1,31 +1,126 @@
 ---
+import Arrow from "../components/Arrow.astro";
 import Page from "../layouts/Page.astro";
 import ModelCard from "../components/catalog/ModelCard.astro";
 import Filter from "../components/catalog/Filter.astro";
 import FormatComparison from "../components/viz/FormatComparison.astro";
-import PatchPreview from "../components/viz/PatchPreview.astro";
+import ShellCommand from "../components/ShellCommand.astro";
+import { activeVersion } from "../lib/catalog.ts";
 import { href, loadIndex } from "../lib/index.ts";
-import { mostBenchmarked } from "../lib/insight.ts";
 import { plural } from "../lib/format.ts";
-const models = loadIndex().bases;
-const featured = mostBenchmarked(models);
+
+const index = loadIndex();
+// Put the richest base models first (most active patches, then alphabetical).
+const models = [...index.bases].sort((a, b) => {
+  const ca = a.patches.filter(p => activeVersion(p)).length;
+  const cb = b.patches.filter(p => activeVersion(p)).length;
+  return cb - ca || a.address.localeCompare(b.address);
+});
+const totalPatches = models.reduce((n, b) => n + b.patches.filter(p => activeVersion(p)).length, 0);
+
+const registryExample = {
+  text: [
+    "# Add any Git-hosted index (GitHub, private GitLab, Gitea, or local mirror)",
+    "wsp registry add internal ssh://git@gitlab.internal/ml/weightspace-index.git",
+    "wsp registry pin internal v2026.11",
+    "",
+    "# Or browse & apply patches interactively in your terminal",
+    "wsp",
+  ].join("\n"),
+  source: { path: "AGENTS.md", label: "AGENTS.md" },
+};
 ---
-<Page title="Weightspace Index" nav="models" description="Find weight patches for your base model, compare benchmark evidence, and download a LoRA adapter or a direct replacement.">
-  <div class:list={["wrap landing", { "with-preview": featured }]}>
-    <div class="find-model">
-      <header class="find-intro">
-        <h1>Find a patch for<br />your model.</h1>
-        <p>Compare weight edits for open models and download a compatible patch. <a href="#patch-vs-lora">Patch vs LoRA</a></p>
-      </header>
-      <section class="directory" id="models" aria-labelledby="directory-heading">
-        <div class="directory-label"><h2 id="directory-heading">Choose a base model</h2><span>{plural(models.length, "model")}</span></div>
-        {models.length > 0 && <Filter target="model-list" label="Filter by model, patch or author" noun="models" one="model" searchHref={href("search/")} />}
-        <p class="filter-status" role="status" id="model-list-status"></p>
-        <ul class="model-list" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
-        {!models.length && <p class="quiet-row">No models have been published yet.</p>}
-      </section>
-    </div>
-    {featured && <PatchPreview version={featured} />}
+<Page title="Weightspace Index" nav="models" description="Download a base model once and apply verified weight patches or native LoRA adapters — with before/after benchmarks, pinned SHA-256 digests, and one-command wsp launch.">
+  <div class="wrap home-hero">
+    <header class="find-intro">
+      <h1>Download the base once.<br />Patch it for every job.</h1>
+      <p>
+        Verified bit-exact weight patches and native LoRA adapters for open models — swap 75–600 MB adapters for coding agents and reasoning instead of re-downloading 50 GB fine-tunes.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#models">Browse {plural(totalPatches, "patch", "patches")} <Arrow /></a>
+        <a class="btn" href={href("submit/")}>Add model or patch</a>
+        <a class="text-link" href={href("how-it-works/")}>Why patches?</a>
+        <a class="text-link" href={href("agent.md")}>For AI agents</a>
+      </div>
+    </header>
+
+    <ul class="value-strip" aria-label="What Weightspace Index gives you">
+      <li>
+        <strong>10× less disk &amp; bandwidth</strong>
+        <span>Keep one 27B/24B base and attach small LoRAs or sparse bit-exact edits per harness.</span>
+      </li>
+      <li>
+        <strong>Receipts, not hype</strong>
+        <span>Every file pinned by 40-char revision &amp; SHA-256; author <em>Reported</em> claims stay separate from <em>Measured</em> runs.</span>
+      </li>
+      <li>
+        <strong>Any Git registry, zero login</strong>
+        <span>Use the default index, internal GitLab repos, or community indexes via <code>wsp</code>.</span>
+      </li>
+    </ul>
+
+    <section class="directory" id="models" aria-labelledby="directory-heading">
+      <div class="directory-label">
+        <div>
+          <h2 id="directory-heading">Choose a base model</h2>
+          <span class="dir-count">{plural(models.length, "model")} · {plural(totalPatches, "active patch", "active patches")}</span>
+        </div>
+        <a class="btn" href={href("submit/")}>+ Add model / patch</a>
+      </div>
+      {models.length > 0 && <Filter target="model-list" label="Filter by model, harness, tag, or author (e.g. 27B, pi, opencode, SWE)" noun="models" one="model" searchHref={href("search/")} />}
+      <p class="filter-status" role="status" id="model-list-status"></p>
+      <ul class="model-list" id="model-list">{models.map(base => <ModelCard base={base} />)}</ul>
+      {!models.length && <p class="quiet-row">No models have been published yet.</p>}
+    </section>
   </div>
+
   <FormatComparison />
+
+  <section class="home-band" id="registries" aria-labelledby="registries-heading">
+    <div class="wrap registry-band">
+      <div class="registry-copy">
+        <h2 id="registries-heading">Use custom &amp; private Git registries</h2>
+        <p>
+          An index is just a Git repository with contract-v1 JSON files — no GitHub lock-in and no API account required.
+          Connect internal GitLab mirrors, pin a specific commit or tag for reproducible deployments, or add third-party community registries (including separate indexes for abliterated patches).
+        </p>
+        <div class="registry-links">
+          <a class="text-link" href={href("submit/")}>Publish to an index <Arrow /></a>
+          <a class="text-link" href={href("agent.md")}>Read agent.md <Arrow /></a>
+        </div>
+      </div>
+      <ShellCommand command={registryExample} title="Multi-registry setup with wsp" />
+    </div>
+  </section>
 </Page>
+
+<style>
+  .home-hero { padding-block: clamp(2rem, 4.5vw, 4rem); }
+  .home-hero .find-intro h1 { font-size: clamp(2.4rem, 5vw, 4.1rem); max-width: 18ch; }
+  .home-hero .find-intro p { max-width: 58ch; }
+  .hero-actions { margin-top: 1.35rem; display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; }
+  .value-strip {
+    list-style: none; padding: 1.25rem 0; margin: 2rem 0 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem 2rem;
+    border-block: 1px solid var(--color-divider);
+  }
+  .value-strip strong { display: block; font-size: .95rem; margin-bottom: .25rem; }
+  .value-strip span { display: block; font-size: .86rem; color: var(--color-text-muted); line-height: 1.45; }
+  .home-hero .directory { margin-top: 2.25rem; padding: 0; border: 0; }
+  .dir-count { display: block; color: var(--color-text-muted); font-size: .84rem; margin-top: .15rem; }
+  :global(.model-entry__right) { display: inline-flex; align-items: center; gap: .85rem; flex-shrink: 0; }
+  :global(.model-entry__gain) {
+    font: 600 .8rem/1 var(--font-mono); color: var(--color-accent);
+    padding: .3rem .55rem; border-radius: .25rem; background: var(--color-surface-subtle);
+    white-space: nowrap;
+  }
+  .registry-band { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 1.5rem 3rem; align-items: center; }
+  .registry-copy h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+  .registry-copy p { margin-top: .7rem; color: var(--color-text-muted); max-width: 52ch; }
+  .registry-links { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 1.25rem; }
+  @media (max-width: 52rem) {
+    .value-strip, .registry-band { grid-template-columns: minmax(0, 1fr); }
+    :global(.model-entry__gain) { display: none; }
+  }
+</style>

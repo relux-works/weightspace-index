@@ -1,0 +1,386 @@
+---
+// Interactive contract-v1 submission wizard (works statically without JS via
+// the instructions below; with JS, validates fields and generates patch.json,
+// v1/version.json, README.md, optional claim, and PR / community-index commands).
+import Arrow from "../components/Arrow.astro";
+import Page from "../layouts/Page.astro";
+import ShellCommand from "../components/ShellCommand.astro";
+import { href, loadIndex } from "../lib/index.ts";
+import { NEW_TAB } from "../lib/links.ts";
+
+const index = loadIndex();
+const bases = index.bases.map((b) => ({
+  address: b.address,
+  profile: b.profiles[0]?.id ?? "bf16",
+  revision: b.profiles[0]?.source.revision ?? "",
+}));
+
+const prSteps = {
+  text: [
+    "git clone https://github.com/relux-works/weightspace-index.git",
+    "cd weightspace-index",
+    "git checkout -b add/<patch-slug>",
+    "# Create models/<ns>/<model>/<patch-slug>/{patch.json,README.md,notices/,v1/version.json}",
+    "(cd tool && cargo run --locked -- generate .. && cargo run --locked -- check ..)",
+    "git add models/ lookup/",
+    'git commit -S -m "models: add <ns>/<model>/<patch-slug>"',
+    "git push -u origin add/<patch-slug>",
+  ].join("\n"),
+  source: { path: "CONTRIBUTING.md", label: "CONTRIBUTING.md" },
+};
+
+const communityRegistryCmd = {
+  text: [
+    "# Publish abliterated / uncensored or domain-specific patches in a separate Git index",
+    "# (GitHub, self-hosted GitLab, Gitea, or any Git server) using the exact same layout.",
+    "wsp registry add community https://github.com/<community-org>/weightspace-community-index.git",
+    "wsp registry pin community main",
+  ].join("\n"),
+  source: { path: "AGENTS.md", label: "AGENTS.md" },
+};
+---
+<Page title="Submit a model or patch" nav="submit" description="Add a verified weight patch or native LoRA adapter to Weightspace Index, or publish abliterated patches in a separate community registry.">
+  <div class="wrap submit-page">
+    <header class="submit-hero">
+      <h1>Add a model or patch</h1>
+      <p class="lede">
+        Every entry in Weightspace Index is a Git pull request verified by exact base revision, byte size, and SHA-256 digest.
+        Only targeted <strong>replacement patches</strong> and <strong>native LoRA adapters</strong> belong here — full-weight fine-tunes are separate models, not patches.
+      </p>
+    </header>
+
+    <section class="submit-policy" aria-labelledby="policy-heading">
+      <h2 id="policy-heading">Scope &amp; abliterated policy</h2>
+      <label class="abliterated-toggle">
+        <input type="checkbox" id="f-abliterated" />
+        <span>
+          <strong>This patch is abliterated / uncensored</strong>
+          <small>Check this if the patch removes refusals or safety alignment.</small>
+        </span>
+      </label>
+
+      <div id="abliterated-notice" class="callout warn" hidden>
+        <p>
+          <strong>Publish abliterated patches in a separate community index.</strong>
+          Relux Works does not host abliterated or uncensored patches in the default <code>relux-works/weightspace-index</code> repository.
+          <code>weightspace</code> (<code>wsp</code>) supports third-party and community registries from day one — use the exact same contract v1 format below to open a PR against a community index (a community-run index repository is launching soon, or point at any GitHub / GitLab repo).
+        </p>
+        <div class="field-row">
+          <label for="f-community-url">Community / custom index Git URL</label>
+          <input id="f-community-url" type="url" placeholder="https://github.com/<community-org>/weightspace-community-index" />
+        </div>
+        <ShellCommand command={communityRegistryCmd} title="Connect a community index in wsp" />
+      </div>
+    </section>
+
+    <form id="submit-form" class="submit-form" novalidate>
+      <fieldset>
+        <legend>1. Base model &amp; target profile</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-base">Base model (<code>namespace/model</code>)</label>
+            <input id="f-base" list="known-bases" required placeholder="Qwen/Qwen3.8-27B" value={bases[0]?.address ?? ""} />
+            <datalist id="known-bases">
+              {bases.map((b) => <option value={b.address} />)}
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="f-profile">Target profile ID</label>
+            <input id="f-profile" required placeholder="bf16" value={bases[0]?.profile ?? "bf16"} />
+          </div>
+          <div class="field span-2">
+            <label for="f-base-rev">Pinned base HF revision (40-char commit SHA)</label>
+            <input id="f-base-rev" class="mono" required placeholder="37561816e66b..." value={bases[0]?.revision ?? ""} />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. Patch metadata</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-slug">Patch slug (permanent URL name)</label>
+            <input id="f-slug" class="mono" required placeholder="my-coding-agent-lora" />
+          </div>
+          <div class="field">
+            <label for="f-kind">Patch kind</label>
+            <select id="f-kind">
+              <option value="lora">LoRA adapter (PEFT or GGUF)</option>
+              <option value="replacement">Bit-exact replacement (.safetensors)</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="f-title">Title</label>
+            <input id="f-title" required placeholder="Coding agent tool-use LoRA" />
+          </div>
+          <div class="field span-2">
+            <label for="f-summary">One-line summary (what it improves and what was measured)</label>
+            <input id="f-summary" required placeholder="RL-trained rank-32 LoRA: +15 pp on SWE-bench Pro with thinking off." />
+          </div>
+          <div class="field">
+            <label for="f-author">Author / team name</label>
+            <input id="f-author" required placeholder="Your Lab or Name" />
+          </div>
+          <div class="field">
+            <label for="f-author-url">Author URL (optional)</label>
+            <input id="f-author-url" type="url" placeholder="https://huggingface.co/your-org" />
+          </div>
+          <div class="field">
+            <label for="f-license">License (SPDX or upstream name)</label>
+            <input id="f-license" required value="Apache-2.0" />
+          </div>
+          <div class="field">
+            <label for="f-submitter">Submitter Git handle</label>
+            <input id="f-submitter" class="mono" required placeholder="your-github-handle" />
+          </div>
+          <div class="field span-2">
+            <label for="f-tags">Tags (comma-separated lowercase kebab-case)</label>
+            <input id="f-tags" class="mono" placeholder="coding-agent, tool-calling, rl" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>3. Upstream artifact &amp; SHA-256</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f-src-repo">Artifact Hugging Face repo</label>
+            <input id="f-src-repo" class="mono" required placeholder="org/my-adapter-repo" />
+          </div>
+          <div class="field">
+            <label for="f-src-file">Primary filename</label>
+            <input id="f-src-file" class="mono" required value="adapter_model.safetensors" />
+          </div>
+          <div class="field span-2">
+            <label for="f-src-rev">Artifact revision (40-char commit SHA)</label>
+            <input id="f-src-rev" class="mono" required placeholder="40 lowercase hex characters" />
+          </div>
+          <div class="field">
+            <label for="f-src-sha">Primary file SHA-256 (64 hex chars)</label>
+            <input id="f-src-sha" class="mono" required placeholder="64 lowercase hex characters" />
+          </div>
+          <div class="field">
+            <label for="f-src-size">Primary file size (exact bytes)</label>
+            <input id="f-src-size" class="mono" type="number" min="1" required placeholder="637610624" />
+          </div>
+          <div class="field peft-only">
+            <label for="f-cfg-sha"><code>adapter_config.json</code> SHA-256 (required for PEFT)</label>
+            <input id="f-cfg-sha" class="mono" placeholder="64 lowercase hex characters" />
+          </div>
+          <div class="field peft-only">
+            <label for="f-cfg-size"><code>adapter_config.json</code> size (exact bytes)</label>
+            <input id="f-cfg-size" class="mono" type="number" min="1" placeholder="1171" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>4. Optional author-reported benchmark claim</legend>
+        <div class="grid-2">
+          <div class="field span-2">
+            <label for="f-claim-url">Source URL (paper, blog or model card, <code>https://</code>)</label>
+            <input id="f-claim-url" type="url" placeholder="https://huggingface.co/org/my-adapter-repo" />
+          </div>
+          <div class="field">
+            <label for="f-claim-bench">Benchmark name</label>
+            <input id="f-claim-bench" placeholder="Terminal-Bench 2.1" />
+          </div>
+          <div class="field">
+            <label for="f-claim-unit">Unit</label>
+            <input id="f-claim-unit" value="%" />
+          </div>
+          <div class="field">
+            <label for="f-claim-base">Base score</label>
+            <input id="f-claim-base" type="number" step="any" placeholder="39.5" />
+          </div>
+          <div class="field">
+            <label for="f-claim-patched">Patched score</label>
+            <input id="f-claim-patched" type="number" step="any" placeholder="55.8" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="submit-actions">
+        <button type="submit" class="btn primary">Generate contract v1 PR files <Arrow /></button>
+        <a class="btn" href={index.docsAt("CONTRIBUTING.md")} {...NEW_TAB}>Read CONTRIBUTING.md <Arrow dir="out" /></a>
+      </div>
+    </form>
+
+    <section id="submit-output" class="submit-output" hidden aria-live="polite">
+      <div id="submit-errors" class="callout bad" hidden></div>
+      <div id="submit-ready" hidden>
+        <h2>Ready for pull request</h2>
+        <p id="submit-target-note" class="muted"></p>
+        <div id="submit-files" class="generated-files"></div>
+        <div class="submit-handoff">
+          <a id="submit-pr-link" class="btn primary" target="_blank" rel="noopener noreferrer" hidden>Open submission on GitHub <Arrow dir="out" /></a>
+        </div>
+        <h3>Git &amp; verification commands</h3>
+        <figure class="terminal sh">
+          <figcaption><span>Run locally before opening your PR</span></figcaption>
+          <pre tabindex="0"><code id="submit-cli-code"></code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section class="home-band subtle" aria-labelledby="manual-pr-heading">
+      <div class="wrap">
+        <div class="band-title">
+          <h2 id="manual-pr-heading">Manual PR workflow (no JavaScript required)</h2>
+          <p>Works with GitHub, self-hosted GitLab, or any Git server hosting a contract-v1 index.</p>
+        </div>
+        <ShellCommand command={prSteps} title="Add a patch and regenerate lookups" />
+      </div>
+    </section>
+  </div>
+</Page>
+
+<script define:vars={{ bases }}>
+  window.__WS_BASES__ = bases;
+</script>
+<script>
+  import { buildSubmissionBundle } from "../lib/submit.ts";
+
+  const form = document.getElementById("submit-form") as HTMLFormElement | null;
+  const abliteratedEl = document.getElementById("f-abliterated") as HTMLInputElement | null;
+  const noticeEl = document.getElementById("abliterated-notice") as HTMLElement | null;
+  const baseEl = document.getElementById("f-base") as HTMLInputElement | null;
+  const profileEl = document.getElementById("f-profile") as HTMLInputElement | null;
+  const baseRevEl = document.getElementById("f-base-rev") as HTMLInputElement | null;
+  const knownBases = ((window as any).__WS_BASES__ ?? []) as { address: string; profile: string; revision: string }[];
+
+  abliteratedEl?.addEventListener("change", () => {
+    if (noticeEl) noticeEl.hidden = !abliteratedEl.checked;
+  });
+
+  baseEl?.addEventListener("change", () => {
+    const match = knownBases.find((b) => b.address === baseEl.value.trim());
+    if (match) {
+      if (profileEl) profileEl.value = match.profile;
+      if (baseRevEl) baseRevEl.value = match.revision;
+    }
+  });
+
+  const val = (id: string) => ((document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null)?.value ?? "").trim();
+  const num = (id: string) => {
+    const raw = val(id);
+    return raw === "" ? undefined : Number(raw);
+  };
+
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const bundle = buildSubmissionBundle({
+      abliterated: Boolean(abliteratedEl?.checked),
+      communityRepoUrl: val("f-community-url"),
+      baseRepoId: val("f-base"),
+      baseRevision: val("f-base-rev"),
+      profileId: val("f-profile"),
+      slug: val("f-slug"),
+      title: val("f-title"),
+      summary: val("f-summary"),
+      kind: (val("f-kind") as "lora" | "replacement") || "lora",
+      authorName: val("f-author"),
+      authorUrl: val("f-author-url") || undefined,
+      submitter: val("f-submitter"),
+      license: val("f-license"),
+      tags: val("f-tags"),
+      changelog: `Initial import of ${val("f-src-repo")}.`,
+      sourceRepoId: val("f-src-repo"),
+      sourceRevision: val("f-src-rev"),
+      sourceFileName: val("f-src-file"),
+      sourceSha256: val("f-src-sha"),
+      sourceSizeBytes: Number(val("f-src-size")),
+      configSha256: val("f-cfg-sha") || undefined,
+      configSizeBytes: num("f-cfg-size"),
+      claimSourceUrl: val("f-claim-url") || undefined,
+      claimBenchmark: val("f-claim-bench") || undefined,
+      claimUnit: val("f-claim-unit") || "%",
+      claimBaseline: num("f-claim-base"),
+      claimPatched: num("f-claim-patched"),
+    });
+
+    const out = document.getElementById("submit-output")!;
+    const errBox = document.getElementById("submit-errors")!;
+    const readyBox = document.getElementById("submit-ready")!;
+    out.hidden = false;
+
+    if (bundle.errors.length > 0) {
+      errBox.hidden = false;
+      readyBox.hidden = true;
+      errBox.innerHTML = `<strong>Fix before submitting:</strong><ul>${bundle.errors.map((e) => `<li>${e.replace(/</g, "&lt;")}</li>`).join("")}</ul>`;
+      errBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+
+    errBox.hidden = true;
+    readyBox.hidden = false;
+    const targetNote = document.getElementById("submit-target-note")!;
+    targetNote.textContent = bundle.isCommunityTarget
+      ? `Target community registry: ${bundle.targetRepoUrl}`
+      : `Target official registry: ${bundle.targetRepoUrl}`;
+
+    const filesEl = document.getElementById("submit-files")!;
+    filesEl.innerHTML = "";
+    for (const f of bundle.files) {
+      const fig = document.createElement("figure");
+      fig.className = "terminal sh";
+      const cap = document.createElement("figcaption");
+      cap.textContent = f.path;
+      const pre = document.createElement("pre");
+      pre.tabIndex = 0;
+      const code = document.createElement("code");
+      code.textContent = f.content;
+      pre.appendChild(code);
+      fig.append(cap, pre);
+      filesEl.appendChild(fig);
+    }
+
+    const cliEl = document.getElementById("submit-cli-code")!;
+    cliEl.textContent = bundle.registryCommand
+      ? `${bundle.cliCommands}\n\n# Users can then subscribe to the community registry:\n${bundle.registryCommand}`
+      : bundle.cliCommands;
+
+    const prLink = document.getElementById("submit-pr-link") as HTMLAnchorElement;
+    if (bundle.prUrl) {
+      prLink.href = bundle.prUrl;
+      prLink.hidden = false;
+    } else {
+      prLink.hidden = true;
+    }
+    readyBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+</script>
+
+<style>
+  .submit-page { padding-block: clamp(2rem, 4.5vw, 4rem); }
+  .submit-hero h1 { font-size: clamp(2.1rem, 4vw, 3.2rem); line-height: 1.02; letter-spacing: -.03em; }
+  .submit-hero .lede { margin-top: .9rem; max-width: 64ch; color: var(--color-text-muted); font-size: 1.05rem; line-height: 1.55; }
+  .submit-policy { margin-top: 2rem; padding: 1.25rem; border: 1px solid var(--color-border); border-radius: var(--radius-surface); background: var(--color-surface-subtle); }
+  .submit-policy h2 { font-size: 1.15rem; margin-bottom: .75rem; }
+  .abliterated-toggle { display: flex; align-items: flex-start; gap: .75rem; cursor: pointer; }
+  .abliterated-toggle input { width: 1.15rem; height: 1.15rem; margin-top: .2rem; accent-color: var(--color-accent); flex: none; }
+  .abliterated-toggle small { display: block; color: var(--color-text-muted); margin-top: .15rem; }
+  .callout { margin-top: 1rem; padding: 1rem 1.15rem; border-radius: var(--radius-surface); border: 1px solid var(--color-border-strong); background: var(--color-bg); }
+  .callout.warn { border-left: 3px solid var(--color-accent); }
+  .callout.bad { border-left: 3px solid var(--color-accent); }
+  .callout ul { margin: .5rem 0 0 1.2rem; }
+  .field-row { margin: .9rem 0; display: grid; gap: .35rem; }
+  .submit-form { margin-top: 2rem; display: grid; gap: 1.75rem; }
+  .submit-form fieldset { border: 1px solid var(--color-border); border-radius: var(--radius-surface); padding: 1.25rem; margin: 0; }
+  .submit-form legend { font: 650 1rem var(--font-display); padding: 0 .45rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .95rem 1.25rem; }
+  .field { display: grid; gap: .3rem; }
+  .field.span-2 { grid-column: 1 / -1; }
+  .field label { font-size: .85rem; font-weight: 550; color: var(--color-text); }
+  .field input, .field select, .field-row input {
+    width: 100%; min-height: 2.5rem; padding: .45rem .7rem;
+    border: 1px solid var(--color-border-strong); border-radius: var(--radius-control);
+    background: var(--color-control); color: var(--color-text); font: .9rem var(--font-ui);
+  }
+  .field input.mono { font-family: var(--font-mono); font-size: .83rem; }
+  .submit-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .85rem 1.25rem; }
+  .submit-output { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+  .generated-files { display: grid; gap: 1rem; margin: 1rem 0 1.5rem; }
+  .submit-handoff { margin-bottom: 1.5rem; }
+  @media (max-width: 44rem) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+</style>

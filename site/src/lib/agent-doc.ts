@@ -116,6 +116,7 @@ export function renderLlmsTxt(index: Index): string {
     `- [Models Directory](${absUrl("")}): Interactive catalog of base models, patches, and benchmark evidence`,
     `- [How It Works](${absUrl("how-it-works/")}): Direct bit-exact replacements vs LoRA adapters, compute/precision/size tradeoffs`,
     `- [CLI Tool (weightspace / wsp)](${absUrl("weightspace/")}): Download, verify, apply, stack patches, and launch inference engines`,
+    `- [Submit a Model or Patch](${absUrl("submit/")}): Interactive contract-v1 PR generator (with separate community-index guidance for abliterated patches)`,
     `- [All Benchmark Runs](${absUrl("compare/")}): Reported vs independently measured benchmark evidence`,
     `- [Repository Structure & Contract](${index.docsAt("docs/structure.md")}): Schema, layout, and integrity guarantees`,
     "",

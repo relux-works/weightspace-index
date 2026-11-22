@@ -89,8 +89,30 @@ const windowCells = patched.map(row => row.slice(0, 8));
   <article class="article wrap" aria-labelledby="article-title">
     <header class="intro">
       <h1 id="article-title">How a weight patch works</h1>
-      <p class="lede">A patch gives some of a model's weights new values. Here is one weight, followed from the base model to the patched one.</p>
+      <p class="lede">
+        Instead of downloading four 54 GB fine-tunes (~216 GB) for four coding agents, download one base model once and swap small verified weight patches (~0.3–0.6 GB LoRAs or megabyte sparse replacements). Here is how a patch changes a model and why the index ships two forms.
+      </p>
     </header>
+
+    <section class="why-pain" aria-labelledby="pain-heading">
+      <h2 id="pain-heading">One base model instead of duplicate checkpoints</h2>
+      <div class="savings-bars">
+        <div class="savings-row">
+          <span class="savings-label">4 separate 27B fine-tunes</span>
+          <span class="savings-track"><i style="width:100%"></i></span>
+          <span class="savings-val">~216 GB</span>
+        </div>
+        <div class="savings-row accent">
+          <span class="savings-label">1 base + 4 Harbor LoRAs</span>
+          <span class="savings-track"><i style="width:26%"></i></span>
+          <span class="savings-val">~56 GB</span>
+        </div>
+      </div>
+      <p class="savings-note">
+        Real sizes from <code>Qwen/Qwen3.8-27B</code> in this index: base BF16 weights (~54 GB) + four harness adapters (<code>pi</code>, <code>OpenCode</code>, <code>Hermes</code>, <code>SWE-agent</code>).
+        Full-weight fine-tunes that rewrite ~100% of weights are not patches and are intentionally excluded from the index.
+      </p>
+    </section>
 
     <figure class="matrix-figure" style={`--equation-columns:${cols * 2}`}>
       <div class="matrix-pair">
@@ -223,14 +245,38 @@ const windowCells = patched.map(row => row.slice(0, 8));
     </div>
   </section>
 
-  <section class="home-band" aria-labelledby="closing-heading">
+  <section class="home-band" id="stacking" aria-labelledby="stacking-heading">
+    <div class="wrap">
+      <div class="band-title">
+        <h2 id="stacking-heading">Stacking patches on top of patches</h2>
+        <p>Compose multiple edits onto one base model — either at runtime with LoRAs or deterministically with <code>wsp apply</code>.</p>
+      </div>
+      <div class="choice">
+        <div class="option">
+          <h3>Multi-LoRA at runtime</h3>
+          <p>Attach several adapters simultaneously in <code>llama.cpp</code> (<code>--lora a.gguf --lora b.gguf</code>) or <code>vLLM</code> / PEFT, or merge them offline.</p>
+        </div>
+        <div class="option">
+          <h3>Bit-exact replacement stacks</h3>
+          <p>
+            Non-overlapping coordinates stay bit-exact. When two replacement patches touch the same weight, choose an explicit <code>--on-conflict</code> policy:
+            <code>error</code> (default), <code>add</code> (<code>W₀ + ΔA + ΔB</code>, like LoRA merge), <code>average</code> (<code>(A+B)/2</code>), <code>weighted</code>, or <code>last-wins</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-band subtle" aria-labelledby="closing-heading">
     <div class="wrap closing">
       <div>
-        <h2 id="closing-heading">Find a patch for your model</h2>
+        <h2 id="closing-heading">Find or submit a patch for your model</h2>
         <p>Patched models may behave in ways their description does not cover. Read a patch's evidence before you run it.</p>
       </div>
       <div class="closing-actions">
         <a class="btn primary" href={href()}>Browse models <Arrow /></a>
+        <a class="btn" href={href("submit/")}>Add model or patch</a>
+        <a class="btn" href={href("weightspace/")}>Get wsp CLI</a>
       </div>
     </div>
   </section>
@@ -240,7 +286,18 @@ const windowCells = patched.map(row => row.slice(0, 8));
   /* One reading column: the intro, both forms and the bridges read as one article. */
   .article { padding-block: clamp(2rem, 5vw, 4.8rem); --matrix-ink: var(--color-text-muted); --matrix-edit: var(--heat-d); --matrix-paper: var(--color-bg); --matrix-outline: var(--color-text); }
   .intro h1 { font-size: clamp(2.1rem, 3.8vw, 3.1rem); line-height: .99; font-weight: 680; letter-spacing: -.035em; }
-  .intro .lede { margin-top: 1.1rem; max-width: 46ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
+  .intro .lede { margin-top: 1.1rem; max-width: 56ch; color: var(--color-text-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); line-height: 1.55; }
+  .why-pain { margin-top: 2rem; padding: 1.25rem 1.35rem; border: 1px solid var(--color-border); border-radius: var(--radius-surface); background: var(--color-surface-subtle); max-width: 44rem; }
+  .why-pain h2 { font-size: 1.15rem; margin-bottom: .9rem; }
+  .savings-bars { display: grid; gap: .6rem; }
+  .savings-row { display: grid; grid-template-columns: 12.5rem minmax(0, 1fr) 4.8rem; align-items: center; gap: .75rem; font-size: .88rem; color: var(--color-text-muted); }
+  .savings-track { height: .75rem; background: var(--color-bg); border-radius: 2px; overflow: hidden; }
+  .savings-track i { display: block; height: 100%; background: var(--color-border-strong); }
+  .savings-row.accent { color: var(--color-text); font-weight: 600; }
+  .savings-row.accent .savings-track i { background: var(--color-accent); }
+  .savings-val { font: 600 .85rem var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+  .savings-note { margin-top: .85rem; font-size: .84rem; color: var(--color-text-muted); line-height: 1.45; }
+  @media (max-width: 40rem) { .savings-row { grid-template-columns: minmax(0, 1fr) 4.5rem; } .savings-track { grid-column: 1 / -1; } }
   .article > .matrix-figure { margin-top: clamp(2rem, 4vw, 2.75rem); max-width: 40rem; }
   .bridge { margin-top: clamp(2rem, 4vw, 2.75rem); max-width: 60ch; color: var(--color-text-muted); font-size: 1.05rem; }
   .form { container-type: inline-size; --matrix-pitch-max: 1.1rem; margin-top: clamp(2.5rem, 5vw, 3.5rem); padding-top: clamp(2rem, 4vw, 2.5rem); border-top: 1px solid var(--color-divider); }

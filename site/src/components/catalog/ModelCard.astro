@@ -3,17 +3,45 @@ import Arrow from "../Arrow.astro";
 import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
 import { plural } from "../../lib/format.ts";
 import { versionTerms } from "../../lib/search.ts";
-import type { Base } from "../../lib/types.ts";
+import type { Base, Version } from "../../lib/types.ts";
+
 interface Props { base: Base }
 const { base } = Astro.props;
-const releases = base.patches.map(activeVersion).filter(v => !!v);
+const releases = base.patches.map(activeVersion).filter((v): v is Version => !!v);
+const availableFormats = [...new Set(releases.flatMap(formats))];
 const names = releases.map(v => v.patch.title);
-const terms = [discoveryText(base.address, base.patches, releases.flatMap(formats)),
+const terms = [discoveryText(base.address, base.patches, availableFormats),
   ...names, ...releases.map(versionTerms)].join(" ").toLowerCase();
+
+// Surface the strongest headline reported/measured improvement for quick scanning.
+let headline: string | null = null;
+let bestGain = -Infinity;
+for (const v of releases) {
+  for (const c of v.claims) {
+    for (const m of c.record.measures) {
+      const gain = m.better === "higher" ? m.patched - m.baseline : m.baseline - m.patched;
+      if (gain > bestGain && gain > 0) {
+        bestGain = gain;
+        const unit = m.unit === "%" ? "pp" : ` ${m.unit}`;
+        headline = `${m.benchmark} +${gain.toFixed(1)} ${unit}`;
+      }
+    }
+  }
+}
 ---
 <li data-search={terms}>
   <a class="model-entry" href={base.url}>
-    <span><strong>{base.model}</strong><small>{base.ns} · {plural(releases.length, "active patch", "active patches")}{base.dir.startsWith("docs/example/") && " · Synthetic example"}</small></span>
-    <span class="entry-arrow"><Arrow /></span>
+    <span class="model-entry__main">
+      <strong>{base.model}</strong>
+      <small>
+        {base.ns} · {plural(releases.length, "active patch", "active patches")}
+        {availableFormats.length > 0 && ` · ${availableFormats.join(" + ")}`}
+        {base.dir.startsWith("docs/example/") && " · Synthetic example"}
+      </small>
+    </span>
+    <span class="model-entry__right">
+      {headline && <span class="model-entry__gain">{headline}</span>}
+      <span class="entry-arrow"><Arrow /></span>
+    </span>
   </a>
 </li>

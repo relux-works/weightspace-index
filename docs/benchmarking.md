@@ -109,6 +109,8 @@ RikiyaT's team evaluated the Qwen3.5-0.8B thinking-loops patch (`rikiyat-thinkin
 
 Temperature, the prompts and seeds sampled, answer extraction, and the inference engine can all affect scores. A temperature-only test would hold the other conditions fixed. The [version 1 benchmark note](../bench/notes/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1.md) describes the observed gap in the initial filed pairs and is shown beside the site’s benchmark results.
 
+The [`qwen3.5-0.8b-thinking-t0.6`](../bench/settings/qwen3.5-0.8b-thinking-t0.6.json) settings are that test. They match the card's settings except for temperature 0.6, the patch authors' value, and are filed beside the card's run, never in place of it. The first two sessions ran 20 items with seed 1234 and concurrency 10 on an M1 Pro. The base answered 3 of 20 and hit the token cap on 17 replies. The patched model answered 10 of 20 and hit the cap on six. [First session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/math500-n197.qwen3.5-0.8b-thinking-t0.6.bf16/20261122T132808Z-f4dd5d/session.json) · [Second session record](../bench/results/Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops/v1/math500-n197.qwen3.5-0.8b-thinking-t0.6.bf16/20261122T161946Z-37b005/session.json)
+
 ## Hardware
 
 Any GPU that stock vLLM supports: NVIDIA with compute capability 7.0 or newer (RTX 20-series, T4 and up), or Apple Silicon through vllm-metal. Older cards such as the GTX 1070 are not supported. They would also need fp16 instead of the pinned bf16 weights, which changes results.

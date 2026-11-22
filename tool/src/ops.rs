@@ -22,10 +22,15 @@ use crate::files::{Sha256Hex, check_cancelled};
 
 mod apply;
 mod build;
+pub mod stack;
 
 pub use apply::apply_replacement;
 pub(crate) use apply::verify_patch_against_base;
 pub use build::build_replacement;
+pub use stack::{
+    AppliedPatchRecord, ApplyStack, ConflictPolicy, PatchSpec, PatchedState, RestoreReport,
+    apply_stack, read_state, restore_backup,
+};
 
 /// The long-running phase a [`Progress`] report belongs to. Byte
 /// counters are per-phase: `bytes_done` restarts when the phase

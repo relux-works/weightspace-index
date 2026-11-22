@@ -21,7 +21,8 @@ use weightspace_tools::error::ToolError;
 use weightspace_tools::generate;
 use weightspace_tools::layout::{check_hygiene, check_lookups, check_models};
 use weightspace_tools::ops::{
-    ApplyReplacement, BuildReplacement, Cx, Progress, Report, apply_replacement, build_replacement,
+    ApplyStack, BuildReplacement, ConflictPolicy, Cx, PatchSpec, Progress, Report, apply_stack,
+    build_replacement, restore_backup,
 };
 use weightspace_tools::records::Records;
 
@@ -117,23 +118,53 @@ fn main() -> ExitCode {
             patch,
             model,
             out,
+            in_place,
+            on_conflict,
             expect_tensor_sha256,
             temp_dir,
         } => {
-            let result = cli::parse_expect(&expect_tensor_sha256).and_then(|expected| {
+            let display_target = out.clone().unwrap_or_else(|| model.clone());
+            let result = (|| {
+                let expected = cli::parse_expect(&expect_tensor_sha256)?;
+                let policy = ConflictPolicy::parse(&on_conflict)?;
+                let specs: Result<Vec<PatchSpec>, ToolError> =
+                    patch.iter().map(|p| PatchSpec::parse(p)).collect();
+                let specs = specs?;
                 with_cx(temp_dir, |cx| {
-                    apply_replacement(
-                        &ApplyReplacement {
-                            patch,
+                    apply_stack(
+                        &ApplyStack {
+                            patches: specs,
                             model,
-                            out: out.clone(),
+                            out,
+                            in_place,
+                            on_conflict: policy,
                             expect_tensor_sha256: expected,
                         },
                         cx,
                     )
                 })
-            });
-            run_op("patched model written", &out, result)
+            })();
+            run_op("patched model written", &display_target, result)
+        }
+        Command::Restore { model } => {
+            let cancelled = AtomicBool::new(false);
+            let mut sink = |_: Progress| {};
+            let mut cx = Cx::new(&cancelled, &mut sink);
+            match restore_backup(&model, &mut cx) {
+                Ok(r) => {
+                    println!(
+                        "restored original weights: {} ({} bytes, sha256 {})",
+                        r.weights_path.display(),
+                        r.restored_bytes,
+                        r.restored_sha256
+                    );
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("{e}");
+                    ExitCode::FAILURE
+                }
+            }
         }
     }
 }

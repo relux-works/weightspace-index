@@ -104,6 +104,17 @@ pub enum ToolError {
     /// The cancellation token was set; nothing was published.
     #[error("cancelled")]
     Cancelled,
+    /// Two or more stacked replacement patches modify the same coordinate
+    /// while `--on-conflict=error` is active.
+    #[error("tensor {tensor}: patch conflict on {overlapping_entries} entries: {detail}")]
+    PatchConflict {
+        tensor: String,
+        overlapping_entries: u64,
+        detail: String,
+    },
+    /// Backup or restore of an in-place patched model failed.
+    #[error("backup {path}: {detail}")]
+    Backup { path: PathBuf, detail: String },
 }
 
 impl ToolError {

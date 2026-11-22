@@ -82,16 +82,32 @@ pub enum Command {
         #[arg(long = "temp-dir")]
         temp_dir: Option<PathBuf>,
     },
-    /// Bake a replacement file into a new copy of a model directory
-    /// holding a single root model.safetensors. The original is never
-    /// modified.
+    /// Bake one or more replacement files into a new copy of a model directory
+    /// holding a single root model.safetensors (default), or modify in place
+    /// with an automatic verified backup (`--in-place`).
     Apply {
-        #[arg(long)]
-        patch: PathBuf,
+        /// One or more replacement `.safetensors` files (pass repeatedly to stack patches;
+        /// use `PATH:WEIGHT` with `--on-conflict=weighted`).
+        #[arg(long, required = true)]
+        patch: Vec<String>,
         #[arg(long)]
         model: PathBuf,
-        #[arg(long)]
-        out: PathBuf,
+        /// Destination directory for the patched copy (required unless `--in-place` is set).
+        #[arg(
+            long,
+            required_unless_present = "in_place",
+            conflicts_with = "in_place"
+        )]
+        out: Option<PathBuf>,
+        /// Patch the model directory in place after saving a SHA-256-verified backup under
+        /// `.weightspace-backup/`. Reversible via `weightspace restore --model <DIR>`.
+        #[arg(long = "in-place")]
+        in_place: bool,
+        /// Merge policy when stacked patches modify the same weight coordinate:
+        /// `error` (default), `add` (W0 + sum(dW)), `average` ((A+B)/2),
+        /// `weighted` (W0 + sum(alpha_k * dW_k)), `last-wins`, or `first-wins`.
+        #[arg(long = "on-conflict", default_value = "error")]
+        on_conflict: String,
         /// Expected base SHA-256 for one full-form patch tensor, as
         /// NAME=HEX. Mandatory for every full-form tensor: the patch
         /// file does not record the bytes it replaces.
@@ -104,6 +120,12 @@ pub enum Command {
         /// pass a disk directory for large checkpoints.
         #[arg(long = "temp-dir")]
         temp_dir: Option<PathBuf>,
+    },
+    /// Restore original base weights from an `--in-place` backup.
+    Restore {
+        /// Model directory previously patched with `apply --in-place`.
+        #[arg(long)]
+        model: PathBuf,
     },
 }
 

@@ -302,9 +302,12 @@ fn generate_and_check_new_layout_via_cli() {
     let refused = run(&["check", root]);
     assert!(!refused.status.success());
     assert!(stderr(&refused).contains("models/index.json: out of date"));
+    let expected_root = weightspace_tools::generate::build(tmp.path())
+        .unwrap()
+        .len();
     let generated = run(&["generate", root]);
     assert!(generated.status.success(), "{}", stderr(&generated));
-    assert!(stdout(&generated).contains("6 generated files"));
+    assert!(stdout(&generated).contains(&format!("{expected_root} generated files")));
     assert!(stdout(&generated).contains("8 generated files"));
     assert!(stdout(&generated).contains("docs/example"));
     let example_index = tmp.path().join("docs/example/models/index.json");

@@ -1,0 +1,5 @@
+# vLLM for Linux x86_64 with an NVIDIA GPU: the PyPI release our Mac sessions'
+# vllm-metal build is based on. Locked with hashes into requirements-cuda.txt;
+# see README.
+-r requirements.txt
+vllm==0.33.0

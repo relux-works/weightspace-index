@@ -123,6 +123,12 @@ A settings file applies only to the base model whose card it cites. Another mode
    uv pip install -p .venv -r bench/requirements-macos.txt
    ```
 
+   On Linux x86_64 with an NVIDIA GPU, install from the CUDA lock. It pins the harness and the vLLM 0.33.0 release from PyPI with every dependency by exact version and SHA-256. Its PyTorch build uses CUDA 13.0, so the GPU driver must support CUDA 13 (driver 580 or newer):
+
+   ```bash
+   uv pip install -p .venv -r bench/requirements-cuda.txt
+   ```
+
    Elsewhere, install the harness (exact pins; `run` refuses other versions) and the vLLM build for your hardware into the same venv:
 
    ```bash
@@ -234,12 +240,18 @@ A settings file applies only to the base model whose card it cites. Another mode
 - **Not run in CI yet.** `check` needs no model or network, only the pinned packages, but the CI workflow doesn't call it yet.
 - **MATH-500 only reads `\boxed{...}` answers.** Other spellings (`\fbox{...}`, `\boxed 5`) give no answer. The card's prompt asks for `\boxed{}`.
 
-## Updating the macOS lock
+## Updating the macOS and CUDA locks
 
 `requirements-macos.txt` is generated from `requirements-macos.in`, which names the harness pins and the two vLLM release wheels. After changing either file, regenerate it from the `bench/` folder:
 
 ```bash
 MACOSX_DEPLOYMENT_TARGET=15.0 uv pip compile -p 3.12 --python-platform aarch64-apple-darwin --generate-hashes --no-header requirements-macos.in -o requirements-macos.txt
+```
+
+`requirements-cuda.txt` is generated the same way from `requirements-cuda.in`:
+
+```bash
+uv pip compile -p 3.12 --python-platform x86_64-manylinux_2_28 --generate-hashes --no-header requirements-cuda.in -o requirements-cuda.txt
 ```
 
 ## Tests

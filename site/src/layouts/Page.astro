@@ -57,6 +57,7 @@ const logo = (svg: string, variant: string) =>
     <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href={href("favicon-light.svg")} type="image/svg+xml" media="(prefers-color-scheme: light)" />
     <link rel="icon" href={href("favicon-dark.svg")} type="image/svg+xml" media="(prefers-color-scheme: dark)" />
+    <link rel="alternate" type="text/markdown" href={href("agent.md")} title="Weightspace Index for AI agents" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -107,6 +108,8 @@ const logo = (svg: string, variant: string) =>
           <nav aria-label="Index documents">
             <a href={href("#patch-vs-lora")}>Patch vs LoRA</a>
             <a href={href("compare/")}>All benchmark runs</a>
+            <a href={href("agent.md")}>For agents (agent.md)</a>
+            <a href={href("llms.txt")}>llms.txt</a>
             <a href={index.docsAt("docs/structure.md")} {...NEW_TAB}>How the index works</a>
             <a href={index.docsAt("DISCLAIMER.md")} {...NEW_TAB}>Disclaimer</a>
             <a href={`https://github.com/${index.githubRepo}`} {...NEW_TAB}>Source</a>

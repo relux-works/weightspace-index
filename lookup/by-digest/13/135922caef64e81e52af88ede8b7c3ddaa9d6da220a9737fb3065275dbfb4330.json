@@ -1,0 +1,9 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "LiquidAI/LFM3-1.7B",
+      "profile": "bf16"
+    }
+  ]
+}

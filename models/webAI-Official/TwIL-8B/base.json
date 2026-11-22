@@ -1,0 +1,39 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "bf16",
+      "source": {
+        "repo_id": "webAI-Official/TwIL-8B",
+        "revision": "9563ba7dfb70eeca4a26654b195011cbf818e7d9"
+      },
+      "files": [
+        {
+          "path": "TwIL-8B-F16-verbose.gguf",
+          "sha256": "c5d8f7d35d82c38e845f23612513ac49333e5fa23a1788d843449124e13b64bd",
+          "size_bytes": 17587420608
+        },
+        {
+          "path": "TwIL-8B-Q4_K_M-balanced.gguf",
+          "sha256": "17bda82d2608ca61b6aca48394f212349ef1515d0d9a2e6edee06619152faa0e",
+          "size_bytes": 5347917568
+        },
+        {
+          "path": "TwIL-8B-Q4_K_M-verbose.gguf",
+          "sha256": "5646abbb98f6ab81cfb9f7590aef894011ba50a259fb5d5aac8284d154e64ef0",
+          "size_bytes": 5347917248
+        },
+        {
+          "path": "TwIL-8B-Q8_0-verbose.gguf",
+          "sha256": "6242f84e5d9854ca54a9f39dd14dadbd9eaad5b3d2bc6195d408cae69e8f85d6",
+          "size_bytes": 9345613248
+        },
+        {
+          "path": "model-balanced.safetensors",
+          "sha256": "79fe4b7e42b45d15f43c10e1e2fa0602409bcc8cad03911aa0d8c4a0846e3532",
+          "size_bytes": 17583228544
+        }
+      ]
+    }
+  ]
+}

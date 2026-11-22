@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/LFM3-1.7B-pi",
+    "title": "harness-hub/LFM3-1.7B-pi model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the pi harness (step 400), one attempt per task at temperature 0.8, paired against LiquidAI/LFM3-1.7B on 150 held-out SmolDataEnvs and 40 held-out traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=150)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 70.0,
+      "patched": 80.7,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=40)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 15.0,
+      "patched": 12.5,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

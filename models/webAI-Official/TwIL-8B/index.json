@@ -1,0 +1,298 @@
+{
+  "base": "webAI-Official/TwIL-8B",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "webAI Non-Commercial License v1.0",
+      "slug": "harness-hub-hermes",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for Hermes Agent on data-analysis tasks: similar solve rate to base with 16% fewer tool calls.",
+      "tags": [
+        "agents",
+        "hermes",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor Hermes Agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/TwIL-8B-hermes (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/TwIL-8B-hermes",
+                  "repo_type": "model",
+                  "revision": "7e926394a756ae97e5585d71bbc1d2494138f0b4"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "241b191a09d031cbd5455dfdc29776c5d8d649e64c93e704831f721364c2fd23",
+              "size_bytes": 395912984
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/TwIL-8B-hermes",
+                  "repo_type": "model",
+                  "revision": "7e926394a756ae97e5585d71bbc1d2494138f0b4"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "673f90586f93c99431f5b388a3f08d1342fda1fba0db9f8bf7444a938990ccf7",
+              "size_bytes": 1177
+            },
+            {
+              "derived_from": [
+                "241b191a09d031cbd5455dfdc29776c5d8d649e64c93e704831f721364c2fd23"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "TwIL-8B-harbor-hermes-lora-F16.gguf",
+                  "repo_id": "harness-hub/TwIL-8B-hermes-GGUF",
+                  "repo_type": "model",
+                  "revision": "3e260bb974724824b5f86ac007b202f475aba566"
+                }
+              ],
+              "name": "TwIL-8B-harbor-hermes-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "68ea8190e3f1b73b6fb53d2f2de842da7678f3ce01b3a97990e8cc50d0530105",
+              "size_bytes": 197958112
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "webAI Non-Commercial License v1.0",
+      "slug": "harness-hub-opencode",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for OpenCode on data-analysis tasks: similar solve rate to base with 32% fewer tool calls.",
+      "tags": [
+        "agents",
+        "opencode",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor OpenCode LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/TwIL-8B-opencode (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/TwIL-8B-opencode",
+                  "repo_type": "model",
+                  "revision": "496d865f1b165098aab0a9c1082f794b60144b99"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "6eabe00d45dc7d59bf15420d711a91330216c697f7532f559f39097ac7fb86af",
+              "size_bytes": 395912984
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/TwIL-8B-opencode",
+                  "repo_type": "model",
+                  "revision": "496d865f1b165098aab0a9c1082f794b60144b99"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "0dbf0b75c853b78b8d703b8c937c54fce22f55d681debdd864899c8de97b9e5f",
+              "size_bytes": 1177
+            },
+            {
+              "derived_from": [
+                "6eabe00d45dc7d59bf15420d711a91330216c697f7532f559f39097ac7fb86af"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "TwIL-8B-harbor-opencode-lora-F16.gguf",
+                  "repo_id": "harness-hub/TwIL-8B-opencode-GGUF",
+                  "repo_type": "model",
+                  "revision": "478df25908a156a0e8abbd1f471ae5a547ae1bf1"
+                }
+              ],
+              "name": "TwIL-8B-harbor-opencode-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "c73f4224d61942046fbb82758c8885384ea6b2fa5c6b1abbed5d4b240b7cf1ab",
+              "size_bytes": 197958112
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "webAI Non-Commercial License v1.0",
+      "slug": "harness-hub-pi",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for the pi harness on data-analysis tasks: +3.4 pp on SmolDataEnvs with 37% fewer tool calls.",
+      "tags": [
+        "agents",
+        "pi",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor pi LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/TwIL-8B-pi (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/TwIL-8B-pi",
+                  "repo_type": "model",
+                  "revision": "650d3169db36542f4429641fe518ce4f1f268078"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "1812e3c87f73ca41c54d784a43da39570e30ff12ce51442d51c903d00d7e5c2d",
+              "size_bytes": 395912984
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/TwIL-8B-pi",
+                  "repo_type": "model",
+                  "revision": "650d3169db36542f4429641fe518ce4f1f268078"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "b8ee323f8079f29c808f873ea79a7aab7c6a875123cda9cfb8fd90a301430152",
+              "size_bytes": 1177
+            },
+            {
+              "derived_from": [
+                "1812e3c87f73ca41c54d784a43da39570e30ff12ce51442d51c903d00d7e5c2d"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "TwIL-8B-harbor-pi-lora-F16.gguf",
+                  "repo_id": "harness-hub/TwIL-8B-pi-GGUF",
+                  "repo_type": "model",
+                  "revision": "f199641d170167657244f9e3a2e462df0a1ee59e"
+                }
+              ],
+              "name": "TwIL-8B-harbor-pi-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "21e610324dd21e488a3c8c3cb6ff18135a74c7fb4cb1e121aedd5eb400db5eaf",
+              "size_bytes": 197958112
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "TwIL-8B-F16-verbose.gguf",
+          "sha256": "c5d8f7d35d82c38e845f23612513ac49333e5fa23a1788d843449124e13b64bd",
+          "size_bytes": 17587420608
+        },
+        {
+          "path": "TwIL-8B-Q4_K_M-balanced.gguf",
+          "sha256": "17bda82d2608ca61b6aca48394f212349ef1515d0d9a2e6edee06619152faa0e",
+          "size_bytes": 5347917568
+        },
+        {
+          "path": "TwIL-8B-Q4_K_M-verbose.gguf",
+          "sha256": "5646abbb98f6ab81cfb9f7590aef894011ba50a259fb5d5aac8284d154e64ef0",
+          "size_bytes": 5347917248
+        },
+        {
+          "path": "TwIL-8B-Q8_0-verbose.gguf",
+          "sha256": "6242f84e5d9854ca54a9f39dd14dadbd9eaad5b3d2bc6195d408cae69e8f85d6",
+          "size_bytes": 9345613248
+        },
+        {
+          "path": "model-balanced.safetensors",
+          "sha256": "79fe4b7e42b45d15f43c10e1e2fa0602409bcc8cad03911aa0d8c4a0846e3532",
+          "size_bytes": 17583228544
+        }
+      ],
+      "id": "bf16",
+      "source": {
+        "repo_id": "webAI-Official/TwIL-8B",
+        "revision": "9563ba7dfb70eeca4a26654b195011cbf818e7d9"
+      }
+    }
+  ]
+}

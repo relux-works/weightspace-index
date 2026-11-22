@@ -1,0 +1,74 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-super-adapter",
+    "title": "harness-hub/Qwen3.8-27B-super-adapter model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with thinking on (xhigh reasoning effort) across pi, Hermes Agent and OpenCode harnesses, one attempt per task, 100-step budget, paired against Qwen/Qwen3.8-27B thinking on.",
+  "sampling": {
+    "thinking": true
+  },
+  "measures": [
+    {
+      "benchmark": "SWE-bench Pro (hard 51)",
+      "name": "OpenCode",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 47.1,
+      "patched": 66.7,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-bench Pro (hard 51)",
+      "name": "Hermes Agent",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 45.1,
+      "patched": 60.8,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-bench Pro (hard 51)",
+      "name": "pi",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 74.0,
+      "patched": 74.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "name": "Hermes Agent",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 58.8,
+      "patched": 63.5,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "name": "pi",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 52.9,
+      "patched": 57.6,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "name": "OpenCode",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 54.9,
+      "patched": 58.5,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/Qwen3.8-27B-hermes-adapted",
+    "title": "harness-hub/Qwen3.8-27B-hermes-adapted model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated under Hermes Agent: one attempt per task, 100-step budget, 131,072-token context window, thinking off, text-only, temperature 0.8, top_p 1.0.",
+  "sampling": {
+    "temperature": 0.8,
+    "top_p": 1.0,
+    "thinking": false
+  },
+  "measures": [
+    {
+      "benchmark": "SWE-bench Pro (hard 51)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 29.4,
+      "patched": 43.1,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 44.7,
+      "patched": 58.8,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

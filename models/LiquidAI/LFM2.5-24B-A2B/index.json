@@ -1,0 +1,408 @@
+{
+  "base": "LiquidAI/LFM2.5-24B-A2B",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-claude-code",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained reference LoRA for Claude Code on data-analysis tasks (published by authors as a starting point, step 100).",
+      "tags": [
+        "agents",
+        "claude-code",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor Claude Code LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM2.5-24B-A2B-claude-code (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-claude-code",
+                  "repo_type": "model",
+                  "revision": "df72375bb3b205f560b107d5b9156030d67f3864"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "d0ea93e449cdee6bf6ac5f66eb8e7784148c086bf5b1a251d4327851db3f3759",
+              "size_bytes": 74870272
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-claude-code",
+                  "repo_type": "model",
+                  "revision": "df72375bb3b205f560b107d5b9156030d67f3864"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "e2275c7badb62c9f76668804e2b749e8f58e291fb83d0609ee24b798038b1f99",
+              "size_bytes": 1294
+            },
+            {
+              "derived_from": [
+                "d0ea93e449cdee6bf6ac5f66eb8e7784148c086bf5b1a251d4327851db3f3759"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM2.5-24B-A2B-harbor-claude-code-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-claude-code-GGUF",
+                  "repo_type": "model",
+                  "revision": "d99731e40daa7627b4e3057f636812a871638fb4"
+                }
+              ],
+              "name": "LFM2.5-24B-A2B-harbor-claude-code-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "bc2b52893d9950b2f95673470746272cc761e06ef8d9b1c0014eb051a76ac7d8",
+              "size_bytes": 37437920
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-hermes",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for Hermes Agent on data-analysis tasks: similar solve rate to base with 13% fewer tool calls.",
+      "tags": [
+        "agents",
+        "hermes",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor Hermes Agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM2.5-24B-A2B-hermes-v2 (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2",
+                  "repo_type": "model",
+                  "revision": "578638158bfff7d855ff5d620c5d0556eb36e902"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "5592192f81ff32ec97ac4112ba5b4f2c9de3990778a16681deaaaaa1d7d434e4",
+              "size_bytes": 74870272
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2",
+                  "repo_type": "model",
+                  "revision": "578638158bfff7d855ff5d620c5d0556eb36e902"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "5a61320f8094b76589d8dcd8c32b031b668192187fa87bfc17f0371bc9b1e904",
+              "size_bytes": 1176
+            },
+            {
+              "derived_from": [
+                "5592192f81ff32ec97ac4112ba5b4f2c9de3990778a16681deaaaaa1d7d434e4"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM2.5-24B-A2B-harbor-hermes-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2-GGUF",
+                  "repo_type": "model",
+                  "revision": "b5ad292f486cad8b5036c6d145f5b6e8424c9a86"
+                }
+              ],
+              "name": "LFM2.5-24B-A2B-harbor-hermes-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "7008de052ec3f89b291778bfadb42eed7769104630f0c2ca0e35d301c15672cf",
+              "size_bytes": 37438016
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-opencode",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for OpenCode on data-analysis tasks: matches base solve rate (+1.3 pp) with 30% fewer tool calls.",
+      "tags": [
+        "agents",
+        "opencode",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor OpenCode LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM2.5-24B-A2B-opencode (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-opencode",
+                  "repo_type": "model",
+                  "revision": "a38472c8af101d1a46213cfe795f513447e2714d"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "4c57191c37dc5470d60e2235b13cb9fd13c3b8b710668bf6ba7d35415446ce4f",
+              "size_bytes": 74870272
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-opencode",
+                  "repo_type": "model",
+                  "revision": "a38472c8af101d1a46213cfe795f513447e2714d"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "d46cfb9370731a48cb7e4bacd5b9afa95e46ec33d21de15d75aaf152f7352859",
+              "size_bytes": 1176
+            },
+            {
+              "derived_from": [
+                "4c57191c37dc5470d60e2235b13cb9fd13c3b8b710668bf6ba7d35415446ce4f"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM2.5-24B-A2B-harbor-opencode-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-opencode-GGUF",
+                  "repo_type": "model",
+                  "revision": "dfda02880f0b10179e1c902199a106af85f2bcc9"
+                }
+              ],
+              "name": "LFM2.5-24B-A2B-harbor-opencode-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "c3de21f4c20a0e2a5a9b006ac4d616a2167464eaad8cc619453de50fdc4ae2fa",
+              "size_bytes": 37438176
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-pi",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for the pi harness on data-analysis tasks: matches base solve rate (+2.7 pp) with 20% fewer tool calls.",
+      "tags": [
+        "agents",
+        "pi",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor pi LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM2.5-24B-A2B-pi-v2 (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-pi-v2",
+                  "repo_type": "model",
+                  "revision": "cff34d69893135bb3a81149c6509a673eeffc45f"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "7fddbe1c8c9c0a517625edcda9d6f074ca7218fa8056c3c68fd5ce1a2cef0ffe",
+              "size_bytes": 74870272
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-pi-v2",
+                  "repo_type": "model",
+                  "revision": "cff34d69893135bb3a81149c6509a673eeffc45f"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "ba2d22a8f96f31c6b3c3a13d5c129e6e0d705661e9b74795ceffcf9a340ca653",
+              "size_bytes": 1176
+            },
+            {
+              "derived_from": [
+                "7fddbe1c8c9c0a517625edcda9d6f074ca7218fa8056c3c68fd5ce1a2cef0ffe"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM2.5-24B-A2B-harbor-pi-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM2.5-24B-A2B-pi-v2-GGUF",
+                  "repo_type": "model",
+                  "revision": "0e9683fe2c21ff6abe2c056e437ea00bd10ef0a8"
+                }
+              ],
+              "name": "LFM2.5-24B-A2B-harbor-pi-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "2f3a71afdb93b974ab2953d02ffdc390696d8d31063b7431f0f45208b2c08acc",
+              "size_bytes": 37438208
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model-00001-of-00010.safetensors",
+          "sha256": "f7b4d9106ff00f1e4529c01bfa2b2e62578cf237cc8c39f792768c510e386b6c",
+          "size_bytes": 4627289632
+        },
+        {
+          "path": "model-00002-of-00010.safetensors",
+          "sha256": "e33aab029127a29dc3f3ec60e995c3ea37608c517d0e33f0c12bd84ea1031700",
+          "size_bytes": 4954693024
+        },
+        {
+          "path": "model-00003-of-00010.safetensors",
+          "sha256": "68bd39f975ed9baf0d489772ac302b926f426baf7140d88007c34b64561a6809",
+          "size_bytes": 4954693624
+        },
+        {
+          "path": "model-00004-of-00010.safetensors",
+          "sha256": "1355d0f20369f5c7697d57eb1d6aa8f954fa12c479e58a688db7817657fc89e4",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00005-of-00010.safetensors",
+          "sha256": "a4fec7fbe3c4f3f08afe357abddba837314fe6f220936c515042ea1ed7dfddcd",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00006-of-00010.safetensors",
+          "sha256": "d7f59eb54c2c6dab7a54258d1bc3665d35a304301e49cba4a492a430de183ad1",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00007-of-00010.safetensors",
+          "sha256": "13f6524d71c8c3190b9d1d083b266a7dff569566a0ab2b14e732e9df08fdb5f7",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00008-of-00010.safetensors",
+          "sha256": "51ebc311324fd321baf5d9c12ef0d6f0dc06b88b2e7b95899c63cf33179c2b35",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00009-of-00010.safetensors",
+          "sha256": "491ab1cff839626e02c5f996fe90ef044592ce14df6471249567027d4adb4dad",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00010-of-00010.safetensors",
+          "sha256": "1d3f7178c0c7d1b146bffe7c5ac41874b06b95ef04538693204502258fe2c1b4",
+          "size_bytes": 3679304232
+        }
+      ],
+      "id": "bf16",
+      "source": {
+        "repo_id": "LiquidAI/LFM2.5-24B-A2B",
+        "revision": "3dc4cd09c9a2a99e1e819693e79d3aba5e9bb4f2"
+      }
+    }
+  ]
+}

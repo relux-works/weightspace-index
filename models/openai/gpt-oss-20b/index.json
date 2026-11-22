@@ -1,0 +1,98 @@
+{
+  "base": "openai/gpt-oss-20b",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "SuperQwen",
+          "url": "https://huggingface.co/superqwen"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "superqwen-swe-lora",
+      "submitter": "ivanopcode",
+      "summary": "Rank-16 SFT LoRA trained on 1,200 resolved SWE-smith trajectories (`bash`, `str_replace_editor`, `submit`); next-action tool match jumps 47.5% → 90%.",
+      "tags": [
+        "coding-agent",
+        "swe-agent",
+        "tool-calling",
+        "sft"
+      ],
+      "title": "SuperQwen SWE-agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of superqwen/gpt-oss-20b-swe-lora (rank 16 PEFT; base weights verified bit-identical to openai/gpt-oss-20b).",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "superqwen/gpt-oss-20b-swe-lora",
+                  "repo_type": "model",
+                  "revision": "41bf5f3e0cdee2db06984bba8793e98dc631ad04"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "2a3e9e6a5e19f1801078ca9fd91a3c2e7c796b2051c4abb18297c09ae76daa99",
+              "size_bytes": 120351464
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "superqwen/gpt-oss-20b-swe-lora",
+                  "repo_type": "model",
+                  "revision": "41bf5f3e0cdee2db06984bba8793e98dc631ad04"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "e8001b156bed666097da02551db7716d6e6f96918cd11ad2126ccf0b09635b19",
+              "size_bytes": 1326
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "mxfp4",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model-00000-of-00002.safetensors",
+          "sha256": "16d0f997dcfc4462089d536bffe51b4bcea2f872f5c430be09ef8ed392312427",
+          "size_bytes": 4792272488
+        },
+        {
+          "path": "model-00001-of-00002.safetensors",
+          "sha256": "4fbe328ab445455d6f58dc73852b85873bd626986310abd91cd4d2ce3245eaea",
+          "size_bytes": 4798702184
+        },
+        {
+          "path": "model-00002-of-00002.safetensors",
+          "sha256": "a18106b209e9ab35c3406db4f6f12a927364a058b21e9d1373d682e20674b303",
+          "size_bytes": 4170342232
+        }
+      ],
+      "id": "mxfp4",
+      "source": {
+        "repo_id": "openai/gpt-oss-20b",
+        "revision": "6cee5e81ee83917806bbde320786a8fb61efebee"
+      }
+    }
+  ]
+}

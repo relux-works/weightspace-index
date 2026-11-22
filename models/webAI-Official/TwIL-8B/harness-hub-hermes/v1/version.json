@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/TwIL-8B-hermes (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "241b191a09d031cbd5455dfdc29776c5d8d649e64c93e704831f721364c2fd23",
+      "size_bytes": 395912984,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-hermes",
+          "revision": "7e926394a756ae97e5585d71bbc1d2494138f0b4",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "673f90586f93c99431f5b388a3f08d1342fda1fba0db9f8bf7444a938990ccf7",
+      "size_bytes": 1177,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-hermes",
+          "revision": "7e926394a756ae97e5585d71bbc1d2494138f0b4",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "TwIL-8B-harbor-hermes-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "68ea8190e3f1b73b6fb53d2f2de842da7678f3ce01b3a97990e8cc50d0530105",
+      "size_bytes": 197958112,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-hermes-GGUF",
+          "revision": "3e260bb974724824b5f86ac007b202f475aba566",
+          "path": "TwIL-8B-harbor-hermes-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "241b191a09d031cbd5455dfdc29776c5d8d649e64c93e704831f721364c2fd23"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

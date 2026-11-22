@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/LFM2.5-24B-A2B-pi-v2",
+    "title": "harness-hub/LFM2.5-24B-A2B-pi-v2 model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the pi harness (step 170), one attempt per task at temperature 0.8, paired against LiquidAI/LFM2.5-24B-A2B on 150 held-out SmolDataEnvs and 40 held-out traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=149)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 83.2,
+      "patched": 85.9,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=40)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 22.5,
+      "patched": 17.5,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

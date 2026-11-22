@@ -1,0 +1,278 @@
+{
+  "base": "LiquidAI/LFM3-1.7B",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-hermes",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for Hermes Agent: +16.0 pp on SmolDataEnvs (62.0% → 78.0%) with 38% fewer tool calls.",
+      "tags": [
+        "agents",
+        "hermes",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor Hermes Agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM3-1.7B-hermes (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM3-1.7B-hermes",
+                  "repo_type": "model",
+                  "revision": "9d96757a4d8f94dca024b745014955e1e5a3371b"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "602adba54927f350d09655993bbc79d9a3ffd97c406ddc852747fa9e07342a09",
+              "size_bytes": 131790920
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM3-1.7B-hermes",
+                  "repo_type": "model",
+                  "revision": "9d96757a4d8f94dca024b745014955e1e5a3371b"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "8440a6ace9ecadf9d1ade8b58c40b8a1c8656f314c34b8afbbe29f2bfefbdb5b",
+              "size_bytes": 1202
+            },
+            {
+              "derived_from": [
+                "602adba54927f350d09655993bbc79d9a3ffd97c406ddc852747fa9e07342a09"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM3-1.7B-harbor-hermes-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM3-1.7B-hermes-GGUF",
+                  "repo_type": "model",
+                  "revision": "29624efd1658b637dde624acf717192caca84b56"
+                }
+              ],
+              "name": "LFM3-1.7B-harbor-hermes-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "66f03073ac573cb0e2660ccd49e29bd883a54d1657564d172ecc814334708794",
+              "size_bytes": 65897536
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-opencode",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for OpenCode: +15.3 pp on SmolDataEnvs (69.3% → 84.7%) with 43% fewer tool calls.",
+      "tags": [
+        "agents",
+        "opencode",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor OpenCode LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM3-1.7B-opencode (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM3-1.7B-opencode",
+                  "repo_type": "model",
+                  "revision": "9a96d7923f26d88686444b552fdfbf8c328c8b4a"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "ff7da0e6ee0749e8cbcca914e8e7cab9a557c50d4894cbbce858bb8dd2e9f618",
+              "size_bytes": 131790920
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM3-1.7B-opencode",
+                  "repo_type": "model",
+                  "revision": "9a96d7923f26d88686444b552fdfbf8c328c8b4a"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "c53768d7740938cceb5c54d682ef678f35e2bc0d9c84eb20d5dfbdf5c22bc443",
+              "size_bytes": 1202
+            },
+            {
+              "derived_from": [
+                "ff7da0e6ee0749e8cbcca914e8e7cab9a557c50d4894cbbce858bb8dd2e9f618"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM3-1.7B-harbor-opencode-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM3-1.7B-opencode-GGUF",
+                  "repo_type": "model",
+                  "revision": "3c68312d0bfa007ad59ab7c6ee32e19b86788948"
+                }
+              ],
+              "name": "LFM3-1.7B-harbor-opencode-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "5bd0ad64448be4eb52b8bd328955af5ae000903a39284f36927d9a6fc89ab517",
+              "size_bytes": 65897760
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "LFM Open License v1.0",
+      "slug": "harness-hub-pi",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for the pi harness: +10.7 pp on SmolDataEnvs (70.0% → 80.7%) with 37% fewer tool calls.",
+      "tags": [
+        "agents",
+        "pi",
+        "rl",
+        "harbor",
+        "data-analysis"
+      ],
+      "title": "Harbor pi LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/LFM3-1.7B-pi (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/LFM3-1.7B-pi",
+                  "repo_type": "model",
+                  "revision": "6b15c1c0b2db4e573dbe3a07e73655873be8fca0"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "40e147149151301b6bb993f1c44ec19f08374275f1cfa48a1fceff0358009d20",
+              "size_bytes": 131790920
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/LFM3-1.7B-pi",
+                  "repo_type": "model",
+                  "revision": "6b15c1c0b2db4e573dbe3a07e73655873be8fca0"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "9dfff83724ffed1d9f0c74364776fd143f2ff399fc48d93fc0ec10a84b506a2e",
+              "size_bytes": 1202
+            },
+            {
+              "derived_from": [
+                "40e147149151301b6bb993f1c44ec19f08374275f1cfa48a1fceff0358009d20"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "LFM3-1.7B-harbor-pi-lora-F16.gguf",
+                  "repo_id": "harness-hub/LFM3-1.7B-pi-GGUF",
+                  "repo_type": "model",
+                  "revision": "eda2a0c3eeda971b04ab85398955299e08268bf1"
+                }
+              ],
+              "name": "LFM3-1.7B-harbor-pi-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "d6b6229d3a4ad59a34a4e54b631a030fa82bb3f79290793522f6690f4aa61593",
+              "size_bytes": 65897728
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model.safetensors",
+          "sha256": "135922caef64e81e52af88ede8b7c3ddaa9d6da220a9737fb3065275dbfb4330",
+          "size_bytes": 3457635448
+        }
+      ],
+      "id": "bf16",
+      "source": {
+        "repo_id": "LiquidAI/LFM3-1.7B",
+        "revision": "1da06bec6a819da10b54c67e5c90972b46d81871"
+      }
+    }
+  ]
+}

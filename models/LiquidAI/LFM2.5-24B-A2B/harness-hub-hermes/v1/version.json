@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/LFM2.5-24B-A2B-hermes-v2 (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "5592192f81ff32ec97ac4112ba5b4f2c9de3990778a16681deaaaaa1d7d434e4",
+      "size_bytes": 74870272,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2",
+          "revision": "578638158bfff7d855ff5d620c5d0556eb36e902",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "5a61320f8094b76589d8dcd8c32b031b668192187fa87bfc17f0371bc9b1e904",
+      "size_bytes": 1176,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2",
+          "revision": "578638158bfff7d855ff5d620c5d0556eb36e902",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "LFM2.5-24B-A2B-harbor-hermes-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "7008de052ec3f89b291778bfadb42eed7769104630f0c2ca0e35d301c15672cf",
+      "size_bytes": 37438016,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM2.5-24B-A2B-hermes-v2-GGUF",
+          "revision": "b5ad292f486cad8b5036c6d145f5b6e8424c9a86",
+          "path": "LFM2.5-24B-A2B-harbor-hermes-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "5592192f81ff32ec97ac4112ba5b4f2c9de3990778a16681deaaaaa1d7d434e4"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

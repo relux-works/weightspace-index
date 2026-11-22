@@ -1,0 +1,37 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of superqwen/qwen3.8-27b-swe-lora (rank 16 PEFT).",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "714fd806ed10d01f53b9dc13c4886671e730437e87fedeb8e0c8ae45c4359745",
+      "size_bytes": 435280528,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "superqwen/qwen3.8-27b-swe-lora",
+          "revision": "c26577ac18d6f0ba37d728aee6ca5fc1b6d5f09a",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "3164d95c22ecde3c2f9d69efba73458b9f644d769fa382bfc4546ab01984aeb9",
+      "size_bytes": 1231,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "superqwen/qwen3.8-27b-swe-lora",
+          "revision": "c26577ac18d6f0ba37d728aee6ca5fc1b6d5f09a",
+          "path": "adapter_config.json"
+        }
+      ]
+    }
+  ]
+}

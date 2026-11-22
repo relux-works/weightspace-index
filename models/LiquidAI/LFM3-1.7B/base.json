@@ -1,0 +1,19 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "bf16",
+      "source": {
+        "repo_id": "LiquidAI/LFM3-1.7B",
+        "revision": "1da06bec6a819da10b54c67e5c90972b46d81871"
+      },
+      "files": [
+        {
+          "path": "model.safetensors",
+          "sha256": "135922caef64e81e52af88ede8b7c3ddaa9d6da220a9737fb3065275dbfb4330",
+          "size_bytes": 3457635448
+        }
+      ]
+    }
+  ]
+}

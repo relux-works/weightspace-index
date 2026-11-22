@@ -1,0 +1,11 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "webAI-Official/TwIL-8B",
+      "profiles": [
+        "bf16"
+      ]
+    }
+  ]
+}

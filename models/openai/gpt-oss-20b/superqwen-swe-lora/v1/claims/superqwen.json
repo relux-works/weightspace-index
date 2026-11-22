@@ -1,0 +1,44 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/superqwen/gpt-oss-20b-swe-lora",
+    "title": "superqwen/gpt-oss-20b-swe-lora model card"
+  },
+  "affiliation": "SuperQwen",
+  "conditions": "Next-action test on 40 held-out SWE-smith trajectories via vLLM OpenAI-compatible API at temperature 0 (single action check, not end-to-end task completion).",
+  "sampling": {
+    "temperature": 0
+  },
+  "measures": [
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Same tool as reference",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 47.5,
+      "patched": 90.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Same str_replace_editor sub-command",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 28.0,
+      "patched": 67.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Returns a tool call",
+      "metric": "rate",
+      "unit": "%",
+      "baseline": 95.0,
+      "patched": 100.0,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

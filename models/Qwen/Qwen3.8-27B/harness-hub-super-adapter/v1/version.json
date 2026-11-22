@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/Qwen3.8-27B-super-adapter (rank 96 merged PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "f3fc23f857300e1b55a49725a4564a2fa4efd5c69f5aeab2da691daacf0b6c33",
+      "size_bytes": 1912679616,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-super-adapter",
+          "revision": "3358a71529ce56aba0095addd6a60a66d7c4228b",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "ac16b38218d38bee16d9b73caa7f7b8af4c7b2f02b8dd8ae70b183a5099b9475",
+      "size_bytes": 1175,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-super-adapter",
+          "revision": "3358a71529ce56aba0095addd6a60a66d7c4228b",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "Qwen3.8-27B-super-adapter-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "90dc73d4f67fa2e8fc66d501e4278313eacec460f36ec7225ff64a420ffe5ab4",
+      "size_bytes": 956336640,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-super-adapter-GGUF",
+          "revision": "dcdf29a1ba09546e8c9e6afc5c7a86d7032b0572",
+          "path": "Qwen3.8-27B-super-adapter-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "f3fc23f857300e1b55a49725a4564a2fa4efd5c69f5aeab2da691daacf0b6c33"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

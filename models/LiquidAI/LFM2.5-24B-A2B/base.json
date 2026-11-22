@@ -1,0 +1,64 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "bf16",
+      "source": {
+        "repo_id": "LiquidAI/LFM2.5-24B-A2B",
+        "revision": "3dc4cd09c9a2a99e1e819693e79d3aba5e9bb4f2"
+      },
+      "files": [
+        {
+          "path": "model-00001-of-00010.safetensors",
+          "sha256": "f7b4d9106ff00f1e4529c01bfa2b2e62578cf237cc8c39f792768c510e386b6c",
+          "size_bytes": 4627289632
+        },
+        {
+          "path": "model-00002-of-00010.safetensors",
+          "sha256": "e33aab029127a29dc3f3ec60e995c3ea37608c517d0e33f0c12bd84ea1031700",
+          "size_bytes": 4954693024
+        },
+        {
+          "path": "model-00003-of-00010.safetensors",
+          "sha256": "68bd39f975ed9baf0d489772ac302b926f426baf7140d88007c34b64561a6809",
+          "size_bytes": 4954693624
+        },
+        {
+          "path": "model-00004-of-00010.safetensors",
+          "sha256": "1355d0f20369f5c7697d57eb1d6aa8f954fa12c479e58a688db7817657fc89e4",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00005-of-00010.safetensors",
+          "sha256": "a4fec7fbe3c4f3f08afe357abddba837314fe6f220936c515042ea1ed7dfddcd",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00006-of-00010.safetensors",
+          "sha256": "d7f59eb54c2c6dab7a54258d1bc3665d35a304301e49cba4a492a430de183ad1",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00007-of-00010.safetensors",
+          "sha256": "13f6524d71c8c3190b9d1d083b266a7dff569566a0ab2b14e732e9df08fdb5f7",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00008-of-00010.safetensors",
+          "sha256": "51ebc311324fd321baf5d9c12ef0d6f0dc06b88b2e7b95899c63cf33179c2b35",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00009-of-00010.safetensors",
+          "sha256": "491ab1cff839626e02c5f996fe90ef044592ce14df6471249567027d4adb4dad",
+          "size_bytes": 4954693824
+        },
+        {
+          "path": "model-00010-of-00010.safetensors",
+          "sha256": "1d3f7178c0c7d1b146bffe7c5ac41874b06b95ef04538693204502258fe2c1b4",
+          "size_bytes": 3679304232
+        }
+      ]
+    }
+  ]
+}

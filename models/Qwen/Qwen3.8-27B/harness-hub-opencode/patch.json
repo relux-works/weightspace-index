@@ -1,0 +1,26 @@
+{
+  "contract_version": 1,
+  "title": "Harbor OpenCode coding agent LoRA",
+  "summary": "RL-trained LoRA for the OpenCode harness: matches base xhigh thinking accuracy with thinking off and 6–8x fewer tokens.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "coding-agent",
+    "opencode",
+    "rl",
+    "harbor"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

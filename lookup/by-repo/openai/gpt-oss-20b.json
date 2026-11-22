@@ -1,0 +1,11 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "openai/gpt-oss-20b",
+      "profiles": [
+        "mxfp4"
+      ]
+    }
+  ]
+}

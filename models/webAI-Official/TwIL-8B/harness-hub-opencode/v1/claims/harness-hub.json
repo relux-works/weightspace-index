@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/TwIL-8B-opencode",
+    "title": "harness-hub/TwIL-8B-opencode model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the OpenCode harness (step 100), one attempt per task at temperature 0.8, paired against webAI-Official/TwIL-8B on held-out SmolDataEnvs and traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=150)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 77.3,
+      "patched": 76.7,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=35)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 42.9,
+      "patched": 37.1,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

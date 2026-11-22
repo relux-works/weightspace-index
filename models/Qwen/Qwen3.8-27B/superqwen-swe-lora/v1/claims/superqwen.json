@@ -1,0 +1,45 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/superqwen/qwen3.8-27b-swe-lora",
+    "title": "superqwen/qwen3.8-27b-swe-lora model card"
+  },
+  "affiliation": "SuperQwen",
+  "conditions": "Next-action test on 40 held-out SWE-smith trajectories via vLLM OpenAI-compatible API at temperature 0 (single action check, not end-to-end task completion).",
+  "sampling": {
+    "temperature": 0,
+    "thinking": true
+  },
+  "measures": [
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Same tool as reference",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 65.0,
+      "patched": 97.5,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Same str_replace_editor sub-command",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 32.0,
+      "patched": 88.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "SWE-smith next-action (n=40)",
+      "name": "Valid JSON arguments",
+      "metric": "rate",
+      "unit": "%",
+      "baseline": 97.5,
+      "patched": 100.0,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

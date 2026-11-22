@@ -1,0 +1,37 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of superqwen/gpt-oss-20b-swe-lora (rank 16 PEFT; base weights verified bit-identical to openai/gpt-oss-20b).",
+  "target_profile": "mxfp4",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "2a3e9e6a5e19f1801078ca9fd91a3c2e7c796b2051c4abb18297c09ae76daa99",
+      "size_bytes": 120351464,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "superqwen/gpt-oss-20b-swe-lora",
+          "revision": "41bf5f3e0cdee2db06984bba8793e98dc631ad04",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "e8001b156bed666097da02551db7716d6e6f96918cd11ad2126ccf0b09635b19",
+      "size_bytes": 1326,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "superqwen/gpt-oss-20b-swe-lora",
+          "revision": "41bf5f3e0cdee2db06984bba8793e98dc631ad04",
+          "path": "adapter_config.json"
+        }
+      ]
+    }
+  ]
+}

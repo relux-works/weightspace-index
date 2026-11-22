@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Harbor pi LoRA",
+  "summary": "RL-trained LoRA for the pi harness on data-analysis tasks: matches base solve rate (+2.7 pp) with 20% fewer tool calls.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "LFM Open License v1.0",
+  "tags": [
+    "agents",
+    "pi",
+    "rl",
+    "harbor",
+    "data-analysis"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

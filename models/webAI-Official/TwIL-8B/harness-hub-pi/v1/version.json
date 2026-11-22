@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/TwIL-8B-pi (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "1812e3c87f73ca41c54d784a43da39570e30ff12ce51442d51c903d00d7e5c2d",
+      "size_bytes": 395912984,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-pi",
+          "revision": "650d3169db36542f4429641fe518ce4f1f268078",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "b8ee323f8079f29c808f873ea79a7aab7c6a875123cda9cfb8fd90a301430152",
+      "size_bytes": 1177,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-pi",
+          "revision": "650d3169db36542f4429641fe518ce4f1f268078",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "TwIL-8B-harbor-pi-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "21e610324dd21e488a3c8c3cb6ff18135a74c7fb4cb1e121aedd5eb400db5eaf",
+      "size_bytes": 197958112,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/TwIL-8B-pi-GGUF",
+          "revision": "f199641d170167657244f9e3a2e462df0a1ee59e",
+          "path": "TwIL-8B-harbor-pi-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "1812e3c87f73ca41c54d784a43da39570e30ff12ce51442d51c903d00d7e5c2d"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

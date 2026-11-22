@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Harbor OpenCode LoRA",
+  "summary": "RL-trained LoRA for OpenCode on data-analysis tasks: similar solve rate to base with 32% fewer tool calls.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "webAI Non-Commercial License v1.0",
+  "tags": [
+    "agents",
+    "opencode",
+    "rl",
+    "harbor",
+    "data-analysis"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

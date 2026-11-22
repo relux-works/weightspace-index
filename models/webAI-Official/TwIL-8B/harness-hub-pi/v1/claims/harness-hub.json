@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/TwIL-8B-pi",
+    "title": "harness-hub/TwIL-8B-pi model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the pi harness (step 90), one attempt per task at temperature 0.8, paired against webAI-Official/TwIL-8B on held-out SmolDataEnvs and traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=146)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 81.5,
+      "patched": 84.9,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=35)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 31.4,
+      "patched": 37.1,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/Qwen3.8-27B-pi-adapted (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "869b2a089882c0dac4683993f11081bd70edc30b32c64a988c688d6ac26b792a",
+      "size_bytes": 637610624,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted",
+          "revision": "7d42b119e2d4d475fa11270634b1ef98d1cd5aee",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "bf046ce17e9cfb0651b1f64f0d1cf9d312c140aaaf03c2e8a3a35e846cd307db",
+      "size_bytes": 1171,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted",
+          "revision": "7d42b119e2d4d475fa11270634b1ef98d1cd5aee",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "Qwen3.8-27B-pi-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "a64f91844f19e67da500d8628bdf9383aa334e61b7ab687805802e7d272d7b67",
+      "size_bytes": 318802304,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted-GGUF",
+          "revision": "19980ce556b41c7b73818083c9adf4b3fa0c72e5",
+          "path": "Qwen3.8-27B-pi-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "869b2a089882c0dac4683993f11081bd70edc30b32c64a988c688d6ac26b792a"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

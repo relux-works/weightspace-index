@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Harbor Hermes Agent LoRA",
+  "summary": "RL-trained LoRA for Hermes Agent: +16.0 pp on SmolDataEnvs (62.0% → 78.0%) with 38% fewer tool calls.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "LFM Open License v1.0",
+  "tags": [
+    "agents",
+    "hermes",
+    "rl",
+    "harbor",
+    "data-analysis"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "contract_version": 1,
+  "title": "Harbor pi coding agent LoRA",
+  "summary": "RL-trained LoRA for the pi coding agent: matches base xhigh thinking accuracy with thinking off and ~4.5x fewer tokens.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "coding-agent",
+    "pi",
+    "rl",
+    "harbor"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

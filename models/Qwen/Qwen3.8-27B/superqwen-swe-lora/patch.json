@@ -1,0 +1,26 @@
+{
+  "contract_version": 1,
+  "title": "SuperQwen SWE-agent LoRA",
+  "summary": "Rank-16 SFT LoRA trained on 1,200 resolved SWE-smith trajectories (`bash`, `str_replace_editor`, `submit`); next-action tool match jumps 65% → 97.5%.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "SuperQwen",
+      "url": "https://huggingface.co/superqwen"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "coding-agent",
+    "swe-agent",
+    "tool-calling",
+    "sft"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

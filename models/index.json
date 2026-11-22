@@ -1,6 +1,11 @@
 {
   "bases": [
-    "Qwen/Qwen3.5-0.8B"
+    "LiquidAI/LFM2.5-24B-A2B",
+    "LiquidAI/LFM3-1.7B",
+    "Qwen/Qwen3.5-0.8B",
+    "Qwen/Qwen3.8-27B",
+    "openai/gpt-oss-20b",
+    "webAI-Official/TwIL-8B"
   ],
   "contract_version": 1
 }

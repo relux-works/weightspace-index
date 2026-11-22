@@ -1,0 +1,28 @@
+{
+  "contract_version": 1,
+  "title": "Harbor Super-Adapter (pi + Hermes + OpenCode)",
+  "summary": "Training-free rank-96 merge of the pi, Hermes and OpenCode LoRAs: improves thinking-on pass@1 across harnesses with 19–48% fewer tool calls.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "coding-agent",
+    "pi",
+    "hermes",
+    "opencode",
+    "merge",
+    "harbor"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

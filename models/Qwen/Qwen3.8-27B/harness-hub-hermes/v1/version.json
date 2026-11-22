@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/Qwen3.8-27B-hermes-adapted (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "0f6b706f8b3a3f4156af7dcd431b74e4f10bc39cb2fd0d4e725d6fe063712756",
+      "size_bytes": 637610624,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted",
+          "revision": "0467acba2ff7788ec8050e7349fb5aa60bb6ddba",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "f0aa081ee2c6cbeeb5d98e839e63e6cb35fcdb63c15312e9a00e72f8d896a34f",
+      "size_bytes": 1171,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted",
+          "revision": "0467acba2ff7788ec8050e7349fb5aa60bb6ddba",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "Qwen3.8-27B-hermes-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "58851e8143d23029bf2b05248f81b9ac2dd32b7d1eb21c40f601aab12a06fb4f",
+      "size_bytes": 318802400,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted-GGUF",
+          "revision": "2835aca3f04ec8625b50c555396e8f2ea3ba329b",
+          "path": "Qwen3.8-27B-hermes-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "0f6b706f8b3a3f4156af7dcd431b74e4f10bc39cb2fd0d4e725d6fe063712756"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

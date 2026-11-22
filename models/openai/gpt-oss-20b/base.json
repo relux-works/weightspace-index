@@ -1,0 +1,29 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "mxfp4",
+      "source": {
+        "repo_id": "openai/gpt-oss-20b",
+        "revision": "6cee5e81ee83917806bbde320786a8fb61efebee"
+      },
+      "files": [
+        {
+          "path": "model-00000-of-00002.safetensors",
+          "sha256": "16d0f997dcfc4462089d536bffe51b4bcea2f872f5c430be09ef8ed392312427",
+          "size_bytes": 4792272488
+        },
+        {
+          "path": "model-00001-of-00002.safetensors",
+          "sha256": "4fbe328ab445455d6f58dc73852b85873bd626986310abd91cd4d2ce3245eaea",
+          "size_bytes": 4798702184
+        },
+        {
+          "path": "model-00002-of-00002.safetensors",
+          "sha256": "a18106b209e9ab35c3406db4f6f12a927364a058b21e9d1373d682e20674b303",
+          "size_bytes": 4170342232
+        }
+      ]
+    }
+  ]
+}

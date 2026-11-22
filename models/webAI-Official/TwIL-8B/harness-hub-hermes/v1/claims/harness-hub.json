@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/TwIL-8B-hermes",
+    "title": "harness-hub/TwIL-8B-hermes model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the Hermes Agent harness (step 60), one attempt per task at temperature 0.8, paired against webAI-Official/TwIL-8B on held-out SmolDataEnvs and traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=149)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 73.2,
+      "patched": 71.1,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=31)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 38.7,
+      "patched": 25.8,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

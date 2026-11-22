@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Harbor Claude Code LoRA",
+  "summary": "RL-trained reference LoRA for Claude Code on data-analysis tasks (published by authors as a starting point, step 100).",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "LFM Open License v1.0",
+  "tags": [
+    "agents",
+    "claude-code",
+    "rl",
+    "harbor",
+    "data-analysis"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

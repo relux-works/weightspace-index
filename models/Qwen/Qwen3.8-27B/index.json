@@ -1,0 +1,511 @@
+{
+  "base": "Qwen/Qwen3.8-27B",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "harness-hub-hermes",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for Hermes Agent: +14.1 pp on Terminal-Bench 2.1 and +13.7 pp on SWE-bench Pro with thinking off.",
+      "tags": [
+        "coding-agent",
+        "hermes",
+        "rl",
+        "harbor"
+      ],
+      "title": "Harbor Hermes Agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/Qwen3.8-27B-hermes-adapted (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted",
+                  "repo_type": "model",
+                  "revision": "0467acba2ff7788ec8050e7349fb5aa60bb6ddba"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "0f6b706f8b3a3f4156af7dcd431b74e4f10bc39cb2fd0d4e725d6fe063712756",
+              "size_bytes": 637610624
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted",
+                  "repo_type": "model",
+                  "revision": "0467acba2ff7788ec8050e7349fb5aa60bb6ddba"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "f0aa081ee2c6cbeeb5d98e839e63e6cb35fcdb63c15312e9a00e72f8d896a34f",
+              "size_bytes": 1171
+            },
+            {
+              "derived_from": [
+                "0f6b706f8b3a3f4156af7dcd431b74e4f10bc39cb2fd0d4e725d6fe063712756"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "Qwen3.8-27B-hermes-lora-F16.gguf",
+                  "repo_id": "harness-hub/Qwen3.8-27B-hermes-adapted-GGUF",
+                  "repo_type": "model",
+                  "revision": "2835aca3f04ec8625b50c555396e8f2ea3ba329b"
+                }
+              ],
+              "name": "Qwen3.8-27B-hermes-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "58851e8143d23029bf2b05248f81b9ac2dd32b7d1eb21c40f601aab12a06fb4f",
+              "size_bytes": 318802400
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "harness-hub-opencode",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for the OpenCode harness: matches base xhigh thinking accuracy with thinking off and 6–8x fewer tokens.",
+      "tags": [
+        "coding-agent",
+        "opencode",
+        "rl",
+        "harbor"
+      ],
+      "title": "Harbor OpenCode coding agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/Qwen3.8-27B-opencode-adapted (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/Qwen3.8-27B-opencode-adapted",
+                  "repo_type": "model",
+                  "revision": "9c6545360eb1fea3a1fb2d142e5c166a88ffc275"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "668b9d7d4283d3d36622f0868c8d983a7299b4a37dbb393716d693dbb04f4582",
+              "size_bytes": 637610624
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/Qwen3.8-27B-opencode-adapted",
+                  "repo_type": "model",
+                  "revision": "9c6545360eb1fea3a1fb2d142e5c166a88ffc275"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "c22cf5bbbaa91833724d9fbfef6d3bd9a35410a56e0be18c96307faf3b43e507",
+              "size_bytes": 1171
+            },
+            {
+              "derived_from": [
+                "668b9d7d4283d3d36622f0868c8d983a7299b4a37dbb393716d693dbb04f4582"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "Qwen3.8-27B-opencode-lora-F16.gguf",
+                  "repo_id": "harness-hub/Qwen3.8-27B-opencode-adapted-GGUF",
+                  "repo_type": "model",
+                  "revision": "53ffbb1c789b1129eaed809c4be89f0bdd5ed0a8"
+                }
+              ],
+              "name": "Qwen3.8-27B-opencode-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "46bfab85a002fdc4366895c88e50d6f692b176fecabe1a3cced37b44a89815b3",
+              "size_bytes": 318802400
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "harness-hub-pi",
+      "submitter": "ivanopcode",
+      "summary": "RL-trained LoRA for the pi coding agent: matches base xhigh thinking accuracy with thinking off and ~4.5x fewer tokens.",
+      "tags": [
+        "coding-agent",
+        "pi",
+        "rl",
+        "harbor"
+      ],
+      "title": "Harbor pi coding agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/Qwen3.8-27B-pi-adapted (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted",
+                  "repo_type": "model",
+                  "revision": "7d42b119e2d4d475fa11270634b1ef98d1cd5aee"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "869b2a089882c0dac4683993f11081bd70edc30b32c64a988c688d6ac26b792a",
+              "size_bytes": 637610624
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted",
+                  "repo_type": "model",
+                  "revision": "7d42b119e2d4d475fa11270634b1ef98d1cd5aee"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "bf046ce17e9cfb0651b1f64f0d1cf9d312c140aaaf03c2e8a3a35e846cd307db",
+              "size_bytes": 1171
+            },
+            {
+              "derived_from": [
+                "869b2a089882c0dac4683993f11081bd70edc30b32c64a988c688d6ac26b792a"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "Qwen3.8-27B-pi-lora-F16.gguf",
+                  "repo_id": "harness-hub/Qwen3.8-27B-pi-adapted-GGUF",
+                  "repo_type": "model",
+                  "revision": "19980ce556b41c7b73818083c9adf4b3fa0c72e5"
+                }
+              ],
+              "name": "Qwen3.8-27B-pi-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "a64f91844f19e67da500d8628bdf9383aa334e61b7ab687805802e7d272d7b67",
+              "size_bytes": 318802304
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "Hugging Face (harness-hub)",
+          "url": "https://huggingface.co/harness-hub"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "harness-hub-super-adapter",
+      "submitter": "ivanopcode",
+      "summary": "Training-free rank-96 merge of the pi, Hermes and OpenCode LoRAs: improves thinking-on pass@1 across harnesses with 19–48% fewer tool calls.",
+      "tags": [
+        "coding-agent",
+        "pi",
+        "hermes",
+        "opencode",
+        "merge",
+        "harbor"
+      ],
+      "title": "Harbor Super-Adapter (pi + Hermes + OpenCode)",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of harness-hub/Qwen3.8-27B-super-adapter (rank 96 merged PEFT) and its upstream F16 GGUF LoRA.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "harness-hub/Qwen3.8-27B-super-adapter",
+                  "repo_type": "model",
+                  "revision": "3358a71529ce56aba0095addd6a60a66d7c4228b"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "f3fc23f857300e1b55a49725a4564a2fa4efd5c69f5aeab2da691daacf0b6c33",
+              "size_bytes": 1912679616
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "harness-hub/Qwen3.8-27B-super-adapter",
+                  "repo_type": "model",
+                  "revision": "3358a71529ce56aba0095addd6a60a66d7c4228b"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "ac16b38218d38bee16d9b73caa7f7b8af4c7b2f02b8dd8ae70b183a5099b9475",
+              "size_bytes": 1175
+            },
+            {
+              "derived_from": [
+                "f3fc23f857300e1b55a49725a4564a2fa4efd5c69f5aeab2da691daacf0b6c33"
+              ],
+              "format": "gguf",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "Qwen3.8-27B-super-adapter-lora-F16.gguf",
+                  "repo_id": "harness-hub/Qwen3.8-27B-super-adapter-GGUF",
+                  "repo_type": "model",
+                  "revision": "dcdf29a1ba09546e8c9e6afc5c7a86d7032b0572"
+                }
+              ],
+              "name": "Qwen3.8-27B-super-adapter-lora-F16.gguf",
+              "role": "derived",
+              "sha256": "90dc73d4f67fa2e8fc66d501e4278313eacec460f36ec7225ff64a420ffe5ab4",
+              "size_bytes": 956336640
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "authors": [
+        {
+          "name": "SuperQwen",
+          "url": "https://huggingface.co/superqwen"
+        }
+      ],
+      "kind": "lora",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "superqwen-swe-lora",
+      "submitter": "ivanopcode",
+      "summary": "Rank-16 SFT LoRA trained on 1,200 resolved SWE-smith trajectories (`bash`, `str_replace_editor`, `submit`); next-action tool match jumps 65% → 97.5%.",
+      "tags": [
+        "coding-agent",
+        "swe-agent",
+        "tool-calling",
+        "sft"
+      ],
+      "title": "SuperQwen SWE-agent LoRA",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial import of superqwen/qwen3.8-27b-swe-lora (rank 16 PEFT).",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_model.safetensors",
+                  "repo_id": "superqwen/qwen3.8-27b-swe-lora",
+                  "repo_type": "model",
+                  "revision": "c26577ac18d6f0ba37d728aee6ca5fc1b6d5f09a"
+                }
+              ],
+              "name": "adapter_model.safetensors",
+              "role": "source",
+              "sha256": "714fd806ed10d01f53b9dc13c4886671e730437e87fedeb8e0c8ae45c4359745",
+              "size_bytes": 435280528
+            },
+            {
+              "format": "json",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "adapter_config.json",
+                  "repo_id": "superqwen/qwen3.8-27b-swe-lora",
+                  "repo_type": "model",
+                  "revision": "c26577ac18d6f0ba37d728aee6ca5fc1b6d5f09a"
+                }
+              ],
+              "name": "adapter_config.json",
+              "role": "source",
+              "sha256": "3164d95c22ecde3c2f9d69efba73458b9f644d769fa382bfc4546ab01984aeb9",
+              "size_bytes": 1231
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "bf16",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model-00001-of-00018.safetensors",
+          "sha256": "ba0ce20aae489ad196733da5064bcdf159a1fe84f53336648196e1ebb7751b1c",
+          "size_bytes": 3966730552
+        },
+        {
+          "path": "model-00002-of-00018.safetensors",
+          "sha256": "06a148c01bfbe3faa14a5f184a7ff29a706f7ae1c8b2705d2058e26d17a001fb",
+          "size_bytes": 3043080328
+        },
+        {
+          "path": "model-00003-of-00018.safetensors",
+          "sha256": "2e1bf62cbcd406eaa64b60d10353e1f0ef4039d0976e56f05cabe953454f9968",
+          "size_bytes": 2542796952
+        },
+        {
+          "path": "model-00004-of-00018.safetensors",
+          "sha256": "511e34063187882659753c4d93f3859f93c019fd438d8813071921c81d9a3f1a",
+          "size_bytes": 3988973152
+        },
+        {
+          "path": "model-00005-of-00018.safetensors",
+          "sha256": "635cb53446dc74f219740fc59e18b774f877b803b9722e289ca62575a6efa701",
+          "size_bytes": 2099339864
+        },
+        {
+          "path": "model-00006-of-00018.safetensors",
+          "sha256": "0bc5214fac607f0e6cc92eec3789d4b8559410ef9fce66621ba8158e8410dae0",
+          "size_bytes": 3979553696
+        },
+        {
+          "path": "model-00007-of-00018.safetensors",
+          "sha256": "80b0c49033e9a0d5762562aa12f4acdb7f54da586f3d0110f28c48d91cf07892",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00008-of-00018.safetensors",
+          "sha256": "7192c5b66185d3592927daabee1cc19e6f6e0ce75988ee20e824b624765fda79",
+          "size_bytes": 3979553696
+        },
+        {
+          "path": "model-00009-of-00018.safetensors",
+          "sha256": "af3c48cc37af44f3db6ae0579baf019180d48d9c527caa0a1f03ff85813a56d8",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00010-of-00018.safetensors",
+          "sha256": "163490a76f3bea3a40855b7efc04ce6d27afaf1a34f0bbde495b9491f76457c9",
+          "size_bytes": 3979553696
+        },
+        {
+          "path": "model-00011-of-00018.safetensors",
+          "sha256": "5f3ae1b948aeee39da77aec558e8236cd65fe4d7cb7686a76bb007acc563c6d8",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00012-of-00018.safetensors",
+          "sha256": "a3de1c7114677a8f5ac5c4892c90e8238ea5c1e2038c80e757dfc87c3902ca55",
+          "size_bytes": 3979553696
+        },
+        {
+          "path": "model-00013-of-00018.safetensors",
+          "sha256": "06ab79a41f74c9c5cb734816feb0c7fc364104b227165ee7391231e1155aa02a",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00014-of-00018.safetensors",
+          "sha256": "4138ed94603065ba884bbcadedb04d7718bb40117e85e6f5c6fc5b9c05b7a85b",
+          "size_bytes": 3979553696
+        },
+        {
+          "path": "model-00015-of-00018.safetensors",
+          "sha256": "69224e27b9de4e7dbf6fc936c6eaae08447bda3b80a6c31a871ab451173afd22",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00016-of-00018.safetensors",
+          "sha256": "73cb9a1089fb6155cb648609478d6633be8a5c7d9ca5a05bc8925ce8a553cefe",
+          "size_bytes": 3979564040
+        },
+        {
+          "path": "model-00017-of-00018.safetensors",
+          "sha256": "beb51f01056142ac4984bd800507b0dd0fd18de57f8e9ef6ea41d1a3598983a8",
+          "size_bytes": 2108759344
+        },
+        {
+          "path": "model-00018-of-00018.safetensors",
+          "sha256": "1d3479509e21494658f9b64d317f5ea8e55c4025d28c702d6c4d0b356ce8ea06",
+          "size_bytes": 3392197344
+        }
+      ],
+      "id": "bf16",
+      "source": {
+        "repo_id": "Qwen/Qwen3.8-27B",
+        "revision": "37561816e66b5b9153b1b64c10968c18c1e6f4a0"
+      }
+    }
+  ]
+}

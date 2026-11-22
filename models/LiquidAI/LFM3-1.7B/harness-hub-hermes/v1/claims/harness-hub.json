@@ -1,0 +1,32 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/harness-hub/LFM3-1.7B-hermes",
+    "title": "harness-hub/LFM3-1.7B-hermes model card"
+  },
+  "affiliation": "Hugging Face",
+  "conditions": "Evaluated with the Hermes Agent harness (step 400), one attempt per task at temperature 0.8, paired against LiquidAI/LFM3-1.7B on 150 held-out SmolDataEnvs and 40 held-out traj2envs tasks.",
+  "sampling": {
+    "temperature": 0.8
+  },
+  "measures": [
+    {
+      "benchmark": "SmolDataEnvs (n=150)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 62.0,
+      "patched": 78.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "traj2envs (n=40)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 25.0,
+      "patched": 17.5,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

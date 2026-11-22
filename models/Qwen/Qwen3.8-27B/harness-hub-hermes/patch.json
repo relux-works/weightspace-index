@@ -1,0 +1,26 @@
+{
+  "contract_version": 1,
+  "title": "Harbor Hermes Agent LoRA",
+  "summary": "RL-trained LoRA for Hermes Agent: +14.1 pp on Terminal-Bench 2.1 and +13.7 pp on SWE-bench Pro with thinking off.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "coding-agent",
+    "hermes",
+    "rl",
+    "harbor"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

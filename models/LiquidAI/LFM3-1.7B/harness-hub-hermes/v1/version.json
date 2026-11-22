@@ -1,0 +1,59 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial import of harness-hub/LFM3-1.7B-hermes (rank 32 PEFT) and its upstream F16 GGUF LoRA.",
+  "target_profile": "bf16",
+  "files": [
+    {
+      "name": "adapter_model.safetensors",
+      "role": "source",
+      "sha256": "602adba54927f350d09655993bbc79d9a3ffd97c406ddc852747fa9e07342a09",
+      "size_bytes": 131790920,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM3-1.7B-hermes",
+          "revision": "9d96757a4d8f94dca024b745014955e1e5a3371b",
+          "path": "adapter_model.safetensors"
+        }
+      ]
+    },
+    {
+      "name": "adapter_config.json",
+      "role": "source",
+      "sha256": "8440a6ace9ecadf9d1ade8b58c40b8a1c8656f314c34b8afbbe29f2bfefbdb5b",
+      "size_bytes": 1202,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM3-1.7B-hermes",
+          "revision": "9d96757a4d8f94dca024b745014955e1e5a3371b",
+          "path": "adapter_config.json"
+        }
+      ]
+    },
+    {
+      "name": "LFM3-1.7B-harbor-hermes-lora-F16.gguf",
+      "role": "derived",
+      "sha256": "66f03073ac573cb0e2660ccd49e29bd883a54d1657564d172ecc814334708794",
+      "size_bytes": 65897536,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "harness-hub/LFM3-1.7B-hermes-GGUF",
+          "revision": "29624efd1658b637dde624acf717192caca84b56",
+          "path": "LFM3-1.7B-harbor-hermes-lora-F16.gguf"
+        }
+      ],
+      "derived_from": [
+        "602adba54927f350d09655993bbc79d9a3ffd97c406ddc852747fa9e07342a09"
+      ],
+      "tool": {
+        "name": "llama.cpp convert_lora_to_gguf",
+        "version": "published-upstream"
+      }
+    }
+  ]
+}

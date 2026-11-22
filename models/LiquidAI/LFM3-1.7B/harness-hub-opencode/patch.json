@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Harbor OpenCode LoRA",
+  "summary": "RL-trained LoRA for OpenCode: +15.3 pp on SmolDataEnvs (69.3% → 84.7%) with 43% fewer tool calls.",
+  "kind": "lora",
+  "authors": [
+    {
+      "name": "Hugging Face (harness-hub)",
+      "url": "https://huggingface.co/harness-hub"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "LFM Open License v1.0",
+  "tags": [
+    "agents",
+    "opencode",
+    "rl",
+    "harbor",
+    "data-analysis"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

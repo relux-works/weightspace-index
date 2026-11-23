@@ -23,11 +23,16 @@
         "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"
       },
       "score": {
-        "owner": "bench contributors",
-        "reason": "30 of 197 item-seed pairs filed",
-        "state": "UNKNOWN"
+        "cut_at_limit": 0.9238578680203046,
+        "denominator": 197,
+        "finished_without_answer": 0.0,
+        "mean_completion_tokens": 30707.84771573604,
+        "metric": "math_verify",
+        "unit": "mean over the protocol's frozen items of the mean over its seeds; a reply scores 1 when its final answer, the last \\boxed{} after the think-end token, equals the gold answer under math-verify, else 0",
+        "value": 0.07614213197969544,
+        "value_lm_eval": 0.18781725888324874
       },
-      "state": "INCOMPLETE"
+      "state": "COMPLETE"
     },
     {
       "id": "math500-n197.qwen3.5-0.8b-thinking.bf16.rikiyat-thinking-loops-v1",
@@ -144,11 +149,16 @@
                 "sha256": "9ee726e31bc718a2fdb22d8ae663fdba296fbb0af600ea0da73e2a5f771bc07f"
               },
               "score": {
-                "owner": "bench contributors",
-                "reason": "30 of 197 item-seed pairs filed",
-                "state": "UNKNOWN"
+                "cut_at_limit": 0.34517766497461927,
+                "denominator": 197,
+                "finished_without_answer": 0.05583756345177665,
+                "mean_completion_tokens": 22445.162436548224,
+                "metric": "math_verify",
+                "unit": "mean over the protocol's frozen items of the mean over its seeds; a reply scores 1 when its final answer, the last \\boxed{} after the think-end token, equals the gold answer under math-verify, else 0",
+                "value": 0.4873096446700508,
+                "value_lm_eval": 0.5380710659898477
               },
-              "state": "INCOMPLETE"
+              "state": "COMPLETE"
             },
             {
               "id": "math500-n197.qwen3.5-0.8b-thinking.bf16",

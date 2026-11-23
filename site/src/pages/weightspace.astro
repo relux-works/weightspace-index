@@ -5,7 +5,7 @@ import Page from "../layouts/Page.astro";
 import ShellCommand from "../components/ShellCommand.astro";
 import WeightspaceMark from "../components/WeightspaceMark.astro";
 import BitComparison from "../components/viz/BitComparison.astro";
-import { toolCommands, toolDownload, toolInstall } from "../lib/commands.ts";
+import { toolApt, toolCommands, toolDownload, toolHomebrew, toolInstall } from "../lib/commands.ts";
 import { humanBytes } from "../lib/format.ts";
 import { href, loadIndex } from "../lib/index.ts";
 import { NEW_TAB } from "../lib/links.ts";
@@ -29,37 +29,39 @@ const downloads = release.assets.map(asset => {
 // Without script the big button offers the first recorded platform.
 const main = downloads[0];
 const hero = [
+  "# Interactive TUI: pick engine -> local base -> pull & apply",
+  "wsp",
+  "",
+  "# Or bake & stack replacements directly (offline)",
   "weightspace apply \\",
-  "  --patch ./my-patch.safetensors \\",
-  "  --model ./my-model \\",
-  "  --out ./my-model-patched",
+  "  --patch ./patch-a.safetensors --patch ./patch-b.safetensors \\",
+  "  --on-conflict add --model ./my-model --out ./my-model-patched",
 ].join("\n");
 
 const reasons = [
   { title: "Checks before it writes", text: "Each replaced tensor is checked against the base the patch expects: saved old values or a SHA-256. A mismatched model is refused." },
-  { title: "Never touches your original", text: "Output is a new directory. The source model stays byte-for-byte as it was." },
-  { title: "Offline, data only", text: "No network, no downloads, no code from a checkpoint. Inputs are read as data." },
-  { title: "Only what changed", text: "Patches store each tensor sparse or whole, whichever file is smaller." },
+  { title: "Safe copies + verified in-place backup", text: "Default output is a new directory. Optional `--in-place` writes a SHA-256-verified backup under `.weightspace-backup/` reversible with `weightspace restore`." },
+  { title: "Patch stacking + multi-registry", text: "Stack replacements with `--on-conflict=error|add|average|weighted|last-wins|first-wins`, or connect custom Git/GitLab/Gitea/HTTP registries with zero auth." },
+  { title: "Interactive TUI + 7 local caches", text: "Run `wsp` to scan Hugging Face, llama.cpp, Ollama, LM Studio, Strata, and ds4 caches, pull verified LoRAs/patches, and launch or print exact paths." },
 ];
 
 const useIt = [
-  "You run the unquantized target model the patch was made for.",
-  "You want the exact model a study measured. Study results attach to the replacement, not to a derived LoRA.",
-  "You serve at scale and want zero adapter overhead.",
-  "You author patches: build one from a base and an edited checkpoint.",
+  "You want a zero-auth `wsp` CLI & TUI to search, pull, verify, and run patches or LoRAs across llama.cpp, vLLM, Ollama, LM Studio, MLX, Strata, or ds4.",
+  "You run the unquantized target model and want the exact weights a study measured with zero adapter overhead.",
+  "You want to stack multiple bit-exact replacements with explicit conflict merge rules (`add`, `average`, `weighted`).",
+  "You author patches or maintain a private/community Git index (`check`, `generate`, `replacement`).",
 ];
 const skipIt = [
-  "You run GGUF or other quantized weights. Load the LoRA instead.",
-  "You want to stack several patches. A baked copy takes one replacement.",
-  "You just want to try a patch in your runtime today.",
+  "You run GGUF or other quantized weights and want to attach adapters dynamically without re-quantizing (use `wsp pull --format gguf` or `--lora`).",
+  "You want to swap multiple LoRA adapters per request in a live vLLM or llama.cpp server.",
 ];
 ---
 <Page title="weightspace" nav="tool" description="Bake a bit-exact replacement into a copy of your model with weightspace, or load the LoRA adapter in a compatible runtime.">
   <section class="wrap tool-hero" aria-labelledby="tool-title">
     <header>
-      <p class="tool-name"><span class="tool-label"><WeightspaceMark /><code>weightspace</code></span> command-line tool</p>
-      <h1 id="tool-title">Bake a patch,<br />bit for bit.</h1>
-      <p class="lede">Writes a replacement patch into a copy of your model. Every changed weight lands at exactly its published value.</p>
+      <p class="tool-name"><span class="tool-label"><WeightspaceMark /><code>weightspace</code> / <code>wsp</code></span> CLI &amp; TUI</p>
+      <h1 id="tool-title">Pull, stack, and bake<br />weight patches.</h1>
+      <p class="lede">Discover local models, pull SHA-256-verified LoRAs and bit-exact replacements across Git/HTTP registries, stack patches safely, and launch your inference engine.</p>
       <section class="release-files tool-downloads" aria-labelledby="download-heading">
         <h2 id="download-heading">Download weightspace</h2>
         <div class="file-choices">
@@ -134,6 +136,8 @@ const skipIt = [
       <div class="install" data-tabs id="install-tabs">
         <div class="setup-tabs" data-slide="line" role="tablist" hidden aria-label="Platform">
           {downloads.map((d, i) => <button role="tab" type="button" data-label={d.os} aria-selected={String(i === 0)}>{d.label}</button>)}
+          <button role="tab" type="button" data-label="homebrew" aria-selected="false">Homebrew</button>
+          <button role="tab" type="button" data-label="apt" aria-selected="false">APT (Debian/Ubuntu)</button>
           <button role="tab" type="button" data-label="source" aria-selected="false">From source</button>
         </div>
         {downloads.map(d => <div class="install-panel" data-panel>
@@ -141,12 +145,22 @@ const skipIt = [
           <ShellCommand command={d.command} title={`Download, verify and install · ${d.arch}`} />
         </div>)}
         <div class="install-panel" data-panel>
+          <h3 class="panel-title">Homebrew (macOS &amp; Linux)</h3>
+          <ShellCommand command={toolHomebrew()} title="Developer ID signed & notarized on macOS · installs weightspace + wsp" />
+        </div>
+        <div class="install-panel" data-panel>
+          <h3 class="panel-title">APT (Debian / Ubuntu)</h3>
+          <ShellCommand command={toolApt()} title="Signed Relux Works APT repo (amd64 & arm64) · .deb also on GitHub Releases" />
+        </div>
+        <div class="install-panel" data-panel>
           <h3 class="panel-title">From source</h3>
-          <ShellCommand command={toolInstall(index.githubRepo)} title="Build with Rust 1.85 or newer" />
+          <ShellCommand command={toolInstall(index.githubRepo)} title="Build & install weightspace + wsp with Rust 1.85+" />
         </div>
       </div>
       <div class="run-cmds">
-        <ShellCommand command={toolCommands.apply} title="Apply a patch" />
+        <ShellCommand command={toolCommands.tui} title="Interactive TUI & hf-style CLI (wsp)" />
+        <ShellCommand command={toolCommands.stack} title="Stack replacements & in-place backup/restore" />
+        <ShellCommand command={toolCommands.apply} title="Apply a single replacement (copy)" />
         <ShellCommand command={toolCommands.replacement} title="Build a patch (authors)" />
       </div>
       <p class="fine">If a patch stores whole tensors, <code>apply</code> also needs their expected base digests. Take them from the patch author, never from your own model. <a href={`${guide}#apply-a-replacement-patch-patch-users`} {...NEW_TAB}>Details</a></p>

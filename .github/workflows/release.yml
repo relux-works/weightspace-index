@@ -18,22 +18,33 @@ jobs:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             archive: tar.gz
+            deb_arch: amd64
+            musl_cc_var: CC_x86_64_unknown_linux_musl
+            is_macos: false
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-24.04-arm
+            archive: tar.gz
+            deb_arch: arm64
+            musl_cc_var: CC_aarch64_unknown_linux_musl
+            is_macos: false
           - target: aarch64-apple-darwin
             os: macos-latest
             archive: tar.gz
+            deb_arch: ''
+            musl_cc_var: ''
+            is_macos: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            archive: tar.gz
+            deb_arch: ''
+            musl_cc_var: ''
+            is_macos: true
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             archive: zip
-          # Optional for v0.1.0; enable when owners want them:
-          # - target: aarch64-unknown-linux-musl
-          #   os: ubuntu-24.04-arm
-          #   archive: tar.gz
-          # - target: x86_64-apple-darwin
-          #   os: macos-latest
-          #   archive: tar.gz
-          # - target: aarch64-pc-windows-msvc
-          #   os: windows-11-arm
-          #   archive: zip
+            deb_arch: ''
+            musl_cc_var: ''
+            is_macos: false
     steps:
       # Pinned to the v7.0.1 commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -44,6 +55,14 @@ jobs:
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
         with:
           workspaces: tool
+
+      - name: Install musl toolchain
+        if: matrix.musl_cc_var != ''
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends musl-tools
+          echo "${{ matrix.musl_cc_var }}=musl-gcc" >> "$GITHUB_ENV"
 
       - name: Install target
         shell: bash
@@ -58,38 +77,145 @@ jobs:
           RUSTFLAGS: ${{ matrix.target == 'x86_64-pc-windows-msvc' && '-C target-feature=+crt-static' || '' }}
         run: cargo build --locked --release --target ${{ matrix.target }} --bin weightspace
 
+      # Developer ID signing + Apple notarization (Relux Works, LLC).
+      # Uses the same org secrets as relux-works/curator.
+      - name: Sign and notarize macOS binary
+        if: matrix.is_macos
+        shell: bash
+        env:
+          MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
+          MACOS_SIGN_P12_PASSWORD: ${{ secrets.MACOS_SIGN_P12_PASSWORD }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          BIN_PATH: tool/target/${{ matrix.target }}/release/weightspace
+        run: |
+          set -euo pipefail
+          if [ -z "${MACOS_SIGN_P12:-}" ] || [ -z "${MACOS_SIGN_P12_PASSWORD:-}" ]; then
+            echo "::warning::MACOS_SIGN_P12 / MACOS_SIGN_P12_PASSWORD not available to this repository; skipping macOS signing & notarization."
+            exit 0
+          fi
+
+          WORK=$(mktemp -d)
+          KEYCHAIN="$WORK/signing.keychain-db"
+          KEYCHAIN_PASS=$(openssl rand -hex 24)
+          P12_FILE="$WORK/cert.p12"
+          cleanup() {
+            security delete-keychain "$KEYCHAIN" 2>/dev/null || true
+            rm -rf "$WORK"
+          }
+          trap cleanup EXIT
+
+          printf '%s' "$MACOS_SIGN_P12" | base64 --decode > "$P12_FILE"
+          security create-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security import "$P12_FILE" -P "$MACOS_SIGN_P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASS" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+
+          IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN" | awk -F'"' '/Developer ID Application:/ { print $2; exit }')
+          if [ -z "$IDENTITY" ]; then
+            echo "::error::No 'Developer ID Application' identity found in MACOS_SIGN_P12"
+            exit 1
+          fi
+          echo "Signing $BIN_PATH with identity: $IDENTITY"
+          codesign --force --options runtime --timestamp --keychain "$KEYCHAIN" --sign "$IDENTITY" "$BIN_PATH"
+          codesign --verify --strict --verbose=2 "$BIN_PATH"
+
+          if [ -n "${ASC_ISSUER_ID:-}" ] && [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_KEY_P8:-}" ]; then
+            P8_FILE="$WORK/AuthKey.p8"
+            if printf '%s' "$ASC_KEY_P8" | grep -q "BEGIN PRIVATE KEY"; then
+              printf '%s\n' "$ASC_KEY_P8" > "$P8_FILE"
+            else
+              printf '%s' "$ASC_KEY_P8" | base64 --decode > "$P8_FILE"
+            fi
+            chmod 600 "$P8_FILE"
+            NOTARY_ZIP="$WORK/weightspace-notary.zip"
+            ditto -c -k --keepParent "$BIN_PATH" "$NOTARY_ZIP"
+            xcrun notarytool submit "$NOTARY_ZIP" \
+              --key "$P8_FILE" \
+              --key-id "$ASC_KEY_ID" \
+              --issuer "$ASC_ISSUER_ID" \
+              --wait \
+              --timeout 20m
+            echo "Apple notarization accepted for $BIN_PATH"
+          else
+            echo "::warning::ASC_* notarization secrets not set; binary is Developer ID signed but not notarized."
+          fi
+
       - name: Package
         shell: bash
+        env:
+          TAG: ${{ github.ref_name }}
+          TARGET: ${{ matrix.target }}
+          ARCHIVE_FMT: ${{ matrix.archive }}
+          DEB_ARCH: ${{ matrix.deb_arch }}
         run: |
-          stage="weightspace-${{ github.ref_name }}-${{ matrix.target }}"
+          set -euo pipefail
+          stage="weightspace-$TAG-$TARGET"
           mkdir "$stage"
-          if [ "${{ matrix.archive }}" = zip ]; then
-            cp "tool/target/${{ matrix.target }}/release/weightspace.exe" "$stage/"
+          if [ "$ARCHIVE_FMT" = zip ]; then
+            cp "tool/target/$TARGET/release/weightspace.exe" "$stage/weightspace.exe"
+            cp "tool/target/$TARGET/release/weightspace.exe" "$stage/wsp.exe"
           else
-            cp "tool/target/${{ matrix.target }}/release/weightspace" "$stage/"
+            cp "tool/target/$TARGET/release/weightspace" "$stage/weightspace"
+            chmod 0755 "$stage/weightspace"
+            ln -s weightspace "$stage/wsp"
           fi
           cp tool/LICENSE "$stage/"
-          if [ "${{ matrix.archive }}" = zip ]; then
+
+          if [ "$ARCHIVE_FMT" = zip ]; then
             7z a "$stage.zip" "$stage"
             artifact="$stage.zip"
           else
             tar -czf "$stage.tar.gz" "$stage"
             artifact="$stage.tar.gz"
           fi
+
           # The same binary, unpacked, so it runs straight after download.
-          if [ "${{ matrix.archive }}" = zip ]; then
+          if [ "$ARCHIVE_FMT" = zip ]; then
             binary="$stage.exe"
             cp "$stage/weightspace.exe" "$binary"
           else
-            # Named like the archive without its extension; the staging
-            # folder holds that name, so it goes once the archive exists.
             binary="$stage"
             cp "$stage/weightspace" weightspace.tmp
             rm -rf "$stage"
             mv weightspace.tmp "$binary"
             chmod +x "$binary"
           fi
-          for f in "$artifact" "$binary"; do
+
+          files_to_hash=("$artifact" "$binary")
+
+          # Build Debian .deb package on Linux runners (installs /usr/bin/weightspace + /usr/bin/wsp symlink).
+          if [ -n "$DEB_ARCH" ]; then
+            deb_ver="${TAG#v}"
+            deb_root="deb-stage"
+            rm -rf "$deb_root"
+            mkdir -p "$deb_root/DEBIAN" "$deb_root/usr/bin" "$deb_root/usr/share/doc/weightspace"
+            install -m 0755 "$binary" "$deb_root/usr/bin/weightspace"
+            ln -s weightspace "$deb_root/usr/bin/wsp"
+            install -m 0644 tool/LICENSE "$deb_root/usr/share/doc/weightspace/LICENSE"
+            cat > "$deb_root/DEBIAN/control" <<EOF
+          Package: weightspace
+          Version: $deb_ver
+          Section: devel
+          Priority: optional
+          Architecture: $DEB_ARCH
+          Maintainer: Relux Works, LLC <ivan@relux.works>
+          Homepage: https://weightspaceindex.com
+          Description: Weightspace Index CLI and interactive TUI (weightspace / wsp)
+           Discover, verify, stack, and apply bit-exact weight patches and native
+           LoRA adapters for open-weight AI models across custom Git/HTTP registries.
+          EOF
+            deb_file="weightspace_${deb_ver}_${DEB_ARCH}.deb"
+            dpkg-deb --build --root-owner-group "$deb_root" "$deb_file"
+            rm -rf "$deb_root"
+            files_to_hash+=("$deb_file")
+            echo "DEB_FILE=$deb_file" >> "$GITHUB_ENV"
+          fi
+
+          for f in "${files_to_hash[@]}"; do
             sha256sum "$f" > "$f.sha256" || shasum -a 256 "$f" > "$f.sha256"
           done
           echo "ARTIFACT=$artifact" >> "$GITHUB_ENV"
@@ -104,7 +230,9 @@ jobs:
             ${{ env.ARTIFACT }}.sha256
             ${{ env.BINARY }}
             ${{ env.BINARY }}.sha256
-          if-no-files-found: error
+            ${{ env.DEB_FILE }}
+            ${{ env.DEB_FILE }}.sha256
+          if-no-files-found: ignore
 
   release:
     name: release
@@ -136,25 +264,44 @@ jobs:
           ls -l
           cat SHA256SUMS
 
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Sign checksums with keyless cosign
+        shell: bash
+        run: |
+          cosign sign-blob \
+            --output-certificate=artifacts/SHA256SUMS.pem \
+            --output-signature=artifacts/SHA256SUMS.sig \
+            artifacts/SHA256SUMS \
+            --yes
+
       # Pinned to the v4.2.2 commit.
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: |
             artifacts/*.tar.gz
             artifacts/*.zip
+            artifacts/*.deb
             artifacts/*-apple-darwin
             artifacts/*-linux-musl
             artifacts/*.exe
+            artifacts/SHA256SUMS
 
       - name: Publish release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
         run: |
-          gh release create "${{ github.ref_name }}" artifacts/* \
-            --title "weightspace ${{ github.ref_name }}" \
+          extra=()
+          if [[ "$TAG" == *-* ]]; then
+            extra+=(--prerelease)
+          fi
+          gh release create "$TAG" artifacts/* \
+            --title "weightspace $TAG" \
             --generate-notes \
-            --verify-tag
+            --verify-tag \
+            "${extra[@]}"
 
       # The site's /weightspace/ page reads this file for its download
       # links and install commands; the site-release job commits it.
@@ -179,20 +326,186 @@ jobs:
           }
           # The first entry is the page's download button when it cannot
           # tell the visitor's platform.
+          mkdir -p release-handoff
           {
             entry aarch64-apple-darwin macos macOS "Apple Silicon" tar.gz ""
             entry x86_64-unknown-linux-musl linux Linux x86_64 tar.gz ""
             entry x86_64-pc-windows-msvc windows Windows x86_64 zip .exe
           } | jq -s --arg tag "$TAG" --arg toolVersion "$version" --arg published "$published" \
-            '{$tag, $toolVersion, $published, assets: .}' > tool-release.json
-          cat tool-release.json
+            '{$tag, $toolVersion, $published, assets: .}' > release-handoff/tool-release.json
+          cp artifacts/SHA256SUMS release-handoff/
+          cp artifacts/*.deb release-handoff/
+          cat release-handoff/tool-release.json
 
       # Pinned to the v4.6.2 commit.
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: site-release
-          path: tool-release.json
+          path: release-handoff/
           if-no-files-found: error
+
+  # Updates Formula/weightspace.rb in relux-works/homebrew-tap on stable tags.
+  homebrew:
+    name: publish Homebrew formula
+    needs: release
+    if: "!contains(github.ref_name, '-')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: site-release
+          path: release-meta
+
+      - name: Update relux-works/homebrew-tap
+        shell: bash
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAP_GITHUB_TOKEN:-}" ]; then
+            echo "::warning::TAP_GITHUB_TOKEN is not available to this repository; skipping Homebrew tap update."
+            exit 0
+          fi
+          ver="${TAG#v}"
+          sha_for() {
+            awk -v f="$1" '$2 == f || $2 == "*" f { print $1 }' release-meta/SHA256SUMS
+          }
+          SHA_MAC_ARM=$(sha_for "weightspace-$TAG-aarch64-apple-darwin.tar.gz")
+          SHA_MAC_X64=$(sha_for "weightspace-$TAG-x86_64-apple-darwin.tar.gz")
+          SHA_LIN_ARM=$(sha_for "weightspace-$TAG-aarch64-unknown-linux-musl.tar.gz")
+          SHA_LIN_X64=$(sha_for "weightspace-$TAG-x86_64-unknown-linux-musl.tar.gz")
+
+          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/relux-works/homebrew-tap.git" tap
+          mkdir -p tap/Formula
+          cat > tap/Formula/weightspace.rb <<EOF
+          # Auto-generated by relux-works/weightspace-index release workflow.
+          class Weightspace < Formula
+            desc "Weightspace Index CLI and interactive TUI (weightspace / wsp)"
+            homepage "https://weightspaceindex.com"
+            version "${ver}"
+            license "MIT"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/relux-works/weightspace-index/releases/download/${TAG}/weightspace-${TAG}-aarch64-apple-darwin.tar.gz"
+                sha256 "${SHA_MAC_ARM}"
+              end
+              on_intel do
+                url "https://github.com/relux-works/weightspace-index/releases/download/${TAG}/weightspace-${TAG}-x86_64-apple-darwin.tar.gz"
+                sha256 "${SHA_MAC_X64}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/relux-works/weightspace-index/releases/download/${TAG}/weightspace-${TAG}-aarch64-unknown-linux-musl.tar.gz"
+                sha256 "${SHA_LIN_ARM}"
+              end
+              on_intel do
+                url "https://github.com/relux-works/weightspace-index/releases/download/${TAG}/weightspace-${TAG}-x86_64-unknown-linux-musl.tar.gz"
+                sha256 "${SHA_LIN_X64}"
+              end
+            end
+
+            def install
+              bin.install "weightspace"
+              bin.install_symlink "weightspace" => "wsp"
+            end
+
+            test do
+              assert_match "Weightspace Index", shell_output("#{bin}/wsp --help")
+            end
+          end
+          EOF
+          cd tap
+          if git diff --quiet && [ -z "$(git status --porcelain)" ]; then
+            echo "Formula/weightspace.rb already up to date for $TAG"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add Formula/weightspace.rb
+          git commit -m "weightspace ${TAG}"
+          git push origin HEAD
+
+  # Publishes Debian .deb packages into relux-works/apt when APT GPG secrets are present.
+  apt:
+    name: publish APT repository
+    needs: release
+    if: "!contains(github.ref_name, '-')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: site-release
+          path: release-meta
+
+      - name: Update relux-works/apt
+        shell: bash
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAP_GITHUB_TOKEN:-}" ] || [ -z "${APT_GPG_PRIVATE_KEY:-}" ]; then
+            echo "::notice::APT_GPG_PRIVATE_KEY or TAP_GITHUB_TOKEN not configured; .deb packages are published on the GitHub Release and APT index update is skipped."
+            exit 0
+          fi
+
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends dpkg-dev apt-utils gnupg
+
+          GNUPGHOME=$(mktemp -d)
+          export GNUPGHOME
+          chmod 700 "$GNUPGHOME"
+          trap 'rm -rf "$GNUPGHOME"' EXIT
+
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --import
+          KEY_ID=$(gpg --list-secret-keys --with-colons | awk -F: '$1 == "sec" { print $5; exit }')
+
+          git clone "https://x-access-token:${TAP_GITHUB_TOKEN}@github.com/relux-works/apt.git" apt-repo
+          mkdir -p apt-repo/pool/main/w/weightspace \
+                   apt-repo/dists/stable/main/binary-amd64 \
+                   apt-repo/dists/stable/main/binary-arm64
+          cp release-meta/*.deb apt-repo/pool/main/w/weightspace/
+
+          cd apt-repo
+          gpg --armor --export "$KEY_ID" > relux-works.gpg
+          for arch in amd64 arm64; do
+            dpkg-scanpackages --arch "$arch" pool/ > "dists/stable/main/binary-${arch}/Packages"
+            gzip -9 -k -f "dists/stable/main/binary-${arch}/Packages"
+          done
+          apt-ftparchive \
+            -o APT::FTPArchive::Release::Origin="Relux Works, LLC" \
+            -o APT::FTPArchive::Release::Label="Relux Works APT" \
+            -o APT::FTPArchive::Release::Suite="stable" \
+            -o APT::FTPArchive::Release::Codename="stable" \
+            -o APT::FTPArchive::Release::Architectures="amd64 arm64" \
+            -o APT::FTPArchive::Release::Components="main" \
+            release dists/stable > dists/stable/Release
+
+          gpg_args=(--batch --yes --pinentry-mode loopback --local-user "$KEY_ID")
+          if [ -n "${APT_GPG_PASSPHRASE:-}" ]; then
+            gpg_args+=(--passphrase-fd 0)
+            printf '%s' "$APT_GPG_PASSPHRASE" | gpg "${gpg_args[@]}" -abs -o dists/stable/Release.gpg dists/stable/Release
+            printf '%s' "$APT_GPG_PASSPHRASE" | gpg "${gpg_args[@]}" --clearsign -o dists/stable/InRelease dists/stable/Release
+          else
+            gpg "${gpg_args[@]}" -abs -o dists/stable/Release.gpg dists/stable/Release
+            gpg "${gpg_args[@]}" --clearsign -o dists/stable/InRelease dists/stable/Release
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add pool dists relux-works.gpg
+          if git diff --cached --quiet; then
+            echo "APT repository already up to date for $TAG"
+            exit 0
+          fi
+          git commit -m "weightspace ${TAG}"
+          git push origin HEAD
 
   # Points the site at the release just published by committing the record
   # to main. A tag cut from an older commit than the recorded one still

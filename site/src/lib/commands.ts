@@ -51,14 +51,40 @@ export function toolDownload(githubRepo: string, release: ToolRelease, asset: To
 export function toolInstall(githubRepo: string): Command {
   const dir = githubRepo.split("/").pop();
   return {
-    text: `git clone https://github.com/${githubRepo}\ncd ${dir}/tool\ncargo build --locked --release --bin weightspace`,
+    text: `git clone https://github.com/${githubRepo}\ncd ${dir}/tool\ncargo install --path . --locked`,
     source: DOCS.install,
   };
 }
 
+export function toolHomebrew(): Command {
+  return {
+    text: "brew install relux-works/tap/weightspace\n# Installs both `weightspace` and the `wsp` short alias",
+    source: DOCS.release,
+  };
+}
+
+export function toolApt(): Command {
+  return {
+    text: [
+      "curl -fsSL https://relux-works.github.io/apt/relux-works.gpg | sudo tee /usr/share/keyrings/relux-works.gpg >/dev/null",
+      'echo "deb [signed-by=/usr/share/keyrings/relux-works.gpg] https://relux-works.github.io/apt stable main" | sudo tee /etc/apt/sources.list.d/relux-works.list',
+      "sudo apt update && sudo apt install weightspace",
+    ].join("\n"),
+    source: DOCS.release,
+  };
+}
+
 export const toolCommands = {
+  tui: {
+    text: "# Launch interactive TUI (detects local models & engines)\nwsp\n\n# Or use hf-style subcommands (no auth required)\nwsp search qwen\nwsp models\nwsp run Qwen/Qwen3.8-27B/harness-hub-pi --engine llama.cpp",
+    source: DOCS.apply,
+  },
   apply: {
     text: "weightspace apply \\\n  --patch ./my-patch.safetensors \\\n  --model ./my-model \\\n  --out ./my-model-patched",
+    source: DOCS.apply,
+  },
+  stack: {
+    text: "# Stack multiple replacements with an explicit conflict policy\nweightspace apply \\\n  --patch ./patch-a.safetensors \\\n  --patch ./patch-b.safetensors \\\n  --on-conflict add \\\n  --model ./my-model \\\n  --in-place\n\n# Restore byte-identical original weights from .weightspace-backup/\nweightspace restore --model ./my-model",
     source: DOCS.apply,
   },
   replacement: {

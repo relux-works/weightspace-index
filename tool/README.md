@@ -39,6 +39,25 @@ Everything below runs **strictly offline** — zero network, zero checkpoint cod
 
 ## Install
 
+### Homebrew (macOS & Linux)
+
+```sh
+brew install relux-works/tap/weightspace
+```
+
+Installs both `weightspace` and the `wsp` short alias. macOS release binaries are Developer ID signed and Apple notarized.
+
+### Debian / Ubuntu (APT or `.deb`)
+
+```sh
+curl -fsSL https://relux-works.github.io/apt/relux-works.gpg | sudo tee /usr/share/keyrings/relux-works.gpg >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/relux-works.gpg] https://relux-works.github.io/apt stable main" \
+  | sudo tee /etc/apt/sources.list.d/relux-works.list
+sudo apt update && sudo apt install weightspace
+```
+
+Every GitHub Release also attaches standalone `weightspace_<ver>_amd64.deb` and `weightspace_<ver>_arm64.deb` packages (installable offline via `sudo apt install ./weightspace_<ver>_amd64.deb`), shipping `/usr/bin/weightspace` and the `/usr/bin/wsp` symlink.
+
 ### From a release archive
 
 Tagged releases are published under **GitHub Releases** for this repository, one archive per platform, where `<tag>` is the release tag including its leading `v` (for example, `v0.1.0-alpha.1`). A release contains the tool as of its tag; `v0.1.0-alpha.1` is tool version 0.1.0 and predates `derive-lora`. For newer commands, install [from source](#from-source).

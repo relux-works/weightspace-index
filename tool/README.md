@@ -9,22 +9,33 @@
 
 A model checkpoint is a large file of named tensors (arrays of numbers). A **replacement patch** says: "for this exact base model, replace the values of these tensors with these new values." Applying it is plain assignment — the new values are copied bit-for-bit into a copy of the model — so the result is exact, with no rounding. For each changed tensor the tool picks whichever storage — in full, or sparsely as the changed positions plus the old and new values at those positions — makes the serialized patch file smaller, storing in full when the sizes tie, so a tensor changed in only a few places can still be stored in full. See [patch formats](../docs/patch-formats.md) for the file-level details.
 
-`weightspace` has five commands:
+`weightspace` (short alias **`wsp`**) provides two clean layers:
+
+### Client CLI, Multi-Registry & Interactive TUI (`wsp`)
+
+- `wsp` / `wsp tui` — interactive terminal UI: choose your inference engine (`llama.cpp`, `vLLM`, `Transformers / PEFT`, `Ollama`, `LM Studio`, `MLX-LM`, `Strata`, `DwarfStar / ds4`), see locally downloaded base models matching indexed patches first (followed by the rest of the catalog sorted newest-added first with `[not downloaded]`), optionally download a missing pinned base, pull & SHA-256-verify the patch/LoRA, apply replacements, and either launch the engine with recommended flags or print absolute paths.
+- `wsp search [QUERY]` / `wsp info <BASE/SLUG>` — browse and inspect patches across all configured registries (no auth required).
+- `wsp pull <BASE/SLUG> [--with-base] [--format auto|peft|gguf|replacement|all]` — download and SHA-256-verify artifacts (and optionally the pinned base profile from Hugging Face).
+- `wsp models` / `wsp engines` — discover locally cached models (Hugging Face hub, `llama.cpp`, Ollama, LM Studio, Strata, `ds4`, Weightspace managed) and installed engines on `PATH`.
+- `wsp run <BASE/SLUG> [--engine <NAME>] [--print-paths] [--download-base]` — pull, apply if replacement, and launch the chosen engine (or print absolute paths and the exact command).
+- `wsp registry <list|add|remove|pin|unpin|default|sync>` — manage `~/.config/weightspace/registries.toml` with the official default registry plus any custom Git host (GitHub, corporate GitLab, Gitea, SSH URLs via system `git`), static HTTP index, or local directory, with commit/tag pinning and priority ordering.
+
+### Offline Patch & Index Commands (`weightspace`)
+
+Everything below runs **strictly offline** — zero network, zero checkpoint code execution:
 
 - `weightspace replacement` — compare a base checkpoint with an edited checkpoint and write one replacement patch file (`.safetensors`) holding only what changed. This is for patch authors.
-- `weightspace apply` — bake one replacement patch file into a **new copy** of a model directory. The original model is never modified. This is for people who have downloaded a patch and a matching base model and want a patched copy to run.
+- `weightspace apply` — bake one or more replacement patch files into a **new copy** of a model directory (default), or modify `--in-place` after writing a SHA-256-verified backup under `.weightspace-backup/`. Supports stacking multiple `--patch` files with `--on-conflict=error|add|average|weighted|last-wins|first-wins` (`PATH:WEIGHT` for weighted delta merge).
+- `weightspace restore --model <DIR>` — verify backup SHA-256 and restore exact original base weights from an `--in-place` apply.
 - `weightspace derive-lora` — derive experimental LoRA factors from an exact replacement and matching base, or offline from sparse old values and supplied matrix shapes. Study claims NEVER transfer to this derived form; it needs its own evaluation. PEFT/llama.cpp/vLLM runtime loading is UNQUALIFIED.
 - `weightspace check [repo]` — run every offline check over an index repository checkout. This is for contributors and CI.
 - `weightspace generate [repo]` — rebuild the index's generated files in a checkout. This is for contributors.
 
-Everything runs **offline**. The tool never uses the network, never downloads models or patches, and never executes code from a repository or a checkpoint: inputs are read as data only. Anything you apply you must already have on disk, and checking downloaded files against the index's recorded sizes and SHA-256 digests remains your step before you run `apply` (see "Use a patch" in the [root README](../README.md)).
-
 ## What it does not do
 
-- It does **not** train or fine-tune models, run inference, or run benchmarks. Run the patched copy with your usual runtime; [workflows](../docs/workflows.md) shows where common runtimes fit.
-- It does **not** combine patches. A baked copy takes at most one replacement. The experimental derived LoRA factors require separate evaluation and runtime qualification; study claims NEVER transfer to them. PEFT/llama.cpp/vLLM runtime loading is UNQUALIFIED.
+- It does **not** train or fine-tune models or run benchmarks. Inference engines (`llama.cpp`, `vLLM`, `Ollama`, `LM Studio`, `MLX-LM`, `Strata`, `ds4`) are launched externally or given printed paths; [workflows](../docs/workflows.md) shows where common runtimes fit.
 - It does **not** prove patch quality, safety, or effectiveness, and a clean run is not an endorsement (see the warning above).
-- It does **not** quantize, dequantize, or convert weights, and it does not read pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`). Checkpoints and patch files must be single-file [safetensors](https://github.com/huggingface/safetensors); sharded or indexed layouts are refused (see [Inputs in detail](#inputs-in-detail)).
+- It does **not** quantize, dequantize, or convert weights, and it does not read pickle-based formats (`.bin`, `.pt`, `.pth`, `.pkl`). Replacement checkpoints and patch files must be single-file [safetensors](https://github.com/huggingface/safetensors); sharded or indexed layouts are refused for `apply` (see [Inputs in detail](#inputs-in-detail)).
 
 ## Install
 

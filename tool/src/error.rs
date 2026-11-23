@@ -115,6 +115,21 @@ pub enum ToolError {
     /// Backup or restore of an in-place patched model failed.
     #[error("backup {path}: {detail}")]
     Backup { path: PathBuf, detail: String },
+    /// Registry configuration or synchronization failed.
+    #[error("registry {name}: {detail}")]
+    Registry { name: String, detail: String },
+    /// Network request or file download failed.
+    #[error("network ({url}): {detail}")]
+    Network { url: String, detail: String },
+    /// Downloaded file failed its SHA-256 or byte-length check.
+    #[error("download integrity failed for {name}: {detail}")]
+    DownloadIntegrity { name: String, detail: String },
+    /// Requested model, patch, or registry entry was not found.
+    #[error("not found: {detail}")]
+    NotFound { detail: String },
+    /// Local inference engine execution or launch planning failed.
+    #[error("engine {engine}: {detail}")]
+    Engine { engine: String, detail: String },
 }
 
 impl ToolError {

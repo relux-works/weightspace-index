@@ -3,13 +3,18 @@ name = "weightspace-tools"
 version = "0.2.0"
 edition = "2024"
 rust-version = "1.85"
+default-run = "weightspace"
 publish = false
 license = "MIT"
-description = "Checks and generator for the Weightspace Index"
+description = "Checks, generator, patch tools, multi-registry client and TUI for the Weightspace Index"
 
 [[bin]]
 name = "weightspace"
 path = "src/main.rs"
+
+[[bin]]
+name = "wsp"
+path = "src/bin/wsp.rs"
 
 [dependencies]
 # No default features: the validator never fetches remote or file references.
@@ -32,6 +37,11 @@ clap = { version = "4.6.7", default-features = false, features = [
     "error-context",
 ] }
 thiserror = "2"
+# Client, multi-registry config, HTTP downloads (pure-Rust rustls, no OpenSSL), and TUI.
+toml = "0.8"
+ureq = { version = "2.12", default-features = false, features = ["tls", "json"] }
+ratatui = { version = "0.29", default-features = false, features = ["crossterm"] }
+crossterm = "0.28"
 
 [dev-dependencies]
 tempfile = "3"

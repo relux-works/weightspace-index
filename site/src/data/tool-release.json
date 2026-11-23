@@ -1,34 +1,49 @@
 {
-  "tag": "v0.1.0-alpha.1",
-  "toolVersion": "0.1.0",
-  "published": "2026-11-16",
+  "tag": "v0.2.0",
+  "toolVersion": "0.2.0",
+  "published": "2026-11-23",
   "assets": [
     {
       "target": "aarch64-apple-darwin",
       "os": "macos",
       "label": "macOS",
       "arch": "Apple Silicon",
-      "name": "weightspace-v0.1.0-alpha.1-aarch64-apple-darwin.tar.gz",
-      "size": 2481999,
-      "sha256": "14c4640f38643b2e1e98fb811bb375214281854ccc2213fff92a07489885a664"
+      "name": "weightspace-v0.2.0-aarch64-apple-darwin.tar.gz",
+      "size": 4154431,
+      "sha256": "ded56a8a5693049f3ba0303cb0fb47442da87cf8f53d7b00c815669e22bdb525",
+      "binary": {
+        "name": "weightspace-v0.2.0-aarch64-apple-darwin",
+        "size": 11459744,
+        "sha256": "b32d4cfd28ddce722c3c1cbabb910c106ee07489d172b33e8938b7413e832bee"
+      }
     },
     {
       "target": "x86_64-unknown-linux-musl",
       "os": "linux",
       "label": "Linux",
       "arch": "x86_64",
-      "name": "weightspace-v0.1.0-alpha.1-x86_64-unknown-linux-musl.tar.gz",
-      "size": 2952718,
-      "sha256": "2c4cce7310ce76b7f6dcbececdacb9c3d37663a88edaa33510814fe4fb525166"
+      "name": "weightspace-v0.2.0-x86_64-unknown-linux-musl.tar.gz",
+      "size": 4942736,
+      "sha256": "41b43218977d031b90c729b38152b5908a4681c7b64daf736a41069903e750b9",
+      "binary": {
+        "name": "weightspace-v0.2.0-x86_64-unknown-linux-musl",
+        "size": 13578936,
+        "sha256": "d7a1dea46b155e23baa34a19dbb38c86eb26054e145b71ffd6f63227f831546b"
+      }
     },
     {
       "target": "x86_64-pc-windows-msvc",
       "os": "windows",
       "label": "Windows",
       "arch": "x86_64",
-      "name": "weightspace-v0.1.0-alpha.1-x86_64-pc-windows-msvc.zip",
-      "size": 2411563,
-      "sha256": "a6f3fe802b1b8987ebe0ae7e0420a2309208e05a5861a5eb0b042796750c5770"
+      "name": "weightspace-v0.2.0-x86_64-pc-windows-msvc.zip",
+      "size": 8052588,
+      "sha256": "6c02e66f0ffdc0cbe538e2e37c13f8cc7c5115640495e8b8d57c27df93da5a83",
+      "binary": {
+        "name": "weightspace-v0.2.0-x86_64-pc-windows-msvc.exe",
+        "size": 10894848,
+        "sha256": "ebf6ed206c88a027d11cccf8ae043ca6f65cfe4bd344dc3058fe324b6a3de4de"
+      }
     }
   ]
 }

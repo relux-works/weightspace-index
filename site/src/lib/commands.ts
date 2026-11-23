@@ -66,8 +66,8 @@ export function toolHomebrew(): Command {
 export function toolApt(): Command {
   return {
     text: [
-      "curl -fsSL https://relux-works.github.io/apt/relux-works.gpg | sudo tee /usr/share/keyrings/relux-works.gpg >/dev/null",
-      'echo "deb [signed-by=/usr/share/keyrings/relux-works.gpg] https://relux-works.github.io/apt stable main" | sudo tee /etc/apt/sources.list.d/relux-works.list',
+      "curl -fsSL https://apt.relux.works/relux-works.gpg | sudo tee /usr/share/keyrings/relux-works.gpg >/dev/null",
+      'echo "deb [signed-by=/usr/share/keyrings/relux-works.gpg] https://apt.relux.works stable main" | sudo tee /etc/apt/sources.list.d/relux-works.list',
       "sudo apt update && sudo apt install weightspace",
     ].join("\n"),
     source: DOCS.release,

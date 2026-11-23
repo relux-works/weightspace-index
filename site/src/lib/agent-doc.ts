@@ -172,7 +172,7 @@ export function renderAgentMarkdown(index: Index): string {
     "",
     "## CLI Quickstart (`weightspace` / `wsp`)",
     "",
-    "Install via Homebrew (`brew install relux-works/tap/weightspace`), Debian/Ubuntu APT (`relux-works.github.io/apt`), or download signed/verified binaries from " + absUrl("weightspace/") + " (macOS Apple Silicon/Intel notarized, Linux x86_64/arm64 musl & `.deb`, Windows x86_64).",
+    "Install via Homebrew (`brew install relux-works/tap/weightspace`), Debian/Ubuntu APT (`https://apt.relux.works`), or download signed/verified binaries from " + absUrl("weightspace/") + " (macOS Apple Silicon/Intel notarized, Linux x86_64/arm64 musl & `.deb`, Windows x86_64).",
     "",
     "```sh",
     "# Launch interactive TUI (detects local models & engines)",

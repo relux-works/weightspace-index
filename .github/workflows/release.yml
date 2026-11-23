@@ -473,11 +473,15 @@ jobs:
           cp release-meta/*.deb apt-repo/pool/main/w/weightspace/
 
           cd apt-repo
-          gpg --armor --export "$KEY_ID" > relux-works.gpg
+          # Export binary OpenPGP keyring for apt `signed-by=.../relux-works.gpg`
+          # (gpgv rejects ASCII-armored files with a .gpg suffix), plus .asc for inspection.
+          gpg --export "$KEY_ID" > relux-works.gpg
+          gpg --armor --export "$KEY_ID" > relux-works.asc
           for arch in amd64 arm64; do
             dpkg-scanpackages --arch "$arch" pool/ > "dists/stable/main/binary-${arch}/Packages"
             gzip -9 -k -f "dists/stable/main/binary-${arch}/Packages"
           done
+          rm -f dists/stable/Release dists/stable/Release.gpg dists/stable/InRelease
           apt-ftparchive \
             -o APT::FTPArchive::Release::Origin="Relux Works, LLC" \
             -o APT::FTPArchive::Release::Label="Relux Works APT" \
@@ -485,7 +489,8 @@ jobs:
             -o APT::FTPArchive::Release::Codename="stable" \
             -o APT::FTPArchive::Release::Architectures="amd64 arm64" \
             -o APT::FTPArchive::Release::Components="main" \
-            release dists/stable > dists/stable/Release
+            release dists/stable > Release.tmp
+          mv Release.tmp dists/stable/Release
 
           gpg_args=(--batch --yes --pinentry-mode loopback --local-user "$KEY_ID")
           if [ -n "${APT_GPG_PASSPHRASE:-}" ]; then
@@ -499,7 +504,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git add pool dists relux-works.gpg
+          git add pool dists relux-works.gpg relux-works.asc
           if git diff --cached --quiet; then
             echo "APT repository already up to date for $TAG"
             exit 0

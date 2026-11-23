@@ -12,6 +12,8 @@ Weightspace Index is an open catalog of **weight patches** for open-weight model
 
 ## 2. Repository Layout
 
+- **Full CLI & TUI walkthrough (install, registries, downloading bases/patches, stacking `--on-conflict`, `--in-place` backups & `restore`, all 9 engines including `mlx-serve`):** see [docs/cli.md](docs/cli.md) or run `wsp --help` / `wsp <command> --help`.
+
 ```text
 models/                 Authored catalog records + generated index.json / README.md
   <ns>/<model>/

@@ -167,6 +167,54 @@ export function previewResult(rows: Result[]) {
   return rows.find(r => r.source === "index") ?? rows[0];
 }
 
+/**
+ * Preapproved mainstream benchmarks allowed as directory-row highlights.
+ * Auxiliary measures (those with a `name`, such as "Cut at the token limit")
+ * and non-mainstream evals are excluded so directory rows never surface
+ * obscure or mislabeled numbers.
+ */
+export const APPROVED_BENCHMARKS: RegExp[] = [
+  /^swe-bench\b/i,
+  /^terminal-bench\b/i,
+  /^math[- ]?500\b/i,
+  /^ifeval\b/i,
+  /^ifbench\b/i,
+  /^gsm8k\b/i,
+  /^aime\b/i,
+  /^gpqa\b/i,
+  /^humaneval\b/i,
+  /^livecodebench\b/i,
+  /^mmlu(?:-pro)?\b/i,
+  /^bfcl\b/i,
+];
+
+export function isApprovedBenchmark(benchmark: string): boolean {
+  return APPROVED_BENCHMARKS.some(rx => rx.test(benchmark.trim()));
+}
+
+/**
+ * Picks at most one primary score on a preapproved benchmark for a model's
+ * directory row. Prefers independent Measured ("index") runs over author
+ * Reported ("author") claims, and excludes auxiliary metrics (`r.name`).
+ */
+export function directoryBenchmarkHighlight(releases: Version[]): Result | null {
+  const candidates = releases
+    .flatMap(v => results(v))
+    .filter(r => !r.name && r.higherIsBetter && isApprovedBenchmark(r.benchmark));
+  if (!candidates.length) return null;
+
+  const measured = candidates.filter(r => r.source === "index");
+  const pool = measured.length ? measured : candidates.filter(r => gain(r) > 0);
+  if (!pool.length) return null;
+
+  return pool.reduce((best, cur) => {
+    const diff = gain(cur) - gain(best);
+    if (diff !== 0) return diff > 0 ? cur : best;
+    const rank = (b: string) => APPROVED_BENCHMARKS.findIndex(rx => rx.test(b.trim()));
+    return rank(cur.benchmark) < rank(best.benchmark) ? cur : best;
+  });
+}
+
 export function signed(n: number, unit = "") {
   const v = Math.round(n * 10) / 10;
   const u = unit === "%" ? " pp" : unit ? ` ${unit}` : "";

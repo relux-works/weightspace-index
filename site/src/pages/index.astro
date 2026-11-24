@@ -259,11 +259,17 @@ const registryExample = {
 
   .home-hero .directory { margin-top: var(--space-8); padding: 0; border: 0; }
   .dir-count { display: block; color: var(--color-text-muted); font-size: .84rem; margin-top: .15rem; }
-  :global(.model-entry__right) { display: inline-flex; align-items: center; gap: .85rem; flex-shrink: 0; }
-  :global(.model-entry__gain) {
-    font: 600 .8rem/1 var(--font-mono); color: var(--color-accent);
-    padding: .3rem .55rem; border-radius: .25rem; background: var(--color-surface-subtle);
+  :global(.model-entry__right) { display: inline-flex; align-items: center; gap: var(--space-4); flex-shrink: 0; min-width: 0; }
+  :global(.model-entry__bench) {
+    display: inline-flex; align-items: baseline; gap: 0.45rem;
+    font-size: 0.8125rem; line-height: 1.3;
     white-space: nowrap;
+  }
+  :global(.model-entry__bench-name) { color: var(--color-text-muted); }
+  :global(.model-entry__bench-delta) {
+    font: 600 0.8125rem/1 var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text);
   }
   .registry-band { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 1.5rem 3rem; align-items: center; }
   .registry-copy h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
@@ -286,7 +292,7 @@ const registryExample = {
   }
   @media (max-width: 52rem) {
     .registry-band { grid-template-columns: minmax(0, 1fr); }
-    :global(.model-entry__gain) { display: none; }
+    :global(.model-entry__bench) { display: none; }
   }
   @media (max-width: 30rem) {
     .hero-actions { gap: var(--space-2) var(--space-4); }

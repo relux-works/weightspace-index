@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { CUT, FINAL_ANSWERS, groupEvidence, pending, previewResult, resultKey, results, type Result, type Pending } from "../src/lib/insight.ts";
+import { CUT, directoryBenchmarkHighlight, FINAL_ANSWERS, groupEvidence, pending, previewResult, resultKey, results, type Result, type Pending } from "../src/lib/insight.ts";
 import type { Run, Version } from "../src/lib/types.ts";
 
 test("author claims stay apart from index results, and every filed run is an index run", () => {
@@ -106,4 +106,36 @@ test("provisional IFEval uses the protocol's strict prompt-level metric", () => 
 test("benchmarks with the same measure name have distinct chart keys", () => {
   const math = { benchmark: "MATH-500", name: CUT, unit: "%" };
   assert.notEqual(resultKey(math), resultKey({ ...math, benchmark: "IFEval" }));
+});
+
+test("directory benchmark highlight filters to preapproved primary scores and prefers Measured runs", () => {
+  const mkVersion = (measures: object[], runs: Run[] = []) => ({
+    label: "v1",
+    claims: [{ record: { source: { url: "https://example.com" }, measures } }],
+    runs,
+    comparisons: [],
+  }) as unknown as Version;
+
+  // Auxiliary metrics like "Cut at the token limit" must never win over primary MATH-500 accuracy.
+  const qwen08 = mkVersion([
+    { benchmark: "MATH-500", metric: "accuracy", unit: "%", baseline: 7.9, patched: 48.1, better: "higher" },
+    { benchmark: "MATH-500", name: CUT, unit: "%", baseline: 93.0, patched: 33.1, better: "lower" },
+  ]);
+  const hit = directoryBenchmarkHighlight([qwen08]);
+  assert.equal(hit?.benchmark, "MATH-500");
+  assert.equal(hit?.patched, 48.1);
+  assert.equal(hit?.source, "author");
+
+  // Obscure benchmarks return null instead of surfacing noisy pills.
+  const obscure = mkVersion([
+    { benchmark: "SmolDataEnvs (n=150)", metric: "pass@1", unit: "%", baseline: 62.0, patched: 78.0, better: "higher" },
+    { benchmark: "SWE-smith next-action (n=40)", name: "Same tool", metric: "accuracy", unit: "%", baseline: 32.0, patched: 88.0, better: "higher" },
+  ]);
+  assert.equal(directoryBenchmarkHighlight([obscure]), null);
+
+  // Well-known SWE-bench Pro beats obscure next-action claims on the same model.
+  const swe = mkVersion([
+    { benchmark: "SWE-bench Pro (hard 51)", metric: "pass@1", unit: "%", baseline: 39.2, patched: 64.7, better: "higher" },
+  ]);
+  assert.equal(directoryBenchmarkHighlight([obscure, swe])?.benchmark, "SWE-bench Pro (hard 51)");
 });

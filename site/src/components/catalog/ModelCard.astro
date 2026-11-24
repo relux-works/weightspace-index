@@ -2,6 +2,7 @@
 import Arrow from "../Arrow.astro";
 import { activeVersion, formats, discoveryText } from "../../lib/catalog.ts";
 import { plural } from "../../lib/format.ts";
+import { directoryBenchmarkHighlight, gain } from "../../lib/insight.ts";
 import { versionTerms } from "../../lib/search.ts";
 import type { Base, Version } from "../../lib/types.ts";
 
@@ -12,22 +13,13 @@ const availableFormats = [...new Set(releases.flatMap(formats))];
 const names = releases.map(v => v.patch.title);
 const terms = [discoveryText(base.address, base.patches, availableFormats),
   ...names, ...releases.map(versionTerms)].join(" ").toLowerCase();
-
-// Surface the strongest headline reported/measured improvement for quick scanning.
-let headline: string | null = null;
-let bestGain = -Infinity;
-for (const v of releases) {
-  for (const c of v.claims) {
-    for (const m of c.record.measures) {
-      const gain = m.better === "higher" ? m.patched - m.baseline : m.baseline - m.patched;
-      if (gain > bestGain && gain > 0) {
-        bestGain = gain;
-        const unit = m.unit === "%" ? "pp" : ` ${m.unit}`;
-        headline = `${m.benchmark} +${gain.toFixed(1)} ${unit}`;
-      }
-    }
-  }
-}
+const highlight = directoryBenchmarkHighlight(releases);
+const highlightDelta = highlight ? (() => {
+  const v = Math.round(gain(highlight) * 10) / 10;
+  const sign = v > 0 ? "+" : v < 0 ? "−" : "±";
+  const unit = highlight.unit === "%" ? "%" : highlight.unit ? ` ${highlight.unit}` : "";
+  return `${sign}${Math.abs(v)}${unit}`;
+})() : null;
 ---
 <li data-search={terms}>
   <a class="model-entry" href={base.url}>
@@ -40,7 +32,12 @@ for (const v of releases) {
       </small>
     </span>
     <span class="model-entry__right">
-      {headline && <span class="model-entry__gain">{headline}</span>}
+      {highlight && highlightDelta && (
+        <span class="model-entry__bench">
+          <span class="model-entry__bench-name">{highlight.benchmark}</span>
+          <span class="model-entry__bench-delta">{highlightDelta}</span>
+        </span>
+      )}
       <span class="entry-arrow"><Arrow /></span>
     </span>
   </a>

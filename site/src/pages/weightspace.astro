@@ -13,6 +13,7 @@ import { highlight } from "../lib/shell.ts";
 import { assetUrl, download, releasePage, toolRelease as release } from "../lib/tool-release.ts";
 
 const index = loadIndex();
+const cliGuide = index.docsAt("docs/cli.md");
 const guide = index.docsAt("tool/README.md");
 const notes = releasePage(index.githubRepo, release);
 // The bare binary when the release has one, else the archive.
@@ -42,11 +43,11 @@ const reasons = [
   { title: "Checks before it writes", text: "Each replaced tensor is checked against the base the patch expects: saved old values or a SHA-256. A mismatched model is refused." },
   { title: "Safe copies + verified in-place backup", text: "Default output is a new directory. Optional `--in-place` writes a SHA-256-verified backup under `.weightspace-backup/` reversible with `weightspace restore`." },
   { title: "Patch stacking + multi-registry", text: "Stack replacements with `--on-conflict=error|add|average|weighted|last-wins|first-wins`, or connect custom Git/GitLab/Gitea/HTTP registries with zero auth." },
-  { title: "Interactive TUI + 7 local caches", text: "Run `wsp` to scan Hugging Face, llama.cpp, Ollama, LM Studio, Strata, and ds4 caches, pull verified LoRAs/patches, and launch or print exact paths." },
+  { title: "Interactive TUI + 8 local caches", text: "Run `wsp` to scan Hugging Face, llama.cpp, Ollama, LM Studio, mlx-serve, Strata, and ds4 caches, pull verified LoRAs/patches, and launch or print exact paths." },
 ];
 
 const useIt = [
-  "You want a zero-auth `wsp` CLI & TUI to search, pull, verify, and run patches or LoRAs across llama.cpp, vLLM, Ollama, LM Studio, MLX, Strata, or ds4.",
+  "You want a zero-auth `wsp` CLI & TUI to search, pull, verify, and run patches or LoRAs across llama.cpp, vLLM, Ollama, LM Studio, MLX-LM, mlx-serve, Strata, or ds4.",
   "You run the unquantized target model and want the exact weights a study measured with zero adapter overhead.",
   "You want to stack multiple bit-exact replacements with explicit conflict merge rules (`add`, `average`, `weighted`).",
   "You author patches or maintain a private/community Git index (`check`, `generate`, `replacement`).",
@@ -163,7 +164,7 @@ const skipIt = [
         <ShellCommand command={toolCommands.apply} title="Apply a single replacement (copy)" />
         <ShellCommand command={toolCommands.replacement} title="Build a patch (authors)" />
       </div>
-      <p class="fine">If a patch stores whole tensors, <code>apply</code> also needs their expected base digests. Take them from the patch author, never from your own model. <a href={`${guide}#apply-a-replacement-patch-patch-users`} {...NEW_TAB}>Details</a></p>
+      <p class="fine">See the full step-by-step <a href={cliGuide} {...NEW_TAB}>CLI &amp; TUI guide (<code>docs/cli.md</code>)</a> for registry setup, conflict-merge math, and all 9 inference engines. If a patch stores whole tensors, <code>apply</code> also needs their expected base digests (<a href={`${guide}#apply-a-replacement-patch-patch-users`} {...NEW_TAB}>low-level details</a>).</p>
     </div>
   </section>
 

@@ -31,12 +31,159 @@ use crate::records::Records;
 use crate::registry::{AppPaths, RegistryConfig, RegistryKind, load_merged_catalog, sync_registry};
 use crate::tui::{TuiExitAction, human_bytes, run_tui};
 
+const ROOT_AFTER_HELP: &str = "\
+QUICKSTART:
+  wsp                                            Launch interactive TUI (TTY default)
+  wsp search qwen                                Search patches & LoRAs across registries
+  wsp info Qwen/Qwen3.8-27B/harness-hub-pi       Inspect files, SHA-256 digests & benchmarks
+  wsp pull Qwen/Qwen3.8-27B/harness-hub-pi --with-base
+                                                 Download verified adapter + pinned base
+  wsp run Qwen/Qwen3.8-27B/harness-hub-pi --engine llama.cpp --print-paths
+                                                 Prepare patch and print exact paths/command
+
+PATCH STACKING & ROLLBACK (OFFLINE):
+  wsp apply --patch a.safetensors --patch b.safetensors \\
+            --on-conflict add --model ./base --in-place
+  wsp restore --model ./base                     Restore byte-exact original weights
+
+CUSTOM & COMMUNITY REGISTRIES (NO AUTH IN WSP):
+  wsp registry add community https://git.example.org/community/index.git --sync
+  wsp registry pin community v2026.11
+  wsp registry default community
+
+FILES & ENVIRONMENT:
+  Config:     ~/.config/weightspace/registries.toml   (override: WEIGHTSPACE_CONFIG)
+  Cache:      ~/.cache/weightspace/                   (override: WEIGHTSPACE_CACHE)
+  Data:       ~/.local/share/weightspace/             (override: WEIGHTSPACE_DATA)
+  HF mirror:  HF_ENDPOINT=https://huggingface.co
+
+DOCUMENTATION:
+  CLI guide:  https://github.com/relux-works/weightspace-index/blob/main/docs/cli.md
+  Agent doc:  https://weightspaceindex.com/agent.md
+  Run `wsp <command> --help` for full examples and conflict-merge formulas.";
+
+const APPLY_AFTER_HELP: &str = "\
+CONFLICT POLICIES (--on-conflict) WHEN STACKING MULTIPLE REPLACEMENT PATCHES:
+  Non-overlapping coordinates are always applied bit-exactly.
+  When two or more patches edit the same weight coordinate (relative to base W0):
+    error       Refuse and print overlapping entry count (default)
+    add         Additive delta merge: W0 + sum(W_k - W0)  [matches LoRA merge math]
+    average     Mean of patched values: sum(W_k) / m = W0 + sum(delta_k) / m
+    weighted    Weighted delta merge: W0 + sum(alpha_k * (W_k - W0)) via PATH:WEIGHT
+    last-wins   Bit-exact value from the last --patch in command order
+    first-wins  Bit-exact value from the first --patch in command order
+
+IN-PLACE BACKUPS & INCREMENTAL STACKING:
+  Default mode writes a fresh copy to --out and never modifies --model.
+  With --in-place, wsp first writes a SHA-256-verified backup under:
+    <model>/.weightspace-backup/<base_sha256>/<weights>
+    <model>/.weightspace-state.json
+  Running `wsp apply --patch next.safetensors --model <model> --in-place` again
+  re-composes the full stack cleanly from the verified base backup.
+  Roll back any time with: `wsp restore --model <model>`.
+
+EXAMPLES:
+  # Safe single patch into a new directory
+  wsp apply --patch ./p1.safetensors --model ./base --out ./base-patched
+
+  # Stack two replacements with additive delta merge into a managed copy
+  wsp apply --patch ./p1.safetensors --patch ./p2.safetensors \\
+            --on-conflict add --model ./base --out ./base-stacked
+
+  # Weighted stack in-place (0.6 * delta1 + 0.4 * delta2) with automatic backup
+  wsp apply --patch ./p1.safetensors:0.6 --patch ./p2.safetensors:0.4 \\
+            --on-conflict weighted --model ./base --in-place";
+
+const RESTORE_AFTER_HELP: &str = "\
+BEHAVIOR:
+  Reads <model>/.weightspace-state.json, verifies the SHA-256 digest of the
+  saved backup under <model>/.weightspace-backup/, stages and verifies the
+  restored weights file, atomically replaces the patched weights, and cleans
+  up .weightspace-backup/ and .weightspace-state.json.
+  Refuses if the backup is missing or has been tampered with.
+
+EXAMPLE:
+  wsp restore --model ./my-model";
+
+const REGISTRY_AFTER_HELP: &str = "\
+REGISTRY TYPES (NO AUTH REQUIRED INSIDE WSP):
+  git    Any Git host (GitHub, corporate GitLab, Gitea, Forgejo, SSH URLs, local
+         Git repos). Synced via your system `git` so existing SSH keys and
+         corporate credential helpers work automatically.
+  http   Any static HTTPS server serving models/index.json and models/<base>/index.json.
+  local  A local filesystem directory containing models/index.json.
+
+RESOLUTION ORDER:
+  Enabled registries are merged by `priority` descending (default registry wins
+  ties). Every item keeps its source registry tag. Config lives in
+  ~/.config/weightspace/registries.toml (override: WEIGHTSPACE_CONFIG).
+
+EXAMPLES:
+  wsp registry list --json
+  wsp registry add corp ssh://git@gitlab.internal/ml/index.git --pin v2026.11 --priority 200 --sync
+  wsp registry add community https://git.example.org/community/abliterated-index.git --sync
+  wsp registry default community
+  wsp registry unpin corp && wsp registry sync";
+
+const PULL_AFTER_HELP: &str = "\
+FORMATS (--format):
+  auto         Prefer GGUF when requested by GGUF engines, else replacement/PEFT
+  peft         Download adapter_model.safetensors + adapter_config.json
+  gguf         Download *.gguf LoRA adapter (for llama.cpp / Ollama / LM Studio)
+  replacement  Download bit-exact *.safetensors replacement file
+  all          Download every artifact listed in version.json
+
+EXAMPLES:
+  wsp pull Qwen/Qwen3.8-27B/harness-hub-pi --format gguf
+  wsp pull Qwen/Qwen3.8-27B/superqwen-swe-lora --with-base
+  wsp pull Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops --format replacement --out ./patches";
+
+const RUN_AFTER_HELP: &str = "\
+SUPPORTED ENGINES (--engine):
+  llama.cpp     llama-server -m <base.gguf> --lora <adapter.gguf>
+  vllm          vllm serve <base> --enable-lora --lora-modules <slug>=<dir>
+  transformers  Python AutoModelForCausalLM / PeftModel snippet
+  ollama        Modelfile (FROM + ADAPTER) + ollama create/run
+  lm-studio     lms load <model> (+ adapter path note)
+  mlx-lm        mlx_lm.server --model <base> --adapter-path <dir>
+  mlx-serve     mlx-serve serve --model-dir <dir> --port 11234 (https://mlxserve.com/)
+  strata        strata-server --model <model> (https://github.com/Niko1221/Strata)
+  ds4           ds4-server -m <model.gguf> (https://github.com/antirez/ds4)
+
+EXAMPLES:
+  wsp run Qwen/Qwen3.8-27B/harness-hub-pi --engine llama.cpp
+  wsp run Qwen/Qwen3.8-27B/superqwen-swe-lora --engine vllm --print-paths
+  wsp run Qwen/Qwen3.5-0.8B/rikiyat-thinking-loops --engine mlx-serve --download-base --print-paths";
+
+const SEARCH_AFTER_HELP: &str = "\
+EXAMPLES:
+  wsp search                              List all indexed patches (newest first)
+  wsp search coding --kind lora           Filter LoRAs matching 'coding'
+  wsp search --base Qwen3.8-27B --json    Machine-readable JSON for scripts & AI agents";
+
+const MODELS_AFTER_HELP: &str = "\
+SCANNED LOCAL MODEL CACHES:
+  Hugging Face   $HUGGINGFACE_HUB_CACHE, $HF_HOME/hub, ~/.cache/huggingface/hub
+  llama.cpp      $LLAMA_CACHE, ~/Library/Caches/llama.cpp, ~/.cache/llama.cpp
+  Ollama         $OLLAMA_MODELS, ~/.ollama/models
+  LM Studio      ~/.cache/lm-studio/models, ~/.lmstudio/models
+  mlx-serve      ~/.mlx-serve/models
+  Strata         ~/Strata, ~/.local/share/strata, ~/Library/Application Support/Strata
+  DwarfStar/ds4  ~/ds4, ~/Developer/ds4, current directory (*.gguf)
+  Weightspace    ~/.local/share/weightspace/bases
+
+EXAMPLES:
+  wsp models
+  wsp models --engine llama.cpp
+  wsp models --json";
+
 #[derive(Parser)]
 #[command(
     name = "wsp",
     bin_name = "wsp",
     version,
-    about = "Weightspace Index CLI & TUI: discover, pull, stack, and run targeted model patches and LoRAs (no auth required)"
+    about = "Weightspace Index CLI & TUI: discover, pull, stack, and run targeted model patches and LoRAs (no auth required)",
+    after_long_help = ROOT_AFTER_HELP
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -52,6 +199,7 @@ pub enum Command {
         registry: Option<String>,
     },
     /// Search patches and LoRA adapters across configured registries.
+    #[command(after_long_help = SEARCH_AFTER_HELP)]
     Search {
         /// Free-text query matched against model, slug, title, summary, and tags.
         query: Option<String>,
@@ -80,6 +228,7 @@ pub enum Command {
         json: bool,
     },
     /// Download and SHA-256-verify a patch/LoRA (and optionally its pinned base model).
+    #[command(after_long_help = PULL_AFTER_HELP)]
     Pull {
         /// Patch address `<org>/<model>/<slug>` (or unique `<slug>`).
         address: String,
@@ -96,10 +245,11 @@ pub enum Command {
         #[arg(long)]
         registry: Option<String>,
     },
-    /// Scan local caches (HF, llama.cpp, Ollama, LM Studio, Strata, ds4, weightspace)
+    /// Scan local caches (HF, llama.cpp, Ollama, LM Studio, mlx-serve, Strata, ds4, weightspace)
     /// and match them against available patches.
+    #[command(after_long_help = MODELS_AFTER_HELP)]
     Models {
-        /// Prefer format matching a specific engine (`llama.cpp`, `vllm`, `ollama`, etc.).
+        /// Prefer format matching a specific engine (`llama.cpp`, `vllm`, `mlx-serve`, `ollama`, etc.).
         #[arg(long)]
         engine: Option<String>,
         /// Restrict catalog matching to one registry name.
@@ -116,10 +266,11 @@ pub enum Command {
         json: bool,
     },
     /// Prepare a patch (pull + apply if replacement) and launch the chosen engine or print paths.
+    #[command(after_long_help = RUN_AFTER_HELP)]
     Run {
         /// Patch address `<org>/<model>/<slug>` (or unique `<slug>`).
         address: String,
-        /// Target inference engine (`llama.cpp`, `vllm`, `transformers`, `ollama`, `lm-studio`, `mlx-lm`, `strata`, `ds4`).
+        /// Target inference engine (`llama.cpp`, `vllm`, `transformers`, `ollama`, `lm-studio`, `mlx-lm`, `mlx-serve`, `strata`, `ds4`).
         #[arg(long, default_value = "llama.cpp")]
         engine: String,
         /// Explicit local base model path (defaults to auto-detected cache entry).
@@ -142,6 +293,7 @@ pub enum Command {
         registry: Option<String>,
     },
     /// Manage index registries (official default + custom Git/GitLab/Gitea/SSH/HTTP/local + pinning).
+    #[command(after_long_help = REGISTRY_AFTER_HELP)]
     Registry {
         #[command(subcommand)]
         action: RegistryCommand,
@@ -213,6 +365,7 @@ pub enum Command {
     /// Bake one or more replacement files into a new copy of a model directory
     /// holding a single root model.safetensors (default), or modify in place
     /// with an automatic verified backup (`--in-place`).
+    #[command(after_long_help = APPLY_AFTER_HELP)]
     Apply {
         /// One or more replacement `.safetensors` files (pass repeatedly to stack patches;
         /// use `PATH:WEIGHT` with `--on-conflict=weighted`).
@@ -253,6 +406,7 @@ pub enum Command {
         temp_dir: Option<PathBuf>,
     },
     /// Restore original base weights from an `--in-place` backup.
+    #[command(after_long_help = RESTORE_AFTER_HELP)]
     Restore {
         /// Model directory previously patched with `apply --in-place`.
         #[arg(long)]
@@ -775,7 +929,7 @@ fn cmd_models(engine: Option<&str>, registry: Option<&str>, json: bool) -> Resul
 
     if locals.is_empty() {
         println!(
-            "No local models discovered in default caches (HF, llama.cpp, Ollama, LM Studio, Strata, ds4, weightspace)."
+            "No local models discovered in default caches (HF, llama.cpp, Ollama, LM Studio, mlx-serve, Strata, ds4, weightspace)."
         );
         println!(
             "Run `wsp search` to browse available patches or `wsp pull <addr> --with-base` to download a pinned base."

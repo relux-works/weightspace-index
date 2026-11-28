@@ -273,18 +273,24 @@ fn discovers_local_models_across_all_supported_engine_caches() {
     fs::create_dir_all(&ws_base).unwrap();
     fs::write(ws_base.join("model.safetensors"), b"stub").unwrap();
 
+    // 8. mlx-serve cache (~/.mlx-serve/models/<org>/<model>/)
+    let mlx_serve_dir = root.join("mlx-serve/Qwen/Qwen3.8-27B-4bit");
+    fs::create_dir_all(&mlx_serve_dir).unwrap();
+    fs::write(mlx_serve_dir.join("model.safetensors"), b"stub").unwrap();
+
     let roots = DiscoveryRoots {
         hf_hub_dirs: vec![root.join("hf")],
         llama_cpp_dirs: vec![llama_dir],
         ollama_dirs: vec![root.join("ollama")],
         lm_studio_dirs: vec![root.join("lms")],
+        mlx_serve_dirs: vec![root.join("mlx-serve")],
         strata_dirs: vec![strata_dir],
         ds4_dirs: vec![ds4_dir],
         weightspace_bases_dir: Some(root.join("ws-bases")),
     };
 
     let found = discover_local_models(&roots);
-    assert_eq!(found.len(), 7, "discovered: {found:?}");
+    assert_eq!(found.len(), 8, "discovered: {found:?}");
 
     assert!(found.iter().any(|m| {
         m.source == ModelSourceKind::HuggingFace
@@ -301,6 +307,7 @@ fn discovers_local_models_across_all_supported_engine_caches() {
             && m.format == ModelWeightFormat::OllamaManifest)
     );
     assert!(found.iter().any(|m| m.source == ModelSourceKind::LmStudio));
+    assert!(found.iter().any(|m| m.source == ModelSourceKind::MlxServe));
     assert!(found.iter().any(|m| m.source == ModelSourceKind::Strata));
     assert!(found.iter().any(|m| m.source == ModelSourceKind::DwarfStar));
     assert!(
@@ -411,6 +418,19 @@ fn tui_state_machine_orders_local_bases_first_and_plans_launch() {
             .display_command
             .contains("ds4-server -m /models/qwen.gguf")
     );
+
+    let mlx_serve_plan = plan_launch(
+        EngineKind::MlxServe,
+        pi_patch,
+        Some(Path::new("/models/qwen-mlx")),
+        None,
+        None,
+    );
+    assert!(
+        mlx_serve_plan
+            .display_command
+            .contains("mlx-serve serve --model-dir /models/qwen-mlx")
+    );
 }
 
 #[test]
@@ -505,5 +525,35 @@ fn pull_index_hosted_replacement_verifies_sha256_and_wsp_cli_works() {
     let engines = run_wsp(&["engines", "--json"]);
     assert!(engines.status.success());
     let eng_json: serde_json::Value = serde_json::from_slice(&engines.stdout).unwrap();
-    assert_eq!(eng_json.as_array().unwrap().len(), 8);
+    assert_eq!(eng_json.as_array().unwrap().len(), 9);
+
+    // Verify canonical `--help` docs expose examples, conflict policies, mlx-serve, and docs/cli.md.
+    let root_help = run_wsp(&["--help"]);
+    assert!(root_help.status.success());
+    let root_text = String::from_utf8_lossy(&root_help.stdout);
+    assert!(root_text.contains("docs/cli.md"), "{root_text}");
+    assert!(root_text.contains("registries.toml"), "{root_text}");
+
+    let apply_help = run_wsp(&["apply", "--help"]);
+    assert!(apply_help.status.success());
+    let apply_text = String::from_utf8_lossy(&apply_help.stdout);
+    for needle in [
+        "error",
+        "add",
+        "average",
+        "weighted",
+        "last-wins",
+        "first-wins",
+        ".weightspace-backup",
+        "wsp restore",
+    ] {
+        assert!(
+            apply_text.contains(needle),
+            "apply --help missing {needle:?}:\n{apply_text}"
+        );
+    }
+
+    let run_help = run_wsp(&["run", "--help"]);
+    assert!(run_help.status.success());
+    assert!(String::from_utf8_lossy(&run_help.stdout).contains("mlx-serve"));
 }

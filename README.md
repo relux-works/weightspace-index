@@ -26,11 +26,15 @@ See [`docs/example/`](docs/example/README.md) for a documentation example: a com
 
 ## Use a patch
 
+The fastest way to search, pull, verify, stack, and run patches (across the official registry or custom Git/HTTP/community registries) is the **`wsp` / `weightspace` CLI & TUI** — see the complete step-by-step **[CLI & TUI guide (`docs/cli.md`)](docs/cli.md)** (or run `wsp --help`).
+
+For manual/scripted verification without the client:
+
 1. Pin the index: note the commit you read.
 2. Open the version's `version.json`. Download each file from a listed locator: a Hugging Face file at its pinned revision, or a file in this repository at your pinned commit.
 3. Check every file's size and SHA-256 against `version.json` (`shasum -a 256 <file>`, `wc -c < <file>`). Stop on any mismatch.
 4. Check that your model files match the target profile's digests in `base.json`.
-5. Apply it: for a replacement patch, `weightspace apply` bakes it into a copy of the model ([tool guide](tool/README.md)); for a LoRA, use your runtime ([workflows](docs/workflows.md)).
+5. Apply it: for a replacement patch, `weightspace apply` bakes or stacks it into a model directory ([CLI guide](docs/cli.md), [low-level tool spec](tool/README.md)); for a LoRA, use your runtime ([workflows](docs/workflows.md)).
 
 ## Submit a patch
 

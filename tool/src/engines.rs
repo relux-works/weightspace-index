@@ -1,6 +1,6 @@
 //! Local inference engine detection, model-directory discovery (Hugging Face,
-//! llama.cpp, Ollama, LM Studio, Strata, DwarfStar/ds4, Weightspace managed),
-//! and launch command planning.
+//! llama.cpp, Ollama, LM Studio, mlx-serve, Strata, DwarfStar/ds4, Weightspace
+//! managed), and launch command planning.
 
 use std::collections::BTreeSet;
 use std::env;
@@ -21,18 +21,20 @@ pub enum EngineKind {
     Ollama,
     LmStudio,
     MlxLm,
+    MlxServe,
     Strata,
     DwarfStar,
 }
 
 impl EngineKind {
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 9] = [
         Self::LlamaCpp,
         Self::Vllm,
         Self::Transformers,
         Self::Ollama,
         Self::LmStudio,
         Self::MlxLm,
+        Self::MlxServe,
         Self::Strata,
         Self::DwarfStar,
     ];
@@ -45,11 +47,12 @@ impl EngineKind {
             "ollama" => Ok(Self::Ollama),
             "lm-studio" | "lmstudio" | "lms" => Ok(Self::LmStudio),
             "mlx" | "mlx-lm" | "mlx_lm" => Ok(Self::MlxLm),
+            "mlx-serve" | "mlxserve" | "mlx_serve" => Ok(Self::MlxServe),
             "strata" | "strata-server" | "strata-engine" => Ok(Self::Strata),
             "ds4" | "dwarfstar" | "dwarf-star" => Ok(Self::DwarfStar),
             _ => Err(ToolError::InvalidArgument {
                 detail: format!(
-                    "unknown engine {s:?}; expected llama.cpp, vllm, transformers, ollama, lm-studio, mlx-lm, strata, or ds4"
+                    "unknown engine {s:?}; expected llama.cpp, vllm, transformers, ollama, lm-studio, mlx-lm, mlx-serve, strata, or ds4"
                 ),
             }),
         }
@@ -63,6 +66,7 @@ impl EngineKind {
             Self::Ollama => "ollama",
             Self::LmStudio => "lm-studio",
             Self::MlxLm => "mlx-lm",
+            Self::MlxServe => "mlx-serve",
             Self::Strata => "strata",
             Self::DwarfStar => "ds4",
         }
@@ -76,6 +80,7 @@ impl EngineKind {
             Self::Ollama => "Ollama",
             Self::LmStudio => "LM Studio",
             Self::MlxLm => "MLX-LM",
+            Self::MlxServe => "mlx-serve",
             Self::Strata => "Strata",
             Self::DwarfStar => "DwarfStar (ds4)",
         }
@@ -96,6 +101,7 @@ impl EngineKind {
             Self::Ollama => &["ollama"],
             Self::LmStudio => &["lms"],
             Self::MlxLm => &["mlx_lm.server", "mlx_lm.generate"],
+            Self::MlxServe => &["mlx-serve"],
             Self::Strata => &["strata-server", "strata-engine", "strata"],
             Self::DwarfStar => &["ds4-server", "ds4", "ds4-agent"],
         }
@@ -111,6 +117,9 @@ impl EngineKind {
             Self::Ollama => "https://ollama.com/download  (macOS: brew install ollama)",
             Self::LmStudio => "https://lmstudio.ai/  (then run `lms bootstrap` for CLI)",
             Self::MlxLm => "Apple Silicon: pip install mlx-lm",
+            Self::MlxServe => {
+                "Apple Silicon: https://mlxserve.com/  (or https://github.com/ddalcu/mlx-serve)"
+            }
             Self::Strata => "Build from source: https://github.com/Niko1221/Strata",
             Self::DwarfStar => "Build from source: https://github.com/antirez/ds4",
         }
@@ -126,6 +135,9 @@ impl EngineKind {
             Self::Ollama => "Local GGUF runner using `Modelfile` (`FROM` + `ADAPTER`)",
             Self::LmStudio => "Desktop & CLI (`lms`) runner for local GGUF and MLX weights",
             Self::MlxLm => "Apple Silicon native MLX runner with `--adapter-path`",
+            Self::MlxServe => {
+                "Native Zig/Swift Apple Silicon server (OpenAI/Anthropic/Ollama APIs, no Python)"
+            }
             Self::Strata => "C++ local inference server for GGUF & Strata SQ quantized packs",
             Self::DwarfStar => "Minimal C Metal/CUDA/ROCm runner (`ds4-server -m <model.gguf>`)",
         }
@@ -223,6 +235,7 @@ pub enum ModelSourceKind {
     LlamaCpp,
     Ollama,
     LmStudio,
+    MlxServe,
     Strata,
     DwarfStar,
     Weightspace,
@@ -235,6 +248,7 @@ impl ModelSourceKind {
             Self::LlamaCpp => "llama.cpp",
             Self::Ollama => "ollama",
             Self::LmStudio => "lm-studio",
+            Self::MlxServe => "mlx-serve",
             Self::Strata => "strata",
             Self::DwarfStar => "ds4",
             Self::Weightspace => "weightspace",
@@ -270,6 +284,7 @@ pub struct DiscoveryRoots {
     pub llama_cpp_dirs: Vec<PathBuf>,
     pub ollama_dirs: Vec<PathBuf>,
     pub lm_studio_dirs: Vec<PathBuf>,
+    pub mlx_serve_dirs: Vec<PathBuf>,
     pub strata_dirs: Vec<PathBuf>,
     pub ds4_dirs: Vec<PathBuf>,
     pub weightspace_bases_dir: Option<PathBuf>,
@@ -306,6 +321,8 @@ impl DiscoveryRoots {
             home.join(".lmstudio").join("models"),
         ];
 
+        let mlx_serve_dirs = vec![home.join(".mlx-serve").join("models")];
+
         let strata_dirs = vec![
             home.join("Strata").join("models"),
             home.join("Strata"),
@@ -325,6 +342,7 @@ impl DiscoveryRoots {
             llama_cpp_dirs: dedup_paths(llama_cpp_dirs),
             ollama_dirs: dedup_paths(ollama_dirs),
             lm_studio_dirs: dedup_paths(lm_studio_dirs),
+            mlx_serve_dirs: dedup_paths(mlx_serve_dirs),
             strata_dirs: dedup_paths(strata_dirs),
             ds4_dirs: dedup_paths(ds4_dirs),
             weightspace_bases_dir: Some(paths.bases_dir()),
@@ -355,6 +373,9 @@ pub fn discover_local_models(roots: &DiscoveryRoots) -> Vec<LocalModel> {
     }
     for dir in &roots.lm_studio_dirs {
         scan_lm_studio(dir, &mut found, &mut seen_paths);
+    }
+    for dir in &roots.mlx_serve_dirs {
+        scan_mlx_serve(dir, &mut found, &mut seen_paths);
     }
     for dir in &roots.llama_cpp_dirs {
         scan_gguf_dir(
@@ -536,6 +557,55 @@ fn scan_lm_studio(root: &Path, out: &mut Vec<LocalModel>, seen: &mut BTreeSet<Pa
                         has_single_safetensors: single_st,
                     });
                 }
+            }
+        }
+    }
+}
+
+fn scan_mlx_serve(root: &Path, out: &mut Vec<LocalModel>, seen: &mut BTreeSet<PathBuf>) {
+    let Ok(entries) = fs::read_dir(root) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let p = entry.path();
+        if !p.is_dir() {
+            continue;
+        }
+        let first_name = entry.file_name().to_string_lossy().into_owned();
+        let (fmt, single_st) = inspect_model_dir(&p);
+        if fmt != ModelWeightFormat::Unknown {
+            if seen.insert(p.clone()) {
+                out.push(LocalModel {
+                    model_id: first_name,
+                    source: ModelSourceKind::MlxServe,
+                    format: fmt,
+                    path: p,
+                    revision: None,
+                    has_single_safetensors: single_st,
+                });
+            }
+            continue;
+        }
+        // Nested `<org>/<model>` layout under `~/.mlx-serve/models/`.
+        let Ok(children) = fs::read_dir(&p) else {
+            continue;
+        };
+        for child in children.flatten() {
+            let cp = child.path();
+            if !cp.is_dir() || !seen.insert(cp.clone()) {
+                continue;
+            }
+            let (cfmt, csingle) = inspect_model_dir(&cp);
+            if cfmt != ModelWeightFormat::Unknown {
+                let child_name = child.file_name().to_string_lossy().into_owned();
+                out.push(LocalModel {
+                    model_id: format!("{first_name}/{child_name}"),
+                    source: ModelSourceKind::MlxServe,
+                    format: cfmt,
+                    path: cp,
+                    revision: None,
+                    has_single_safetensors: csingle,
+                });
             }
         }
     }
@@ -865,6 +935,33 @@ pub fn plan_launch(
                 a.push(ad_dir);
             }
             let cmd = format_cmd("mlx_lm.server", &a);
+            (exe, a, cmd)
+        }
+        EngineKind::MlxServe => {
+            let exe = status
+                .binary_path
+                .clone()
+                .or_else(|| Some(PathBuf::from("mlx-serve")));
+            let target = patched_str.as_deref().unwrap_or(&base_str).to_owned();
+            let a = vec![
+                "serve".into(),
+                "--model-dir".into(),
+                target,
+                "--port".into(),
+                "11234".into(),
+            ];
+            if let Some(ref ad) = adapter_str
+                && patched_str.is_none()
+            {
+                notes.push(format!(
+                    "mlx-serve serves baked/merged MLX safetensors directories directly; adapter downloaded at: {ad} (or run dynamically via `mlx-lm --adapter-path`)."
+                ));
+            }
+            notes.push(
+                "mlx-serve site/repo: https://mlxserve.com/ · https://github.com/ddalcu/mlx-serve"
+                    .into(),
+            );
+            let cmd = format_cmd("mlx-serve", &a);
             (exe, a, cmd)
         }
         EngineKind::Strata => {

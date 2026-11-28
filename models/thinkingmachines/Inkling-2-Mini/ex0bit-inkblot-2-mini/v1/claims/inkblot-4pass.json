@@ -1,0 +1,94 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/Ex0bit/Inkblot-2-mini/blob/fb0b924f46a74331e34ce4f4288177f9dc0383c8/README.md",
+    "title": "Ex0bit/Inkblot-2-mini model card (4-pass rse_looper vs. default 3-pass base)"
+  },
+  "affiliation": "Tensorbend.ai Research",
+  "conditions": "Patched Ex0bit/Inkblot-2-mini evaluated with 4 loop passes via rse_looper's LoopConfig(num_passes=4) inference wrapper compared against untouched default 3-pass thinkingmachines/Inkling-2-Mini (overriding unmodified base to 4 passes collapses base to 3.1% on DeepScaleR-Test and GSM8K with 95.3% repeat loops). Greedy decoding (temperature 0) on fixed public slices (n=32 to 300).",
+  "sampling": {
+    "temperature": 0
+  },
+  "measures": [
+    {
+      "benchmark": "DeepScaleR-Test (n=64)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 50.0,
+      "patched": 70.3,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "LiveCodeBench v6 (n=32)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 34.4,
+      "patched": 40.6,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "2025-2026 Olympiad (n=64)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 20.3,
+      "patched": 34.4,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "GSM8K (n=128)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 93.8,
+      "patched": 96.1,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "MMLU (n=285)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 82.5,
+      "patched": 83.2,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "ARC-Challenge (n=300)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 94.3,
+      "patched": 93.7,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "HellaSwag (n=300)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 61.7,
+      "patched": 63.3,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "WinoGrande (n=300)",
+      "name": "4-pass (rse_looper) vs. default 3-pass base",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 68.7,
+      "patched": 64.7,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

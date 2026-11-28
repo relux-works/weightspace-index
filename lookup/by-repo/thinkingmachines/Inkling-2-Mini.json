@@ -1,0 +1,11 @@
+{
+  "contract_version": 1,
+  "matches": [
+    {
+      "base": "thinkingmachines/Inkling-2-Mini",
+      "profiles": [
+        "nvfp4"
+      ]
+    }
+  ]
+}

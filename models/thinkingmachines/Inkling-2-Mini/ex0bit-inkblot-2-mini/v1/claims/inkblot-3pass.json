@@ -1,0 +1,86 @@
+{
+  "contract_version": 1,
+  "source": {
+    "url": "https://huggingface.co/Ex0bit/Inkblot-2-mini/blob/fb0b924f46a74331e34ce4f4288177f9dc0383c8/README.md",
+    "title": "Ex0bit/Inkblot-2-mini model card (default 3-pass inference)"
+  },
+  "affiliation": "Tensorbend.ai Research",
+  "conditions": "Default 3-pass inference for both untouched thinkingmachines/Inkling-2-Mini and Ex0bit/Inkblot-2-mini, greedy decoding (temperature 0) on fixed public slices (n=32 to 300; DeepScaleR-Test capped at 2,048 tokens) with deterministic grading (rse_looper/grader.py) and live container grading for LiveCodeBench v6.",
+  "sampling": {
+    "temperature": 0
+  },
+  "measures": [
+    {
+      "benchmark": "DeepScaleR-Test (n=64)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 50.0,
+      "patched": 68.8,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "LiveCodeBench v6 (n=32)",
+      "metric": "pass@1",
+      "unit": "%",
+      "baseline": 34.4,
+      "patched": 40.6,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "2025-2026 Olympiad (n=64)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 20.3,
+      "patched": 32.8,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "GSM8K (n=128)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 93.8,
+      "patched": 94.5,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "MMLU (n=285)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 82.5,
+      "patched": 83.5,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "ARC-Challenge (n=300)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 94.3,
+      "patched": 94.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "HellaSwag (n=300)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 61.7,
+      "patched": 61.0,
+      "better": "higher",
+      "samples_per_item": 1
+    },
+    {
+      "benchmark": "WinoGrande (n=300)",
+      "metric": "accuracy",
+      "unit": "%",
+      "baseline": 68.7,
+      "patched": 67.0,
+      "better": "higher",
+      "samples_per_item": 1
+    }
+  ]
+}

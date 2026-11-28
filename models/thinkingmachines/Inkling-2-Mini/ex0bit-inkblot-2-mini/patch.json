@@ -1,0 +1,27 @@
+{
+  "contract_version": 1,
+  "title": "Inkblot-2-mini",
+  "summary": "Edits 327 BF16/FP32 loop-control and routing weights in Inkling-2-Mini to stabilize multi-pass looping and improve math and code reasoning while leaving all 24.4B quantized experts untouched.",
+  "kind": "replacement",
+  "authors": [
+    {
+      "name": "Eric E. (Tensorbend.ai Research)",
+      "url": "https://huggingface.co/Ex0bit"
+    }
+  ],
+  "submitter": "ivanopcode",
+  "license": "Apache-2.0",
+  "tags": [
+    "looped-transformer",
+    "math",
+    "reasoning",
+    "coding",
+    "rsi"
+  ],
+  "versions": [
+    {
+      "version": 1,
+      "status": "active"
+    }
+  ]
+}

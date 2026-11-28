@@ -1,0 +1,24 @@
+{
+  "contract_version": 1,
+  "profiles": [
+    {
+      "id": "nvfp4",
+      "source": {
+        "repo_id": "thinkingmachines/Inkling-2-Mini",
+        "revision": "c9d028302cd0f035fdf8e7e91f089a4ce94d2195"
+      },
+      "files": [
+        {
+          "path": "model-00001-of-00001.safetensors",
+          "sha256": "65e60f51aa1284d4fb022584908c315270334d991828bb774af60584523539d1",
+          "size_bytes": 19526019168
+        },
+        {
+          "path": "mtp.safetensors",
+          "sha256": "7c3b651317f01f73bcf4e1dceba66ef8b7e1a1eac6bc171e882e690a4b10a1d2",
+          "size_bytes": 635801416
+        }
+      ]
+    }
+  ]
+}

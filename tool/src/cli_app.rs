@@ -204,6 +204,9 @@ pub enum Command {
         /// Mandatory expected base digest for every full-form patch tensor.
         #[arg(long = "expect-tensor-sha256")]
         expect_tensor_sha256: Vec<String>,
+        /// JSON object file mapping full-form tensor names to expected base SHA-256 hex digests.
+        #[arg(long = "expect-tensor-sha256-file")]
+        expect_tensor_sha256_file: Option<PathBuf>,
         #[arg(long = "temp-dir")]
         temp_dir: Option<PathBuf>,
     },
@@ -238,6 +241,9 @@ pub enum Command {
         /// file does not record the bytes it replaces.
         #[arg(long = "expect-tensor-sha256")]
         expect_tensor_sha256: Vec<String>,
+        /// JSON object file mapping full-form tensor names to expected base SHA-256 hex digests.
+        #[arg(long = "expect-tensor-sha256-file")]
+        expect_tensor_sha256_file: Option<PathBuf>,
         /// Directory for the private snapshots of the inputs
         /// (default: the system temporary directory). It needs
         /// free space for a copy of each input checkpoint held at
@@ -300,9 +306,54 @@ pub enum RegistryCommand {
 
 /// Parses repeated `--expect-tensor-sha256 NAME=HEX` arguments.
 pub fn parse_expect(items: &[String]) -> Result<BTreeMap<String, Sha256Hex>, ToolError> {
+    parse_expect_with_file(items, None)
+}
+
+/// Parses expected base tensor SHA-256 digests from an optional JSON object file
+/// (`{ "tensor.name": "<64-hex>" }`) and repeated `NAME=HEX` CLI arguments.
+pub fn parse_expect_with_file(
+    items: &[String],
+    file: Option<&Path>,
+) -> Result<BTreeMap<String, Sha256Hex>, ToolError> {
+    let invalid = |detail: String| ToolError::InvalidArgument { detail };
     let mut out = BTreeMap::new();
+    if let Some(path) = file {
+        let raw = std::fs::read(path).map_err(|e| ToolError::io(path, e))?;
+        let val: serde_json::Value = serde_json::from_slice(&raw).map_err(|e| {
+            invalid(format!(
+                "--expect-tensor-sha256-file {}: invalid JSON: {e}",
+                path.display()
+            ))
+        })?;
+        let map = val.as_object().ok_or_else(|| {
+            invalid(format!(
+                "--expect-tensor-sha256-file {}: expected a JSON object mapping tensor names to 64-hex SHA-256 digests",
+                path.display()
+            ))
+        })?;
+        for (name, hex_val) in map {
+            if name.is_empty() {
+                return Err(invalid(format!(
+                    "--expect-tensor-sha256-file {}: tensor name must be non-empty",
+                    path.display()
+                )));
+            }
+            let hex = hex_val.as_str().ok_or_else(|| {
+                invalid(format!(
+                    "--expect-tensor-sha256-file {} {name}: expected a 64-hex string, got {hex_val}",
+                    path.display()
+                ))
+            })?;
+            let digest = Sha256Hex::parse(hex).map_err(|_| {
+                invalid(format!(
+                    "--expect-tensor-sha256-file {} {name}: expected 64 hex characters, got {hex:?}",
+                    path.display()
+                ))
+            })?;
+            out.insert(name.clone(), digest);
+        }
+    }
     for item in items {
-        let invalid = |detail: String| ToolError::InvalidArgument { detail };
         let (name, hex) = item.split_once('=').ok_or_else(|| {
             invalid(format!(
                 "--expect-tensor-sha256 expects NAME=HEX, got {item:?}"
@@ -429,54 +480,58 @@ pub fn run() -> ExitCode {
             method,
             out,
             expect_tensor_sha256,
+            expect_tensor_sha256_file,
             temp_dir,
         } => {
             debug_assert_eq!(factor_dtype, "f32");
-            let result = parse_expect(&expect_tensor_sha256).and_then(|expected| {
-                with_cx(temp_dir, |cx| {
-                    use crate::derive_lora::*;
-                    if method == "selector-exact" {
-                        if rank.is_some() {
-                            return Err(ToolError::InvalidArgument {
-                                detail: "selector-exact chooses rank per tensor; omit --rank"
-                                    .into(),
-                            });
-                        }
-                        derive_exact_lora(
-                            &DeriveExactLora {
-                                model,
-                                tensor_shapes,
-                                patch,
-                                out: out.clone(),
-                                expect_tensor_sha256: expected,
-                            },
-                            cx,
-                        )
-                    } else {
-                        let model = model.ok_or_else(|| ToolError::InvalidArgument {
-                            detail: "explicit-rank methods require --model".into(),
-                        })?;
-                        let rank = rank.ok_or_else(|| ToolError::InvalidArgument {
-                            detail: "explicit-rank methods require --rank".into(),
-                        })?;
-                        derive_lora(
-                            &DeriveLora {
-                                model,
-                                patch,
-                                rank,
-                                out: out.clone(),
-                                expect_tensor_sha256: expected,
-                                method: if method == "svd" {
-                                    Method::Svd
-                                } else {
-                                    Method::Selector
-                                },
-                            },
-                            cx,
-                        )
-                    }
-                })
-            });
+            let result =
+                parse_expect_with_file(&expect_tensor_sha256, expect_tensor_sha256_file.as_deref())
+                    .and_then(|expected| {
+                        with_cx(temp_dir, |cx| {
+                            use crate::derive_lora::*;
+                            if method == "selector-exact" {
+                                if rank.is_some() {
+                                    return Err(ToolError::InvalidArgument {
+                                        detail:
+                                            "selector-exact chooses rank per tensor; omit --rank"
+                                                .into(),
+                                    });
+                                }
+                                derive_exact_lora(
+                                    &DeriveExactLora {
+                                        model,
+                                        tensor_shapes,
+                                        patch,
+                                        out: out.clone(),
+                                        expect_tensor_sha256: expected,
+                                    },
+                                    cx,
+                                )
+                            } else {
+                                let model = model.ok_or_else(|| ToolError::InvalidArgument {
+                                    detail: "explicit-rank methods require --model".into(),
+                                })?;
+                                let rank = rank.ok_or_else(|| ToolError::InvalidArgument {
+                                    detail: "explicit-rank methods require --rank".into(),
+                                })?;
+                                derive_lora(
+                                    &DeriveLora {
+                                        model,
+                                        patch,
+                                        rank,
+                                        out: out.clone(),
+                                        expect_tensor_sha256: expected,
+                                        method: if method == "svd" {
+                                            Method::Svd
+                                        } else {
+                                            Method::Selector
+                                        },
+                                    },
+                                    cx,
+                                )
+                            }
+                        })
+                    });
             println!("{}", crate::derive_lora::DISCLAIMER);
             run_op("derived experimental LoRA written", &out, result)
         }
@@ -487,11 +542,15 @@ pub fn run() -> ExitCode {
             in_place,
             on_conflict,
             expect_tensor_sha256,
+            expect_tensor_sha256_file,
             temp_dir,
         } => {
             let display_target = out.clone().unwrap_or_else(|| model.clone());
             let result = (|| {
-                let expected = parse_expect(&expect_tensor_sha256)?;
+                let expected = parse_expect_with_file(
+                    &expect_tensor_sha256,
+                    expect_tensor_sha256_file.as_deref(),
+                )?;
                 let policy = ConflictPolicy::parse(&on_conflict)?;
                 let specs: Result<Vec<PatchSpec>, ToolError> =
                     patch.iter().map(|p| PatchSpec::parse(p)).collect();

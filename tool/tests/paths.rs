@@ -77,6 +77,31 @@ fn one_shard_indexed_model_applies() {
 }
 
 #[test]
+fn one_shard_indexed_model_with_sidecar_applies() {
+    let tmp = tempfile::tempdir().unwrap();
+    let (patch, model, index) = one_shard_model(tmp.path(), ONE_SHARD);
+    let sidecar_bytes = b"auxiliary-mtp-weights";
+    fs::write(model.join("mtp.safetensors"), sidecar_bytes).unwrap();
+    let out = tmp.path().join("patched");
+    apply(&ApplyReplacement {
+        patch,
+        model,
+        out: out.clone(),
+        expect_tensor_sha256: BTreeMap::new(),
+    })
+    .unwrap();
+    assert!(out.join(ONE_SHARD).is_file());
+    assert_eq!(
+        fs::read(out.join("mtp.safetensors")).unwrap(),
+        sidecar_bytes
+    );
+    assert_eq!(
+        fs::read_to_string(out.join("model.safetensors.index.json")).unwrap(),
+        index
+    );
+}
+
+#[test]
 fn index_naming_another_shard_refused() {
     let tmp = tempfile::tempdir().unwrap();
     let (patch, model, _) =

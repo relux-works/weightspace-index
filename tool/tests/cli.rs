@@ -280,6 +280,36 @@ fn cli_errors() {
         stderr(&out)
     );
     assert!(!destination.exists());
+
+    // Passing expected digests via --expect-tensor-sha256-file succeeds and reproduces edited bytes.
+    let parsed_base = SafeTensors::deserialize(&base_bytes).unwrap();
+    let hex_of = |name: &str| -> String {
+        Sha256::digest(parsed_base.tensor(name).unwrap().data())
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect()
+    };
+    let a_hex = hex_of("a");
+    let b_hex = hex_of("b");
+    let expect_file = tmp.path().join("base-digests.json");
+    fs::write(
+        &expect_file,
+        format!("{{\"a\":\"{a_hex}\",\"b\":\"{b_hex}\"}}\n"),
+    )
+    .unwrap();
+    let out = run(&[
+        "apply",
+        "--patch",
+        patch.to_str().unwrap(),
+        "--model",
+        model.to_str().unwrap(),
+        "--expect-tensor-sha256-file",
+        expect_file.to_str().unwrap(),
+        "--out",
+        destination.to_str().unwrap(),
+    ]);
+    assert!(out.status.success(), "{}", stderr(&out));
+    assert!(destination.join("model.safetensors").is_file());
 }
 
 // The CLI detects root/example catalog drift, repairs both at docs/example, and preserves authored records.

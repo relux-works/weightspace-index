@@ -6,12 +6,15 @@ use crate::error::ToolError;
 use crate::files::{copy_range_with_progress, open_input};
 use crate::ops::{Cx, Phase};
 
-/// Slice 1 supports exactly one weights file at the model root:
-/// `model.safetensors`, or a one-shard indexed checkpoint (Hugging
-/// Face's `model.safetensors-00001-of-00001.safetensors` layout) whose
-/// `model.safetensors.index.json` maps every tensor to that one file.
-/// Several safetensors files, or an index naming any other file, are a
-/// sharded layout and are refused, never guessed at.
+/// Slice 1 supports a single main weights file at the model root:
+/// `model.safetensors`, or a one-shard indexed checkpoint (such as
+/// `model-00001-of-00001.safetensors` or
+/// `model.safetensors-00001-of-00001.safetensors`) whose
+/// `model.safetensors.index.json` maps every indexed tensor to that one
+/// root file. Unindexed auxiliary `.safetensors` sidecars alongside a
+/// single-shard index (for example `mtp.safetensors`) are left untouched
+/// and copied byte-for-byte; multi-shard indexes or unindexed multi-file
+/// layouts are refused, never guessed at.
 pub(crate) fn single_weights_file(model: &Path) -> Result<PathBuf, ToolError> {
     let sharded = |detail: String| ToolError::ShardedModel {
         path: model.to_path_buf(),
@@ -29,25 +32,42 @@ pub(crate) fn single_weights_file(model: &Path) -> Result<PathBuf, ToolError> {
             weights.push(PathBuf::from(entry.file_name()));
         }
     }
-    match weights.as_slice() {
-        [only] if indexed => {
-            let raw = fs::read(&index_path).map_err(|e| ToolError::io(&index_path, e))?;
-            let index: serde_json::Value = serde_json::from_slice(&raw)
-                .map_err(|e| sharded(format!("unreadable model.safetensors.index.json: {e}")))?;
-            let map = index
-                .get("weight_map")
-                .and_then(|m| m.as_object())
-                .filter(|m| !m.is_empty())
-                .ok_or_else(|| sharded("index has no weight_map".into()))?;
-            let name = only.to_string_lossy();
-            if let Some((tensor, file)) = map.iter().find(|(_, f)| f.as_str() != Some(&*name)) {
-                return Err(sharded(format!(
-                    "index maps {tensor} to {file}, not the only weights file {name} \
-                     (sharded checkpoint)"
-                )));
+    if indexed {
+        let raw = fs::read(&index_path).map_err(|e| ToolError::io(&index_path, e))?;
+        let index: serde_json::Value = serde_json::from_slice(&raw)
+            .map_err(|e| sharded(format!("unreadable model.safetensors.index.json: {e}")))?;
+        let map = index
+            .get("weight_map")
+            .and_then(|m| m.as_object())
+            .filter(|m| !m.is_empty())
+            .ok_or_else(|| sharded("index has no weight_map".into()))?;
+        let mut target: Option<&str> = None;
+        for (tensor, file_val) in map {
+            let file = file_val.as_str().ok_or_else(|| {
+                sharded(format!(
+                    "index maps {tensor} to non-string file entry {file_val}"
+                ))
+            })?;
+            match target {
+                None => target = Some(file),
+                Some(first) if first == file => {}
+                Some(first) => {
+                    return Err(sharded(format!(
+                        "index maps {tensor} to {file}, alongside {first} (sharded checkpoint)"
+                    )));
+                }
             }
-            Ok(only.clone())
         }
+        let target = target.expect("non-empty weight_map");
+        if let Some(found) = weights.iter().find(|w| w.as_os_str() == target) {
+            return Ok(found.clone());
+        }
+        return Err(sharded(format!(
+            "index maps tensors to {target}, which is not a root .safetensors file \
+             (sharded checkpoint)"
+        )));
+    }
+    match weights.as_slice() {
         [only] if only.as_os_str() == "model.safetensors" => Ok(only.clone()),
         [] => Err(sharded("no root model.safetensors".into())),
         [only] => Err(sharded(format!(

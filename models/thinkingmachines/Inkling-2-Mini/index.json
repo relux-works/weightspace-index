@@ -1,0 +1,78 @@
+{
+  "base": "thinkingmachines/Inkling-2-Mini",
+  "baseline_runs": [],
+  "contract_version": 1,
+  "patches": [
+    {
+      "authors": [
+        {
+          "name": "Eric E. (Tensorbend.ai Research)",
+          "url": "https://huggingface.co/Ex0bit"
+        }
+      ],
+      "kind": "replacement",
+      "latest": 1,
+      "license": "Apache-2.0",
+      "slug": "ex0bit-inkblot-2-mini",
+      "submitter": "ivanopcode",
+      "summary": "Edits 327 BF16/FP32 loop-control and routing weights in Inkling-2-Mini to stabilize multi-pass looping and improve math and code reasoning while leaving all 24.4B quantized experts untouched.",
+      "tags": [
+        "looped-transformer",
+        "math",
+        "reasoning",
+        "coding",
+        "rsi"
+      ],
+      "title": "Inkblot-2-mini",
+      "versions": [
+        {
+          "assessments": [],
+          "changelog": "Initial maintainer canonical replacement representation of Ex0bit/Inkblot-2-mini against thinkingmachines/Inkling-2-Mini (327 edited BF16/FP32 loop-control and routing tensors; 0 quantized expert or vision weights changed), built from the two pinned published checkpoints without altering any tensor dtype or replacement value.",
+          "files": [
+            {
+              "format": "safetensors",
+              "locators": [
+                {
+                  "kind": "hf",
+                  "path": "replacements.safetensors",
+                  "repo_id": "reluxworks/Inkling-2-Mini-ex0bit-inkblot-2-mini",
+                  "repo_type": "model",
+                  "revision": "f1a1b8e7a51eb15d7117af9ef5396d59a17f10b2"
+                }
+              ],
+              "name": "replacements.safetensors",
+              "role": "source",
+              "sha256": "fa671bf1e22449893f1563112bc95cb0c5fd5f20003abe9a9185f419e11bd756",
+              "size_bytes": 1003051184
+            }
+          ],
+          "runs": [],
+          "status": "active",
+          "target_profile": "nvfp4",
+          "version": 1
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "files": [
+        {
+          "path": "model-00001-of-00001.safetensors",
+          "sha256": "65e60f51aa1284d4fb022584908c315270334d991828bb774af60584523539d1",
+          "size_bytes": 19526019168
+        },
+        {
+          "path": "mtp.safetensors",
+          "sha256": "7c3b651317f01f73bcf4e1dceba66ef8b7e1a1eac6bc171e882e690a4b10a1d2",
+          "size_bytes": 635801416
+        }
+      ],
+      "id": "nvfp4",
+      "source": {
+        "repo_id": "thinkingmachines/Inkling-2-Mini",
+        "revision": "c9d028302cd0f035fdf8e7e91f089a4ce94d2195"
+      }
+    }
+  ]
+}

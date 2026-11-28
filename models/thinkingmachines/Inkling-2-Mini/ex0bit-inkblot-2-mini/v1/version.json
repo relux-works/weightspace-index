@@ -1,0 +1,22 @@
+{
+  "contract_version": 1,
+  "changelog": "Initial maintainer canonical replacement representation of Ex0bit/Inkblot-2-mini against thinkingmachines/Inkling-2-Mini (327 edited BF16/FP32 loop-control and routing tensors; 0 quantized expert or vision weights changed), built from the two pinned published checkpoints without altering any tensor dtype or replacement value.",
+  "target_profile": "nvfp4",
+  "files": [
+    {
+      "name": "replacements.safetensors",
+      "role": "source",
+      "sha256": "fa671bf1e22449893f1563112bc95cb0c5fd5f20003abe9a9185f419e11bd756",
+      "size_bytes": 1003051184,
+      "locators": [
+        {
+          "kind": "hf",
+          "repo_type": "model",
+          "repo_id": "reluxworks/Inkling-2-Mini-ex0bit-inkblot-2-mini",
+          "revision": "f1a1b8e7a51eb15d7117af9ef5396d59a17f10b2",
+          "path": "replacements.safetensors"
+        }
+      ]
+    }
+  ]
+}

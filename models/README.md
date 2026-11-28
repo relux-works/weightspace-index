@@ -11,4 +11,5 @@ Patch counts include all patch names, regardless of version status.
 | [Qwen/Qwen3.5-0.8B](Qwen/Qwen3.5-0.8B/README.md) | 1 |
 | [Qwen/Qwen3.8-27B](Qwen/Qwen3.8-27B/README.md) | 5 |
 | [openai/gpt-oss-20b](openai/gpt-oss-20b/README.md) | 1 |
+| [thinkingmachines/Inkling-2-Mini](thinkingmachines/Inkling-2-Mini/README.md) | 1 |
 | [webAI-Official/TwIL-8B](webAI-Official/TwIL-8B/README.md) | 3 |

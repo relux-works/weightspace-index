@@ -282,19 +282,12 @@ fn cli_errors() {
     assert!(!destination.exists());
 
     // Passing expected digests via --expect-tensor-sha256-file succeeds and reproduces edited bytes.
-    let parsed_base = SafeTensors::deserialize(&base_bytes).unwrap();
-    let hex_of = |name: &str| -> String {
-        Sha256::digest(parsed_base.tensor(name).unwrap().data())
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect()
-    };
-    let a_hex = hex_of("a");
-    let b_hex = hex_of("b");
+    let big_hex = tensor_hash(&base_bytes, "big");
+    let small_hex = tensor_hash(&base_bytes, "small");
     let expect_file = tmp.path().join("base-digests.json");
     fs::write(
         &expect_file,
-        format!("{{\"a\":\"{a_hex}\",\"b\":\"{b_hex}\"}}\n"),
+        format!("{{\"big\":\"{big_hex}\",\"small\":\"{small_hex}\"}}\n"),
     )
     .unwrap();
     let out = run(&[
